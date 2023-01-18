@@ -31,15 +31,10 @@ class BookPriceDb:
                 return books
 
     def get_book_stores_for_books(self, books) -> dict:
-        book_dict = {b.book_id: b for b in books}
-        print(book_dict)
-        for b in books:
-            print(b)
-
+        book_dict = {b.id: b for b in books}
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                book_ids = [book.book_id for book in books]
-                ids_format_string = ",".join(["%s"] * len(book_ids))
+                ids_format_string = ",".join(["%s"] * len(book_dict.keys()))
                 query = "SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " \
                         "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " \
                         "bs.PriceFormat " \
@@ -47,7 +42,7 @@ class BookPriceDb:
                         "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " \
                         f"WHERE bsb.BookId IN ({ids_format_string})"
 
-                cursor.execute(query, book_ids)
+                cursor.execute(query, tuple(book_dict.keys()))
 
                 books_in_bookstore = {}
                 book_stores = {}
@@ -59,7 +54,6 @@ class BookPriceDb:
                                                                row["BookStoreUrl"],
                                                                row["PriceCssSelector"],
                                                                row["PriceFormat"])
-                        print(row["PriceFormat"])
 
                     book_id = row["BookId"]
                     if book_id not in books_in_bookstore:
@@ -73,7 +67,7 @@ class BookPriceDb:
     def create_prices(self, book_prices):
         with self.get_connection() as con:
             with con.cursor() as cursor:
-                price_rows = [(price.book.book_id, price.book_store.id, str(price.price), price.created) for price in book_prices]
+                price_rows = [(price.book.id, price.book_store.id, str(price.price), price.created) for price in book_prices]
 
                 query = ("INSERT INTO BookPrice (BookId, BookStoreId, Price, Created) " 
                          "VALUES (%s, %s, %s, %s)")

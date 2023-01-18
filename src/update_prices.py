@@ -30,7 +30,7 @@ def get_updated_prices_for_book(book_stores) -> list:
     for book_in_store in book_stores:
         full_url = book_in_store.get_full_url()
         try:
-            logging.debug(f"Getting price for book ID {book_in_store.book.book_id} at book store ID "
+            logging.debug(f"Getting price for book ID {book_in_store.book.id} at book store ID "
                           f"{book_in_store.book_store.id} (URL {full_url})")
 
             new_price_value = WebSource.get_price(book_in_store.get_full_url(),
