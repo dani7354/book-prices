@@ -2,10 +2,14 @@
 import argparse
 import logging
 from datetime import datetime
+from queue import Queue
+from threading import Thread
 from config import ConfigLoader
 from data.bookprice_db import BookPriceDb
 from data.model import BookPrice
 from price_source.web import WebSource
+
+MAX_THREAD_COUNT = 8
 
 
 def parse_arguments():
@@ -23,6 +27,14 @@ def setup_logging(logfile, loglevel):
         format='%(asctime)s - %(levelname)s: %(message)s',
         level=loglevel)
     logging.getLogger().addHandler(logging.StreamHandler())
+
+
+def create_book_store_queue(book_stores_by_book_id) -> Queue:
+    queue = Queue()
+    for b in book_stores_by_book_id.values():
+        queue.put(b)
+
+    return queue
 
 
 def get_updated_prices_for_book(book_stores) -> list:
@@ -49,16 +61,11 @@ def get_updated_prices_for_book(book_stores) -> list:
     return new_prices
 
 
-def get_updated_book_prices(book_stores_by_book_id) -> list:
-    all_new_prices = []
-    for book_id, book_stores in book_stores_by_book_id.items():
-        logging.debug(f"Updating prices for book ID {book_id}...")
-        new_prices_for_book = get_updated_prices_for_book(book_stores)
-        logging.debug(f"Got {len(new_prices_for_book)} prices for book ID {book_id}")
-
-        all_new_prices.extend(new_prices_for_book)
-
-    return all_new_prices
+def get_updated_prices_for_books(book_stores_queue, updated_book_prices):
+    while not book_stores_queue.empty():
+        book_stores_for_book = book_stores_queue.get()
+        new_prices_for_book = get_updated_prices_for_book(book_stores_for_book)
+        updated_book_prices.extend(new_prices_for_book)
 
 
 def run():
@@ -79,13 +86,23 @@ def run():
 
     logging.info("Reading book stores for books...")
     book_store_data_by_book_id = books_db.get_book_stores_for_books(books)
-    logging.debug(f"Book stores read for {len(book_store_data_by_book_id)} books.")
+    books_with_store_count = len(book_store_data_by_book_id)
+    logging.debug(f"Book stores found for {books_with_store_count} books.")
 
-    logging.info("Updating prices for books...")
-    updated_prices = get_updated_book_prices(book_store_data_by_book_id)
+    book_store_queue = create_book_store_queue(book_store_data_by_book_id)
+    thread_count = MAX_THREAD_COUNT if books_with_store_count >= MAX_THREAD_COUNT else books_with_store_count
+    logging.info(f"Updating prices for books using {thread_count} threads...")
+    threads = []
+    updated_book_prices = []
+    for _ in range(thread_count):
+        t = Thread(target=get_updated_prices_for_books, args=(book_store_queue, updated_book_prices, ))
+        threads.append(t)
+        t.start()
 
-    logging.info(f"Inserting {len(updated_prices)} prices to DB....")
-    books_db.create_prices(updated_prices)
+    [t.join() for t in threads]
+
+    logging.info(f"Inserting {len(updated_book_prices)} prices to DB....")
+    books_db.create_prices(updated_book_prices)
     logging.info(f"Prices inserted!")
 
 
