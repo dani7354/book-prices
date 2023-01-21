@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from queue import Queue
 from threading import Thread
-from config import ConfigLoader
+from configuration.config import ConfigLoader
 from data.bookprice_db import BookPriceDb
 from data.model import BookPrice
 from price_source.web import WebSource
