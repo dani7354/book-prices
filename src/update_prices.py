@@ -7,6 +7,8 @@ from data.bookprice_db import BookPriceDb
 from data.model import BookPrice
 from price_source.web import WebSource
 
+THREAD_COUNT = 10
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
