@@ -1,5 +1,5 @@
 from mysql.connector import (connection)
-from .model import Book, BookStore, BookInBookStore
+from .model import Book, BookStore, BookInBookStore, BookStoreSitemap
 
 
 class BookPriceDb:
@@ -49,11 +49,7 @@ class BookPriceDb:
                 for row in cursor:
                     book_store_id = row["BookStoreId"]
                     if book_store_id not in book_stores:
-                        book_stores[book_store_id] = BookStore(book_store_id,
-                                                               row["BookStoreName"],
-                                                               row["BookStoreUrl"],
-                                                               row["PriceCssSelector"],
-                                                               row["PriceFormat"])
+                        self._add_book_store_from_row(row, book_stores)
 
                     book_id = row["BookId"]
                     if book_id not in books_in_bookstore:
@@ -73,3 +69,34 @@ class BookPriceDb:
                          "VALUES (%s, %s, %s, %s)")
                 cursor.executemany(query, price_rows)
                 con.commit()
+
+    def get_sitemaps(self) -> list:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT bss.Id as SitemapId, bss.Url as SitemapUrl, bs.Id as BookStoreId, "
+                         "bs.Url as BookStoreUrl, bs.Name as BookStoreName, bs.PriceCssSelector, bs.PriceFormat " 
+                         "FROM BookStoreSitemap bss "
+                         "INNER JOIN BookStore bs ON bs.Id = bss.BookStoreId;")
+
+                cursor.execute(query)
+
+                book_stores = {}
+                sitemaps = []
+                for row in cursor:
+                    book_store_id = row["BookStoreId"]
+                    print(book_store_id)
+                    if book_store_id not in book_stores:
+                        self._add_book_store_from_row(row, book_stores)
+
+                    sitemaps.append(BookStoreSitemap(row["SitemapId"], row["SitemapUrl"], book_stores[book_store_id]))
+
+        return sitemaps
+
+    @staticmethod
+    def _add_book_store_from_row(row, book_store_dict):
+        book_store_id = row["BookStoreId"]
+        book_store_dict[book_store_id] = BookStore(book_store_id,
+                                                   row["BookStoreName"],
+                                                   row["BookStoreUrl"],
+                                                   row["PriceCssSelector"],
+                                                   row["PriceFormat"])
