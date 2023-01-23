@@ -7,7 +7,7 @@ from threading import Thread
 from configuration.config import ConfigLoader
 from data.bookprice_db import BookPriceDb
 from data.model import BookPrice
-from price_source.web import WebSource
+from book_source.web import WebshopPriceFinder
 
 MAX_THREAD_COUNT = 8
 
@@ -45,9 +45,9 @@ def get_updated_prices_for_book(book_stores) -> list:
             logging.debug(f"Getting price for book ID {book_in_store.book.id} at book store ID "
                           f"{book_in_store.book_store.id} (URL {full_url})")
 
-            new_price_value = WebSource.get_price(book_in_store.get_full_url(),
-                                                  book_in_store.book_store.price_css_selector,
-                                                  book_in_store.book_store.price_format)
+            new_price_value = WebshopPriceFinder.get_price(book_in_store.get_full_url(),
+                                                           book_in_store.book_store.price_css_selector,
+                                                           book_in_store.book_store.price_format)
 
             new_prices.append(BookPrice(0,
                                         book_in_store.book,

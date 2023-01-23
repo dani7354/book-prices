@@ -34,3 +34,10 @@ class BookPrice:
         self.book_store = book_store
         self.price = price
         self.created = created
+
+
+class BookStoreSitemap:
+    def __init__(self, id, url, book_store):
+        self.id = id
+        self.url = url
+        self.book_store = book_store
