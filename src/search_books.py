@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 from configuration.config import ConfigLoader
-from price_source.web import SitemapBookFinder
+from book_source.web import SitemapBookFinder
 from data.bookprice_db import BookPriceDb
 
 MAX_THREAD_COUNT = 10
@@ -27,7 +27,7 @@ def run():
     sitemap_finder = SitemapBookFinder(max_thread_count=MAX_THREAD_COUNT)
     all_matched_urls = []
     for sitemap in books_db.get_sitemaps():
-        print(f"Reading sitemap {sitemap.url} for book store {sitemap.book_store.name}...")
+        print(f"Reading sitemap {sitemap.url} for book store {sitemap.book_store.name} (id {sitemap.book_store.id})...")
         matched_urls = sitemap_finder.search_sitemap(sitemap.url, args.words)
         print(f"Found {len(matched_urls)} matches!")
         all_matched_urls.extend(matched_urls)

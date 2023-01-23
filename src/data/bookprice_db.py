@@ -84,7 +84,6 @@ class BookPriceDb:
                 sitemaps = []
                 for row in cursor:
                     book_store_id = row["BookStoreId"]
-                    print(book_store_id)
                     if book_store_id not in book_stores:
                         self._add_book_store_from_row(row, book_stores)
 
