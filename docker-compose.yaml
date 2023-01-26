@@ -1,0 +1,24 @@
+version: "3.7"
+networks:
+  localnetwork:
+services:
+  price_update:
+    build: ./src
+    image: price_update_hourly
+    volumes:
+      - ./docker/price_updater/log:/usr/local/price_updater/log
+      - ./docker/price_updater/config:/usr/local/price_updater/config
+    networks:
+      - localnetwork
+  db:
+    image: mysql:8.0.30
+    command: --default-authentication-plugin=caching_sha2_password
+    restart: always
+    env_file: ./docker/db/.db.env
+    ports:
+      - 3306:3306
+    volumes:
+      - ./docker/db/data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    networks:
+      - localnetwork

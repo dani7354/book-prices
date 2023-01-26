@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import logging
+import sys
 from datetime import datetime
 from queue import Queue
 from threading import Thread
@@ -83,6 +84,9 @@ def run():
 
     books = books_db.get_books()
     logging.debug(f"{len(books)} books read.")
+    if len(books) == 0:
+        logging.info("No books read from DB.")
+        sys.exit(0)
 
     logging.info("Reading book stores for books...")
     book_store_data_by_book_id = books_db.get_book_stores_for_books(books)
