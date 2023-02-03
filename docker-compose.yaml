@@ -10,6 +10,13 @@ services:
       - ./docker/price_updater/config:/usr/local/price_updater/config
     networks:
       - localnetwork
+  web:
+    build: ./src/web
+    image: bookprices_web
+    ports:
+      - 5000:5000
+    networks:
+      - localnetwork
   db:
     image: mysql:8.0.30
     command: --default-authentication-plugin=caching_sha2_password
@@ -19,6 +26,6 @@ services:
       - 3306:3306
     volumes:
       - ./docker/db/data:/var/lib/mysql
-      - ./sql:/docker-entrypoint-initdb.d
+      - ./docker/db/init:/docker-entrypoint-initdb.d
     networks:
       - localnetwork
