@@ -1,5 +1,6 @@
 venv/
 test/
+docker/
 .idea/
 .DS_Store
 *.pyc
