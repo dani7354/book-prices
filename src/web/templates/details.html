@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>
+  {{ details.book.title }}
+  <small class="text-muted">af {{ details.book.author }}</small>
+</h3>
+
+<h4>Seneste priser</h4>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Butik</th>
+      <th scope="col">Pris</th>
+      <th scope="col">Hentet</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in details.book_prices %}
+    <tr>
+      <td>{{ p.book_store_name }}</td>
+      <td>{{ p.price }}</td>
+      <td>{{ p.created }}</td>
+      <td><a href="{{ p.url }}">Link</a></td>
+    </tr>
+  {% endfor %}
+
+
+  </tbody>
+</table>
+
+{% endblock %}
+

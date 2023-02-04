@@ -41,3 +41,13 @@ class BookStoreSitemap:
         self.id = id
         self.url = url
         self.book_store = book_store
+
+
+class BookStoreBookPrice:
+    def __init__(self, id, book_store_id, book_store_name, url, price, created):
+        self.id = id
+        self.book_store_id = book_store_id
+        self.book_store_name = book_store_name
+        self.url = url
+        self.price = price
+        self.created = created

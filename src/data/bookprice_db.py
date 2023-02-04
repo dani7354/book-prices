@@ -1,5 +1,5 @@
 from mysql.connector import (connection)
-from .model import Book, BookStore, BookInBookStore, BookStoreSitemap
+from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice
 
 
 class BookPriceDb:
@@ -21,7 +21,8 @@ class BookPriceDb:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Title, Author "
-                         "FROM Book;")
+                         "FROM Book "
+                         "ORDER BY Title ASC;")
                 cursor.execute(query)
                 books = []
                 for row in cursor:
@@ -29,6 +30,20 @@ class BookPriceDb:
                     books.append(book)
 
                 return books
+
+    def get_book(self, id) -> Book:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Title, Author "
+                         "FROM Book "
+                         "WHERE Id = %s;")
+                cursor.execute(query, (id, ))
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"], row["Title"], row["Author"])
+                    books.append(book)
+
+                return books[0] if len(books) > 0 else None
 
     def get_book_stores_for_books(self, books) -> dict:
         book_dict = {b.id: b for b in books}
@@ -69,6 +84,32 @@ class BookPriceDb:
                          "VALUES (%s, %s, %s, %s)")
                 cursor.executemany(query, price_rows)
                 con.commit()
+
+    def get_latest_prices(self, book_id) -> list:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT bp.Id, bp.BookStoreId, bs.Name as BookStoreName, CONCAT(bs.Url, bsb.Url) as Url, "
+                         "bp.Price, bp.Created "
+                         "FROM BookPrice bp "
+                         "INNER JOIN BookStore bs ON bs.Id = bp.BookStoreId "
+                         "INNER JOIN BookStoreBook bsb ON bsb.BookId = bp.BookId AND bsb.BookStoreId = bp.BookStoreId "
+                         "WHERE bp.BookId = %s AND bp.Created IN "
+                         "(SELECT MAX(bp2.Created) "
+                         "FROM BookPrice bp2 "
+                         "WHERE bp2.BookId = bp.BookId AND bp2.BookStoreId = bp.BookStoreId) "
+                         "ORDER BY Price ASC;")
+
+                cursor.execute(query, (book_id,))
+
+                latest_prices_for_book = []
+                for row in cursor:
+                    latest_prices_for_book.append(BookStoreBookPrice(row["Id"],
+                                                                     row["BookStoreId"],
+                                                                     row["BookStoreName"],
+                                                                     row["Url"],
+                                                                     row["Price"],
+                                                                     row["Created"]))
+                return latest_prices_for_book
 
     def get_sitemaps(self) -> list:
         with self.get_connection() as con:

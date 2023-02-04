@@ -24,10 +24,15 @@ def index():
     return render_template("index.html", books=book_view_models)
 
 
-@app.route("/book/<int:book_id>")
+@app.route("/details/<int:book_id>")
 def details(book_id):
-    # Do lookup and return book details!
-    return ""
+    book = db.get_book(book_id)
+    if book is None:
+        return "<h1>NotFound</h1>", 404
+    book_prices = db.get_latest_prices(book.id)
+    book_details = BookMapper.map_book_details(book, book_prices)
+
+    return render_template("details.html", details=book_details)
 
 
 if __name__ == "__main__":
