@@ -12,7 +12,8 @@ class BookDetailsViewModel:
 
 
 class PriceHistoryViewModel:
-    def __init__(self, book, book_store, book_prices):
+    def __init__(self, book, book_store, book_prices, url):
         self.book = book
         self.book_store = book_store
         self.book_prices = book_prices
+        self.url = url

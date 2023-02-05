@@ -62,6 +62,14 @@ class BookPriceDb:
 
                 return book_store[0] if len(book_store) > 0 else None
 
+    def get_book_store_for_book(self, book, book_store_id):
+        book_stores_for_book = self.get_book_stores_for_books((book,))
+        for book_store_book in book_stores_for_book[book.id]:
+            if book_store_book.book_store.id == book_store_id:
+                return book_store_book
+
+        return None
+
     def get_book_stores_for_books(self, books) -> dict:
         book_dict = {b.id: b for b in books}
         with self.get_connection() as con:

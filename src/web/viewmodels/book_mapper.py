@@ -15,7 +15,9 @@ class BookMapper:
         return BookDetailsViewModel(book, book_prices)
 
     @staticmethod
-    def map_price_history(book, book_store, book_prices):
-        return PriceHistoryViewModel(book, book_store, book_prices)
+    def map_price_history(book_in_book_store, book_prices):
 
-
+        return PriceHistoryViewModel(book_in_book_store.book,
+                                     book_in_book_store.book_store,
+                                     book_prices,
+                                     book_in_book_store.get_full_url())
