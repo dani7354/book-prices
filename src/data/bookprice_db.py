@@ -31,6 +31,22 @@ class BookPriceDb:
 
                 return books
 
+    def search_books(self, search_phrase) -> list:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                phrase_with_wildcards = f"%{search_phrase}%"
+                query = ("SELECT Id, Title, Author "
+                         "FROM Book "
+                         "WHERE Title LIKE %s OR Author LIKE %s "
+                         "ORDER BY Title ASC;")
+                cursor.execute(query, (phrase_with_wildcards, phrase_with_wildcards))
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"], row["Title"], row["Author"])
+                    books.append(book)
+
+                return books
+
     def get_book(self, book_id) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:

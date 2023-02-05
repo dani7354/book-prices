@@ -18,7 +18,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    books = db.get_books()
+    search_phrase = request.args.get("search")
+    books = db.get_books() if search_phrase is None else db.search_books(search_phrase)
     book_view_models = BookMapper.map_book_list(books)
 
     return render_template("index.html", books=book_view_models)
