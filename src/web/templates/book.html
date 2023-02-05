@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="text-muted" >
+<a class="link-secondary text-decoration-none" href="{{ url_for('index') }}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"></path>
+  </svg>
+  <span>Tilbage til oversigt</span>
+</a>
+</p>
+
+<h3>
+  {{ details.book.title }}
+  <small class="text-muted">af {{ details.book.author }}</small>
+</h3>
+<h4>Seneste priser</h4>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Butik</th>
+      <th scope="col">Pris</th>
+      <th scope="col">Hentet</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in details.book_prices %}
+    <tr>
+      <td>{{ p.book_store_name }}</td>
+      <td>{{ p.price }}</td>
+      <td>{{ p.created }}</td>
+      <td>
+        <a href="{{ url_for('price_history', book_id=details.book.id, store_id=p.book_store_id) }}">Prisudvikling</a>
+        <a href="{{ p.url }}">Link</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

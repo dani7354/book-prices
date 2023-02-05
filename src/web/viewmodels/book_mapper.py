@@ -1,4 +1,4 @@
-from .book import BookListItemViewModel, BookDetailsViewModel
+from .book import BookListItemViewModel, BookDetailsViewModel, PriceHistoryViewModel
 
 
 class BookMapper:
@@ -13,3 +13,9 @@ class BookMapper:
     @staticmethod
     def map_book_details(book, book_prices) -> BookDetailsViewModel:
         return BookDetailsViewModel(book, book_prices)
+
+    @staticmethod
+    def map_price_history(book, book_store, book_prices):
+        return PriceHistoryViewModel(book, book_store, book_prices)
+
+

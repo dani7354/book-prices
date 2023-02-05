@@ -24,15 +24,29 @@ def index():
     return render_template("index.html", books=book_view_models)
 
 
-@app.route("/details/<int:book_id>")
-def details(book_id):
+@app.route("/book/<int:book_id>")
+def book(book_id):
     book = db.get_book(book_id)
     if book is None:
-        return "<h1>NotFound</h1>", 404
+        return "<h1>404 Not Found</h1>", 404
     book_prices = db.get_latest_prices(book.id)
     book_details = BookMapper.map_book_details(book, book_prices)
 
-    return render_template("details.html", details=book_details)
+    return render_template("book.html", details=book_details)
+
+
+@app.route("/book/<int:book_id>/store/<int:store_id>")
+def price_history(book_id, store_id):
+    book = db.get_book(book_id)
+    book_store = db.get_book_store(store_id)
+
+    if book is None or book_store is None:
+        return "<h1>404 Not Found</h1>", 404
+
+    prices_for_store = db.get_book_prices_for_store(book, book_store)
+    price_history_view_model = BookMapper.map_price_history(book, book_store, prices_for_store)
+
+    return render_template("price_history.html", price_history=price_history_view_model)
 
 
 if __name__ == "__main__":

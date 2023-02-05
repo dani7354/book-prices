@@ -1,5 +1,5 @@
 from mysql.connector import (connection)
-from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice
+from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice, BookPrice
 
 
 class BookPriceDb:
@@ -31,19 +31,36 @@ class BookPriceDb:
 
                 return books
 
-    def get_book(self, id) -> Book:
+    def get_book(self, book_id) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Title, Author "
                          "FROM Book "
                          "WHERE Id = %s;")
-                cursor.execute(query, (id, ))
+                cursor.execute(query, (book_id,))
                 books = []
                 for row in cursor:
                     book = Book(row["Id"], row["Title"], row["Author"])
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
+
+    def get_book_store(self, book_store_id) -> BookStore:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url "
+                         "FROM BookStore "
+                         "WHERE Id = %s;")
+                cursor.execute(query, (book_store_id,))
+                book_store = []
+                for row in cursor:
+                    book_store.append(BookStore(row["Id"],
+                                                row["Name"],
+                                                row["Url"],
+                                                row["PriceCssSelector"],
+                                                row["PriceFormat"]))
+
+                return book_store[0] if len(book_store) > 0 else None
 
     def get_book_stores_for_books(self, books) -> dict:
         book_dict = {b.id: b for b in books}
@@ -110,6 +127,26 @@ class BookPriceDb:
                                                                      row["Price"],
                                                                      row["Created"]))
                 return latest_prices_for_book
+
+    def get_book_prices_for_store(self, book, book_store) -> list:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT MAX(Id) as Id, MAX(Price) as Price, DATE(Created) as Created "
+                         "FROM BookPrice bp "
+                         "WHERE bp.BookId = %s AND bp.BookStoreId = %s "
+                         "GROUP BY DATE(Created) "
+                         "ORDER BY Created DESC ")
+
+                cursor.execute(query, (book.id, book_store.id))
+
+                book_prices_for_store = []
+                for row in cursor:
+                    book_prices_for_store.append(BookPrice(row["Id"],
+                                                           book,
+                                                           book_store,
+                                                           row["Price"],
+                                                           row["Created"]))
+                return book_prices_for_store
 
     def get_sitemaps(self) -> list:
         with self.get_connection() as con:
