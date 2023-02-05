@@ -143,7 +143,7 @@ class BookPriceDb:
                          "FROM BookPrice bp "
                          "WHERE bp.BookId = %s AND bp.BookStoreId = %s "
                          "GROUP BY DATE(Created) "
-                         "ORDER BY Created DESC ")
+                         "ORDER BY Created DESC;")
 
                 cursor.execute(query, (book.id, book_store.id))
 

@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
    <h1>Bøger</h1>
+    <form class="row g-3" method="get" action="/">
+        <div class="col-auto">
+            <input type="text" class="form-control" name="search" value="">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary mb-3">Søg</button>
+        </div>
+    </form>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for b in books %}
