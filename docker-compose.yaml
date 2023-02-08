@@ -3,7 +3,9 @@ networks:
   localnetwork:
 services:
   price_update:
-    build: ./src
+    build:
+      context: ./
+      dockerfile: ./docker/price_updater/Dockerfile
     image: price_update_hourly
     volumes:
       - ./docker/price_updater/log:/usr/local/price_updater/log
@@ -12,8 +14,8 @@ services:
       - localnetwork
   web:
     build: 
-      context: ./src
-      dockerfile: ./web/Dockerfile
+      context: ./
+      dockerfile: ./docker/web/Dockerfile
     image: bookprices_web
     env_file: ./docker/web/.web.env
     ports:
