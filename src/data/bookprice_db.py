@@ -34,7 +34,7 @@ class BookPriceDb:
     def search_books(self, search_phrase) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                phrase_with_wildcards = f"%{search_phrase}%"
+                phrase_with_wildcards = f"{search_phrase}%"
                 query = ("SELECT Id, Title, Author "
                          "FROM Book "
                          "WHERE Title LIKE %s OR Author LIKE %s "
