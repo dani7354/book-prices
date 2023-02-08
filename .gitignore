@@ -1,6 +1,7 @@
 venv/
 test/
 docker/
+.vscode/
 .idea/
 .DS_Store
 *.pyc

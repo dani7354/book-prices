@@ -1,13 +1,17 @@
 FROM python:3.11-slim-bullseye
-
-EXPOSE 80
-EXPOSE 443
+EXPOSE 5000
 
 WORKDIR /bookprices_web
 
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
+RUN pip3 install flask
 
-COPY . .
+COPY ./web web
+COPY ./data data
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+WORKDIR /bookprices_web/web
+
+CMD [ "python3", "-m" , "flask", "--app", "app.py", "run", "--host=0.0.0.0"]
+
+

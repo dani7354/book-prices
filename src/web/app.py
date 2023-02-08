@@ -1,18 +1,17 @@
 import sys, os
-sys.path.append("..")
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from flask import Flask, render_template, request, redirect, url_for, session
 from data import bookprice_db, model
-from configuration import config
 from viewmodels.book_mapper import BookMapper
 
 
-config = config.ConfigLoader.load("config.json")
 db = bookprice_db.BookPriceDb(
-    config.database.db_host,
-    config.database.db_port,
-    config.database.db_user,
-    config.database.db_password,
-    config.database.db_name)
+    os.environ["MYSQL_SERVER"],
+    os.environ["MYSQL_SERVER_PORT"],
+    os.environ["MYSQL_USER"],
+    os.environ["MYSQL_PASSWORD"],
+    os.environ["MYSQL_DATABASE"])
+
 app = Flask(__name__)
 
 
