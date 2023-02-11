@@ -1,1 +1,1 @@
-*/10 * * * * python3 /usr/local/price_updater/update_prices.py -c /usr/local/price_updater/config/config.json
+0 */6 * * * python3 /usr/local/price_updater/update_prices.py -c /usr/local/price_updater/config/config.json
