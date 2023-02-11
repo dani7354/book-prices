@@ -1,9 +1,16 @@
 venv/
 test/
-docker/
+
+docker/db/
+docker/price_updater/config/
+docker/price_updater/log/
+
+.vscode/
 .idea/
 .DS_Store
 *.pyc
 *.log
+*.env
+config.json
 sql/insert_book_with_prices.sql
 sql/user.sql
