@@ -1,0 +1,25 @@
+FROM python:3.11-slim-bullseye
+
+RUN apt-get update && apt-get install -y libatlas-base-dev gfortran nginx supervisor
+
+# Configure nginx
+RUN adduser --no-create-home nginx
+COPY ./docker/web/nginx/bookprices /etc/nginx/sites-available/default
+COPY ./docker/web/nginx/uwsgi_params /etc/nginx/uwsgi_params
+RUN service nginx restart
+
+WORKDIR /usr/local/bookprices_web
+
+COPY ./src/web web
+COPY ./src/data data
+COPY ./src/web/requirements.txt requirements.txt
+COPY ./docker/web/bookprices_web.ini web/bookprices_web.ini
+
+RUN pip3 install -r requirements.txt
+RUN pip3 install flask
+RUN pip3 install uwsgi
+
+WORKDIR /usr/local/bookprices_web/web
+
+EXPOSE 80
+CMD ["/usr/local/bin/uwsgi", "bookprices_web.ini" ]
