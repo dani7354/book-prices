@@ -5,7 +5,6 @@ WORKDIR /bookprices_web
 
 COPY ./src/web/requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
-RUN pip3 install flask
 
 COPY ./src/web web
 COPY ./src/data data
