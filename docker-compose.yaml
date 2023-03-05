@@ -15,7 +15,7 @@ services:
   web:
     build: 
       context: ./
-      dockerfile: docker/web/Dockerfile_nginx
+      dockerfile: docker/web/Dockerfile
     image: dsp8ef9/book_prices_web
     env_file: ./docker/web/.web.env
     ports:
