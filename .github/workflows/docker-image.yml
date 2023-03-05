@@ -26,6 +26,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/web/Dockerfile
+          file: ./docker/web/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_web:1.0
