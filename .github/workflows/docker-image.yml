@@ -22,7 +22,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: docker/web/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/ppc64le
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/arm64/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_web:latest
 
@@ -43,6 +43,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: docker/price_updater/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/ppc64le
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/arm64/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_update:latest
