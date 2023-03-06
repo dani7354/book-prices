@@ -6,7 +6,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/price_updater/Dockerfile
-    image: dsp8ef9/book_prices_update
+    image: dsp8ef9/book_prices_update:latest
     volumes:
       - ./docker/price_updater/log:/usr/local/price_updater/log
       - ./docker/price_updater/config:/usr/local/price_updater/config
@@ -16,7 +16,7 @@ services:
     build: 
       context: ./
       dockerfile: docker/web/Dockerfile
-    image: dsp8ef9/book_prices_web
+    image: dsp8ef9/book_prices_web:latest
     env_file: ./docker/web/.web.env
     ports:
       - "8080:80"
