@@ -4,10 +4,8 @@ from flask import Flask, render_template, request, abort
 from data import bookprice_db, model
 from viewmodels.book_mapper import BookMapper
 
-
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
-
 
 db = bookprice_db.BookPriceDb(
     os.environ["MYSQL_SERVER"],
