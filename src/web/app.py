@@ -6,6 +6,7 @@ from viewmodels.book_mapper import BookMapper
 
 
 NOT_FOUND = 404
+INTERNAL_SERVER_ERROR = 500
 
 
 db = bookprice_db.BookPriceDb(
@@ -57,6 +58,11 @@ def price_history(book_id, store_id):
 @app.errorhandler(NOT_FOUND)
 def not_found(error):
     return render_template("404.html"), NOT_FOUND
+
+
+@app.errorhandler(INTERNAL_SERVER_ERROR)
+def not_found(error):
+    return render_template("500.html"), INTERNAL_SERVER_ERROR
 
 
 if __name__ == "__main__":
