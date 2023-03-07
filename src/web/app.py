@@ -1,9 +1,11 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, abort
 from data import bookprice_db, model
 from viewmodels.book_mapper import BookMapper
 
+NOT_FOUND = 404
+INTERNAL_SERVER_ERROR = 500
 
 db = bookprice_db.BookPriceDb(
     os.environ["MYSQL_SERVER"],
@@ -28,7 +30,7 @@ def index():
 def book(book_id):
     book = db.get_book(book_id)
     if book is None:
-        return "<h1>404 Not Found</h1>", 404
+        abort(NOT_FOUND)
     book_prices = db.get_latest_prices(book.id)
     book_details = BookMapper.map_book_details(book, book_prices)
 
@@ -39,16 +41,26 @@ def book(book_id):
 def price_history(book_id, store_id):
     book = db.get_book(book_id)
     if book is None:
-        return "<h1>404 Not Found</h1>", 404
+        abort(NOT_FOUND)
 
     book_in_book_store = db.get_book_store_for_book(book, store_id)
     if book_in_book_store is None:
-        return "<h1>404 Not Found</h1>", 404
+        abort(NOT_FOUND)
 
     book_prices = db.get_book_prices_for_store(book, book_in_book_store.book_store)
     price_history_view_model = BookMapper.map_price_history(book_in_book_store, book_prices)
 
     return render_template("price_history.html", view_model=price_history_view_model)
+
+
+@app.errorhandler(NOT_FOUND)
+def not_found(error):
+    return render_template("404.html"), NOT_FOUND
+
+
+@app.errorhandler(INTERNAL_SERVER_ERROR)
+def not_found(error):
+    return render_template("500.html"), INTERNAL_SERVER_ERROR
 
 
 if __name__ == "__main__":
