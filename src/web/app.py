@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def index():
+def index() -> str:
     search_phrase = request.args.get("search")
     books = db.get_books() if search_phrase is None else db.search_books(search_phrase)
     book_view_models = BookMapper.map_book_list(books)
@@ -27,10 +27,11 @@ def index():
 
 
 @app.route("/book/<int:book_id>")
-def book(book_id):
+def book(book_id: int) -> str:
     book = db.get_book(book_id)
     if book is None:
         abort(NOT_FOUND)
+
     book_prices = db.get_latest_prices(book.id)
     book_details = BookMapper.map_book_details(book, book_prices)
 
@@ -38,7 +39,7 @@ def book(book_id):
 
 
 @app.route("/book/<int:book_id>/store/<int:store_id>")
-def price_history(book_id, store_id):
+def price_history(book_id: int, store_id: int) -> str:
     book = db.get_book(book_id)
     if book is None:
         abort(NOT_FOUND)
