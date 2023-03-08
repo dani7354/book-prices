@@ -129,18 +129,23 @@ class BookPriceDb:
     def get_latest_prices(self, book_id) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT bp.Id, bp.BookStoreId, bs.Name as BookStoreName, CONCAT(bs.Url, bsb.Url) as Url, "
-                         "bp.Price, bp.Created "
+                query = ("With LatestPricesTwo as ( "
+                         "SELECT MAX(bp.Id) as Id "
                          "FROM BookPrice bp "
-                         "INNER JOIN BookStore bs ON bs.Id = bp.BookStoreId "
-                         "INNER JOIN BookStoreBook bsb ON bsb.BookId = bp.BookId AND bsb.BookStoreId = bp.BookStoreId "
-                         "WHERE bp.BookId = %s AND bp.Created IN "
-                         "(SELECT MAX(bp2.Created) "
-                         "FROM BookPrice bp2 "
-                         "WHERE bp2.BookId = bp.BookId AND bp2.BookStoreId = bp.BookStoreId) "
-                         "ORDER BY Price ASC;")
+                         "WHERE bp.BookId = %s "
+                         "GROUP BY bp.BookStoreId ) "
+                         " "
+                         "SELECT bp.Id, bsb.BookStoreId, bs.Name as BookStoreName, CONCAT(bs.Url, bsb.Url) as Url, "
+                         "bp.Price, bp.Created "
+                         "FROM BookStoreBook bsb "
+                         "INNER JOIN BookStore bs ON bs.Id = bsb.BookStoreId "
+                         "LEFT OUTER JOIN BookPrice bp ON bp.BookId = bsb.BookId "
+                         "AND bp.BookStoreId = bsb.BookStoreId "
+                         "AND bp.Id IN (SELECT Id FROM LatestPricesTwo) "
+                         "WHERE bsb.BookId = %s "
+                         "ORDER BY bp.Price ASC;")
 
-                cursor.execute(query, (book_id,))
+                cursor.execute(query, (book_id, book_id))
 
                 latest_prices_for_book = []
                 for row in cursor:
