@@ -2,7 +2,7 @@
 import argparse
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from queue import Queue
 from threading import Thread
 from configuration.config import ConfigLoader
@@ -54,7 +54,7 @@ def get_updated_prices_for_book(book_stores) -> list:
                                         book_in_store.book,
                                         book_in_store.book_store,
                                         new_price_value,
-                                        datetime.now().strftime("%Y/%m/%d %H:%M:%S.%f")))
+                                        datetime.now(timezone.utc).isoformat()))
         except Exception as ex:
             logging.error(f"Failed get updated price from {full_url}")
             logging.error(f"Exception: {ex}")
