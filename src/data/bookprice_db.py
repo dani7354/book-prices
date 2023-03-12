@@ -19,16 +19,11 @@ class BookPriceDb:
 
     def create_book(self, book: Book) -> int:
         with self.get_connection() as con:
-            with con.cursor() as cursor:
+            with con.cursor(dictionary=True) as cursor:
                 query = "INSERT INTO Book(Title, Author) VALUES (%s, %s);"
                 cursor.execute(query, (book.title, book.author))
                 con.commit()
 
-                return self._get_last_insert_id()
-
-    def _get_last_insert_id(self) -> int:
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
                 query = "SELECT LAST_INSERT_ID() as Id;"
                 cursor.execute(query)
 
@@ -168,7 +163,10 @@ class BookPriceDb:
     def create_prices(self, book_prices):
         with self.get_connection() as con:
             with con.cursor() as cursor:
-                price_rows = [(price.book.id, price.book_store.id, str(price.price), price.created) for price in book_prices]
+                price_rows = [(price.book.id,
+                               price.book_store.id,
+                               str(price.price),
+                               price.created) for price in book_prices]
 
                 query = ("INSERT INTO BookPrice (BookId, BookStoreId, Price, Created) " 
                          "VALUES (%s, %s, %s, %s)")

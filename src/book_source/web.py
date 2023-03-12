@@ -23,7 +23,7 @@ class WebsiteBookFinder:
         response = requests.get(url)
         content_bs = BeautifulSoup(response.content.decode(), BS_HTML_PARSER)
         match_url_tag = content_bs.select_one(match_url_css)
-        if match_url_tag is None or cls.HTML_HREF not in match_url_tag:
+        if match_url_tag is None:
             return None
 
         return match_url_tag[cls.HTML_HREF]
