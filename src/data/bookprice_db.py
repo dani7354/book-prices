@@ -17,6 +17,27 @@ class BookPriceDb:
                                          database=self.db_name)
         return con
 
+    def create_book(self, book: Book) -> int:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = "INSERT INTO Book(Title, Author) VALUES (%s, %s);"
+                cursor.execute(query, (book.title, book.author))
+                con.commit()
+
+                return self._get_last_insert_id()
+
+    def _get_last_insert_id(self) -> int:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = "SELECT LAST_INSERT_ID() as Id;"
+                cursor.execute(query)
+
+                for row in cursor:
+                    if "Id" in row:
+                        return row["Id"]
+
+                return -1
+
     def get_books(self) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
@@ -68,15 +89,43 @@ class BookPriceDb:
                          "FROM BookStore "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_store_id,))
-                book_store = []
+                book_stores = []
                 for row in cursor:
-                    book_store.append(BookStore(row["Id"],
-                                                row["Name"],
-                                                row["Url"],
-                                                row["PriceCssSelector"],
-                                                row["PriceFormat"]))
+                    book_stores.append(BookStore(row["Id"],
+                                                 row["Name"],
+                                                 row["Url"],
+                                                 row["SearchUrl"],
+                                                 row["SearchResultCssSelector"],
+                                                 row["PriceCssSelector"],
+                                                 row["PriceFormat"]))
 
-                return book_store[0] if len(book_store) > 0 else None
+                return book_stores[0] if len(book_stores) > 0 else None
+
+    def get_book_stores(self):
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, SearchUrl, SearchResultCssSelector "
+                         "FROM BookStore")
+                cursor.execute(query)
+                book_stores = []
+                for row in cursor:
+                    book_stores.append(BookStore(row["Id"],
+                                                 row["Name"],
+                                                 row["Url"],
+                                                 row["SearchUrl"],
+                                                 row["SearchResultCssSelector"],
+                                                 row["PriceCssSelector"],
+                                                 row["PriceFormat"]))
+
+                return book_stores
+
+    def create_book_store_for_book(self, book_id, book_store_id, url):
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("INSERT INTO BookStoreBook (BookId, BookStoreId, Url) "
+                         "VALUES (%s, %s, %s)")
+                cursor.execute(query, (book_id, book_store_id, url))
+                con.commit()
 
     def get_book_store_for_book(self, book, book_store_id):
         book_stores_for_book = self.get_book_stores_for_books((book,))
@@ -181,7 +230,8 @@ class BookPriceDb:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT bss.Id as SitemapId, bss.Url as SitemapUrl, bs.Id as BookStoreId, "
-                         "bs.Url as BookStoreUrl, bs.Name as BookStoreName, bs.PriceCssSelector, bs.PriceFormat " 
+                         "bs.Url as BookStoreUrl, bs.Name as BookStoreName, bs.PriceCssSelector, bs.PriceFormat, "
+                         "bs.SearchUrl, bs.SearchResultCssSelector " 
                          "FROM BookStoreSitemap bss "
                          "INNER JOIN BookStore bs ON bs.Id = bss.BookStoreId;")
 
@@ -204,5 +254,7 @@ class BookPriceDb:
         book_store_dict[book_store_id] = BookStore(book_store_id,
                                                    row["BookStoreName"],
                                                    row["BookStoreUrl"],
+                                                   row["SearchUrl"],
+                                                   row["SearchResultCssSelector"],
                                                    row["PriceCssSelector"],
                                                    row["PriceFormat"])
