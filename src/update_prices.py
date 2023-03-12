@@ -20,7 +20,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def setup_logging(logfile, loglevel):
+def setup_logging(logfile: str, loglevel: int):
     loglevel = loglevel
     logging.basicConfig(
         filename=logfile,
@@ -30,7 +30,7 @@ def setup_logging(logfile, loglevel):
     logging.getLogger().addHandler(logging.StreamHandler())
 
 
-def create_book_store_queue(book_stores_by_book_id) -> Queue:
+def create_book_store_queue(book_stores_by_book_id: dict) -> Queue:
     queue = Queue()
     for b in book_stores_by_book_id.values():
         queue.put(b)
@@ -38,7 +38,7 @@ def create_book_store_queue(book_stores_by_book_id) -> Queue:
     return queue
 
 
-def get_updated_prices_for_book(book_stores) -> list:
+def get_updated_prices_for_book(book_stores: list) -> list:
     new_prices = []
     for book_in_store in book_stores:
         full_url = book_in_store.get_full_url()
@@ -62,7 +62,7 @@ def get_updated_prices_for_book(book_stores) -> list:
     return new_prices
 
 
-def get_updated_prices_for_books(book_stores_queue, updated_book_prices):
+def get_updated_prices_for_books(book_stores_queue: Queue, updated_book_prices: list):
     while not book_stores_queue.empty():
         book_stores_for_book = book_stores_queue.get()
         new_prices_for_book = get_updated_prices_for_book(book_stores_for_book)
