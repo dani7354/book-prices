@@ -1,4 +1,5 @@
 from mysql.connector import (connection)
+from datetime import datetime
 from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice, BookPrice
 
 
@@ -171,6 +172,14 @@ class BookPriceDb:
                 query = ("INSERT INTO BookPrice (BookId, BookStoreId, Price, Created) " 
                          "VALUES (%s, %s, %s, %s)")
                 cursor.executemany(query, price_rows)
+                con.commit()
+
+    def delete_prices_older_than(self, date: datetime):
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("DELETE FROM BookPrice "
+                         "WHERE Created < %s")
+                cursor.executemany(query, (datetime,))
                 con.commit()
 
     def get_latest_prices(self, book_id: int) -> list:
