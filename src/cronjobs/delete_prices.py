@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import shared
 import logging
+import sys
+import os
 from datetime import date, timedelta
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from data.bookprice_db import BookPriceDb
 from configuration.config import ConfigLoader
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-import argparse
 import logging
 import sys
 import shared
+import os
 from datetime import datetime, timezone
 from queue import Queue
 from threading import Thread
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from configuration.config import ConfigLoader
 from data.bookprice_db import BookPriceDb
 from data.model import BookPrice

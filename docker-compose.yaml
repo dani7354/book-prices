@@ -5,11 +5,11 @@ services:
   price_update:
     build:
       context: ./
-      dockerfile: ./docker/price_updater/Dockerfile
+      dockerfile: docker/cronjobs/Dockerfile
     image: dsp8ef9/book_prices_update:latest
     volumes:
-      - ./docker/price_updater/log:/usr/local/price_updater/log
-      - ./docker/price_updater/config:/usr/local/price_updater/config
+      - ./docker/cronjobs/log:/usr/local/book_prices/cronjobs/log
+      - ./docker/cronjobs/config:/usr/local/book_prices/cronjobs/config
     networks:
       - localnetwork
   web:

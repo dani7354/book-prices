@@ -42,7 +42,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          file: docker/price_updater/Dockerfile
+          file: docker/cronjobs/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_update:latest
