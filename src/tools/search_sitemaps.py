@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 import argparse
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from configuration.config import ConfigLoader
 from book_source.web import SitemapBookFinder
 from data.bookprice_db import BookPriceDb
@@ -15,6 +18,18 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def search_sitemaps(sitemaps: list, words: list) -> list:
+    sitemap_finder = SitemapBookFinder(max_thread_count=MAX_THREAD_COUNT)
+    all_matched_urls = []
+    for sitemap in sitemaps:
+        print(f"Reading sitemap {sitemap.url} for book store {sitemap.book_store.name} (id {sitemap.book_store.id})...")
+        matched_urls = sitemap_finder.search_sitemap(sitemap.url, words)
+        print(f"Found {len(matched_urls)} matches!")
+        all_matched_urls.extend(matched_urls)
+
+    return all_matched_urls
+
+
 def run():
     args = parse_arguments()
     configuration = ConfigLoader.load(args.configuration)
@@ -24,17 +39,11 @@ def run():
                            configuration.database.db_password,
                            configuration.database.db_name)
 
-    sitemap_finder = SitemapBookFinder(max_thread_count=MAX_THREAD_COUNT)
-    all_matched_urls = []
-    for sitemap in books_db.get_sitemaps():
-        print(f"Reading sitemap {sitemap.url} for book store {sitemap.book_store.name} (id {sitemap.book_store.id})...")
-        matched_urls = sitemap_finder.search_sitemap(sitemap.url, args.words)
-        print(f"Found {len(matched_urls)} matches!")
-        all_matched_urls.extend(matched_urls)
+    sitemaps = books_db.get_sitemaps()
+    matches = search_sitemaps(sitemaps, args.words)
 
-    for m in all_matched_urls:
+    for m in matches:
         print(m)
-
 
 if __name__ == "__main__":
     run()

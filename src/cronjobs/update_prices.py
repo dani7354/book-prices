@@ -1,36 +1,22 @@
 #!/usr/bin/env python3
-import argparse
 import logging
 import sys
-from datetime import datetime
+import shared
+import os
+from datetime import datetime, timezone
 from queue import Queue
 from threading import Thread
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from configuration.config import ConfigLoader
 from data.bookprice_db import BookPriceDb
 from data.model import BookPrice
 from book_source.web import WebshopPriceFinder
 
-MAX_THREAD_COUNT = 8
+MAX_THREAD_COUNT = 10
+LOG_FILE_NAME = "update_prices.log"
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--configuration", dest="configuration", type=str, required=True)
-
-    return parser.parse_args()
-
-
-def setup_logging(logfile, loglevel):
-    loglevel = loglevel
-    logging.basicConfig(
-        filename=logfile,
-        filemode="a",
-        format='%(asctime)s - %(levelname)s: %(message)s',
-        level=loglevel)
-    logging.getLogger().addHandler(logging.StreamHandler())
-
-
-def create_book_store_queue(book_stores_by_book_id) -> Queue:
+def create_book_store_queue(book_stores_by_book_id: dict) -> Queue:
     queue = Queue()
     for b in book_stores_by_book_id.values():
         queue.put(b)
@@ -38,7 +24,7 @@ def create_book_store_queue(book_stores_by_book_id) -> Queue:
     return queue
 
 
-def get_updated_prices_for_book(book_stores) -> list:
+def get_updated_prices_for_book(book_stores: list) -> list:
     new_prices = []
     for book_in_store in book_stores:
         full_url = book_in_store.get_full_url()
@@ -54,7 +40,7 @@ def get_updated_prices_for_book(book_stores) -> list:
                                         book_in_store.book,
                                         book_in_store.book_store,
                                         new_price_value,
-                                        datetime.now().strftime("%Y/%m/%d %H:%M:%S.%f")))
+                                        datetime.now(timezone.utc).isoformat()))
         except Exception as ex:
             logging.error(f"Failed get updated price from {full_url}")
             logging.error(f"Exception: {ex}")
@@ -62,7 +48,7 @@ def get_updated_prices_for_book(book_stores) -> list:
     return new_prices
 
 
-def get_updated_prices_for_books(book_stores_queue, updated_book_prices):
+def get_updated_prices_for_books(book_stores_queue: Queue, updated_book_prices: list):
     while not book_stores_queue.empty():
         book_stores_for_book = book_stores_queue.get()
         new_prices_for_book = get_updated_prices_for_book(book_stores_for_book)
@@ -70,9 +56,9 @@ def get_updated_prices_for_books(book_stores_queue, updated_book_prices):
 
 
 def run():
-    args = parse_arguments()
+    args = shared.parse_arguments()
     configuration = ConfigLoader.load(args.configuration)
-    setup_logging(configuration.logfile, configuration.loglevel)
+    shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
 
     logging.info("Config loaded!")
     logging.info("Reading books from DB...")

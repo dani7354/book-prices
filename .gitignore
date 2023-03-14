@@ -2,8 +2,8 @@ venv/
 test/
 
 docker/db/
-docker/price_updater/config/
-docker/price_updater/log/
+docker/cronjobs/config/
+docker/cronjobs/log/
 
 .vscode/
 .idea/

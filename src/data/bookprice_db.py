@@ -1,4 +1,5 @@
 from mysql.connector import (connection)
+from datetime import date
 from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice, BookPrice
 
 
@@ -17,6 +18,22 @@ class BookPriceDb:
                                          database=self.db_name)
         return con
 
+    def create_book(self, book: Book) -> int:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = "INSERT INTO Book(Title, Author) VALUES (%s, %s);"
+                cursor.execute(query, (book.title, book.author))
+                con.commit()
+
+                query = "SELECT LAST_INSERT_ID() as Id;"
+                cursor.execute(query)
+
+                for row in cursor:
+                    if "Id" in row:
+                        return row["Id"]
+
+                return -1
+
     def get_books(self) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
@@ -31,7 +48,7 @@ class BookPriceDb:
 
                 return books
 
-    def search_books(self, search_phrase) -> list:
+    def search_books(self, search_phrase: str) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 phrase_with_wildcards = f"{search_phrase}%"
@@ -47,7 +64,7 @@ class BookPriceDb:
 
                 return books
 
-    def get_book(self, book_id) -> Book:
+    def get_book(self, book_id: int) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Title, Author "
@@ -61,39 +78,67 @@ class BookPriceDb:
 
                 return books[0] if len(books) > 0 else None
 
-    def get_book_store(self, book_store_id) -> BookStore:
+    def get_book_store(self, book_store_id: int) -> BookStore:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url "
                          "FROM BookStore "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_store_id,))
-                book_store = []
+                book_stores = []
                 for row in cursor:
-                    book_store.append(BookStore(row["Id"],
-                                                row["Name"],
-                                                row["Url"],
-                                                row["PriceCssSelector"],
-                                                row["PriceFormat"]))
+                    book_stores.append(BookStore(row["Id"],
+                                                 row["Name"],
+                                                 row["Url"],
+                                                 row["SearchUrl"],
+                                                 row["SearchResultCssSelector"],
+                                                 row["PriceCssSelector"],
+                                                 row["PriceFormat"]))
 
-                return book_store[0] if len(book_store) > 0 else None
+                return book_stores[0] if len(book_stores) > 0 else None
 
-    def get_book_store_for_book(self, book, book_store_id):
-        book_stores_for_book = self.get_book_stores_for_books((book,))
+    def get_book_stores(self) -> list:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, SearchUrl, SearchResultCssSelector "
+                         "FROM BookStore")
+                cursor.execute(query)
+                book_stores = []
+                for row in cursor:
+                    book_stores.append(BookStore(row["Id"],
+                                                 row["Name"],
+                                                 row["Url"],
+                                                 row["SearchUrl"],
+                                                 row["SearchResultCssSelector"],
+                                                 row["PriceCssSelector"],
+                                                 row["PriceFormat"]))
+
+                return book_stores
+
+    def create_book_store_for_book(self, book_id: int, book_store_id: int, url: str):
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("INSERT INTO BookStoreBook (BookId, BookStoreId, Url) "
+                         "VALUES (%s, %s, %s)")
+                cursor.execute(query, (book_id, book_store_id, url))
+                con.commit()
+
+    def get_book_store_for_book(self, book: Book, book_store_id: int):
+        book_stores_for_book = self.get_book_stores_for_books([book])
         for book_store_book in book_stores_for_book[book.id]:
             if book_store_book.book_store.id == book_store_id:
                 return book_store_book
 
         return None
 
-    def get_book_stores_for_books(self, books) -> dict:
+    def get_book_stores_for_books(self, books: list) -> dict:
         book_dict = {b.id: b for b in books}
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 ids_format_string = ",".join(["%s"] * len(book_dict.keys()))
                 query = "SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " \
                         "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " \
-                        "bs.PriceFormat " \
+                        "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector " \
                         "FROM BookStoreBook bsb " \
                         "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " \
                         f"WHERE bsb.BookId IN ({ids_format_string})"
@@ -116,17 +161,28 @@ class BookPriceDb:
 
         return books_in_bookstore
 
-    def create_prices(self, book_prices):
+    def create_prices(self, book_prices: list):
         with self.get_connection() as con:
             with con.cursor() as cursor:
-                price_rows = [(price.book.id, price.book_store.id, str(price.price), price.created) for price in book_prices]
+                price_rows = [(price.book.id,
+                               price.book_store.id,
+                               str(price.price),
+                               price.created) for price in book_prices]
 
                 query = ("INSERT INTO BookPrice (BookId, BookStoreId, Price, Created) " 
                          "VALUES (%s, %s, %s, %s)")
                 cursor.executemany(query, price_rows)
                 con.commit()
 
-    def get_latest_prices(self, book_id) -> list:
+    def delete_prices_older_than(self, earliest_date: date):
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("DELETE FROM BookPrice "
+                         "WHERE Created < %s")
+                cursor.execute(query, (str(earliest_date),))
+                con.commit()
+
+    def get_latest_prices(self, book_id: int) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("With LatestPricesTwo as ( "
@@ -157,7 +213,7 @@ class BookPriceDb:
                                                                      row["Created"]))
                 return latest_prices_for_book
 
-    def get_book_prices_for_store(self, book, book_store) -> list:
+    def get_book_prices_for_store(self, book: Book, book_store: BookStore) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT MAX(Id) as Id, MAX(Price) as Price, DATE(Created) as Created "
@@ -181,7 +237,8 @@ class BookPriceDb:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT bss.Id as SitemapId, bss.Url as SitemapUrl, bs.Id as BookStoreId, "
-                         "bs.Url as BookStoreUrl, bs.Name as BookStoreName, bs.PriceCssSelector, bs.PriceFormat " 
+                         "bs.Url as BookStoreUrl, bs.Name as BookStoreName, bs.PriceCssSelector, bs.PriceFormat, "
+                         "bs.SearchUrl, bs.SearchResultCssSelector " 
                          "FROM BookStoreSitemap bss "
                          "INNER JOIN BookStore bs ON bs.Id = bss.BookStoreId;")
 
@@ -199,10 +256,12 @@ class BookPriceDb:
         return sitemaps
 
     @staticmethod
-    def _add_book_store_from_row(row, book_store_dict):
+    def _add_book_store_from_row(row: dict, book_store_dict: dict):
         book_store_id = row["BookStoreId"]
         book_store_dict[book_store_id] = BookStore(book_store_id,
                                                    row["BookStoreName"],
                                                    row["BookStoreUrl"],
+                                                   row["SearchUrl"],
+                                                   row["SearchResultCssSelector"],
                                                    row["PriceCssSelector"],
                                                    row["PriceFormat"])
