@@ -8,6 +8,8 @@ COPY ./src/data ./data
 COPY ./src/crontab ./crontab
 COPY ./src/requirements.txt requirements.txt
 COPY ./src/update_prices.py ./update_prices.py
+COPY ./src/delete_prices.py ./delete_prices.py
+COPY ./src/shared.py ./shared.py
 
 RUN pip install -r ./requirements.txt
 RUN mkdir ./config

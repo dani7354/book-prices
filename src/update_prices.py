@@ -2,6 +2,7 @@
 import argparse
 import logging
 import sys
+import shared
 from datetime import datetime, timezone
 from queue import Queue
 from threading import Thread
@@ -10,24 +11,8 @@ from data.bookprice_db import BookPriceDb
 from data.model import BookPrice
 from book_source.web import WebshopPriceFinder
 
-MAX_THREAD_COUNT = 8
-
-
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--configuration", dest="configuration", type=str, required=True)
-
-    return parser.parse_args()
-
-
-def setup_logging(logfile: str, loglevel: int):
-    loglevel = loglevel
-    logging.basicConfig(
-        filename=logfile,
-        filemode="a",
-        format='%(asctime)s - %(levelname)s: %(message)s',
-        level=loglevel)
-    logging.getLogger().addHandler(logging.StreamHandler())
+MAX_THREAD_COUNT = 10
+LOG_FILE_NAME = "update_prices.log"
 
 
 def create_book_store_queue(book_stores_by_book_id: dict) -> Queue:
@@ -70,9 +55,9 @@ def get_updated_prices_for_books(book_stores_queue: Queue, updated_book_prices: 
 
 
 def run():
-    args = parse_arguments()
+    args = shared.parse_arguments()
     configuration = ConfigLoader.load(args.configuration)
-    setup_logging(configuration.logfile, configuration.loglevel)
+    shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
 
     logging.info("Config loaded!")
     logging.info("Reading books from DB...")
