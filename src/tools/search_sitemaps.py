@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 import argparse
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from configuration.config import ConfigLoader
 from book_source.web import SitemapBookFinder
 from data.bookprice_db import BookPriceDb
