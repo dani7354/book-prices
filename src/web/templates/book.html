@@ -30,7 +30,11 @@
       <td>{{ p.price }}</td>
       <td>{{ p.created }}</td>
       <td>
-        <a href="{{ url_for('price_history', book_id=details.book.id, store_id=p.book_store_id) }}">Prisudvikling</a>
+        {% if p.is_price_available %}
+          <a href="{{ url_for('price_history', book_id=details.book.id, store_id=p.book_store_id) }}">Prisudvikling</a>
+        {% else %}
+          <u class="text-muted">Prisudvikling</u>
+        {% endif %}
         <a href="{{ p.url }}">Link</a>
       </td>
     </tr>
