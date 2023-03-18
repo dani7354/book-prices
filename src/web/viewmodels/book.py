@@ -12,12 +12,13 @@ class BookDetailsViewModel:
 
 
 class BookPriceForStoreViewModel:
-    def __init__(self, book_store_id, book_store_name, url, price, created):
+    def __init__(self, book_store_id, book_store_name, url, price, created, is_price_available):
         self.book_store_id = book_store_id
         self.book_store_name = book_store_name
         self.url = url
         self.price = price
         self.created = created
+        self.is_price_available = is_price_available
 
 
 class PriceHistoryViewModel:

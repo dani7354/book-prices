@@ -17,13 +17,15 @@ class BookMapper:
     def map_book_details(book, book_prices) -> BookDetailsViewModel:
         book_price_view_models = []
         for bp in book_prices:
-            price_str = bp.price if bp.price is not None else PRICE_NONE_TEXT
-            created_str = bp.created if bp.created is not None else PRICE_CREATED_NONE_TEXT
+            is_price_available = bp.price is not None
+            price_str = bp.price if is_price_available else PRICE_NONE_TEXT
+            created_str = bp.created if is_price_available else PRICE_CREATED_NONE_TEXT
             book_price_view_models.append(BookPriceForStoreViewModel(bp.book_store_id,
                                                                      bp.book_store_name,
                                                                      bp.url,
                                                                      price_str,
-                                                                     created_str))
+                                                                     created_str,
+                                                                     is_price_available))
 
         return BookDetailsViewModel(book, book_price_view_models)
 
