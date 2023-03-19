@@ -8,6 +8,8 @@ from viewmodels.book_mapper import BookMapper
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
 
+BOOK_FALLBACK_IMAGE_URL = "/static/images/books/default.png"
+
 db = bookprice_db.BookPriceDb(
     os.environ["MYSQL_SERVER"],
     os.environ["MYSQL_SERVER_PORT"],
@@ -22,7 +24,7 @@ app = Flask(__name__)
 def index() -> str:
     search_phrase = request.args.get("search")
     books = db.get_books() if search_phrase is None else db.search_books(search_phrase)
-    book_view_models = BookMapper.map_book_list(books)
+    book_view_models = BookMapper.map_book_list(books, BOOK_FALLBACK_IMAGE_URL)
 
     return render_template("index.html", books=book_view_models)
 
@@ -34,7 +36,9 @@ def book(book_id: int) -> str:
         abort(NOT_FOUND)
 
     book_prices = db.get_latest_prices(book.id)
-    book_details = BookMapper.map_book_details(book, book_prices)
+    book_details = BookMapper.map_book_details(book,
+                                               book_prices,
+                                               BOOK_FALLBACK_IMAGE_URL)
 
     return render_template("book.html", details=book_details)
 

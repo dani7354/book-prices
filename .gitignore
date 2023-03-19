@@ -2,6 +2,7 @@ venv/
 test/
 
 docker/db/
+docker/cronjobs/images/
 docker/cronjobs/config/
 docker/cronjobs/log/
 

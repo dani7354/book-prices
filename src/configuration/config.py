@@ -11,9 +11,10 @@ class Database:
 
 
 class Config:
-    def __init__(self, database, logdir, loglevel):
+    def __init__(self, database, logdir, imgdir, loglevel):
         self.database = database
         self.logdir = logdir
+        self.imgdir = imgdir
         self.loglevel = loglevel
 
 
@@ -34,5 +35,5 @@ class ConfigLoader:
                                database_section["password"],
                                database_section["name"]),
                       json_content["logdir"],
+                      json_content["imgdir"],
                       json_content["loglevel"])
-
