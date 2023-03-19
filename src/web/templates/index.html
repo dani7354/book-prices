@@ -14,6 +14,9 @@
     {% for b in books %}
       <div class="col">
         <div class="card">
+          {% if b.image_url %}
+            <img src="{{ b.image_url }}" class="card-img-top" alt="{{ b.title }}">
+          {% endif %}
           <div class="card-body">
             <h5 class="card-title"><a class="link-secondary" href="{{ url_for('book', book_id=b.id) }}">{{ b.title }}</a></h5>
             <p class="card-text">{{ b.author }}</p>

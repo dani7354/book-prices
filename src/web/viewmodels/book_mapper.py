@@ -11,7 +11,7 @@ class BookMapper:
 
     @staticmethod
     def map_book_list_item(book) -> BookListItemViewModel:
-        return BookListItemViewModel(book.id, book.title, book.author)
+        return BookListItemViewModel(book.id, book.title, book.author, book.image_url)
 
     @staticmethod
     def map_book_details(book, book_prices) -> BookDetailsViewModel:

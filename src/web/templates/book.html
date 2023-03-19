@@ -13,6 +13,11 @@
   {{ details.book.title }}
   <small class="text-muted">af {{ details.book.author }}</small>
 </h3>
+{% if details.book.image_url %}
+<div class="text-center">
+  <img src="{{ details.book.image_url }}" class="img-fluid rounded" alt="{{ details.book.title }}">
+</div>
+{% endif %}
 <h4>Seneste priser</h4>
 <table class="table">
   <thead>
