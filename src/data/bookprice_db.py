@@ -81,7 +81,8 @@ class BookPriceDb:
     def get_book_store(self, book_store_id: int) -> BookStore:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url "
+                query = ("SELECT Id, Name,  PriceFormat, Url, "
+                         "SearchUrl, SearchResultCssSelector, PriceCssSelector, ImageCssSelector "
                          "FROM BookStore "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_store_id,))
@@ -93,6 +94,7 @@ class BookPriceDb:
                                                  row["SearchUrl"],
                                                  row["SearchResultCssSelector"],
                                                  row["PriceCssSelector"],
+                                                 row["ImageCssSelector"],
                                                  row["PriceFormat"]))
 
                 return book_stores[0] if len(book_stores) > 0 else None
@@ -100,7 +102,8 @@ class BookPriceDb:
     def get_book_stores(self) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, SearchUrl, SearchResultCssSelector "
+                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
+                         "SearchUrl, SearchResultCssSelector, ImageCssSelector "
                          "FROM BookStore")
                 cursor.execute(query)
                 book_stores = []
@@ -111,6 +114,7 @@ class BookPriceDb:
                                                  row["SearchUrl"],
                                                  row["SearchResultCssSelector"],
                                                  row["PriceCssSelector"],
+                                                 row["ImageCssSelector"],
                                                  row["PriceFormat"]))
 
                 return book_stores
@@ -138,7 +142,7 @@ class BookPriceDb:
                 ids_format_string = ",".join(["%s"] * len(book_dict.keys()))
                 query = "SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " \
                         "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " \
-                        "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector " \
+                        "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector " \
                         "FROM BookStoreBook bsb " \
                         "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " \
                         f"WHERE bsb.BookId IN ({ids_format_string})"
@@ -238,7 +242,7 @@ class BookPriceDb:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT bss.Id as SitemapId, bss.Url as SitemapUrl, bs.Id as BookStoreId, "
                          "bs.Url as BookStoreUrl, bs.Name as BookStoreName, bs.PriceCssSelector, bs.PriceFormat, "
-                         "bs.SearchUrl, bs.SearchResultCssSelector " 
+                         "bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector " 
                          "FROM BookStoreSitemap bss "
                          "INNER JOIN BookStore bs ON bs.Id = bss.BookStoreId;")
 
@@ -264,4 +268,5 @@ class BookPriceDb:
                                                    row["SearchUrl"],
                                                    row["SearchResultCssSelector"],
                                                    row["PriceCssSelector"],
+                                                   row["ImageCssSelector"],
                                                    row["PriceFormat"])
