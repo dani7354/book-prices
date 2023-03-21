@@ -4,21 +4,18 @@ from queue import Queue
 import requests
 import os
 
+
 BS_HTML_PARSER = "html.parser"
 HTML_SRC = "src"
 FALLBACK_FILE_EXT = ".file"
 
 
 class ImageSource:
-    def __init__(self, page_url, image_css_selector, new_image_filename):
+    def __init__(self, id: int, page_url: str, image_css_selector: str, new_image_filename: str):
+        self.id = id
         self.page_url = page_url
         self.image_css_selector = image_css_selector
         self.new_image_filename = new_image_filename
-
-
-class ImageDownloadRequest:
-    def __init__(self, image_sources: list):
-        self.image_sources = image_sources
 
 
 class ImageDownloader:
@@ -31,9 +28,9 @@ class ImageDownloader:
         self.max_thread_count = max_thread_count
         self.location = location
 
-    def download_images(self, request: ImageDownloadRequest) -> list:
-        image_source_queue = self._create_image_source_queue(request.image_sources)
-        downloaded_images = []
+    def download_images(self, image_sources: list) -> dict:
+        image_source_queue = self._create_image_source_queue(image_sources)
+        downloaded_images = {}
         threads = []
         for _ in range(self.max_thread_count):
             t = Thread(target=self._get_image_url_and_download, args=(image_source_queue, downloaded_images,))
@@ -44,7 +41,7 @@ class ImageDownloader:
 
         return downloaded_images
 
-    def _get_image_url_and_download(self, image_source_queue: Queue, downloaded_images: list):
+    def _get_image_url_and_download(self, image_source_queue: Queue, downloaded_images: dict):
         while not image_source_queue.empty():
             image_source = image_source_queue.get()
             image_url = self._get_image_url_from_page(image_source)
@@ -53,7 +50,7 @@ class ImageDownloader:
 
             image_filename = self._get_image(image_source.new_image_filename, image_url)
             if image_filename is not None:
-                downloaded_images.append(image_filename)
+                downloaded_images[image_source.id] = image_filename
 
     @staticmethod
     def _get_image_url_from_page(image_source: ImageSource) -> str | None:

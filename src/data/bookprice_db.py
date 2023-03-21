@@ -34,6 +34,15 @@ class BookPriceDb:
 
                 return -1
 
+    def update_book(self, book: Book):
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("UPDATE Book "
+                         "SET Title = %s, Author = %s, ImageUrl = %s "
+                         "WHERE Id = %s;")
+                cursor.execute(query, (book.title, book.author, book.image_url, book.id))
+                con.commit()
+
     def get_books(self) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:

@@ -1,4 +1,5 @@
 from .book import BookListItemViewModel, BookDetailsViewModel, PriceHistoryViewModel, BookPriceForStoreViewModel
+import os
 
 PRICE_NONE_TEXT = "-"
 PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
@@ -6,16 +7,21 @@ PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
 
 class BookMapper:
     @classmethod
-    def map_book_list(cls, books, fallback_image) -> list:
-        return [cls.map_book_list_item(b, fallback_image) for b in books]
+    def map_book_list(cls, books, image_base_url: str, fallback_image: str) -> list:
+        return [cls.map_book_list_item(b, image_base_url, fallback_image) for b in books]
 
     @staticmethod
-    def map_book_list_item(book, fallback_image) -> BookListItemViewModel:
-        image_url = book.image_url if book.image_url is not None else fallback_image
+    def map_book_list_item(book, image_base_url: str, fallback_image: str) -> BookListItemViewModel:
+
+        if book.image_url is not None:
+            image_url = os.path.join(image_base_url, book.image_url)
+        else:
+            image_url = os.path.join(image_base_url, fallback_image)
+
         return BookListItemViewModel(book.id, book.title, book.author, image_url)
 
     @staticmethod
-    def map_book_details(book, book_prices, fallback_image) -> BookDetailsViewModel:
+    def map_book_details(book, book_prices: list, image_base_url: str, fallback_image: str) -> BookDetailsViewModel:
         book_price_view_models = []
         for bp in book_prices:
             is_price_available = bp.price is not None
@@ -29,7 +35,10 @@ class BookMapper:
                                                                      created_str,
                                                                      is_price_available))
 
-        book.image_url = book.image_url if book.image_url is not None else fallback_image
+        if book.image_url is not None:
+            book.image_url = os.path.join(image_base_url, book.image_url)
+        else:
+            book.image_url = os.path.join(image_base_url, fallback_image)
 
         return BookDetailsViewModel(book, book_price_view_models)
 
