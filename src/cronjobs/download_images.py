@@ -52,6 +52,9 @@ def run():
     logging.debug("Getting books from db...")
     all_books = books_db.get_books()
     books_without_image = get_books_without_image(all_books)
+    if len(books_without_image) == 0:
+        logging.info("An image exist for all books at the moment.")
+        sys.exit(0)
 
     logging.debug(f"Getting book stores for {len(books_without_image)} books...")
     book_stores_for_book = books_db.get_book_stores_for_books(books_without_image)
