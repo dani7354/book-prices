@@ -10,6 +10,7 @@ services:
     volumes:
       - ./docker/cronjobs/log:/usr/local/book_prices/cronjobs/log
       - ./docker/cronjobs/config:/usr/local/book_prices/cronjobs/config
+      - ./docker/cronjobs/images:/usr/local/book_prices/cronjobs/images
     networks:
       - localnetwork
   web:
@@ -17,6 +18,8 @@ services:
       context: ./
       dockerfile: docker/web/Dockerfile
     image: dsp8ef9/book_prices_web:latest
+    volumes:
+      - ./docker/cronjobs/images:/usr/local/bookprices_web/web/static/images/books
     env_file: ./docker/web/.web.env
     ports:
       - "8080:80"

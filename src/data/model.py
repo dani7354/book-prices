@@ -2,20 +2,30 @@ import urllib.parse
 
 
 class Book:
-    def __init__(self, id, title, author):
+    def __init__(self, id, title, author, image_url):
         self.id = id
         self.title = title
         self.author = author
+        self.image_url = image_url
 
 
 class BookStore:
-    def __init__(self, id, name, url, search_url, search_result_css_selector, price_css_selector, price_format):
+    def __init__(self,
+                 id,
+                 name,
+                 url,
+                 search_url,
+                 search_result_css_selector,
+                 price_css_selector,
+                 image_css_selector,
+                 price_format):
         self.id = id
         self.name = name
         self.url = url
         self.search_url = search_url
         self.search_result_css_selector = search_result_css_selector
         self.price_css_selector = price_css_selector
+        self.image_css_selector = image_css_selector
         self.price_format = price_format
 
 

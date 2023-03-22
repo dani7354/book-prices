@@ -1,8 +1,9 @@
 class BookListItemViewModel:
-    def __init__(self, id, title, author):
+    def __init__(self, id, title, author, image_url):
         self.id = id
         self.title = title
         self.author = author
+        self.image_url = image_url
 
 
 class BookDetailsViewModel:
