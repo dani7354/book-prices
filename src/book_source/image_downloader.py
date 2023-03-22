@@ -43,14 +43,17 @@ class ImageDownloader:
 
     def _get_image_url_and_download(self, image_source_queue: Queue, downloaded_images: dict):
         while not image_source_queue.empty():
-            image_source = image_source_queue.get()
-            image_url = self._get_image_url_from_page(image_source)
-            if image_url is None:
-                continue
+            try:
+                image_source = image_source_queue.get()
+                image_url = self._get_image_url_from_page(image_source)
+                if image_url is None:
+                    continue
 
-            image_filename = self._get_image(image_source.new_image_filename, image_url)
-            if image_filename is not None:
-                downloaded_images[image_source.id] = image_filename
+                image_filename = self._get_image(image_source.new_image_filename, image_url)
+                if image_filename is not None:
+                    downloaded_images[image_source.id] = image_filename
+            except:
+                continue
 
     @staticmethod
     def _get_image_url_from_page(image_source: ImageSource) -> str | None:
