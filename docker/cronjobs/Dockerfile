@@ -6,6 +6,7 @@ COPY ./src/book_source ./book_source
 COPY ./src/configuration ./configuration
 COPY ./src/data ./data
 COPY ./src/cronjobs ./cronjobs
+COPY ./src/tools ./tools
 
 RUN pip install -r ./cronjobs/requirements.txt
 RUN mkdir ./cronjobs/config
