@@ -19,8 +19,14 @@ class WebsiteBookFinder:
         return match_url
 
     @classmethod
-    def _get_match_url(cls, url: str, match_url_css: str) -> str | None:
+    def _get_match_url(cls, url: str, match_url_css: str | None) -> str | None:
         response = requests.get(url)
+        if response.status_code > 399:
+            return None
+
+        if match_url_css is None:  # If search redirects to detail page.
+            return response.url
+
         content_bs = BeautifulSoup(response.content.decode(), BS_HTML_PARSER)
         match_url_tag = content_bs.select_one(match_url_css)
         if match_url_tag is None:

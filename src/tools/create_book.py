@@ -60,19 +60,9 @@ def run():
                            configuration.database.db_name)
 
     all_matches = []
-
-    print("Getting sitemaps...")
-    sitemaps = books_db.get_sitemaps()
-    print(f"Found {len(sitemaps)} sitemaps!")
-
-    print(f"Searching sitemaps for ISBN {args.isbn}...")
-    matches_from_sitemaps = search_sitemaps(sitemaps, args.isbn)
-    print(f"{len(matches_from_sitemaps)} URLs found!")
-    all_matches.extend(matches_from_sitemaps)
-
     book_stores_website_search = []
     for book_store in books_db.get_book_stores():
-        if book_store.search_url is not None and book_store.search_result_css_selector is not None:
+        if book_store.search_url is not None:
             book_stores_website_search.append(book_store)
 
     print(f"Searching websites for ISBN {args.isbn}...")
