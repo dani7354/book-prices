@@ -9,15 +9,27 @@
 </a>
 </p>
 
-<h3>
+<h3 class="pb-4">
   {{ details.book.title }}
   <small class="text-muted">af {{ details.book.author }}</small>
 </h3>
-{% if details.book.image_url %}
-<div class="text-center">
-  <img src="{{ details.book.image_url }}" class="img-fluid rounded" alt="{{ details.book.title }}">
+<div class="container pb-4">
+   <div class="row">
+      <div class="col-4">
+       {% if details.book.image_url %}
+        <div class="text-center">
+          <img src="{{ details.book.image_url }}" class="img-fluid rounded" alt="{{ details.book.title }}">
+        </div>
+      {% endif %}
+     </div>
+     <div class="col">
+      <p><strong>Titel:</strong> {{ details.book.title }}</p>
+      <p><strong>Forfatter(e):</strong> {{ details.book.author }}</p>
+      <p><strong>ISBN:</strong> {{ details.book.isbn }}</p>
+     </div>
+  </div>
 </div>
-{% endif %}
+
 <h4>Seneste priser</h4>
 <table class="table">
   <thead>
