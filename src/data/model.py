@@ -2,8 +2,9 @@ import urllib.parse
 
 
 class Book:
-    def __init__(self, id, title, author, image_url):
+    def __init__(self, id: int, isbn: str, title: str, author: str, image_url: str | None):
         self.id = id
+        self.isbn = isbn
         self.title = title
         self.author = author
         self.image_url = image_url
@@ -11,14 +12,14 @@ class Book:
 
 class BookStore:
     def __init__(self,
-                 id,
-                 name,
-                 url,
-                 search_url,
-                 search_result_css_selector,
-                 price_css_selector,
-                 image_css_selector,
-                 price_format):
+                 id: int,
+                 name: str,
+                 url: str,
+                 search_url: str | None,
+                 search_result_css_selector: str | None,
+                 price_css_selector: str | None,
+                 image_css_selector: str | None,
+                 price_format: str | None):
         self.id = id
         self.name = name
         self.url = url
@@ -30,17 +31,17 @@ class BookStore:
 
 
 class BookInBookStore:
-    def __init__(self, book, book_store, url):
+    def __init__(self, book: Book, book_store: BookStore, url: str):
         self.book = book
         self.book_store = book_store
         self.url = url
 
-    def get_full_url(self):
+    def get_full_url(self) -> str:
         return urllib.parse.urljoin(self.book_store.url, self.url)
 
 
 class BookPrice:
-    def __init__(self, id, book, book_store, price, created):
+    def __init__(self, id: int, book: Book, book_store: BookStore, price: float, created: str):
         self.id = id
         self.book = book
         self.book_store = book_store
@@ -49,14 +50,20 @@ class BookPrice:
 
 
 class BookStoreSitemap:
-    def __init__(self, id, url, book_store):
+    def __init__(self, id: int, url: str, book_store: BookStore):
         self.id = id
         self.url = url
         self.book_store = book_store
 
 
 class BookStoreBookPrice:
-    def __init__(self, id, book_store_id, book_store_name, url, price, created):
+    def __init__(self,
+                 id: int,
+                 book_store_id: int,
+                 book_store_name: str,
+                 url: str,
+                 price: float,
+                 created: str):
         self.id = id
         self.book_store_id = book_store_id
         self.book_store_name = book_store_name
