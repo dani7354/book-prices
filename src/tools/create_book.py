@@ -71,7 +71,7 @@ def run():
     all_matches.extend(matches_from_websites)
 
     print(f"Creating new book: {args.title} by {args.author}...")
-    new_book = Book(0, args.title, args.author, None)
+    new_book = Book(0, args.isbn, args.title, args.author, None)
     new_book_id = books_db.create_book(new_book)
     if new_book_id == -1:
         print("Failed to add book!")
