@@ -1,28 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-   <h1>Bøger</h1>
-    <form class="row g-3" method="get" action="/">
-        <div class="col-auto">
-            <input type="text" class="form-control" name="search" value="">
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-secondary mb-3">Søg</button>
-        </div>
-    </form>
-
-    <div class="row row-cols-1 row-cols-md-5 g-4">
-    {% for b in books %}
-      <div class="col">
-        <div class="card">
-          {% if b.image_url %}
-            <img src="{{ b.image_url }}" class="card-img-top" alt="{{ b.title }}">
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title"><a class="link-secondary" href="{{ url_for('book', book_id=b.id) }}">{{ b.title }}</a></h5>
-            <p class="card-text">{{ b.author }}</p>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
+<h1>Bøger</h1>
+<form class="row g-3" method="get" action="/">
+    <div class="col-auto">
+        <input type="text" class="form-control" name="search" value="">
     </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-secondary mb-3">Søg</button>
+    </div>
+</form>
+
+<div class="row row-cols-1 row-cols-md-5 g-4">
+    {% for b in books %}
+    <div class="col">
+        <div class="card">
+            {% if b.image_url %}
+            <img src="{{ b.image_url }}" class="card-img-top" alt="{{ b.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title"><a class="link-secondary" href="{{ url_for('book', book_id=b.id) }}">{{ b.title
+                    }}</a></h5>
+                <p class="card-text">{{ b.author }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

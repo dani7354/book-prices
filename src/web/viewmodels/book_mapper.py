@@ -18,7 +18,7 @@ class BookMapper:
         else:
             image_url = os.path.join(image_base_url, fallback_image)
 
-        return BookListItemViewModel(book.id, book.title, book.author, image_url)
+        return BookListItemViewModel(book.id, book.isbn, book.title, book.author, image_url)
 
     @staticmethod
     def map_book_details(book, book_prices: list, image_base_url: str, fallback_image: str) -> BookDetailsViewModel:
