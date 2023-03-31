@@ -87,6 +87,20 @@ class BookPriceDb:
 
                 return books[0] if len(books) > 0 else None
 
+    def get_book_by_isbn(self, book_id: str) -> Book:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Isbn, Title, Author, ImageUrl "
+                         "FROM Book "
+                         "WHERE Isbn = %s;")
+                cursor.execute(query, (book_id,))
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"])
+                    books.append(book)
+
+                return books[0] if len(books) > 0 else None
+
     def get_book_store(self, book_store_id: int) -> BookStore:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
@@ -115,6 +129,27 @@ class BookPriceDb:
                          "SearchUrl, SearchResultCssSelector, ImageCssSelector "
                          "FROM BookStore")
                 cursor.execute(query)
+                book_stores = []
+                for row in cursor:
+                    book_stores.append(BookStore(row["Id"],
+                                                 row["Name"],
+                                                 row["Url"],
+                                                 row["SearchUrl"],
+                                                 row["SearchResultCssSelector"],
+                                                 row["PriceCssSelector"],
+                                                 row["ImageCssSelector"],
+                                                 row["PriceFormat"]))
+
+                return book_stores
+
+    def get_missing_book_stores(self, book_id: int) -> list:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
+                         "SearchUrl, SearchResultCssSelector, ImageCssSelector "
+                         "FROM BookStore "
+                         "WHERE Id NOT IN (SELECT BookStoreId FROM BookStoreBook WHERE BookId = %s)")
+                cursor.execute(query, (book_id,))
                 book_stores = []
                 for row in cursor:
                     book_stores.append(BookStore(row["Id"],

@@ -2,14 +2,13 @@
 import argparse
 import os
 import sys
+import isbn_check
 from urllib.parse import urlparse
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from configuration.config import ConfigLoader
 from book_source.web import SitemapBookFinder, WebsiteBookFinder
 from data.bookprice_db import BookPriceDb
 from data.model import Book
-
-MAX_THREAD_COUNT = 10
 
 
 def parse_arguments():
@@ -20,19 +19,6 @@ def parse_arguments():
     parser.add_argument("-c", "--configuration", dest="configuration", type=str, required=True)
 
     return parser.parse_args()
-
-
-def search_sitemaps(sitemaps: list, isbn: str) -> list:
-    sitemap_finder = SitemapBookFinder(max_thread_count=MAX_THREAD_COUNT)
-    matches = []
-    for sitemap in sitemaps:
-        print(f"Reading sitemap {sitemap.url} for book store {sitemap.book_store.name} (id {sitemap.book_store.id})...")
-        matched_urls = sitemap_finder.search_sitemap(sitemap.url, [isbn])
-
-        if len(matched_urls) > 0:
-            matches.append((sitemap.book_store.id, urlparse(matched_urls[0]).path))
-
-    return matches
 
 
 def search_website(book_stores: list, isbn: str) -> list:
@@ -52,6 +38,10 @@ def search_website(book_stores: list, isbn: str) -> list:
 
 def run():
     args = parse_arguments()
+    if not isbn_check.check_isbn13(args.isbn):
+        print(f"{args.isbn} not valid")
+        sys.exit(1)
+
     configuration = ConfigLoader.load(args.configuration)
     books_db = BookPriceDb(configuration.database.db_host,
                            configuration.database.db_port,
@@ -59,32 +49,39 @@ def run():
                            configuration.database.db_password,
                            configuration.database.db_name)
 
-    all_matches = []
+    book = books_db.get_book_by_isbn(args.isbn)
+    if book is None:
+        print(f"Creating new book: {args.title} by {args.author}...")
+        book = Book(0, args.isbn, args.title, args.author, None)
+        book_id = books_db.create_book(book)
+        if book_id == -1:
+            print("Failed to add book!")
+            sys.exit(1)
+
+        book.id = book_id
+        print(f"New book created with id {book.id}")
+    else:
+        print(f"Book already exists with id {book.id}!")
+
     book_stores_website_search = []
-    for book_store in books_db.get_book_stores():
+    for book_store in books_db.get_missing_book_stores(book.id):
         if book_store.search_url is not None:
             book_stores_website_search.append(book_store)
+    if len(book_stores_website_search) == 0:
+        print("Book already added for available bookstores.")
+        sys.exit(0)
 
     print(f"Searching websites for ISBN {args.isbn}...")
     matches_from_websites = search_website(book_stores_website_search, args.isbn)
-    print(f"{len(matches_from_websites)} URLs found!")
-    all_matches.extend(matches_from_websites)
+    print(f"{len(matches_from_websites)} search URLs found!")
 
-    print(f"Creating new book: {args.title} by {args.author}...")
-    new_book = Book(0, args.isbn, args.title, args.author, None)
-    new_book_id = books_db.create_book(new_book)
-    if new_book_id == -1:
-        print("Failed to add book!")
-        exit(1)
-
-    print(f"New book created with id {new_book_id}")
-
-    print(f"Inserting {len(all_matches)} URLs...")
-    for store_id, url in all_matches:
+    print(f"Inserting {len(matches_from_websites)} URLs...")
+    for store_id, url in matches_from_websites:
         try:
-            books_db.create_book_store_for_book(new_book_id, store_id, url)
+            books_db.create_book_store_for_book(book.id, store_id, url)
         except Exception as ex:
-            print(f"Error while inserting url {url} for book {new_book_id} and book store {store_id}.")
+            print(f"Error while inserting url {url} for book {book.id} and book store {store_id}.")
+            print(ex)
             continue
 
     print("Book and urls added!")
