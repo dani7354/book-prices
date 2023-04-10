@@ -16,4 +16,4 @@ def calculate_check_digit(isbn13: str) -> int:
         multiply_by = 1 if i % 2 == 0 else 3
         sum += int(isbn13[i]) * multiply_by
 
-    return 10 - (sum % 10)
+    return (10 - (sum % 10)) % 10
