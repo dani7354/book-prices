@@ -1,4 +1,4 @@
-from mysql.connector import (connection)
+from mysql.connector import connection
 from datetime import date
 from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice, BookPrice
 
@@ -233,7 +233,7 @@ class BookPriceDb:
     def get_latest_prices(self, book_id: int) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("With LatestPricesTwo as ( "
+                query = ("With LatestPrice as ( "
                          "SELECT MAX(bp.Id) as Id "
                          "FROM BookPrice bp "
                          "WHERE bp.BookId = %s "
@@ -243,9 +243,9 @@ class BookPriceDb:
                          "bp.Price, bp.Created "
                          "FROM BookStoreBook bsb "
                          "INNER JOIN BookStore bs ON bs.Id = bsb.BookStoreId "
-                         "LEFT OUTER JOIN BookPrice bp ON bp.BookId = bsb.BookId "
-                         "AND bp.BookStoreId = bsb.BookStoreId "
-                         "AND bp.Id IN (SELECT Id FROM LatestPricesTwo) "
+                         "LEFT OUTER JOIN BookPrice bp "
+                         "INNER JOIN LatestPrice lp ON bp.Id = lp.Id "
+                         "ON bp.BookId = bsb.BookId AND bp.BookStoreId = bsb.BookStoreId "
                          "WHERE bsb.BookId = %s "
                          "ORDER BY bp.Price ASC;")
 
