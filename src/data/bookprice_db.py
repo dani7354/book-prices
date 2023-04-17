@@ -63,9 +63,9 @@ class BookPriceDb:
                 phrase_with_wildcards = f"{search_phrase}%"
                 query = ("SELECT Id, Isbn, Title, Author, ImageUrl "
                          "FROM Book "
-                         "WHERE Title LIKE %s OR Author LIKE %s "
+                         "WHERE Title LIKE %s OR Author LIKE %s OR Isbn = %s "
                          "ORDER BY Title ASC;")
-                cursor.execute(query, (phrase_with_wildcards, phrase_with_wildcards))
+                cursor.execute(query, (phrase_with_wildcards, phrase_with_wildcards, search_phrase))
                 books = []
                 for row in cursor:
                     book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"])
