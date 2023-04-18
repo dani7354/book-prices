@@ -2,7 +2,7 @@ from mysql.connector import connection
 
 
 class BaseDb:
-    def __init__(self, db_host, db_port, db_user, db_password, db_name):
+    def __init__(self, db_host: str, db_port: str, db_user: str, db_password: str, db_name: str):
         self.db_host = db_host
         self.db_port = db_port,
         self.db_user = db_user
