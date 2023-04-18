@@ -1,23 +1,9 @@
-from mysql.connector import connection
 from datetime import date
+from .base_db import BaseDb
 from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice, BookPrice
 
 
-class BookPriceDb:
-    def __init__(self, db_host, db_port, db_user, db_password, db_name):
-        self.db_host = db_host
-        self.db_port = db_port,
-        self.db_user = db_user
-        self.db_password = db_password
-        self.db_name = db_name
-
-    def get_connection(self) -> connection:
-        con = connection.MySQLConnection(host=self.db_host,
-                                         user=self.db_user,
-                                         password=self.db_password,
-                                         database=self.db_name)
-        return con
-
+class BookPriceDb(BaseDb):
     def create_book(self, book: Book) -> int:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
