@@ -1,4 +1,4 @@
-from .book import BookListItemViewModel, BookDetailsViewModel, PriceHistoryViewModel, BookPriceForStoreViewModel
+from .book import IndexViewModel, BookListItemViewModel, BookDetailsViewModel, PriceHistoryViewModel, BookPriceForStoreViewModel
 import os
 
 PRICE_NONE_TEXT = "-"
@@ -6,6 +6,16 @@ PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
 
 
 class BookMapper:
+    @classmethod
+    def map_index_vm(cls,
+                     books,
+                     search_phrase: str | None,
+                     image_base_url: str,
+                     fallback_image: str) -> IndexViewModel:
+        search_phrase = "" if not search_phrase else search_phrase
+
+        return IndexViewModel(cls.map_book_list(books, image_base_url, fallback_image), search_phrase)
+
     @classmethod
     def map_book_list(cls, books, image_base_url: str, fallback_image: str) -> list:
         return [cls.map_book_list_item(b, image_base_url, fallback_image) for b in books]

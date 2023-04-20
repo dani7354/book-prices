@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Bøger</h1>
-<form class="row g-3" method="get" action="/">
+<form class="row g-3" method="get" enctype="application/x-www-form-urlencoded" action="/">
     <div class="col-auto">
-        <input type="text" class="form-control" name="search" value="">
+        <input type="text" class="form-control" name="search" value="{{ view_model.search_phrase }}">
     </div>
     <div class="col-auto">
         <button type="submit" class="btn btn-secondary mb-3">Søg</button>
@@ -11,7 +11,7 @@
 </form>
 
 <div class="row row-cols-1 row-cols-md-5 g-4">
-    {% for b in books %}
+    {% for b in view_model.book_list %}
     <div class="col">
         <div class="card">
             {% if b.image_url %}
