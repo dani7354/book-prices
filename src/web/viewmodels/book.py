@@ -1,3 +1,9 @@
+class IndexViewModel:
+    def __init__(self, book_list: list, search_phrase: str):
+        self.book_list = book_list
+        self.search_phrase = search_phrase
+
+
 class BookListItemViewModel:
     def __init__(self, id: int, isbn: str, title: str, author: str, image_url: str):
         self.id = id
