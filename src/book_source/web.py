@@ -126,3 +126,4 @@ class WebshopPriceFinder:
         price_value = float(price_format_match.group().replace(",", "."))
 
         return price_value
+
