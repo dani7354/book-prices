@@ -61,15 +61,14 @@ class BookStoreSearch:
     def _search_for_next_book(self):
         while not self.book_queue.empty():
             book_stores_for_book = self.book_queue.get()
-            for book, book_stores in book_stores_for_book:
-                for bs in book_stores:
-                    match_url = WebsiteBookFinder.search_book_isbn(bs.search_url,
-                                                                   book.isbn,
-                                                                   bs.search_result_css_selector)
+            for bs in book_stores_for_book.book_stores:
+                match_url = WebsiteBookFinder.search_book_isbn(bs.search_url,
+                                                               book_stores_for_book.book.isbn,
+                                                               bs.search_result_css_selector)
 
-                    if match_url:
-                        logging.info(f"Found match for book with id {book.id} in book store with id {bs.id}: {match_url}")
-                        self._create_book_store_for_book(book, bs, match_url)
+                if match_url:
+                    logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id {bs.id}: {match_url}")
+                    self._create_book_store_for_book(book_stores_for_book.book, bs, match_url)
 
     def _start_search(self):
         thread_count = self.max_thread_count if self.book_queue.qsize() >= self.max_thread_count else self.book_queue.qsize()
