@@ -24,8 +24,10 @@ class WebsiteBookFinder:
         if response.status_code > 399:
             return None
 
-        if match_url_css is None:  # If search redirects to detail page.
-            return response.url
+        if not match_url_css:
+            if cls._was_redirected_from_detail_page(response):
+                return response.url
+            return None
 
         content_bs = BeautifulSoup(response.content.decode(), BS_HTML_PARSER)
         match_url_tag = content_bs.select_one(match_url_css)
@@ -33,6 +35,10 @@ class WebsiteBookFinder:
             return None
 
         return match_url_tag[cls.HTML_HREF]
+
+    @staticmethod
+    def _was_redirected_from_detail_page(response: requests.Response):
+        return len(response.history) > 0 and response.history[0].status_code in (301, 302)
 
 
 class SitemapBookFinder:

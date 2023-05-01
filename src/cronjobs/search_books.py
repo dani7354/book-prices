@@ -4,6 +4,7 @@ import os
 import shared
 import sys
 import collections
+from urllib.parse import urlparse
 from queue import Queue
 from threading import Thread
 
@@ -68,7 +69,9 @@ class BookStoreSearch:
 
                 if match_url:
                     logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id {bs.id}: {match_url}")
-                    self._create_book_store_for_book(book_stores_for_book.book, bs, match_url)
+                    self._create_book_store_for_book(book_stores_for_book.book,
+                                                     bs,
+                                                     urlparse(match_url).path)
 
     def _start_search(self):
         thread_count = self.max_thread_count if self.book_queue.qsize() >= self.max_thread_count else self.book_queue.qsize()
