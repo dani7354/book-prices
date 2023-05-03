@@ -28,6 +28,7 @@ class BookStoreSearch:
         self.book_queue = Queue()
 
     def _get_book_stores_for_book(self, book: Book):
+        logging.info(f"Getting book stores with no information for book with id {book.id}...")
         book_stores = []
         for book_store in self.db.get_missing_book_stores(book.id):
             if book_store.search_url is not None:
