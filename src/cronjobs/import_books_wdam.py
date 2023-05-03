@@ -7,7 +7,6 @@ import sys
 import os
 import requests
 import queue
-import re
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from configuration.config import ConfigLoader
@@ -23,7 +22,7 @@ BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
 AUTHOR_CSS = "h2.author span a"
 
-LOG_FILE_NAME = "search_books.log"
+LOG_FILE_NAME = "import_wdam_books.log"
 THREAD_COUNT = 10
 
 
@@ -83,9 +82,8 @@ class WdamBookImport:
                 continue
 
             book = self._parse_book(response.content.decode())
-            print(f"{book.isbn}, {book.title}, {book.author}")
             if self._is_book_valid(book):
-                print("YES!")
+                logging.debug(f"Found valid book: {book.title} by {book.author} (ISBN-13: {book.isbn})")
                 books.append(book)
 
     def _save_books_if_not_exist(self, books):
@@ -94,6 +92,7 @@ class WdamBookImport:
             if b.isbn in existing_books_isbn:
                 continue
             try:
+                logging.debug(f"Saving book with ISBN {b.isbn}")
                 self.db.create_book(b)
             except Exception as ex:
                 logging.error(f"Error while inserting book: {b.title}, {b.author}, {b.isbn}")
@@ -120,7 +119,7 @@ class WdamBookImport:
         return book.author and book.title and isbn_check.check_isbn13(book.isbn)
 
     @staticmethod
-    def _parse_title(data_bs: BeautifulSoup):
+    def _parse_title(data_bs: BeautifulSoup) -> str:
         title = None
         title_tag = data_bs.select_one(TITLE_CSS)
         if title_tag:
@@ -149,4 +148,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

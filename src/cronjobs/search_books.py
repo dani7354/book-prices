@@ -68,23 +68,21 @@ class BookStoreSearch:
                                                                bs.search_result_css_selector)
 
                 if match_url:
-                    logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id {bs.id}: {match_url}")
+                    logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id "
+                                 f"{bs.id}: {match_url}")
                     self._create_book_store_for_book(book_stores_for_book.book,
                                                      bs,
                                                      urlparse(match_url).path)
 
     def _start_search(self):
-        thread_count = self.max_thread_count if self.book_queue.qsize() >= self.max_thread_count else self.book_queue.qsize()
+        logging.info(f"Starting search with {self.max_thread_count} threads...")
         threads = []
-
-        logging.info(f"Starting search with {thread_count} threads...")
-        for _ in range(thread_count):
+        for _ in range(self.max_thread_count):
             t = Thread(target=self._search_for_next_book())
             threads.append(t)
             t.start()
 
         [t.join() for t in threads]
-
         logging.info("Finished search!")
 
     def run(self):
