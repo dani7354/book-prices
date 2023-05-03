@@ -49,7 +49,7 @@ class WdamBookImport:
 
     def _get_book_urls(self) -> list:
         book_list_response = requests.get(self.book_list_url)
-        if book_list_response.status_code != 200:
+        if not book_list_response.ok:
             return []
 
         book_list_bs = BeautifulSoup(book_list_response.content.decode(), "html.parser")
@@ -65,7 +65,7 @@ class WdamBookImport:
         books = []
         threads = []
         for _ in range(self.thread_count):
-            t = Thread(target=self._get_next_book, args=(books, ))
+            t = Thread(target=self._get_next_book, args=(books,))
             threads.append(t)
             t.start()
 
@@ -129,7 +129,7 @@ class WdamBookImport:
                 span_text = span_tag.get_text()
                 title = title.replace(span_text, "")
 
-        return title.strip()
+        return title.strip() if title else None
 
 
 def main():
