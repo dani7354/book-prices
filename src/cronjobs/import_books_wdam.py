@@ -87,6 +87,7 @@ class WdamBookImport:
                 books.append(book)
 
     def _save_books_if_not_exist(self, books):
+        saved_count = 0
         existing_books_isbn = {b.isbn for b in self.db.get_books()}
         for b in books:
             if b.isbn in existing_books_isbn:
@@ -94,9 +95,11 @@ class WdamBookImport:
             try:
                 logging.debug(f"Saving book with ISBN {b.isbn}")
                 self.db.create_book(b)
+                saved_count += 1
             except Exception as ex:
                 logging.error(f"Error while inserting book: {b.title}, {b.author}, {b.isbn}")
                 logging.error(ex)
+        logging.info(f"{saved_count} new books saved!")
 
     def _parse_book(self, data: str) -> Book:
         data_bs = BeautifulSoup(data, "html.parser")

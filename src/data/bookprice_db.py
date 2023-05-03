@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from .base_db import BaseDb
 from .model import Book, BookStore, BookInBookStore, BookStoreSitemap, BookStoreBookPrice, BookPrice
 
@@ -7,8 +7,8 @@ class BookPriceDb(BaseDb):
     def create_book(self, book: Book) -> int:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = "INSERT INTO Book(Isbn, Title, Author) VALUES (%s, %s, %s);"
-                cursor.execute(query, (book.isbn, book.title, book.author))
+                query = "INSERT INTO Book(Isbn, Title, Author, Created) VALUES (%s, %s, %s, %s);"
+                cursor.execute(query, (book.isbn, book.title, book.author, datetime.utcnow()))
                 con.commit()
 
                 query = "SELECT LAST_INSERT_ID() as Id;"
@@ -32,13 +32,13 @@ class BookPriceDb(BaseDb):
     def get_books(self) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl "
+                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
                          "FROM Book "
                          "ORDER BY Title ASC;")
                 cursor.execute(query)
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"])
+                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
                     books.append(book)
 
                 return books
@@ -47,14 +47,14 @@ class BookPriceDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 phrase_with_wildcards = f"{search_phrase}%"
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl "
+                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Title LIKE %s OR Author LIKE %s OR Isbn = %s "
                          "ORDER BY Title ASC;")
                 cursor.execute(query, (phrase_with_wildcards, phrase_with_wildcards, search_phrase))
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"])
+                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
                     books.append(book)
 
                 return books
@@ -62,13 +62,13 @@ class BookPriceDb(BaseDb):
     def get_book(self, book_id: int) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl "
+                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_id,))
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"])
+                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
@@ -76,13 +76,13 @@ class BookPriceDb(BaseDb):
     def get_book_by_isbn(self, book_id: str) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl "
+                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Isbn = %s;")
                 cursor.execute(query, (book_id,))
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"])
+                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
