@@ -3,16 +3,13 @@ from bs4 import BeautifulSoup
 from threading import Thread
 import logging
 import shared
-import sys
-import os
 import requests
 import queue
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from configuration.config import ConfigLoader
-from data.bookprice_db import BookPriceDb
-from data.model import Book
-from tools import isbn_check
+from bookprices.shared.config import loader
+from bookprices.shared.db.book import BookDb
+from bookprices.shared.model.book import Book
+from bookprices.shared.validation import isbn
 
 
 URL = "https://www.williamdam.dk/boger-i-fokus?n=60"
@@ -27,7 +24,7 @@ THREAD_COUNT = 10
 
 
 class WdamBookImport:
-    def __init__(self, db: BookPriceDb, thread_count: int, book_list_url: str):
+    def __init__(self, db: BookDb, thread_count: int, book_list_url: str):
         self.db = db
         self.thread_count = thread_count
         self.book_list_url = book_list_url
@@ -119,7 +116,7 @@ class WdamBookImport:
 
     @staticmethod
     def _is_book_valid(book: Book) -> bool:
-        return book.author and book.title and isbn_check.check_isbn13(book.isbn)
+        return book.author and book.title and isbn.check_isbn13(book.isbn)
 
     @staticmethod
     def _parse_title(data_bs: BeautifulSoup) -> str:
@@ -137,13 +134,13 @@ class WdamBookImport:
 
 def main():
     args = shared.parse_arguments()
-    configuration = ConfigLoader.load(args.configuration)
+    configuration = loader.load(args.configuration)
     shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
-    books_db = BookPriceDb(configuration.database.db_host,
-                           configuration.database.db_port,
-                           configuration.database.db_user,
-                           configuration.database.db_password,
-                           configuration.database.db_name)
+    books_db = BookDb(configuration.database.db_host,
+                      configuration.database.db_port,
+                      configuration.database.db_user,
+                      configuration.database.db_password,
+                      configuration.database.db_name)
 
     book_import = WdamBookImport(books_db, THREAD_COUNT, URL)
     book_import.run()

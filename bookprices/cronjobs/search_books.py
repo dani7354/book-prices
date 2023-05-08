@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 import logging
-import os
 import shared
-import sys
 import collections
 from urllib.parse import urlparse
 from queue import Queue
 from threading import Thread
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from configuration.config import ConfigLoader
-from data.bookprice_db import BookPriceDb
-from book_source.web import SitemapBookFinder, WebsiteBookFinder
-from data.model import BookPrice, Book, BookStore
+from bookprices.shared.config import loader
+from bookprices.shared.db.book import BookDb
+from bookprices.shared.db.bookstore import BookStoreDb
+from bookprices.shared.webscraping.sitemap import SitemapBookFinder
+from bookprices.shared.webscraping.book import BookFinder
+from bookprices.shared.model.book import Book
+from bookprices.shared.model.bookprice import BookPrice
+from bookprices.shared.model.bookstore import BookStore
 
 
 LOG_FILE_NAME = "search_books.log"
@@ -22,15 +23,16 @@ BookStoresForBook = collections.namedtuple("BookStoresForBook", ["book", "book_s
 
 
 class BookStoreSearch:
-    def __init__(self, db: BookPriceDb, max_thread_count: int):
-        self.db = db
+    def __init__(self, book_db: BookDb, bookstore_db: BookStoreDb, max_thread_count: int):
+        self.book_db = book_db
+        self.bookstore_db = bookstore_db
         self.max_thread_count = max_thread_count
         self.book_queue = Queue()
 
     def _get_book_stores_for_book(self, book: Book):
         logging.info(f"Getting book stores with no information for book with id {book.id}...")
         book_stores = []
-        for book_store in self.db.get_missing_book_stores(book.id):
+        for book_store in self.bookstore_db.get_missing_book_stores(book.id):
             if book_store.search_url is not None:
                 book_stores.append(book_store)
 
@@ -55,7 +57,7 @@ class BookStoreSearch:
 
     def _create_book_store_for_book(self, book: Book, book_store: BookStore, url: str):
         try:
-            self.db.create_book_store_for_book(book.id, book_store.id, url)
+            self.bookstore_db.create_book_store_for_book(book.id, book_store.id, url)
         except Exception as ex:
             logging.error(f"Error while inserting url {url} for book {book.id} and book store {book_store.id}.")
             logging.error(ex)
@@ -64,9 +66,9 @@ class BookStoreSearch:
         while not self.book_queue.empty():
             book_stores_for_book = self.book_queue.get()
             for bs in book_stores_for_book.book_stores:
-                match_url = WebsiteBookFinder.search_book_isbn(bs.search_url,
-                                                               book_stores_for_book.book.isbn,
-                                                               bs.search_result_css_selector)
+                match_url = BookFinder.search_book_isbn(bs.search_url,
+                                                        book_stores_for_book.book.isbn,
+                                                        bs.search_result_css_selector)
 
                 if match_url:
                     logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id "
@@ -87,7 +89,7 @@ class BookStoreSearch:
         logging.info("Finished search!")
 
     def run(self):
-        books = self.db.get_books()
+        books = self.book_db.get_books()
         book_stores_for_books = self._get_book_stores_for_books(books)
         self._fill_queue(book_stores_for_books)
         self._start_search()
@@ -95,15 +97,21 @@ class BookStoreSearch:
 
 def main():
     args = shared.parse_arguments()
-    configuration = ConfigLoader.load(args.configuration)
+    configuration = loader.load(args.configuration)
     shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
-    books_db = BookPriceDb(configuration.database.db_host,
-                           configuration.database.db_port,
-                           configuration.database.db_user,
-                           configuration.database.db_password,
-                           configuration.database.db_name)
+    books_db = BookDb(configuration.database.db_host,
+                      configuration.database.db_port,
+                      configuration.database.db_user,
+                      configuration.database.db_password,
+                      configuration.database.db_name)
 
-    book_search = BookStoreSearch(books_db, MAX_THREADS)
+    bookstore_db = BookStoreDb(configuration.database.db_host,
+                               configuration.database.db_port,
+                               configuration.database.db_user,
+                               configuration.database.db_password,
+                               configuration.database.db_name)
+
+    book_search = BookStoreSearch(books_db, bookstore_db, MAX_THREADS)
     book_search.run()
 
 

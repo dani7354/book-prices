@@ -4,9 +4,10 @@ import logging
 import sys
 import os
 from datetime import date, timedelta
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from data.bookprice_db import BookPriceDb
-from configuration.config import ConfigLoader
+
+from bookprices.shared.db.bookprice import BookPriceDb
+from bookprices.shared.config import loader
+
 
 PRICE_MAX_AGE_DAYS = 30
 LOG_FILE_NAME = "delete_prices.log"
@@ -14,7 +15,7 @@ LOG_FILE_NAME = "delete_prices.log"
 
 def run():
     args = shared.parse_arguments()
-    configuration = ConfigLoader.load(args.configuration)
+    configuration = loader.load(args.configuration)
     shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
 
     logging.info("Config loaded!")

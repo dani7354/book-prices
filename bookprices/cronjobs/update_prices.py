@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 import logging
 import sys
-import shared
-import os
 from datetime import datetime, timezone
 from queue import Queue
 from threading import Thread
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from configuration.config import ConfigLoader
-from data.bookprice_db import BookPriceDb
-from data.model import BookPrice
-from book_source.web import WebshopPriceFinder
+
+import bookprices.cronjobs.shared as shared
+from bookprices.shared.config import loader
+from bookprices.shared.db.bookprice import BookPriceDb
+from bookprices.shared.db.bookstore import BookStoreDb
+from bookprices.shared.db.book import BookDb
+from bookprices.shared.model.bookprice import BookPrice
+from bookprices.shared.webscraping.price import PriceFinder
 
 MAX_THREAD_COUNT = 10
 LOG_FILE_NAME = "update_prices.log"
@@ -32,9 +33,9 @@ def get_updated_prices_for_book(book_stores: list) -> list:
             logging.debug(f"Getting price for book ID {book_in_store.book.id} at book store ID "
                           f"{book_in_store.book_store.id} (URL {full_url})")
 
-            new_price_value = WebshopPriceFinder.get_price(book_in_store.get_full_url(),
-                                                           book_in_store.book_store.price_css_selector,
-                                                           book_in_store.book_store.price_format)
+            new_price_value = PriceFinder.get_price(book_in_store.get_full_url(),
+                                                    book_in_store.book_store.price_css_selector,
+                                                    book_in_store.book_store.price_format)
 
             new_prices.append(BookPrice(0,
                                         book_in_store.book,
@@ -57,16 +58,28 @@ def get_updated_prices_for_books(book_stores_queue: Queue, updated_book_prices: 
 
 def run():
     args = shared.parse_arguments()
-    configuration = ConfigLoader.load(args.configuration)
+    configuration = loader.load(args.configuration)
     shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
 
     logging.info("Config loaded!")
     logging.info("Reading books from DB...")
-    books_db = BookPriceDb(configuration.database.db_host,
-                           configuration.database.db_port,
-                           configuration.database.db_user,
-                           configuration.database.db_password,
-                           configuration.database.db_name)
+    books_db = BookDb(configuration.database.db_host,
+                      configuration.database.db_port,
+                      configuration.database.db_user,
+                      configuration.database.db_password,
+                      configuration.database.db_name)
+
+    bookstore_db = BookStoreDb(configuration.database.db_host,
+                               configuration.database.db_port,
+                               configuration.database.db_user,
+                               configuration.database.db_password,
+                               configuration.database.db_name)
+
+    bookprice_db = BookPriceDb(configuration.database.db_host,
+                               configuration.database.db_port,
+                               configuration.database.db_user,
+                               configuration.database.db_password,
+                               configuration.database.db_name)
 
     books = books_db.get_books()
     logging.debug(f"{len(books)} books read.")
@@ -75,7 +88,7 @@ def run():
         sys.exit(0)
 
     logging.info("Reading book stores for books...")
-    book_store_data_by_book_id = books_db.get_book_stores_for_books(books)
+    book_store_data_by_book_id = bookstore_db.get_book_stores_for_books(books)
     books_with_store_count = len(book_store_data_by_book_id)
     logging.debug(f"Book stores found for {books_with_store_count} books.")
 
@@ -92,7 +105,7 @@ def run():
     [t.join() for t in threads]
 
     logging.info(f"Inserting {len(updated_book_prices)} prices to DB....")
-    books_db.create_prices(updated_book_prices)
+    bookprice_db.create_prices(updated_book_prices)
     logging.info(f"Prices inserted!")
 
 

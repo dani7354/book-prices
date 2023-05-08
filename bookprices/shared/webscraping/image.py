@@ -4,8 +4,8 @@ from queue import Queue
 import requests
 import os
 
+import bookprices.shared.webscraping.options as options
 
-BS_HTML_PARSER = "html.parser"
 HTML_SRC = "src"
 FALLBACK_FILE_EXT = ".file"
 
@@ -19,14 +19,13 @@ class ImageSource:
 
 
 class ImageDownloader:
-    file_extensions = {"image/jpg": ".jpg",
-                       "image/jpeg": ".jpeg",
-                       "image/png": ".png",
-                       "image/bmp": ".bmp"}
-
     def __init__(self, max_thread_count: int, location: str):
         self.max_thread_count = max_thread_count
         self.location = location
+        self.file_extensions = {"image/jpg": ".jpg",
+                                "image/jpeg": ".jpeg",
+                                "image/png": ".png",
+                                "image/bmp": ".bmp"}
 
     def download_images(self, image_sources: list) -> dict:
         image_source_queue = self._create_image_source_queue(image_sources)
@@ -61,7 +60,7 @@ class ImageDownloader:
         if page_response.status_code != 200:
             return None
 
-        page_content_bs = BeautifulSoup(page_response.content.decode(), BS_HTML_PARSER)
+        page_content_bs = BeautifulSoup(page_response.content.decode(), options.BS_HTML_PARSER)
         img_element = page_content_bs.select_one(image_source.image_css_selector)
         if img_element is None:
             return None

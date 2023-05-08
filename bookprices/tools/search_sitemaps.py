@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import argparse
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from configuration.config import ConfigLoader
-from book_source.web import SitemapBookFinder
-from data.bookprice_db import BookPriceDb
+
+from bookprices.shared.config import loader
+from bookprices.shared.webscraping.sitemap import SitemapBookFinder
+from bookprices.shared.db.bookstore import BookStoreDb
 
 MAX_THREAD_COUNT = 10
 
@@ -32,8 +30,8 @@ def search_sitemaps(sitemaps: list, words: list) -> list:
 
 def run():
     args = parse_arguments()
-    configuration = ConfigLoader.load(args.configuration)
-    books_db = BookPriceDb(configuration.database.db_host,
+    configuration = loader.load(args.configuration)
+    books_db = BookStoreDb(configuration.database.db_host,
                            configuration.database.db_port,
                            configuration.database.db_user,
                            configuration.database.db_password,
@@ -44,6 +42,7 @@ def run():
 
     for m in matches:
         print(m)
+
 
 if __name__ == "__main__":
     run()

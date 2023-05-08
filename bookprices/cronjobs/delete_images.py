@@ -4,9 +4,8 @@ import logging
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from data.bookprice_db import BookPriceDb
-from configuration.config import ConfigLoader
+from bookprices.shared.db.book import BookDb
+from bookprices.shared.config import loader
 
 
 DEFAULT_IMAGE_NAME = "default.png"
@@ -15,15 +14,15 @@ LOG_FILE_NAME = "delete_images.log"
 
 def main():
     args = shared.parse_arguments()
-    configuration = ConfigLoader.load(args.configuration)
+    configuration = loader.load(args.configuration)
     shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
 
     logging.info("Config loaded!")
-    books_db = BookPriceDb(configuration.database.db_host,
-                           configuration.database.db_port,
-                           configuration.database.db_user,
-                           configuration.database.db_password,
-                           configuration.database.db_name)
+    books_db = BookDb(configuration.database.db_host,
+                      configuration.database.db_port,
+                      configuration.database.db_user,
+                      configuration.database.db_password,
+                      configuration.database.db_name)
 
     logging.info("Unused book images will now be deleted.")
     logging.info("Getting image file names from database...")

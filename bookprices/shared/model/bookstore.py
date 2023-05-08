@@ -1,14 +1,5 @@
 import urllib.parse
-
-
-class Book:
-    def __init__(self, id: int, isbn: str, title: str, author: str, image_url: str | None, created: str | None = None):
-        self.id = id
-        self.isbn = isbn
-        self.title = title
-        self.author = author
-        self.image_url = image_url
-        self.created = created
+from bookprices.shared.model.book import Book
 
 
 class BookStore:
@@ -41,22 +32,6 @@ class BookInBookStore:
         return urllib.parse.urljoin(self.book_store.url, self.url)
 
 
-class BookPrice:
-    def __init__(self, id: int, book: Book, book_store: BookStore, price: float, created: str):
-        self.id = id
-        self.book = book
-        self.book_store = book_store
-        self.price = price
-        self.created = created
-
-
-class BookStoreSitemap:
-    def __init__(self, id: int, url: str, book_store: BookStore):
-        self.id = id
-        self.url = url
-        self.book_store = book_store
-
-
 class BookStoreBookPrice:
     def __init__(self,
                  id: int,
@@ -71,3 +46,10 @@ class BookStoreBookPrice:
         self.url = url
         self.price = price
         self.created = created
+
+
+class BookStoreSitemap:
+    def __init__(self, id: int, url: str, book_store: BookStore):
+        self.id = id
+        self.url = url
+        self.book_store = book_store
