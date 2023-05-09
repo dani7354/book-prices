@@ -8,9 +8,9 @@ services:
       dockerfile: docker/cronjob/Dockerfile
     image: dsp8ef9/bookprices_job:latest
     volumes:
-      - ./docker/cronjob/log:/usr/local/bookprices/cronjob/log
-      - ./docker/cronjob/config:/usr/local/bookprices/cronjob/config
-      - ./docker/cronjob/images:/usr/local/bookprices/cronjob/images
+      - ./docker/cronjob/log:/usr/local/bookprices_job/log
+      - ./docker/cronjob/config:/usr/local/bookprices_job/config
+      - ./docker/cronjob/images:/usr/local/bookprices_job/images
     networks:
       - localnetwork
   web:

@@ -8,7 +8,7 @@ def _load_from_json(file) -> dict:
 
 
 def load(file) -> Config:
-    json_content = cls._load_from_json(file)
+    json_content = _load_from_json(file)
     database_section = json_content["database"]
 
     return Config(Database(database_section["host"],

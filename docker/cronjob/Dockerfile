@@ -1,15 +1,17 @@
 FROM python:3.11-alpine
 
-WORKDIR /usr/local/bookprices
+WORKDIR /usr/local/bookprices_job
 
-COPY ./bookprices/cronjob ./cronjob
-COPY ./bookprices/shared ./shared
-COPY ./bookprices/tool ./tool
+COPY ./bookprices ./bookprices
 
-RUN pip install -r ./cronjob/requirements.txt
-RUN mkdir ./cronjob/config
+COPY ./setup.py setup.py
+COPY ./docker/cronjob/requirements.txt requirements.txt
+RUN pip install -e .
+RUN pip install -r requirements.txt
 
-RUN crontab ./cronjob/crontab
+RUN mkdir ./config
+
+RUN crontab ./bookprices/cronjob/crontab
 
 CMD ["crond", "-f"]
 

@@ -96,7 +96,7 @@ class WdamBookImport:
             except Exception as ex:
                 logging.error(f"Error while inserting book: {b.title}, {b.author}, {b.isbn}")
                 logging.error(ex)
-        logging.info(f"{saved_count} new books saved!")
+        logging.info(f"{saved_count} new book(s) saved!")
 
     def _parse_book(self, data: str) -> Book:
         data_bs = BeautifulSoup(data, "html.parser")

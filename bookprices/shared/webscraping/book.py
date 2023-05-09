@@ -1,6 +1,7 @@
 import requests
-import options
 from bs4 import BeautifulSoup
+
+import bookprices.shared.webscraping.options as options
 
 
 class BookFinder:

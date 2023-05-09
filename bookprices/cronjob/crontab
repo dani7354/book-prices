@@ -1,6 +1,6 @@
-0 */6 * * * python3 /usr/local/bookprices/cronjob/update_prices.py -c /usr/local/bookprices/cronjob/config/config.json
-0 0 * * * python3 /usr/local/bookprices/cronjob/delete_prices.py -c /usr/local/bookprices/cronjob/config/config.json
-5 10 * * 1 python3 /usr/local/bookprices/cronjob/delete_images.py -c /usr/local/bookprices/cronjob/config/config.json
-*/20 * * * * python3 /usr/local/bookprices/cronjob/download_images.py -c /usr/local/bookprices/cronjob/config/config.json
-0 2 * * * python3 /usr/local/bookprices/cronjob/import_books_wdam.py -c /usr/local/bookprices/cronjob/config/config.json
-0 3 * * * python3 /usr/local/bookprices/cronjob/search_books.py -c /usr/local/bookprices/cronjob/config/config.json
+0 */6 * * * python3 /usr/local/bookprices_job/bookprices/cronjob/update_prices.py -c /usr/local/bookprices_job/config/config.json
+0 0 * * * python3 /usr/local/bookprices_job/bookprices/cronjob/delete_prices.py -c /usr/local/bookprices_job/config/config.json
+5 10 * * 1 python3 /usr/local/bookprices_job/bookprices/cronjob/delete_images.py -c /usr/local/bookprices_job/config.json
+*/20 * * * * python3 /usr/local/bookprices_job/bookprices/cronjob/download_images.py -c /usr/local/bookprices_job/config/config.json
+0 2 * * * python3 /usr/local/bookprices_job/bookprices/cronjob/import_books_wdam.py -c /usr/local/bookprices_job/config/config.json
+0 3 * * * python3 /usr/local/bookprices_job/bookprices/cronjob/search_books.py -c /usr/local/bookprices_job/config/config.json
