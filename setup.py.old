@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name='bookprices',
-    version='',
+    version='1.0',
     packages=[
         'bookprices',
         'bookprices.web',
-        'bookprices.web.mapper',
         'bookprices.web.viewmodels',
+        'bookprices.web.mapper'
         'bookprices.tool',
         'bookprices.shared',
         'bookprices.shared.db',

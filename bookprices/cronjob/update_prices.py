@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from queue import Queue
 from threading import Thread
 
-import bookprices.cronjobs.shared as shared
+import bookprices.cronjob.shared as shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.bookprice import BookPriceDb
 from bookprices.shared.db.bookstore import BookStoreDb

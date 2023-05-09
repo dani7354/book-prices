@@ -2,24 +2,24 @@ version: "3.7"
 networks:
   localnetwork:
 services:
-  price_update:
+  job:
     build:
       context: ./
-      dockerfile: docker/cronjobs/Dockerfile
-    image: dsp8ef9/book_prices_update:latest
+      dockerfile: docker/cronjob/Dockerfile
+    image: dsp8ef9/bookprices_job:latest
     volumes:
-      - ./docker/cronjobs/log:/usr/local/book_prices/cronjobs/log
-      - ./docker/cronjobs/config:/usr/local/book_prices/cronjobs/config
-      - ./docker/cronjobs/images:/usr/local/book_prices/cronjobs/images
+      - ./docker/cronjob/log:/usr/local/bookprices/cronjob/log
+      - ./docker/cronjob/config:/usr/local/bookprices/cronjob/config
+      - ./docker/cronjob/images:/usr/local/bookprices/cronjob/images
     networks:
       - localnetwork
   web:
     build: 
       context: ./
       dockerfile: docker/web/Dockerfile
-    image: dsp8ef9/book_prices_web:latest
+    image: dsp8ef9/bookprices_web:latest
     volumes:
-      - ./docker/cronjobs/images:/usr/local/bookprices_web/web/static/images/books
+      - ./docker/cronjob/images:/usr/local/bookprices_web/bookprices/web/static/images/books
     env_file: ./docker/web/.web.env
     ports:
       - "8080:80"

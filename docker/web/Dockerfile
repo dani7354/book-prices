@@ -12,15 +12,17 @@ RUN service nginx restart
 WORKDIR /usr/local/bookprices_web
 
 # move application files
-COPY ./src/web web
-COPY ./src/data data
-COPY ./src/web/requirements.txt requirements.txt
-COPY ./docker/web/bookprices_web.ini web/bookprices_web.ini
+COPY ./bookprices ./bookprices
+COPY ./docker/web/bookprices_web.ini bookprices/web/bookprices_web.ini
+
 
 # install python dependencies
+COPY ./setup.py ./setup.py
+COPY ./docker/web/requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
+RUN pip3 install -e .
 
-WORKDIR /usr/local/bookprices_web/web
+WORKDIR /usr/local/bookprices_web/bookprices/web
 COPY ./docker/web/start.sh start.sh
 RUN chmod +x start.sh
 

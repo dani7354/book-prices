@@ -3,11 +3,11 @@ EXPOSE 5000
 
 WORKDIR /bookprices_web
 
-COPY ./src/web/requirements.txt requirements.txt
+COPY ./bookprices/web/requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-COPY ./src/web web
-COPY ./src/data data
+COPY ./bookprices/web web
+COPY ./bookprices/data data
 
 WORKDIR /bookprices_web/web
 
