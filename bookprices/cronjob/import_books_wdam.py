@@ -12,8 +12,6 @@ from bookprices.shared.model.book import Book
 from bookprices.shared.validation import isbn
 
 
-URL = "https://www.williamdam.dk/boger-i-fokus?n=60"
-
 BOOK_URL_CSS = "a.product-name"
 BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
@@ -22,12 +20,17 @@ AUTHOR_CSS = "h2.author span a"
 LOG_FILE_NAME = "import_wdam_books.log"
 THREAD_COUNT = 10
 
+list_urls = ["https://www.williamdam.dk/boger-i-fokus?n=60",
+             "https://www.williamdam.dk/boeger/--type_bog,sprog_dansk?n=60",
+             "https://www.williamdam.dk/boeger/skoenlitteratur-og-relaterede-emner/historiske-romaner/--type_bog,sprog"
+             "_dansk?orderby=release_date&orderway=desc&n=60"]
+
 
 class WdamBookImport:
-    def __init__(self, db: BookDb, thread_count: int, book_list_url: str):
+    def __init__(self, db: BookDb, thread_count: int, book_list_urls: list[str]):
         self.db = db
         self.thread_count = thread_count
-        self.book_list_url = book_list_url
+        self.book_list_urls = book_list_urls
         self.book_url_queue = queue.Queue()
 
     def run(self):
@@ -45,12 +48,15 @@ class WdamBookImport:
         logging.info("Done!")
 
     def _get_book_urls(self) -> list:
-        book_list_response = requests.get(self.book_list_url)
-        if not book_list_response.ok:
-            return []
+        book_urls = []
+        for list_url in self.book_list_urls:
+            book_list_response = requests.get(list_url)
+            if not book_list_response.ok:
+                continue
 
-        book_list_bs = BeautifulSoup(book_list_response.content.decode(), "html.parser")
-        book_urls = [t["href"] for t in book_list_bs.select(BOOK_URL_CSS)]
+            book_list_bs = BeautifulSoup(book_list_response.content.decode(), "html.parser")
+            book_urls_for_list = [t["href"] for t in book_list_bs.select(BOOK_URL_CSS)]
+            book_urls.extend(book_urls_for_list)
 
         return book_urls
 
@@ -142,7 +148,7 @@ def main():
                       configuration.database.db_password,
                       configuration.database.db_name)
 
-    book_import = WdamBookImport(books_db, THREAD_COUNT, URL)
+    book_import = WdamBookImport(books_db, THREAD_COUNT, list_urls)
     book_import.run()
 
 
