@@ -4,7 +4,7 @@ server {
     charset utf-8;
 
     location /static {
-        alias /usr/local/bookprices_web/web/static/;
+        alias /usr/local/bookprices_web/bookprices/web/static/;
     }
 
     location / {

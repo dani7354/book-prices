@@ -26,7 +26,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_web:latest
 
-  build_book_prices_update:
+  build_book_prices_job:
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -42,7 +42,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          file: docker/cronjobs/Dockerfile
+          file: docker/cronjob/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_update:latest
