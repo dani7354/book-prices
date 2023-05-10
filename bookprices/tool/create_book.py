@@ -5,8 +5,7 @@ from urllib.parse import urlparse
 
 from bookprices.shared.config import loader
 from bookprices.shared.webscraping.book import BookFinder
-from bookprices.shared.db.bookstore import BookStoreDb
-from bookprices.shared.db.book import BookDb
+from bookprices.shared.db.database import Database
 from bookprices.shared.model.book import Book
 from bookprices.shared.validation import isbn
 
@@ -43,23 +42,17 @@ def run():
         sys.exit(1)
 
     configuration = loader.load(args.configuration)
-    books_db = BookDb(configuration.database.db_host,
-                      configuration.database.db_port,
-                      configuration.database.db_user,
-                      configuration.database.db_password,
-                      configuration.database.db_name)
+    db = Database(configuration.database.db_host,
+                  configuration.database.db_port,
+                  configuration.database.db_user,
+                  configuration.database.db_password,
+                  configuration.database.db_name)
 
-    bookstore_db = BookStoreDb(configuration.database.db_host,
-                               configuration.database.db_port,
-                               configuration.database.db_user,
-                               configuration.database.db_password,
-                               configuration.database.db_name)
-
-    book = books_db.get_book_by_isbn(args.isbn)
+    book = db.book_db.get_book_by_isbn(args.isbn)
     if book is None:
         print(f"Creating new book: {args.title} by {args.author}...")
         book = Book(0, args.isbn, args.title, args.author, None)
-        book_id = books_db.create_book(book)
+        book_id = db.book_db.create_book(book)
         if book_id == -1:
             print("Failed to add book!")
             sys.exit(1)
@@ -70,7 +63,7 @@ def run():
         print(f"Book already exists with id {book.id}!")
 
     book_stores_website_search = []
-    for book_store in bookstore_db.get_missing_book_stores(book.id):
+    for book_store in db.bookstore_db.get_missing_book_stores(book.id):
         if book_store.search_url is not None:
             book_stores_website_search.append(book_store)
     if len(book_stores_website_search) == 0:
@@ -84,7 +77,7 @@ def run():
     print(f"Inserting {len(matches_from_websites)} URLs...")
     for store_id, url in matches_from_websites:
         try:
-            bookstore_db.create_book_store_for_book(book.id, store_id, url)
+            db.bookstore_db.create_book_store_for_book(book.id, store_id, url)
         except Exception as ex:
             print(f"Error while inserting url {url} for book {book.id} and book store {store_id}.")
             print(ex)
