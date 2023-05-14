@@ -44,15 +44,22 @@ class BookDb(BaseDb):
 
                 return books
 
-    def search_books(self, search_phrase: str) -> list:
+    def search_books(self, search_phrase: str, page: int, page_size: int) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 phrase_with_wildcards = f"{search_phrase}%"
                 query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Title LIKE %s OR Author LIKE %s OR Isbn = %s "
-                         "ORDER BY Title ASC;")
-                cursor.execute(query, (phrase_with_wildcards, phrase_with_wildcards, search_phrase))
+                         "ORDER BY Title ASC "
+                         "LIMIT %s "
+                         "OFFSET %s;")
+                offset = (page - 1) * page_size
+                cursor.execute(query, (phrase_with_wildcards,
+                                       phrase_with_wildcards,
+                                       search_phrase,
+                                       page_size,
+                                       offset))
                 books = []
                 for row in cursor:
                     book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
