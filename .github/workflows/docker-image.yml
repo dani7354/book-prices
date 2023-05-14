@@ -24,7 +24,7 @@ jobs:
           file: docker/web/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_web:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bookprices_web:latest
 
   build_book_prices_job:
     runs-on: ubuntu-latest
@@ -45,4 +45,4 @@ jobs:
           file: docker/cronjob/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/book_prices_update:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bookprices_cronjob:latest
