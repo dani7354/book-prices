@@ -26,7 +26,7 @@ services:
     networks:
       - localnetwork
   db:
-    image: mysql:8.0.30
+    image: mysql:8.0.33
     command: --default-authentication-plugin=caching_sha2_password
     restart: always
     env_file: ./docker/db/.db.env
