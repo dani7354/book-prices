@@ -23,8 +23,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def index() -> str:
-    search_phrase = request.args.get("search") if request.args.get("search") else ""
-    page = int(request.args.get("page")) if request.args.get("page") else 1
+    search_phrase = request.args.get("search", type=str, default="")
+    page = request.args.get("page", type=int, default=1)
     books = db.book_db.search_books(search_phrase, page, BOOK_PAGESIZE)
     vm = BookMapper.map_index_vm(books,
                                  search_phrase,
