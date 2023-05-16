@@ -13,12 +13,18 @@ class BookMapper:
     @classmethod
     def map_index_vm(cls,
                      books: list,
-                     search_phrase: str | None,
+                     search_phrase: str,
                      image_base_url: str,
-                     fallback_image: str) -> view_model.IndexViewModel:
-        search_phrase = "" if not search_phrase else search_phrase
+                     fallback_image: str,
+                     current_page: int,
+                     previous_page: int | None,
+                     next_page: int | None) -> view_model.IndexViewModel:
 
-        return view_model.IndexViewModel(cls.map_book_list(books, image_base_url, fallback_image), search_phrase)
+        return view_model.IndexViewModel(cls.map_book_list(books, image_base_url, fallback_image),
+                                         search_phrase,
+                                         current_page,
+                                         previous_page,
+                                         next_page)
 
     @classmethod
     def map_book_list(cls,
