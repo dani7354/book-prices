@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Bøger</h1>
-<form class="row g-3" method="get" enctype="application/x-www-form-urlencoded" action="/">
+<form action="/" class="row g-3" enctype="application/x-www-form-urlencoded" method="get">
     <div class="col-auto">
-        <input type="text" class="form-control" name="search" value="{{ view_model.search_phrase }}">
+        <input class="form-control" name="search" type="text" value="{{ view_model.search_phrase }}">
     </div>
     <div class="col-auto">
-        <button type="submit" class="btn btn-secondary mb-3">Søg</button>
+        <button class="btn btn-secondary mb-3" type="submit">Søg</button>
     </div>
 </form>
 
@@ -23,7 +23,7 @@
         <div class="card">
             {% if b.image_url %}
             <a href="{{ url_for('book', book_id=b.id) }}">
-                <img src="{{ b.image_url }}" class="card-img-top" alt="{{ b.title }}">
+                <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
             </a>
             {% endif %}
             <div class="card-body">
@@ -37,22 +37,22 @@
     {% endfor %}
 </div>
 <nav aria-label="Pagination">
-  <ul class="pagination">
-    <li class="{{ 'page-item' if view_model.previous_page else 'page-item disabled' }}">
-      <a class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.previous_page }}" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
-    </li>
-    <li class="page-item">
-      <a class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.current_page }}">
-        {{ view_model.current_page }}
-      </a>
-    </li>
-    <li class="{{ 'page-item' if view_model.next_page else 'page-item disabled' }}">
-      <a class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.next_page }}" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>
-  </ul>
+    <ul class="pagination">
+        <li class="{{ 'page-item' if view_model.previous_page else 'page-item disabled' }}">
+            <a aria-label="Previous" class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.previous_page }}">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.current_page }}">
+                {{ view_model.current_page }}
+            </a>
+        </li>
+        <li class="{{ 'page-item' if view_model.next_page else 'page-item disabled' }}">
+            <a aria-label="Next" class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.next_page }}">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
 </nav>
 {% endblock %}
