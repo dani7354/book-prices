@@ -49,7 +49,9 @@ class BookMapper:
                          book_prices: list[BookStoreBookPrice],
                          image_base_url: str,
                          fallback_image: str,
-                         index_url: str) -> view_model.BookDetailsViewModel:
+                         index_url: str,
+                         page: int | None,
+                         search_phrase: str | None) -> view_model.BookDetailsViewModel:
 
         book_price_view_models = []
         for bp in book_prices:
@@ -69,13 +71,19 @@ class BookMapper:
         else:
             book.image_url = os.path.join(image_base_url, fallback_image)
 
-        return view_model.BookDetailsViewModel(book, book_price_view_models, index_url)
+        return view_model.BookDetailsViewModel(book,
+                                               book_price_view_models,
+                                               index_url,
+                                               page,
+                                               search_phrase)
 
     @staticmethod
     def map_price_history(book_in_book_store: BookInBookStore,
-                          book_prices: list[BookPrice]) -> view_model.PriceHistoryViewModel:
+                          book_prices: list[BookPrice],
+                          return_url: str) -> view_model.PriceHistoryViewModel:
 
         return view_model.PriceHistoryViewModel(book_in_book_store.book,
                                                 book_in_book_store.book_store,
                                                 book_prices,
-                                                book_in_book_store.get_full_url())
+                                                book_in_book_store.get_full_url(),
+                                                return_url)

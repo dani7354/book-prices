@@ -22,6 +22,7 @@ db = database.Database(
     os.environ["MYSQL_DATABASE"])
 
 app = Flask(__name__)
+app.debug = os.environ.get("DEBUG", False)
 
 
 @app.route("/")
@@ -52,8 +53,8 @@ def book(book_id: int) -> str:
     if book is None:
         abort(NOT_FOUND)
 
-    page = request.args.get(PAGE_PARAMETER, type=int, default=1)
-    search_phrase = request.args.get(SEARCH_PARAMETER, type=str, default="")
+    page = request.args.get(PAGE_PARAMETER, type=int)
+    search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
     index_url = url_for("index", search=search_phrase, page=page)
 
     book_prices = db.bookprice_db.get_latest_prices(book.id)
@@ -61,9 +62,11 @@ def book(book_id: int) -> str:
                                                book_prices,
                                                BOOK_IMAGES_PATH,
                                                BOOK_FALLBACK_IMAGE_NAME,
-                                               index_url)
+                                               index_url,
+                                               page,
+                                               search_phrase)
 
-    return render_template("book.html", details=book_details)
+    return render_template("book.html", view_model=book_details)
 
 
 @app.route("/book/<int:book_id>/store/<int:store_id>")
@@ -76,8 +79,14 @@ def price_history(book_id: int, store_id: int) -> str:
     if book_in_book_store is None:
         abort(NOT_FOUND)
 
+    page = request.args.get(PAGE_PARAMETER, type=int)
+    search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
+    index_url = url_for("book", book_id=book_id, search=search_phrase, page=page)
+
     book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
-    price_history_view_model = BookMapper.map_price_history(book_in_book_store, book_prices)
+    price_history_view_model = BookMapper.map_price_history(book_in_book_store,
+                                                            book_prices,
+                                                            index_url)
 
     return render_template("price_history.html", view_model=price_history_view_model)
 
