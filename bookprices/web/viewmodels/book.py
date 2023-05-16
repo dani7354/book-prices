@@ -57,6 +57,10 @@ class IndexViewModel:
 
 
 class BookDetailsViewModel:
-    def __init__(self, book: Book, book_prices: list[BookPriceForStoreViewModel]):
+    def __init__(self,
+                 book: Book,
+                 book_prices: list[BookPriceForStoreViewModel],
+                 index_url: str):
         self.book = book
         self.book_prices = book_prices
+        self_index_url = index_url

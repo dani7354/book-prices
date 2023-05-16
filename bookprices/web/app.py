@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, url_for
 
 import bookprices.shared.db.database as database
 from bookprices.web.mapper.book import BookMapper
@@ -10,6 +10,9 @@ INTERNAL_SERVER_ERROR = 500
 BOOK_PAGESIZE = 12
 BOOK_IMAGES_PATH = "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
+
+SEARCH_PARAMETER = "search"
+PAGE_PARAMETER = "page"
 
 db = database.Database(
     os.environ["MYSQL_SERVER"],
@@ -23,8 +26,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def index() -> str:
-    search_phrase = request.args.get("search", type=str, default="")
-    page = request.args.get("page", type=int, default=1)
+    search_phrase = request.args.get(SEARCH_PARAMETER, type=str, default="")
+    page = request.args.get(PAGE_PARAMETER, type=int, default=1)
     page = page if page > 0 else 1
 
     books_current = db.book_db.search_books(search_phrase, page, BOOK_PAGESIZE)
@@ -49,11 +52,17 @@ def book(book_id: int) -> str:
     if book is None:
         abort(NOT_FOUND)
 
+    page = request.args.get(PAGE_PARAMETER, type=int, default=1)
+    search_phrase = request.args.get(SEARCH_PARAMETER, type=str, default="")
+
+    index_url = url_for("index", search=search_phrase, page=page)
+
     book_prices = db.bookprice_db.get_latest_prices(book.id)
     book_details = BookMapper.map_book_details(book,
                                                book_prices,
                                                BOOK_IMAGES_PATH,
-                                               BOOK_FALLBACK_IMAGE_NAME)
+                                               BOOK_FALLBACK_IMAGE_NAME,
+                                               index_url)
 
     return render_template("book.html", details=book_details)
 
@@ -85,4 +94,4 @@ def not_found(error):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(host="0.0.0.0", port=3031)
