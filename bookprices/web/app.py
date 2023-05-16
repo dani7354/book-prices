@@ -7,6 +7,7 @@ from bookprices.web.mapper.book import BookMapper
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
 
+BOOK_PAGESIZE = 12
 BOOK_IMAGES_PATH = "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
 
@@ -22,12 +23,22 @@ app = Flask(__name__)
 
 @app.route("/")
 def index() -> str:
-    search_phrase = request.args.get("search")
-    books = db.book_db.get_books() if search_phrase is None else db.book_db.search_books(search_phrase)
-    vm = BookMapper.map_index_vm(books,
+    search_phrase = request.args.get("search", type=str, default="")
+    page = request.args.get("page", type=int, default=1)
+    page = page if page > 0 else 1
+
+    books_current = db.book_db.search_books(search_phrase, page, BOOK_PAGESIZE)
+    books_next = db.book_db.search_books(search_phrase, page + 1, BOOK_PAGESIZE)
+    next_page = page + 1 if len(books_next) > 0 else None
+    previous_page = page - 1 if page >= 2 else None
+
+    vm = BookMapper.map_index_vm(books_current,
                                  search_phrase,
                                  BOOK_IMAGES_PATH,
-                                 BOOK_FALLBACK_IMAGE_NAME)
+                                 BOOK_FALLBACK_IMAGE_NAME,
+                                 page,
+                                 previous_page,
+                                 next_page)
 
     return render_template("index.html", view_model=vm)
 

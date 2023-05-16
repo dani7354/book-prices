@@ -1,31 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Bøger</h1>
-<form class="row g-3" method="get" enctype="application/x-www-form-urlencoded" action="/">
+<form action="/" class="row g-3" enctype="application/x-www-form-urlencoded" method="get">
     <div class="col-auto">
-        <input type="text" class="form-control" name="search" value="{{ view_model.search_phrase }}">
+        <input class="form-control" name="search" type="text" value="{{ view_model.search_phrase }}">
     </div>
     <div class="col-auto">
-        <button type="submit" class="btn btn-secondary mb-3">Søg</button>
+        <button class="btn btn-secondary mb-3" type="submit">Søg</button>
     </div>
 </form>
 
-<div class="row row-cols-1 row-cols-md-4 g-4">
+<div class="row row-cols-1 row-cols-md-4 g-4 pb-5">
+    {% if view_model.book_list|length == 0 %}
+     <div class="col">
+        <h3>Ingen bøger fundet</h3>
+        <p>Prøv en anden titel eller forfatter</p>
+     </div>
+    {% endif %}
+
     {% for b in view_model.book_list %}
     <div class="col">
         <div class="card">
             {% if b.image_url %}
             <a href="{{ url_for('book', book_id=b.id) }}">
-                <img src="{{ b.image_url }}" class="card-img-top" alt="{{ b.title }}">
+                <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
             </a>
             {% endif %}
             <div class="card-body">
-                <h5 class="card-title"><a class="link-secondary" href="{{ url_for('book', book_id=b.id) }}">{{ b.title
-                    }}</a></h5>
+                <h5 class="card-title">
+                    <a class="link-secondary" href="{{ url_for('book', book_id=b.id) }}">{{ b.title }}</a>
+                </h5>
                 <p class="card-text">{{ b.author }}</p>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        <li class="{{ 'page-item' if view_model.previous_page else 'page-item disabled' }}">
+            <a aria-label="Previous" class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.previous_page }}">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.current_page }}">
+                {{ view_model.current_page }}
+            </a>
+        </li>
+        <li class="{{ 'page-item' if view_model.next_page else 'page-item disabled' }}">
+            <a aria-label="Next" class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.next_page }}">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
 {% endblock %}

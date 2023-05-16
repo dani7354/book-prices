@@ -43,9 +43,17 @@ class PriceHistoryViewModel:
 
 
 class IndexViewModel:
-    def __init__(self, book_list: list[BookListItemViewModel], search_phrase: str):
+    def __init__(self,
+                 book_list: list[BookListItemViewModel],
+                 search_phrase: str,
+                 current_page: int,
+                 previous_page: int | None,
+                 next_page: int | None):
         self.book_list = book_list
         self.search_phrase = search_phrase
+        self.current_page = current_page
+        self.previous_page = previous_page
+        self.next_page = next_page
 
 
 class BookDetailsViewModel:
