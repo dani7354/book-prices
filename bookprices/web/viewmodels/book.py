@@ -34,12 +34,14 @@ class PriceHistoryViewModel:
                  book: Book,
                  book_store: BookStore,
                  book_prices: list[BookPrice],
-                 url: str):
+                 store_url: str,
+                 return_url: str):
 
         self.book = book
         self.book_store = book_store
         self.book_prices = book_prices
-        self.url = url
+        self.store_url = store_url
+        self.return_url = return_url
 
 
 class IndexViewModel:
@@ -57,6 +59,14 @@ class IndexViewModel:
 
 
 class BookDetailsViewModel:
-    def __init__(self, book: Book, book_prices: list[BookPriceForStoreViewModel]):
+    def __init__(self,
+                 book: Book,
+                 book_prices: list[BookPriceForStoreViewModel],
+                 return_url: str,
+                 page: int | None,
+                 search_phrase: str | None):
         self.book = book
         self.book_prices = book_prices
+        self.return_url = return_url
+        self.page = page
+        self.search_phrase = search_phrase

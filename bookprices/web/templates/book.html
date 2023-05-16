@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <p class="text-muted">
-    <a class="link-secondary text-decoration-none" href="{{ url_for('index') }}">
+    <a class="link-secondary text-decoration-none" href="{{ view_model.return_url }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up"
              viewBox="0 0 16 16">
             <path fill-rule="evenodd"
@@ -12,22 +12,22 @@
 </p>
 
 <h3 class="pb-4">
-    {{ details.book.title }}
-    <small class="text-muted">af {{ details.book.author }}</small>
+    {{ view_model.book.title }}
+    <small class="text-muted">af {{ view_model.book.author }}</small>
 </h3>
 <div class="container pb-4">
     <div class="row">
         <div class="col-4">
-            {% if details.book.image_url %}
+            {% if view_model.book.image_url %}
             <div class="text-center">
-                <img src="{{ details.book.image_url }}" class="img-fluid rounded" alt="{{ details.book.title }}">
+                <img src="{{ view_model.book.image_url }}" class="img-fluid rounded" alt="{{ view_model.book.title }}">
             </div>
             {% endif %}
         </div>
         <div class="col">
-            <p><strong>Titel:</strong> {{ details.book.title }}</p>
-            <p><strong>Forfatter(e):</strong> {{ details.book.author }}</p>
-            <p><strong>ISBN:</strong> {{ details.book.isbn }}</p>
+            <p><strong>Titel:</strong> {{ view_model.book.title }}</p>
+            <p><strong>Forfatter(e):</strong> {{ view_model.book.author }}</p>
+            <p><strong>ISBN:</strong> {{ view_model.book.isbn }}</p>
         </div>
     </div>
 </div>
@@ -43,14 +43,16 @@
     </tr>
     </thead>
     <tbody>
-    {% for p in details.book_prices %}
+    {% for p in view_model.book_prices %}
     <tr>
         <td>{{ p.book_store_name }}</td>
         <td>{{ p.price }}</td>
         <td>{{ p.created }}</td>
         <td>
             {% if p.is_price_available %}
-            <a href="{{ url_for('price_history', book_id=details.book.id, store_id=p.book_store_id) }}">Prisudvikling</a>
+            <a href="{{ url_for('price_history', book_id=view_model.book.id, store_id=p.book_store_id, search=view_model.search_phrase, page=view_model.page) }}">
+                Prisudvikling
+            </a>
             {% else %}
             <u class="text-muted">Prisudvikling</u>
             {% endif %}

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, url_for
 
 import bookprices.shared.db.database as database
 from bookprices.web.mapper.book import BookMapper
@@ -11,6 +11,9 @@ BOOK_PAGESIZE = 12
 BOOK_IMAGES_PATH = "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
 
+SEARCH_PARAMETER = "search"
+PAGE_PARAMETER = "page"
+
 db = database.Database(
     os.environ["MYSQL_SERVER"],
     os.environ["MYSQL_SERVER_PORT"],
@@ -19,12 +22,13 @@ db = database.Database(
     os.environ["MYSQL_DATABASE"])
 
 app = Flask(__name__)
+app.debug = os.environ.get("DEBUG", False)
 
 
 @app.route("/")
 def index() -> str:
-    search_phrase = request.args.get("search", type=str, default="")
-    page = request.args.get("page", type=int, default=1)
+    search_phrase = request.args.get(SEARCH_PARAMETER, type=str, default="")
+    page = request.args.get(PAGE_PARAMETER, type=int, default=1)
     page = page if page > 0 else 1
 
     books_current = db.book_db.search_books(search_phrase, page, BOOK_PAGESIZE)
@@ -49,13 +53,20 @@ def book(book_id: int) -> str:
     if book is None:
         abort(NOT_FOUND)
 
+    page = request.args.get(PAGE_PARAMETER, type=int)
+    search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
+    index_url = url_for("index", search=search_phrase, page=page)
+
     book_prices = db.bookprice_db.get_latest_prices(book.id)
     book_details = BookMapper.map_book_details(book,
                                                book_prices,
                                                BOOK_IMAGES_PATH,
-                                               BOOK_FALLBACK_IMAGE_NAME)
+                                               BOOK_FALLBACK_IMAGE_NAME,
+                                               index_url,
+                                               page,
+                                               search_phrase)
 
-    return render_template("book.html", details=book_details)
+    return render_template("book.html", view_model=book_details)
 
 
 @app.route("/book/<int:book_id>/store/<int:store_id>")
@@ -68,8 +79,14 @@ def price_history(book_id: int, store_id: int) -> str:
     if book_in_book_store is None:
         abort(NOT_FOUND)
 
+    page = request.args.get(PAGE_PARAMETER, type=int)
+    search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
+    index_url = url_for("book", book_id=book_id, search=search_phrase, page=page)
+
     book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
-    price_history_view_model = BookMapper.map_price_history(book_in_book_store, book_prices)
+    price_history_view_model = BookMapper.map_price_history(book_in_book_store,
+                                                            book_prices,
+                                                            index_url)
 
     return render_template("price_history.html", view_model=price_history_view_model)
 
@@ -85,4 +102,4 @@ def not_found(error):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(host="0.0.0.0", port=3031)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <p class="text-muted">
-    <a class="link-secondary text-decoration-none" href="{{ url_for('book', book_id=view_model.book.id) }}">
+    <a class="link-secondary text-decoration-none" href="{{ view_model.return_url }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up"
              viewBox="0 0 16 16">
             <path fill-rule="evenodd"
@@ -10,7 +10,7 @@
         <span>Tilbage til {{ view_model.book.title }}</span>
     </a>
 </p>
-<h3>Prishistorik for <a class="link-secondary" href="{{ view_model.url }}">{{ view_model.book.title }} hos {{
+<h3>Prishistorik for <a class="link-secondary" href="{{ view_model.store_url }}">{{ view_model.book.title }} hos {{
     view_model.book_store.name }}</a></h3>
 <table class="table">
     <thead>
