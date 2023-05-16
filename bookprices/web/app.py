@@ -54,7 +54,6 @@ def book(book_id: int) -> str:
 
     page = request.args.get(PAGE_PARAMETER, type=int, default=1)
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str, default="")
-
     index_url = url_for("index", search=search_phrase, page=page)
 
     book_prices = db.bookprice_db.get_latest_prices(book.id)

@@ -63,4 +63,4 @@ class BookDetailsViewModel:
                  index_url: str):
         self.book = book
         self.book_prices = book_prices
-        self_index_url = index_url
+        self.index_url = index_url
