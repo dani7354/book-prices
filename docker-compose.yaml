@@ -18,11 +18,21 @@ services:
       context: ./
       dockerfile: docker/web/Dockerfile
     image: dsp8ef9/bookprices_web:latest
-    volumes:
-      - ./docker/cronjob/images:/usr/local/bookprices_web/bookprices/web/static/images/books
     env_file: ./docker/web/.web.env
     ports:
+      - "3031:3031"
+    networks:
+      - localnetwork
+  nginx:
+    build:
+      context: ./
+      dockerfile: docker/nginx/Dockerfile
+    image: dsp8ef9/bookprices_nginx:latest
+    ports:
       - "8080:80"
+    volumes:
+      - ./docker/cronjob/images:/usr/share/nginx/html/static/images:ro
+      - ./bookprices/web/assets:/usr/share/nginx/html/static/assets:ro
     networks:
       - localnetwork
   db:

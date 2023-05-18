@@ -1,14 +1,13 @@
 FROM python:3.11.2-slim-bullseye
 EXPOSE 80
 
-RUN apt-get update && apt-get install -y nginx build-essential
+RUN apt-get update && apt-get install -y build-essential
 
 # Configure nginx
+#COPY ./docker/web/nginx/bookprices /etc/nginx/sites-available/default
+#COPY ./docker/web/nginx/uwsgi_params /etc/nginx/uwsgi_params
+#RUN service nginx restart
 RUN adduser --no-create-home bookprices
-COPY ./docker/web/nginx/bookprices /etc/nginx/sites-available/default
-COPY ./docker/web/nginx/uwsgi_params /etc/nginx/uwsgi_params
-RUN service nginx restart
-
 WORKDIR /usr/local/bookprices_web
 
 # move application files
