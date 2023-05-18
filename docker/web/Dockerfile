@@ -1,12 +1,8 @@
 FROM python:3.11.2-slim-bullseye
-EXPOSE 80
+EXPOSE 3031
 
 RUN apt-get update && apt-get install -y build-essential
 
-# Configure nginx
-#COPY ./docker/web/nginx/bookprices /etc/nginx/sites-available/default
-#COPY ./docker/web/nginx/uwsgi_params /etc/nginx/uwsgi_params
-#RUN service nginx restart
 RUN adduser --no-create-home bookprices
 WORKDIR /usr/local/bookprices_web
 
