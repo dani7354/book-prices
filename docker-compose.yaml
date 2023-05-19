@@ -34,7 +34,6 @@ services:
       - "8080:80"
     volumes:
       - ./docker/cronjob/images:/usr/share/nginx/html/static/images/books:ro
-      - ./bookprices/web/assets:/usr/share/nginx/html/static/assets:ro
     depends_on:
       - web
     networks:
