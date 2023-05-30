@@ -46,7 +46,7 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bookprices_cronjob:latest
-          
+
   build_book_prices_nginx:
     runs-on: ubuntu-latest
     steps:
