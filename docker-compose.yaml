@@ -1,8 +1,9 @@
-version: "3.7"
+version: "3.9"
 networks:
   localnetwork:
 services:
   job:
+    container_name: job
     build:
       context: ./
       dockerfile: docker/cronjob/Dockerfile
@@ -14,18 +15,31 @@ services:
     networks:
       - localnetwork
   web:
+    container_name: web
     build: 
       context: ./
       dockerfile: docker/web/Dockerfile
     image: dsp8ef9/bookprices_web:latest
-    volumes:
-      - ./docker/cronjob/images:/usr/local/bookprices_web/bookprices/web/static/images/books
     env_file: ./docker/web/.web.env
+    networks:
+      - localnetwork
+  nginx:
+    container_name: nginx
+    restart: always
+    build:
+      context: ./
+      dockerfile: docker/nginx/Dockerfile
+    image: dsp8ef9/bookprices_nginx:latest
     ports:
       - "8080:80"
+    volumes:
+      - ./docker/cronjob/images:/usr/share/nginx/html/static/images/books:ro
+    depends_on:
+      - web
     networks:
       - localnetwork
   db:
+    container_name: db
     image: mysql:8.0.33
     command: --default-authentication-plugin=caching_sha2_password
     restart: always
