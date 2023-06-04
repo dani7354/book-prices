@@ -31,8 +31,10 @@ services:
       dockerfile: docker/nginx/Dockerfile
     image: dsp8ef9/bookprices_nginx:latest
     ports:
-      - "8080:80"
+      - "80:80"
+      - "443:443"
     volumes:
+      - ./docker/nginx/tls:/etc/nginx/tls:ro
       - ./docker/cronjob/images:/usr/share/nginx/html/static/images/books:ro
     depends_on:
       - web
