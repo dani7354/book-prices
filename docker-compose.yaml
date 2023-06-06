@@ -10,7 +10,7 @@ services:
     image: dsp8ef9/bookprices_job:latest
     volumes:
       - ./docker/cronjob/log:/usr/local/bookprices_job/log
-      - ./docker/cronjob/config:/usr/local/bookprices_job/config
+      - ./docker/cronjob/config:/usr/local/bookprices_job/config:ro
       - ./docker/cronjob/images:/usr/local/bookprices_job/images
     networks:
       - localnetwork
@@ -31,8 +31,10 @@ services:
       dockerfile: docker/nginx/Dockerfile
     image: dsp8ef9/bookprices_nginx:latest
     ports:
-      - "8080:80"
+      - "80:80"
+      - "443:443"
     volumes:
+      - ./docker/nginx/tls:/etc/nginx/tls:ro
       - ./docker/cronjob/images:/usr/share/nginx/html/static/images/books:ro
     depends_on:
       - web
@@ -48,6 +50,6 @@ services:
       - "3306:3306"
     volumes:
       - ./docker/db/data:/var/lib/mysql
-      - ./docker/db/init:/docker-entrypoint-initdb.d
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
     networks:
       - localnetwork

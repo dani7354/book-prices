@@ -1,12 +1,11 @@
 venv/
 test/
-
 bookprices.egg-info/
-
 docker/db/
 docker/cronjob/images/
 docker/cronjob/config/
 docker/cronjob/log/
+docker/nginx/tls/
 .vscode/
 .idea/
 .DS_Store
