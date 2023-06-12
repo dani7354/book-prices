@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import shared
 import logging
-import sys
-import os
 from datetime import date, timedelta
 
 from bookprices.shared.db.bookprice import BookPriceDb
