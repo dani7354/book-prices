@@ -8,6 +8,7 @@ docker/cronjob/log/
 docker/nginx/tls/
 .vscode/
 .idea/
+.pytest_cache/
 .DS_Store
 *.pyc
 *.log
