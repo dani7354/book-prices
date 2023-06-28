@@ -64,7 +64,7 @@ def test_deletes_only_unused_images(books, images, tmpdir):
 def test_excludes_default_image_from_deletion(books, images, tmpdir):
     mock_db = BookDb("", "", "", "", "")
     mock_db.get_books = MagicMock(return_value=[])
-    with open(os.path.join(tmpdir.strpath,DEFAULT_IMAGE_NAME), "wb") as default_image_file:
+    with open(os.path.join(tmpdir.strpath, DEFAULT_IMAGE_NAME), "wb") as default_image_file:
         default_image_file.write(b"\x00" * 1000)
 
     job = DeleteImagesJob(mock_db, tmpdir.strpath)
