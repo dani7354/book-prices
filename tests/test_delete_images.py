@@ -1,8 +1,7 @@
 import os
 import shutil
-from unittest.mock import MagicMock
-
 import pytest
+from unittest.mock import MagicMock
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.model.book import Book
 from bookprices.cronjob.delete_images import DeleteImagesJob, DEFAULT_IMAGE_NAME
