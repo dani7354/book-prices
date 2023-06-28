@@ -1,15 +1,56 @@
 #!/usr/bin/env python3
-import shared
 import logging
-import sys
 import os
-
+from bookprices.shared.db.database import Database
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.config import loader
+import bookprices.cronjob.shared as shared
 
 
 DEFAULT_IMAGE_NAME = "default.png"
 LOG_FILE_NAME = "delete_images.log"
+
+
+class DeleteImagesJob:
+    def __init__(self, books_db: BookDb, image_folder: str):
+        self.books_db = books_db
+        self.image_folder = image_folder
+
+    def run(self):
+        images_from_db = self._get_image_filenames_from_db()
+        if not images_from_db:
+            logging.info("No book images to check!")
+            return
+
+        images_from_folder = self._get_image_filenames_from_folder()
+        if not images_from_folder:
+            logging.info("No image files in folder!")
+            return
+
+        images_to_delete = images_from_folder.difference(images_from_db)
+        if not images_to_delete:
+            logging.info("No image files to delete!")
+            return
+
+        logging.info(f"{len(images_to_delete)} image files will be deleted.")
+        self._delete_files(images_to_delete)
+
+    def _get_image_filenames_from_db(self) -> set[str]:
+        filenames = [b.image_url for b in self.books_db.get_books() if b.image_url]
+        filenames.append(DEFAULT_IMAGE_NAME)
+
+        return set(filenames)
+
+    def _get_image_filenames_from_folder(self) -> set[str]:
+        return set(os.listdir(self.image_folder))
+
+    def _delete_files(self, files: set):
+        for file in files:
+            try:
+                os.remove(os.path.join(self.image_folder, file))
+            except FileNotFoundError as ex:
+                logging.error(f"{file} blev ikke fundet i {self.image_folder}")
+                logging.error(ex)
 
 
 def main():
@@ -18,41 +59,13 @@ def main():
     shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
 
     logging.info("Config loaded!")
-    books_db = BookDb(configuration.database.db_host,
-                      configuration.database.db_port,
-                      configuration.database.db_user,
-                      configuration.database.db_password,
-                      configuration.database.db_name)
+    books_db = Database(configuration.database.db_host,
+                        configuration.database.db_port,
+                        configuration.database.db_user,
+                        configuration.database.db_password,
+                        configuration.database.db_name)
 
-    logging.info("Unused book images will now be deleted.")
-    logging.info("Getting image file names from database...")
-    all_books = books_db.get_books()
-    image_filenames_db = [DEFAULT_IMAGE_NAME]
-    for b in all_books:
-        if b.image_url:
-            image_filenames_db.append(b.image_url)
-
-    if len(image_filenames_db) == 0:
-        logging.info("No book images to check!")
-        sys.exit(0)
-
-    image_filenames_db = set(image_filenames_db)
-    logging.debug(f"Got {len(image_filenames_db)} images!")
-
-    image_files = set(os.listdir(configuration.imgdir))
-    if len(image_files) == 0:
-        logging.info("No image files in folder!")
-        sys.exit(0)
-
-    files_to_delete = image_files.difference(image_filenames_db)
-    logging.info(f"{len(files_to_delete)} image files will be deleted.")
-
-    for file in files_to_delete:
-        file_path = os.path.join(configuration.imgdir, file)
-        logging.debug(f"Deleting image file: {file_path}")
-        os.remove(file_path)
-
-    logging.info("Done!")
+    DeleteImagesJob(books_db.book_db, configuration.imgdir).run()
 
 
 if __name__ == "__main__":
