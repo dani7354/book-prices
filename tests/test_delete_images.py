@@ -62,7 +62,7 @@ def test_deletes_only_unused_images(books, images, tmpdir):
     assert books[1].image_url not in images_left
 
 
-def test_exclude_default_image_from_deletion(books, images, tmpdir):
+def test_excludes_default_image_from_deletion(books, images, tmpdir):
     mock_db = BookDb("", "", "", "", "")
     mock_db.get_books = MagicMock(return_value=[])
     with open(os.path.join(tmpdir.strpath,DEFAULT_IMAGE_NAME), "wb") as default_image_file:
