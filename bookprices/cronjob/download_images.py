@@ -10,12 +10,14 @@ from bookprices.shared.db.database import Database
 from bookprices.shared.model.book import Book
 from bookprices.shared.webscraping.image import ImageDownloader, ImageSource
 
+
 MAX_THREAD_COUNT = 10
 LOG_FILE_NAME = "download_images.log"
 
 
 class DownloadImagesJob:
-    def __init__(self, db: Database,
+    def __init__(self,
+                 db: Database,
                  image_downloader: ImageDownloader,
                  image_folder: str,
                  max_thread_count: int):

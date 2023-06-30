@@ -41,7 +41,7 @@ class ImageDownloader:
 
     def _get_image_name(self, filename_base: str, location: str, headers) -> str:
         content_type = headers.get("Content-Type")
-        extension = self.file_extensions[content_type] if content_type in self.file_extensions else FALLBACK_FILE_EXT
+        extension = self.file_extensions.get(content_type, FALLBACK_FILE_EXT)
         filename = f"{filename_base}{extension}"
 
         return os.path.join(location, filename)

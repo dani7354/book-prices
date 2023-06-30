@@ -5,14 +5,11 @@ import collections
 from urllib.parse import urlparse
 from queue import Queue
 from threading import Thread
-
 from bookprices.shared.config import loader
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.db.bookstore import BookStoreDb
-from bookprices.shared.webscraping.sitemap import SitemapBookFinder
 from bookprices.shared.webscraping.book import BookFinder
 from bookprices.shared.model.book import Book
-from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookStore
 
 
