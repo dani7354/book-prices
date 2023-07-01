@@ -2,6 +2,7 @@
 import logging
 from urllib.parse import urlparse
 from queue import Queue
+import sys
 from threading import Thread
 from typing import NamedTuple
 from bookprices.cronjob import shared
@@ -103,21 +104,25 @@ class BookStoreSearch:
 
 
 def main():
-    args = shared.parse_arguments()
-    configuration = loader.load(args.configuration)
-    shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
-    logging.info("Config loaded!")
+    try:
+        args = shared.parse_arguments()
+        configuration = loader.load(args.configuration)
+        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
+        logging.info("Config loaded!")
 
-    logging.info("Starting book search...")
-    db = Database(configuration.database.db_host,
-                  configuration.database.db_port,
-                  configuration.database.db_user,
-                  configuration.database.db_password,
-                  configuration.database.db_name)
+        logging.info("Starting book search...")
+        db = Database(configuration.database.db_host,
+                      configuration.database.db_port,
+                      configuration.database.db_user,
+                      configuration.database.db_password,
+                      configuration.database.db_name)
 
-    book_search = BookStoreSearch(db, shared.THREAD_COUNT)
-    book_search.run()
-    logging.info("Done!")
+        book_search = BookStoreSearch(db, shared.THREAD_COUNT)
+        book_search.run()
+        logging.info("Done!")
+    except Exception as ex:
+        logging.error(f"Error downloading images: {ex}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

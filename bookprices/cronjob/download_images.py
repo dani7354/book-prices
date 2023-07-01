@@ -11,7 +11,6 @@ from bookprices.shared.model.book import Book
 from bookprices.shared.webscraping.image import ImageDownloader, ImageSource
 
 
-MAX_THREAD_COUNT = 10
 LOG_FILE_NAME = "download_images.log"
 
 
@@ -114,7 +113,7 @@ def main():
                       configuration.database.db_name)
 
         image_downloader = ImageDownloader(configuration.imgdir)
-        download_images_job = DownloadImagesJob(db, image_downloader, configuration.imgdir, MAX_THREAD_COUNT)
+        download_images_job = DownloadImagesJob(db, image_downloader, configuration.imgdir, shared.THREAD_COUNT)
         download_images_job.run()
     except Exception as ex:
         logging.error(f"Error downloading images: {ex}")

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import requests
+import sys
 import queue
 from bs4 import BeautifulSoup
 from threading import Thread
@@ -137,17 +138,21 @@ class WdamBookImport:
 
 
 def main():
-    args = shared.parse_arguments()
-    configuration = loader.load(args.configuration)
-    shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
-    books_db = BookDb(configuration.database.db_host,
-                      configuration.database.db_port,
-                      configuration.database.db_user,
-                      configuration.database.db_password,
-                      configuration.database.db_name)
+    try:
+        args = shared.parse_arguments()
+        configuration = loader.load(args.configuration)
+        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
+        books_db = BookDb(configuration.database.db_host,
+                          configuration.database.db_port,
+                          configuration.database.db_user,
+                          configuration.database.db_password,
+                          configuration.database.db_name)
 
-    book_import = WdamBookImport(books_db, shared.THREAD_COUNT, list_urls)
-    book_import.run()
+        book_import = WdamBookImport(books_db, shared.THREAD_COUNT, list_urls)
+        book_import.run()
+    except Exception as ex:
+        logging.error(f"Failed to import books: {ex}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
