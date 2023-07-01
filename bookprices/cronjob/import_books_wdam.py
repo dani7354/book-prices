@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-from bs4 import BeautifulSoup
-from threading import Thread
 import logging
-import shared
 import requests
 import queue
-
+from bs4 import BeautifulSoup
+from threading import Thread
+from bookprices.cronjob import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.model.book import Book
@@ -18,7 +17,6 @@ TITLE_CSS = "h1"
 AUTHOR_CSS = "h2.author span a"
 
 LOG_FILE_NAME = "import_wdam_books.log"
-THREAD_COUNT = 10
 
 list_urls = ["https://www.williamdam.dk/boger-i-fokus?n=60",
              "https://www.williamdam.dk/boeger/--type_bog,sprog_dansk?n=60",
@@ -148,7 +146,7 @@ def main():
                       configuration.database.db_password,
                       configuration.database.db_name)
 
-    book_import = WdamBookImport(books_db, THREAD_COUNT, list_urls)
+    book_import = WdamBookImport(books_db, shared.THREAD_COUNT, list_urls)
     book_import.run()
 
 
