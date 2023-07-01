@@ -16,9 +16,7 @@ BOOK_URL_CSS = "a.product-name"
 BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
 AUTHOR_CSS = "h2.author span a"
-
 LOG_FILE_NAME = "import_wdam_books.log"
-
 list_urls = ["https://www.williamdam.dk/boger-i-fokus?n=60",
              "https://www.williamdam.dk/boeger/--type_bog,sprog_dansk?n=60",
              "https://www.williamdam.dk/boeger/skoenlitteratur-og-relaterede-emner/historiske-romaner/--type_bog,sprog"

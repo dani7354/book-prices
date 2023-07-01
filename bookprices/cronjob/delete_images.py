@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import logging
 import os
+from bookprices.cronjob import shared
 from bookprices.shared.db.database import Database
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.config import loader
-import bookprices.cronjob.shared as shared
 
 
 DEFAULT_IMAGE_NAME = "default.png"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import shared
 import logging
 from datetime import date, timedelta
+from bookprices.cronjob import shared
 from bookprices.shared.db.database import Database
 from bookprices.shared.db.bookprice import BookPriceDb
 from bookprices.shared.config import loader
