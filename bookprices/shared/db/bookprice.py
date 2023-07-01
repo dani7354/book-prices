@@ -1,5 +1,4 @@
 from datetime import date
-
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.book import Book
@@ -62,10 +61,15 @@ class BookPriceDb(BaseDb):
     def get_book_prices_for_store(self, book: Book, book_store: BookStore) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT MAX(Id) as Id, MAX(Price) as Price, DATE(Created) as Created "
+                query = ("With LatestPrices as ( "
+                         "SELECT MAX(Id) as Id "
                          "FROM BookPrice bp "
                          "WHERE bp.BookId = %s AND bp.BookStoreId = %s "
-                         "GROUP BY DATE(Created) "
+                         "GROUP BY DATE(Created))"
+                         " "
+                         "SELECT bp.Id, bp.Price, DATE(bp.Created) as Created "
+                         "FROM BookPrice bp "
+                         "INNER JOIN LatestPrices lp ON bp.Id = lp.Id "
                          "ORDER BY Created DESC;")
 
                 cursor.execute(query, (book.id, book_store.id))

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+import logging
+import requests
+import sys
+import queue
 from bs4 import BeautifulSoup
 from threading import Thread
-import logging
-import shared
-import requests
-import queue
-
+from bookprices.cronjob import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.model.book import Book
@@ -16,10 +16,7 @@ BOOK_URL_CSS = "a.product-name"
 BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
 AUTHOR_CSS = "h2.author span a"
-
 LOG_FILE_NAME = "import_wdam_books.log"
-THREAD_COUNT = 10
-
 list_urls = ["https://www.williamdam.dk/boger-i-fokus?n=60",
              "https://www.williamdam.dk/boeger/--type_bog,sprog_dansk?n=60",
              "https://www.williamdam.dk/boeger/skoenlitteratur-og-relaterede-emner/historiske-romaner/--type_bog,sprog"
@@ -139,17 +136,21 @@ class WdamBookImport:
 
 
 def main():
-    args = shared.parse_arguments()
-    configuration = loader.load(args.configuration)
-    shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
-    books_db = BookDb(configuration.database.db_host,
-                      configuration.database.db_port,
-                      configuration.database.db_user,
-                      configuration.database.db_password,
-                      configuration.database.db_name)
+    try:
+        args = shared.parse_arguments()
+        configuration = loader.load(args.configuration)
+        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
+        books_db = BookDb(configuration.database.db_host,
+                          configuration.database.db_port,
+                          configuration.database.db_user,
+                          configuration.database.db_password,
+                          configuration.database.db_name)
 
-    book_import = WdamBookImport(books_db, THREAD_COUNT, list_urls)
-    book_import.run()
+        book_import = WdamBookImport(books_db, shared.THREAD_COUNT, list_urls)
+        book_import.run()
+    except Exception as ex:
+        logging.error(f"Failed to import books: {ex}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@
 import argparse
 import sys
 from urllib.parse import urlparse
-
 from bookprices.shared.config import loader
 from bookprices.shared.webscraping.book import BookFinder
 from bookprices.shared.db.database import Database
@@ -35,7 +34,7 @@ def search_website(book_stores: list, isbn: str) -> list:
     return matches
 
 
-def run():
+def main():
     args = parse_arguments()
     if not isbn.check_isbn13(args.isbn):
         print(f"{args.isbn} not valid")
@@ -87,4 +86,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    main()

@@ -4,6 +4,9 @@ import logging
 import os
 
 
+THREAD_COUNT = 10
+
+
 def parse_arguments() -> Namespace:
     parser = ArgumentParser()
     parser.add_argument("-c", "--configuration", dest="configuration", type=str, required=True)

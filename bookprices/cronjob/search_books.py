@@ -1,38 +1,36 @@
 #!/usr/bin/env python3
 import logging
-import shared
-import collections
 from urllib.parse import urlparse
 from queue import Queue
+import sys
 from threading import Thread
-
+from typing import NamedTuple
+from bookprices.cronjob import shared
 from bookprices.shared.config import loader
-from bookprices.shared.db.book import BookDb
-from bookprices.shared.db.bookstore import BookStoreDb
-from bookprices.shared.webscraping.sitemap import SitemapBookFinder
+from bookprices.shared.db.database import Database
 from bookprices.shared.webscraping.book import BookFinder
 from bookprices.shared.model.book import Book
-from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookStore
 
 
 LOG_FILE_NAME = "search_books.log"
-MAX_THREADS = 10
 
-BookStoresForBook = collections.namedtuple("BookStoresForBook", ["book", "book_stores"])
+
+class BookStoresForBook(NamedTuple):
+    book: Book
+    book_stores: list[BookStore]
 
 
 class BookStoreSearch:
-    def __init__(self, book_db: BookDb, bookstore_db: BookStoreDb, max_thread_count: int):
-        self.book_db = book_db
-        self.bookstore_db = bookstore_db
-        self.max_thread_count = max_thread_count
+    def __init__(self, db: Database, thread_count: int):
+        self.db = db
+        self.thread_count = thread_count
         self.book_queue = Queue()
 
     def _get_book_stores_for_book(self, book: Book):
         logging.info(f"Getting book stores with no information for book with id {book.id}...")
         book_stores = []
-        for book_store in self.bookstore_db.get_missing_book_stores(book.id):
+        for book_store in self.db.bookstore_db.get_missing_book_stores(book.id):
             if book_store.search_url is not None:
                 book_stores.append(book_store)
 
@@ -57,31 +55,33 @@ class BookStoreSearch:
 
     def _create_book_store_for_book(self, book: Book, book_store: BookStore, url: str):
         try:
-            self.bookstore_db.create_book_store_for_book(book.id, book_store.id, url)
+            self.db.bookstore_db.create_book_store_for_book(book.id, book_store.id, url)
         except Exception as ex:
             logging.error(f"Error while inserting url {url} for book {book.id} and book store {book_store.id}.")
             logging.error(ex)
 
-    def _search_for_next_book(self):
+    def _search_books(self):
         while not self.book_queue.empty():
             book_stores_for_book = self.book_queue.get()
-            for bs in book_stores_for_book.book_stores:
-                match_url = BookFinder.search_book_isbn(bs.search_url,
+            for bookstore in book_stores_for_book.book_stores:
+                match_url = BookFinder.search_book_isbn(bookstore.search_url,
                                                         book_stores_for_book.book.isbn,
-                                                        bs.search_result_css_selector)
+                                                        bookstore.search_result_css_selector)
 
-                if match_url:
-                    logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id "
-                                 f"{bs.id}: {match_url}")
-                    self._create_book_store_for_book(book_stores_for_book.book,
-                                                     bs,
-                                                     urlparse(match_url).path)
+                if not match_url:
+                    continue
+
+                logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id "
+                             f"{bookstore.id}: {match_url}")
+                self._create_book_store_for_book(book_stores_for_book.book,
+                                                 bookstore,
+                                                 urlparse(match_url).path)
 
     def _start_search(self):
-        logging.info(f"Starting search with {self.max_thread_count} threads...")
+        logging.info(f"Starting search with {self.thread_count} threads...")
         threads = []
-        for _ in range(self.max_thread_count):
-            t = Thread(target=self._search_for_next_book())
+        for _ in range(self.thread_count):
+            t = Thread(target=self._search_books())
             threads.append(t)
             t.start()
 
@@ -89,30 +89,40 @@ class BookStoreSearch:
         logging.info("Finished search!")
 
     def run(self):
-        books = self.book_db.get_books()
+        books = self.db.book_db.get_books()
+        if not books:
+            logging.info("No books found!")
+            return
+
         book_stores_for_books = self._get_book_stores_for_books(books)
+        if not book_stores_for_books:
+            logging.info("No book stores found for the existing books!")
+            return
+
         self._fill_queue(book_stores_for_books)
         self._start_search()
 
 
 def main():
-    args = shared.parse_arguments()
-    configuration = loader.load(args.configuration)
-    shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
-    books_db = BookDb(configuration.database.db_host,
+    try:
+        args = shared.parse_arguments()
+        configuration = loader.load(args.configuration)
+        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
+        logging.info("Config loaded!")
+
+        logging.info("Starting book search...")
+        db = Database(configuration.database.db_host,
                       configuration.database.db_port,
                       configuration.database.db_user,
                       configuration.database.db_password,
                       configuration.database.db_name)
 
-    bookstore_db = BookStoreDb(configuration.database.db_host,
-                               configuration.database.db_port,
-                               configuration.database.db_user,
-                               configuration.database.db_password,
-                               configuration.database.db_name)
-
-    book_search = BookStoreSearch(books_db, bookstore_db, MAX_THREADS)
-    book_search.run()
+        book_search = BookStoreSearch(db, shared.THREAD_COUNT)
+        book_search.run()
+        logging.info("Done!")
+    except Exception as ex:
+        logging.error(f"Error downloading images: {ex}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
