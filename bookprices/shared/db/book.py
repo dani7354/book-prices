@@ -9,7 +9,7 @@ class BookDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = "INSERT INTO Book(Isbn, Title, Author, Created) VALUES (%s, %s, %s, %s);"
-                cursor.execute(query, (book.isbn, book.title, book.author, datetime.utcnow()))
+                cursor.execute(query, (book.isbn, book.title, book.author, datetime.now()))
                 con.commit()
 
                 query = "SELECT LAST_INSERT_ID() as Id;"

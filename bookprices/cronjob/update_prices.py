@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from queue import Queue
 from threading import Thread
 from bookprices.cronjob import shared
@@ -67,7 +67,7 @@ class PriceUpdateJob:
                                             book_in_store.book,
                                             book_in_store.book_store,
                                             new_price_value,
-                                            datetime.now(timezone.utc).isoformat()))
+                                            datetime.now().isoformat()))
             except Exception as ex:
                 logging.error(f"Failed get updated price from {full_url}")
                 logging.error(f"Exception: {ex}")
