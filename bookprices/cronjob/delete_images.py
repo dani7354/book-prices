@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import os
+import sys
 from bookprices.cronjob import shared
 from bookprices.shared.db.database import Database
 from bookprices.shared.db.book import BookDb
@@ -54,18 +55,23 @@ class DeleteImagesJob:
 
 
 def main():
-    args = shared.parse_arguments()
-    configuration = loader.load(args.configuration)
-    shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
+    try:
+        args = shared.parse_arguments()
+        configuration = loader.load(args.configuration)
+        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
+        logging.info("Config loaded!")
 
-    logging.info("Config loaded!")
-    books_db = Database(configuration.database.db_host,
-                        configuration.database.db_port,
-                        configuration.database.db_user,
-                        configuration.database.db_password,
-                        configuration.database.db_name)
+        books_db = Database(configuration.database.db_host,
+                            configuration.database.db_port,
+                            configuration.database.db_user,
+                            configuration.database.db_password,
+                            configuration.database.db_name)
 
-    DeleteImagesJob(books_db.book_db, configuration.imgdir).run()
+        delete_images_job = DeleteImagesJob(books_db.book_db, configuration.imgdir)
+        delete_images_job.run()
+    except Exception as ex:
+        logging.error(f"Failed to delete images: {ex}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

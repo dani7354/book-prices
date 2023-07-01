@@ -22,9 +22,9 @@ class BookStoresForBook(NamedTuple):
 
 
 class BookStoreSearch:
-    def __init__(self, db: Database, max_thread_count: int):
+    def __init__(self, db: Database, thread_count: int):
         self.db = db
-        self.max_thread_count = max_thread_count
+        self.thread_count = thread_count
         self.book_queue = Queue()
 
     def _get_book_stores_for_book(self, book: Book):
@@ -78,9 +78,9 @@ class BookStoreSearch:
                                                  urlparse(match_url).path)
 
     def _start_search(self):
-        logging.info(f"Starting search with {self.max_thread_count} threads...")
+        logging.info(f"Starting search with {self.thread_count} threads...")
         threads = []
-        for _ in range(self.max_thread_count):
+        for _ in range(self.thread_count):
             t = Thread(target=self._search_books())
             threads.append(t)
             t.start()

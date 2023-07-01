@@ -93,7 +93,7 @@ def main():
         price_update_job.run()
     except Exception as ex:
         logging.error(f"An error occurred while updating prices!")
-        logging.error(f"Exception: {ex}")
+        logging.error(ex)
         sys.exit(1)
 
 
