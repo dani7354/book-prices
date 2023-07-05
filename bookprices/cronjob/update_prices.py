@@ -9,7 +9,7 @@ from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookInBookStore
-from bookprices.shared.webscraping.price import PriceFinder
+from bookprices.shared.webscraping.price import PriceFinder, PriceNotFoundException
 
 
 LOG_FILE_NAME = "update_prices.log"
@@ -68,9 +68,8 @@ class PriceUpdateJob:
                                             book_in_store.book_store,
                                             new_price_value,
                                             datetime.now().isoformat()))
-            except Exception as ex:
-                logging.error(f"Failed get updated price from {full_url}")
-                logging.error(f"Exception: {ex}")
+            except PriceNotFoundException as ex:
+                logging.error(ex)
 
         logging.info(f"Saving {len(new_prices)} new prices")
         self._db.bookprice_db.create_prices(new_prices)

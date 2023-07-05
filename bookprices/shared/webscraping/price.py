@@ -18,7 +18,7 @@ class PriceFinder:
             response = requests.get(url)
             response.raise_for_status()
         except HTTPError as ex:
-            raise PriceNotFoundException(ex)
+            raise PriceNotFoundException(f"Something went wrong while trying to reach {url}: {ex}")
 
         price = cls._parse_price(response.content.decode(), price_css_path, price_format)
 
