@@ -1,6 +1,6 @@
 setuptools~=65.5.1
 mysql-connector-python~=8.0.33
-requests~=2.28.2
+requests~=2.31.0
 bs4~=0.0.1
 beautifulsoup4~=4.11.2
 flask==2.2.5
