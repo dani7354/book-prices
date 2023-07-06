@@ -76,11 +76,96 @@
 
     </header>
     <main>
-        {% block content %}{% endblock %}
+
+<p class="text-muted">
+    <a class="link-secondary text-decoration-none" href="/?search=&amp;page=4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up"
+             viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+                  d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"></path>
+        </svg>
+        <span>Tilbage til oversigt</span>
+    </a>
+</p>
+
+<h3 class="pb-4">
+    Den svenske konges hemmelige marmeladeopskrift
+    <small class="text-muted">af Knud Romer</small>
+</h3>
+<div class="container pb-4">
+    <div class="row">
+        <div class="col-4">
+
+            <div class="text-center">
+                <img src="/static/images/books/121.jpg" class="img-fluid rounded" alt="Den svenske konges hemmelige marmeladeopskrift">
+            </div>
+
+        </div>
+        <div class="col">
+            <p><strong>Titel:</strong> Den svenske konges hemmelige marmeladeopskrift</p>
+            <p><strong>Forfatter(e):</strong> Knud Romer</p>
+            <p><strong>ISBN:</strong> 9788711553060</p>
+        </div>
+    </div>
+</div>
+
+<h4>Seneste priser</h4>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Butik</th>
+        <th scope="col">Pris</th>
+        <th scope="col">Hentet</th>
+        <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr>
+        <td>Saxo</td>
+        <td>229.0</td>
+        <td>2023-07-05 18:00:06</td>
+        <td>
+
+            <a href="/book/121/store/1?search=&amp;page=4">
+                Prisudvikling
+            </a>
+
+            <a href="">Link</a>
+        </td>
+    </tr>
+
+    <tr>
+        <td>William Dam</td>
+        <td>229.0 DKK</td>
+        <td>2023-07-05 18:00:08</td>
+        <td>
+
+            <a href="/book/121/store/2?search=&amp;page=4">
+                Prisudvikling
+            </a>
+
+            <a href="">Link</a>
+        </td>
+    </tr>
+    <tr>
+        <td>William Dam</td>
+        <td>229,-</td>
+        <td>2023-07-05 18:00:08</td>
+        <td>
+
+            <a href="/book/121/store/2?search=&amp;page=4">
+                Prisudvikling
+            </a>
+
+            <a href="">Link</a>
+        </td>
+    </tr>
+
+    </tbody>
+</table>
+
     </main>
-    <footer class="pt-5 my-5 text-muted border-top">
-        Lavet af Daniel S. &middot; &copy; 2023
-    </footer>
 </div>
 <script src="/static/assets/js/bootstrap.bundle.js"></script>
 </body>
