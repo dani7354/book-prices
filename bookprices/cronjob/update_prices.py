@@ -71,6 +71,10 @@ class PriceUpdateJob:
             except PriceNotFoundException as ex:
                 logging.error(ex)
 
+        if not new_prices:
+            logging.warning(f"No new prices found for book!")
+            return
+
         logging.info(f"Saving {len(new_prices)} new prices")
         self._db.bookprice_db.create_prices(new_prices)
 
