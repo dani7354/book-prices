@@ -1,11 +1,15 @@
 from bs4 import BeautifulSoup
 import requests
+from requests.exceptions import HTTPError
 from urllib.parse import urlparse, urljoin
 import os
 import bookprices.shared.webscraping.options as options
 
 HTML_SRC = "src"
-FALLBACK_FILE_EXT = ".file"
+
+
+class ImageNotDownloadedException(Exception):
+    pass
 
 
 class ImageSource:
@@ -36,19 +40,25 @@ class ImageDownloader:
         return image_filename
 
     def _get_image(self, filename_base: str, url: str) -> str:
-        image_response = requests.get(url)
-        image_response.raise_for_status()
-        image_file_path = self._get_image_name(filename_base, self._location, image_response.headers)
+        try:
+            image_response = requests.get(url)
+            image_response.raise_for_status()
+            image_file_path = self._get_image_name(filename_base, self._location, image_response.headers)
 
-        with open(image_file_path, "wb") as image:
-            image.write(image_response.content)
+            with open(image_file_path, "wb") as image:
+                image.write(image_response.content)
+        except HTTPError as ex:
+            raise ImageNotDownloadedException(f"Failed to download image from {url}: {ex}")
 
         return image_file_path
 
     def _get_image_name(self, filename_base: str, location: str, headers) -> str:
-        content_type = headers.get("Content-Type")
-        extension = self._file_extensions.get(content_type, FALLBACK_FILE_EXT)
-        filename = f"{filename_base}{extension}"
+        try:
+            content_type = headers["Content-Type"]
+            extension = self._file_extensions[content_type]
+            filename = f"{filename_base}{extension}"
+        except KeyError as ex:
+            raise ImageNotDownloadedException(f"Image format not supported: {ex}")
 
         return os.path.join(location, filename)
 
@@ -65,9 +75,16 @@ class ImageDownloader:
 
     @staticmethod
     def _get_image_url_from_page(image_source: ImageSource) -> str:
-        page_response = requests.get(image_source.page_url)
-        page_response.raise_for_status()
-        page_content_bs = BeautifulSoup(page_response.content.decode(), options.BS_HTML_PARSER)
-        img_element = page_content_bs.select_one(image_source.image_css_selector)
+        try:
+            page_response = requests.get(image_source.page_url)
+            page_response.raise_for_status()
+            page_content_bs = BeautifulSoup(page_response.content.decode(), options.BS_HTML_PARSER)
+            img_element = page_content_bs.select_one(image_source.image_css_selector)
+            url = img_element[HTML_SRC]
+        except HTTPError as ex:
+            raise ImageNotDownloadedException(f"Failed to connect to {image_source.page_url}: {ex}")
+        except KeyError as ex:
+            raise ImageNotDownloadedException(f"Failed to parse url from HTML element {image_source.image_css_selector}: "
+                                              f"{ex}")
 
-        return img_element.get(HTML_SRC)
+        return url

@@ -8,7 +8,7 @@ from bookprices.cronjob import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.book import Book
-from bookprices.shared.webscraping.image import ImageDownloader, ImageSource
+from bookprices.shared.webscraping.image import ImageDownloader, ImageSource, ImageNotDownloadedException
 
 
 LOG_FILE_NAME = "download_images.log"
@@ -93,8 +93,8 @@ class DownloadImagesJob:
             try:
                 image = self.image_downloader.download_image(image_source)
                 self.image_filenames[image_source.book_id] = image
-            except Exception as ex:
-                logging.error(f"Error downloading image for book {image_source.book_id}: {ex}")
+            except ImageNotDownloadedException as ex:
+                logging.error(ex)
                 continue
 
 
