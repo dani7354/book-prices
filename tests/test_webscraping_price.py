@@ -11,7 +11,7 @@ from bookprices.shared.webscraping.price import PriceFinder, PriceNotFoundExcept
                           (".table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2)", r"\d+"),
                           (".table > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(2)", r"\d+\.\d+")])
 def test_get_price_value_without_currency(monkeypatch, css_selector, value_format):
-    monkeypatch.setattr(requests, "get", shared.mock_get)
+    monkeypatch.setattr(requests, "get", shared.mock_get_price)
 
     price_finder = PriceFinder()
     price = price_finder.get_price("http://fake.com",
@@ -27,7 +27,7 @@ def test_get_price_value_without_currency(monkeypatch, css_selector, value_forma
                           (".table > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(2)", None),
                           (".table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2)", None)])
 def test_get_price_raise_price_not_found(monkeypatch, css_selector, value_format):
-    monkeypatch.setattr(requests, "get", shared.mock_get)
+    monkeypatch.setattr(requests, "get", shared.mock_get_price)
 
     price_finder = PriceFinder()
 
