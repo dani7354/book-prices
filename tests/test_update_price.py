@@ -36,7 +36,7 @@ def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
     db.bookstore_db.get_book_stores_for_books = MagicMock(return_value=books_in_bookstore)
     db.book_db.get_books = MagicMock(return_value=[MagicMock()])
     db.bookprice_db.create_prices = MagicMock()
-    monkeypatch.setattr(requests, "get", shared.mock_get)
+    monkeypatch.setattr(requests, "get", shared.mock_get_price)
 
     job = PriceUpdateJob(db, thread_count=1)
     job.run()
@@ -51,7 +51,7 @@ def test_updates_prices_doesnt_save_if_no_prices_found(monkeypatch, books_in_boo
     db.bookstore_db.get_book_stores_for_books = MagicMock(return_value={1: [], 2: []})
     db.book_db.get_books = MagicMock(return_value=[MagicMock(), MagicMock()])
     db.bookprice_db.create_prices = MagicMock()
-    monkeypatch.setattr(requests, "get", shared.mock_get)
+    monkeypatch.setattr(requests, "get", shared.mock_get_price)
 
     job = PriceUpdateJob(db, thread_count=1)
     job.run()

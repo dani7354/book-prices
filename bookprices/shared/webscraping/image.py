@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+from urllib.parse import urlparse, urljoin
 import os
 import bookprices.shared.webscraping.options as options
 
@@ -14,25 +15,30 @@ class ImageSource:
         self.image_css_selector = image_css_selector
         self.new_image_filename = new_image_filename
 
+    def get_base_url(self) -> str:
+        parsed_url = urlparse(self.page_url)
+        return f"{parsed_url.scheme}://{parsed_url.netloc}"
+
 
 class ImageDownloader:
     def __init__(self, location: str):
-        self.location = location
-        self.file_extensions = {"image/jpg": ".jpg",
-                                "image/jpeg": ".jpeg",
-                                "image/png": ".png",
-                                "image/bmp": ".bmp"}
+        self._location = location
+        self._file_extensions = {"image/jpg": ".jpg",
+                                 "image/jpeg": ".jpeg",
+                                 "image/png": ".png",
+                                 "image/bmp": ".bmp"}
 
     def download_image(self, image_source: ImageSource) -> str:
         image_url = self._get_image_url_from_page(image_source)
-        image_filename = self._get_image(image_source.new_image_filename, image_url)
+        valid_url = self._get_valid_url(image_url, image_source)
+        image_filename = self._get_image(image_source.new_image_filename, valid_url)
 
         return image_filename
 
     def _get_image(self, filename_base: str, url: str) -> str:
         image_response = requests.get(url)
         image_response.raise_for_status()
-        image_file_path = self._get_image_name(filename_base, self.location, image_response.headers)
+        image_file_path = self._get_image_name(filename_base, self._location, image_response.headers)
 
         with open(image_file_path, "wb") as image:
             image.write(image_response.content)
@@ -41,10 +47,21 @@ class ImageDownloader:
 
     def _get_image_name(self, filename_base: str, location: str, headers) -> str:
         content_type = headers.get("Content-Type")
-        extension = self.file_extensions.get(content_type, FALLBACK_FILE_EXT)
+        extension = self._file_extensions.get(content_type, FALLBACK_FILE_EXT)
         filename = f"{filename_base}{extension}"
 
         return os.path.join(location, filename)
+
+    @staticmethod
+    def _get_valid_url(url: str, image_source: ImageSource) -> str:
+        parsed_url = urlparse(url)
+        if not parsed_url.netloc:
+            return urljoin(image_source.get_base_url(), url)
+        if not parsed_url.scheme:
+            scheme = urlparse(image_source.get_base_url()).scheme
+            return urljoin(f"{scheme}://", url)
+
+        return url
 
     @staticmethod
     def _get_image_url_from_page(image_source: ImageSource) -> str:
