@@ -3,3 +3,4 @@ flask==2.2.5
 mysql-connector-python==8.0.32
 requests==2.31.0
 uWSGI==2.0.21
+matplotlib==3.7.2
