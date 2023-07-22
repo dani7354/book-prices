@@ -84,12 +84,8 @@ def price_history(book_id: int, store_id: int) -> str:
     index_url = url_for("book", book_id=book_id, search=search_phrase, page=page)
 
     book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
-    dates, prices = [], []
-    for book_price in book_prices:
-        dates.append(book_price.created)
-        prices.append(book_price.price)
-
-    price_history_plot = PriceHistory(dates, prices, book_in_book_store.book_store.name)
+    prices_by_date = {p.created: p.price for p in book_prices}
+    price_history_plot = PriceHistory(prices_by_date, book_in_book_store.book_store.name)
     plot_base64 = price_history_plot.get_plot_base64()
 
     price_history_view_model = BookMapper.map_price_history(book_in_book_store,
