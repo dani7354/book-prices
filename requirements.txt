@@ -5,5 +5,4 @@ bs4~=0.0.1
 beautifulsoup4~=4.11.2
 flask==2.2.5
 pytest~=7.3.2
-bookprices~=1.0
 matplotlib~=3.7.2
