@@ -14,7 +14,7 @@ class PriceHistory:
     def _plot(self) -> bytes:
         figure = Figure(figsize=(10, 5))
         subplot = figure.subplots()
-        subplot.plot(self._prices_by_date.keys(), self._prices_by_date.values(), "o-r")
+        subplot.plot(self._prices_by_date.keys(), self._prices_by_date.values(), "o-r", label=self._title)
 
         subplot.tick_params(axis='x', rotation=90)
         subplot.set_xticks(list(self._prices_by_date.keys()))
