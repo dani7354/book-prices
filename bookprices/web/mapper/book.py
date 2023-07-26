@@ -80,10 +80,12 @@ class BookMapper:
     @staticmethod
     def map_price_history(book_in_book_store: BookInBookStore,
                           book_prices: list[BookPrice],
-                          return_url: str) -> view_model.PriceHistoryViewModel:
+                          return_url: str,
+                          plot_base64: str) -> view_model.PriceHistoryViewModel:
 
         return view_model.PriceHistoryViewModel(book_in_book_store.book,
                                                 book_in_book_store.book_store,
                                                 book_prices,
+                                                plot_base64,
                                                 book_in_book_store.get_full_url(),
                                                 return_url)

@@ -27,7 +27,7 @@ class BookPriceDb(BaseDb):
                 cursor.execute(query, (str(earliest_date),))
                 con.commit()
 
-    def get_latest_prices(self, book_id: int) -> list:
+    def get_latest_prices(self, book_id: int) -> list[BookStoreBookPrice]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("With LatestPrice as ( "
@@ -58,7 +58,7 @@ class BookPriceDb(BaseDb):
                                                                      row["Created"]))
                 return latest_prices_for_book
 
-    def get_book_prices_for_store(self, book: Book, book_store: BookStore) -> list:
+    def get_book_prices_for_store(self, book: Book, book_store: BookStore) -> list[BookPrice]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("With LatestPrices as ( "

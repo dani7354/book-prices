@@ -34,12 +34,14 @@ class PriceHistoryViewModel:
                  book: Book,
                  book_store: BookStore,
                  book_prices: list[BookPrice],
+                 plot_data: str,
                  store_url: str,
                  return_url: str):
 
         self.book = book
         self.book_store = book_store
         self.book_prices = book_prices
+        self.plot_data = plot_data
         self.store_url = store_url
         self.return_url = return_url
 

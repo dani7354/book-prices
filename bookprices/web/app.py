@@ -1,8 +1,8 @@
 import os
-from flask import Flask, render_template, request, abort, url_for
-
 import bookprices.shared.db.database as database
+from flask import Flask, render_template, request, abort, url_for
 from bookprices.web.mapper.book import BookMapper
+from bookprices.web.plot.price import PriceHistory
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
@@ -84,9 +84,14 @@ def price_history(book_id: int, store_id: int) -> str:
     index_url = url_for("book", book_id=book_id, search=search_phrase, page=page)
 
     book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
+    prices_by_date = {p.created: p.price for p in book_prices}
+    price_history_plot = PriceHistory(prices_by_date, book_in_book_store.book_store.name)
+    plot_base64 = price_history_plot.get_plot_base64()
+
     price_history_view_model = BookMapper.map_price_history(book_in_book_store,
                                                             book_prices,
-                                                            index_url)
+                                                            index_url,
+                                                            plot_base64)
 
     return render_template("price_history.html", view_model=price_history_view_model)
 
