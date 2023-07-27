@@ -1,4 +1,7 @@
 from datetime import date
+from collections import defaultdict
+from typing import Any
+
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.book import Book
@@ -82,3 +85,34 @@ class BookPriceDb(BaseDb):
                                                            row["Price"],
                                                            row["Created"]))
                 return book_prices_for_store
+
+    def get_all_book_prices(self, book: Book) -> dict[BookStore, list[BookPrice]]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("With LatestPrices as ( "
+                         "SELECT MAX(Id) as Id "
+                         "FROM BookPrice bp "
+                         "WHERE bp.BookId = %s "
+                         "GROUP BY DATE(Created), bp.BookStoreId)"
+                         " "
+                         "SELECT bp.Id, bp.BookStoreId, bp.Price, DATE(bp.Created) as Created "
+                         "FROM BookPrice bp "
+                         "INNER JOIN LatestPrices lp ON bp.Id = lp.Id "
+                         "ORDER BY Created DESC;")
+
+                cursor.execute(query, (book.id,))
+                bookstores = {}
+                prices_by_bookstores: defaultdict[BookStore, list[BookPrice]] = defaultdict(list)
+                for row in cursor:
+                    bookstore_id = row["BookStoreId"]
+                    bookstore = bookstores.get(bookstore_id)
+                    if not bookstore:
+                        bookstore = self.get_book_store(bookstore_id)
+                        bookstores[bookstore_id] = bookstore
+
+                    prices_by_bookstores[bookstore].append(BookPrice(row["Id"],
+                                                                     book,
+                                                                     bookstore,
+                                                                     row["Price"],
+                                                                     row["Created"]))
+                return prices_by_bookstores

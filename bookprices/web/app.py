@@ -1,8 +1,9 @@
 import os
 import bookprices.shared.db.database as database
+import bookprices.web.mapper.price as price_mapper
 from flask import Flask, render_template, request, abort, url_for
 from bookprices.web.mapper.book import BookMapper
-from bookprices.web.plot.price import PriceHistory
+from bookprices.web.plot.price import LineData, PriceHistory
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
@@ -57,11 +58,17 @@ def book(book_id: int) -> str:
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
     index_url = url_for("index", search=search_phrase, page=page)
 
-    book_prices = db.bookprice_db.get_latest_prices(book.id)
+    latest_prices = db.bookprice_db.get_latest_prices(book.id)
+    all_prices = db.bookprice_db.get_all_book_prices(book)
+    linedata = price_mapper.map_to_linedata_list(all_prices)
+    price_history_plot = PriceHistory(linedata)
+    plot_base64 = price_history_plot.get_plot_base64()
+
     book_details = BookMapper.map_book_details(book,
-                                               book_prices,
+                                               latest_prices,
                                                BOOK_IMAGES_PATH,
                                                BOOK_FALLBACK_IMAGE_NAME,
+                                               plot_base64,
                                                index_url,
                                                page,
                                                search_phrase)
@@ -82,10 +89,9 @@ def price_history(book_id: int, store_id: int) -> str:
     page = request.args.get(PAGE_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
     index_url = url_for("book", book_id=book_id, search=search_phrase, page=page)
-
     book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
-    prices_by_date = {p.created: p.price for p in book_prices}
-    price_history_plot = PriceHistory(prices_by_date, book_in_book_store.book_store.name)
+    linedata = price_mapper.map_to_linedata(book_prices, book_in_book_store.book_store.name)
+    price_history_plot = PriceHistory([linedata])
     plot_base64 = price_history_plot.get_plot_base64()
 
     price_history_view_model = BookMapper.map_price_history(book_in_book_store,

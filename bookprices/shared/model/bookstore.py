@@ -1,25 +1,19 @@
 import urllib.parse
+from dataclasses import dataclass
+from typing import Optional
 from bookprices.shared.model.book import Book
 
 
+@dataclass(frozen=True)
 class BookStore:
-    def __init__(self,
-                 id: int,
-                 name: str,
-                 url: str,
-                 search_url: str | None,
-                 search_result_css_selector: str | None,
-                 price_css_selector: str | None,
-                 image_css_selector: str | None,
-                 price_format: str | None):
-        self.id = id
-        self.name = name
-        self.url = url
-        self.search_url = search_url
-        self.search_result_css_selector = search_result_css_selector
-        self.price_css_selector = price_css_selector
-        self.image_css_selector = image_css_selector
-        self.price_format = price_format
+    id: int
+    name: str
+    url: str
+    search_url: Optional[str]
+    search_result_css_selector: Optional[str]
+    price_css_selector: Optional[str]
+    image_css_selector: Optional[str]
+    price_format: Optional[str]
 
 
 class BookInBookStore:

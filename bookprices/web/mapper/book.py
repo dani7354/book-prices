@@ -1,6 +1,6 @@
 import os
-
 import bookprices.web.viewmodels.book as view_model
+from typing import Optional
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore
@@ -17,8 +17,8 @@ class BookMapper:
                      image_base_url: str,
                      fallback_image: str,
                      current_page: int,
-                     previous_page: int | None,
-                     next_page: int | None) -> view_model.IndexViewModel:
+                     previous_page: Optional[int],
+                     next_page: Optional[int]) -> view_model.IndexViewModel:
 
         return view_model.IndexViewModel(cls.map_book_list(books, image_base_url, fallback_image),
                                          search_phrase,
@@ -49,9 +49,10 @@ class BookMapper:
                          book_prices: list[BookStoreBookPrice],
                          image_base_url: str,
                          fallback_image: str,
+                         plot_data: str,
                          index_url: str,
-                         page: int | None,
-                         search_phrase: str | None) -> view_model.BookDetailsViewModel:
+                         page: Optional[int],
+                         search_phrase: Optional[str]) -> view_model.BookDetailsViewModel:
 
         book_price_view_models = []
         for bp in book_prices:
@@ -73,6 +74,7 @@ class BookMapper:
 
         return view_model.BookDetailsViewModel(book,
                                                book_price_view_models,
+                                               plot_data,
                                                index_url,
                                                page,
                                                search_phrase)
