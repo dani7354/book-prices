@@ -4,26 +4,7 @@ from bookprices.shared.model.book import Book
 
 
 class BookStoreDb(BaseDb):
-    def get_book_store(self, book_store_id: int) -> BookStore:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name,  PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, PriceCssSelector, ImageCssSelector "
-                         "FROM BookStore "
-                         "WHERE Id = %s;")
-                cursor.execute(query, (book_store_id,))
-                book_stores = []
-                for row in cursor:
-                    book_stores.append(BookStore(row["Id"],
-                                                 row["Name"],
-                                                 row["Url"],
-                                                 row["SearchUrl"],
-                                                 row["SearchResultCssSelector"],
-                                                 row["PriceCssSelector"],
-                                                 row["ImageCssSelector"],
-                                                 row["PriceFormat"]))
 
-                return book_stores[0] if len(book_stores) > 0 else None
 
     def get_book_stores(self) -> list:
         with self.get_connection() as con:

@@ -1,31 +1,37 @@
 import base64
 from io import BytesIO
 from matplotlib.figure import Figure
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class LineData:
+    title: str
+    dates: list[str]
+    prices: list[float]
 
 
 class PriceHistory:
-    PLOT_STYLE = 'seaborn-dark'
-    IMAGE_FORMAT = 'png'
+    PLOT_STYLE = "seaborn-dark"
+    IMAGE_FORMAT = "png"
 
-    def __init__(self, prices_by_date: dict, title: str):
-        self._prices_by_date = prices_by_date
-        self._title = title
+    def __init__(self, lines: list[LineData]):
+        self._lines = lines
 
     def _plot(self) -> bytes:
         figure = Figure(figsize=(10, 5))
         subplot = figure.subplots()
-        subplot.plot(self._prices_by_date.keys(), self._prices_by_date.values(), "o-r", label=self._title)
+        for line in self._lines:
+            subplot.plot(line.dates, line.prices, "-o", label=line.title)
 
         subplot.tick_params(axis='x', rotation=90)
-        subplot.set_xticks(list(self._prices_by_date.keys()))
         subplot.legend()
-
         subplot.set_xlabel("Dato")
         subplot.set_ylabel("Pris")
         figure.align_labels()
 
         img_buf = BytesIO()
-        figure.savefig(img_buf, format=self.IMAGE_FORMAT, dpi=100, bbox_inches='tight')
+        figure.savefig(img_buf, format=self.IMAGE_FORMAT, dpi=100, bbox_inches="tight")
 
         return img_buf.getvalue()
 

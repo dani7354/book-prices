@@ -1,74 +1,53 @@
+from dataclasses import dataclass
+from typing import Optional
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
 from bookprices.shared.model.bookprice import BookPrice
 
 
+@dataclass(frozen=True)
 class BookListItemViewModel:
-    def __init__(self, id: int, isbn: str, title: str, author: str, image_url: str):
-        self.id = id
-        self.isbn = isbn
-        self.title = title
-        self.author = author
-        self.image_url = image_url
+    id: int
+    isbn: str
+    title: str
+    author: str
+    image_url: str
 
 
+@dataclass(frozen=True)
 class BookPriceForStoreViewModel:
-    def __init__(self,
-                 book_store_id: int,
-                 book_store_name: str,
-                 url: str,
-                 price: float,
-                 created: str,
-                 is_price_available: bool):
-
-        self.book_store_id = book_store_id
-        self.book_store_name = book_store_name
-        self.url = url
-        self.price = price
-        self.created = created
-        self.is_price_available = is_price_available
+    book_store_id: int
+    book_store_name: str
+    url: str
+    price: float
+    created: str
+    is_price_available: bool
 
 
+@dataclass(frozen=True)
 class PriceHistoryViewModel:
-    def __init__(self,
-                 book: Book,
-                 book_store: BookStore,
-                 book_prices: list[BookPrice],
-                 plot_data: str,
-                 store_url: str,
-                 return_url: str):
-
-        self.book = book
-        self.book_store = book_store
-        self.book_prices = book_prices
-        self.plot_data = plot_data
-        self.store_url = store_url
-        self.return_url = return_url
+    book: Book
+    book_store: BookStore
+    book_prices: list[BookPrice]
+    plot_data: str
+    store_url: str
+    return_url: str
 
 
+@dataclass(frozen=True)
 class IndexViewModel:
-    def __init__(self,
-                 book_list: list[BookListItemViewModel],
-                 search_phrase: str,
-                 current_page: int,
-                 previous_page: int | None,
-                 next_page: int | None):
-        self.book_list = book_list
-        self.search_phrase = search_phrase
-        self.current_page = current_page
-        self.previous_page = previous_page
-        self.next_page = next_page
+    book_list: list[BookListItemViewModel]
+    search_phrase: str
+    current_page: int
+    previous_page: Optional[int]
+    next_page: Optional[int]
 
 
+@dataclass(frozen=True)
 class BookDetailsViewModel:
-    def __init__(self,
-                 book: Book,
-                 book_prices: list[BookPriceForStoreViewModel],
-                 return_url: str,
-                 page: int | None,
-                 search_phrase: str | None):
-        self.book = book
-        self.book_prices = book_prices
-        self.return_url = return_url
-        self.page = page
-        self.search_phrase = search_phrase
+    book: Book
+    book_prices: list[BookPriceForStoreViewModel]
+    plot_data: str
+    return_url: str
+    page: Optional[int]
+    search_phrase: Optional[str]
