@@ -3,7 +3,7 @@ import bookprices.shared.db.database as database
 import bookprices.web.mapper.price as price_mapper
 from flask import Flask, render_template, request, abort, url_for
 from bookprices.web.mapper.book import BookMapper
-from bookprices.web.plot.price import LineData, PriceHistory
+from bookprices.web.plot.price import PriceHistory
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500

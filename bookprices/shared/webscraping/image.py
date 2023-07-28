@@ -1,5 +1,6 @@
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
+from dataclasses import dataclass
 from requests.exceptions import HTTPError
 from urllib.parse import urlparse, urljoin
 import os
@@ -12,12 +13,12 @@ class ImageNotDownloadedException(Exception):
     pass
 
 
+@dataclass(frozen=True)
 class ImageSource:
-    def __init__(self, book_id: int, page_url: str, image_css_selector: str, new_image_filename: str):
-        self.book_id = book_id
-        self.page_url = page_url
-        self.image_css_selector = image_css_selector
-        self.new_image_filename = new_image_filename
+    book_id: int
+    page_url: str
+    image_css_selector: str
+    new_image_filename: str
 
     def get_base_url(self) -> str:
         parsed_url = urlparse(self.page_url)
