@@ -7,7 +7,7 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import WebDriverException
 from bs4 import BeautifulSoup
 
@@ -71,7 +71,7 @@ class PriceFinderDynamic(PriceFinder):
                 driver.get(url)
 
                 price_element = WebDriverWait(driver, timeout=cls.DYNAMIC_ELEMENT_WAIT_TIMEOUT).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
+                    ec.presence_of_element_located((By.CSS_SELECTOR, css_selector))
                 )
         except WebDriverException as ex:
             raise PriceNotFoundException(f"Something went wrong while getting price from {url}: {ex}")
