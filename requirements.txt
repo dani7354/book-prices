@@ -6,3 +6,4 @@ beautifulsoup4~=4.11.2
 flask==2.2.5
 pytest~=7.3.2
 matplotlib~=3.7.2
+selenium~=4.11.2
