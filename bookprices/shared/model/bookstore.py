@@ -14,6 +14,7 @@ class BookStore:
     price_css_selector: Optional[str]
     image_css_selector: Optional[str]
     price_format: Optional[str]
+    price_finder: str
 
 
 @dataclass(frozen=True)
