@@ -88,3 +88,9 @@ class PriceFinderDynamic(PriceFinder):
             raise PriceNotFoundException(f"No match for the price format {price_format}")
 
         return float(price.group().replace(",", "."))
+
+
+class PriceFinderFactory:
+    @classmethod
+    def get_price_finder(cls, has_dynamically_loaded_content: bool) -> PriceFinder:
+        return PriceFinderDynamic() if has_dynamically_loaded_content else PriceFinderStatic()

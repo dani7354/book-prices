@@ -14,7 +14,7 @@ class BookStore:
     price_css_selector: Optional[str]
     image_css_selector: Optional[str]
     price_format: Optional[str]
-    price_finder: str
+    has_dynamically_loaded_content: bool
 
 
 @dataclass(frozen=True)

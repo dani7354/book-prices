@@ -17,7 +17,8 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
                             search_result_css_selector=None,
                             price_css_selector=".table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)",
                             image_css_selector=None,
-                            price_format="\\d+"),
+                            price_format="\\d+",
+                            has_dynamically_loaded_content=False),
                             url="/book1"),
             BookInBookStore(book=MagicMock(),
                             book_store=BookStore(1, "BookStore 2", "http://bookstore2.com",
@@ -25,7 +26,8 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
                             search_result_css_selector=None,
                             price_css_selector=".table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)",
                             image_css_selector=None,
-                            price_format="\\d+"),
+                            price_format="\\d+",
+                            has_dynamically_loaded_content=False),
                             url="/book1"),
         ]
     }
