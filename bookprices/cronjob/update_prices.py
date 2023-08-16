@@ -9,7 +9,7 @@ from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookInBookStore
-from bookprices.shared.webscraping.price import PriceFinder, PriceNotFoundException
+from bookprices.shared.webscraping.price import PriceFinderFactory, PriceNotFoundException
 
 
 LOG_FILE_NAME = "update_prices.log"
@@ -20,6 +20,7 @@ class PriceUpdateJob:
         self._db = db
         self.thread_count = thread_count
         self._book_stores_queue = Queue()
+        self._price_finder_factory = PriceFinderFactory()
 
     def run(self):
         books = self._db.book_db.get_books()
@@ -59,9 +60,10 @@ class PriceUpdateJob:
                 logging.debug(f"Getting price for book ID {book_in_store.book.id} at book store ID "
                               f"{book_in_store.book_store.id} (URL {full_url})")
 
-                new_price_value = PriceFinder.get_price(book_in_store.get_full_url(),
-                                                        book_in_store.book_store.price_css_selector,
-                                                        book_in_store.book_store.price_format)
+                price_finder = PriceFinderFactory.get_price_finder(book_in_store.book_store.has_dynamically_loaded_content)
+                new_price_value = price_finder.get_price(book_in_store.get_full_url(),
+                                                         book_in_store.book_store.price_css_selector,
+                                                         book_in_store.book_store.price_format)
 
                 new_prices.append(BookPrice(0,
                                             book_in_store.book,

@@ -1,7 +1,7 @@
 import pytest
 import requests
 import shared
-from bookprices.shared.webscraping.price import PriceFinder, PriceNotFoundException
+from bookprices.shared.webscraping.price import PriceFinderStatic, PriceNotFoundException
 
 
 @pytest.mark.parametrize("css_selector,value_format",
@@ -13,10 +13,8 @@ from bookprices.shared.webscraping.price import PriceFinder, PriceNotFoundExcept
 def test_get_price_value_without_currency(monkeypatch, css_selector, value_format):
     monkeypatch.setattr(requests, "get", shared.mock_get_price)
 
-    price_finder = PriceFinder()
-    price = price_finder.get_price("http://fake.com",
-                                   css_selector,
-                                   value_format)
+    price_finder = PriceFinderStatic()
+    price = price_finder.get_price("http://fake.com", css_selector, value_format)
 
     assert price == 229.0
 
@@ -29,9 +27,7 @@ def test_get_price_value_without_currency(monkeypatch, css_selector, value_forma
 def test_get_price_raise_price_not_found(monkeypatch, css_selector, value_format):
     monkeypatch.setattr(requests, "get", shared.mock_get_price)
 
-    price_finder = PriceFinder()
+    price_finder = PriceFinderStatic()
 
     with pytest.raises(PriceNotFoundException):
-        _ = price_finder.get_price("http://fake.com",
-                                   css_selector,
-                                   value_format)
+        _ = price_finder.get_price("http://fake.com", css_selector, value_format)
