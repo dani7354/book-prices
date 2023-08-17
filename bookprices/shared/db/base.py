@@ -22,7 +22,8 @@ class BaseDb:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name,  PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, PriceCssSelector, ImageCssSelector "
+                         "SearchUrl, SearchResultCssSelector, PriceCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent "
                          "FROM BookStore "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_store_id,))

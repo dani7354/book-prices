@@ -5,12 +5,12 @@ from bookprices.shared.model.book import Book
 
 class BookStoreDb(BaseDb):
 
-
     def get_book_stores(self) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector "
+                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent "
                          "FROM BookStore")
                 cursor.execute(query)
                 book_stores = []
@@ -22,7 +22,8 @@ class BookStoreDb(BaseDb):
                                                  row["SearchResultCssSelector"],
                                                  row["PriceCssSelector"],
                                                  row["ImageCssSelector"],
-                                                 row["PriceFormat"]))
+                                                 row["PriceFormat"],
+                                                 row["HasDynamicallyLoadedContent"]))
 
                 return book_stores
 
@@ -30,7 +31,8 @@ class BookStoreDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector "
+                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent "
                          "FROM BookStore "
                          "WHERE Id NOT IN (SELECT BookStoreId FROM BookStoreBook WHERE BookId = %s)")
                 cursor.execute(query, (book_id,))
@@ -43,7 +45,8 @@ class BookStoreDb(BaseDb):
                                                  row["SearchResultCssSelector"],
                                                  row["PriceCssSelector"],
                                                  row["ImageCssSelector"],
-                                                 row["PriceFormat"]))
+                                                 row["PriceFormat"],
+                                                 row["HasDynamicallyLoadedContent"]))
 
                 return book_stores
 
@@ -68,12 +71,13 @@ class BookStoreDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 ids_format_string = ",".join(["%s"] * len(book_dict.keys()))
-                query = "SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " \
-                        "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " \
-                        "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector " \
-                        "FROM BookStoreBook bsb " \
-                        "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " \
-                        f"WHERE bsb.BookId IN ({ids_format_string})"
+                query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
+                         "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
+                         "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
+                         "bs.HasDynamicallyLoadedContent " 
+                         "FROM BookStoreBook bsb " 
+                         "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
+                         f"WHERE bsb.BookId IN ({ids_format_string})")
 
                 cursor.execute(query, tuple(book_dict.keys()))
 
@@ -103,4 +107,5 @@ class BookStoreDb(BaseDb):
                                                    row["SearchResultCssSelector"],
                                                    row["PriceCssSelector"],
                                                    row["ImageCssSelector"],
-                                                   row["PriceFormat"])
+                                                   row["PriceFormat"],
+                                                   row["HasDynamicallyLoadedContent"])
