@@ -8,7 +8,7 @@ from typing import NamedTuple
 from bookprices.cronjob import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
-from bookprices.shared.webscraping.book import BookFinder
+from bookprices.shared.webscraping.book import BookFinder, IsbnSearch, BookNotFoundError
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
 
@@ -21,13 +21,13 @@ class BookStoresForBook(NamedTuple):
     book_stores: list[BookStore]
 
 
-class BookStoreSearch:
+class BookStoreSearchJob:
     def __init__(self, db: Database, thread_count: int):
         self.db = db
         self.thread_count = thread_count
         self.book_queue = Queue()
 
-    def _get_book_stores_for_book(self, book: Book):
+    def _get_book_stores_for_book(self, book: Book) -> list[BookStore]:
         logging.info(f"Getting book stores with no information for book with id {book.id}...")
         book_stores = []
         for book_store in self.db.bookstore_db.get_missing_book_stores(book.id):
@@ -36,7 +36,7 @@ class BookStoreSearch:
 
         return book_stores
 
-    def _get_book_stores_for_books(self, books: list) -> list:
+    def _get_book_stores_for_books(self, books: list) -> list[BookStoresForBook]:
         book_stores_for_books = []
         for book in books:
             if not book.isbn:
@@ -64,18 +64,21 @@ class BookStoreSearch:
         while not self.book_queue.empty():
             book_stores_for_book = self.book_queue.get()
             for bookstore in book_stores_for_book.book_stores:
-                match_url = BookFinder.search_book_isbn(bookstore.search_url,
-                                                        book_stores_for_book.book.isbn,
-                                                        bookstore.search_result_css_selector)
+                try:
+                    search_request = IsbnSearch(bookstore.search_url,
+                                                bookstore.search_result_css_selector,
+                                                book_stores_for_book.book.isbn,
+                                                bookstore.isbn_css_selector)
 
-                if not match_url:
-                    continue
+                    match_url = BookFinder.search_book_isbn(search_request)
+                    logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id "
+                                 f"{bookstore.id}: {match_url}")
 
-                logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id "
-                             f"{bookstore.id}: {match_url}")
-                self._create_book_store_for_book(book_stores_for_book.book,
-                                                 bookstore,
-                                                 urlparse(match_url).path)
+                    self._create_book_store_for_book(book_stores_for_book.book,
+                                                     bookstore,
+                                                     urlparse(match_url).path)
+                except BookNotFoundError as ex:
+                    logging.error(ex)
 
     def _start_search(self):
         logging.info(f"Starting search with {self.thread_count} threads...")
@@ -117,7 +120,7 @@ def main():
                       configuration.database.db_password,
                       configuration.database.db_name)
 
-        book_search = BookStoreSearch(db, shared.THREAD_COUNT)
+        book_search = BookStoreSearchJob(db, shared.THREAD_COUNT)
         book_search.run()
         logging.info("Done!")
     except Exception as ex:

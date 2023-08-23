@@ -3,10 +3,10 @@ import argparse
 import sys
 from urllib.parse import urlparse
 from bookprices.shared.config import loader
-from bookprices.shared.webscraping.book import BookFinder
+from bookprices.shared.webscraping.book import BookFinder, IsbnSearch, BookNotFoundError
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.book import Book
-from bookprices.shared.validation import isbn
+from bookprices.shared.validation.isbn import check_isbn13
 
 
 def parse_arguments():
@@ -23,20 +23,26 @@ def search_website(book_stores: list, isbn: str) -> list:
     matches = []
     for book_store in book_stores:
         print(f"Searching {book_store.name} for {isbn}...")
-        match_url = BookFinder.search_book_isbn(book_store.search_url,
-                                                isbn,
-                                                book_store.search_result_css_selector)
+        try:
+            search_request = IsbnSearch(book_store.search_url,
+                                        book_store.search_result_css_selector,
+                                        isbn,
+                                        book_store.isbn_css_selector)
 
-        if match_url is not None:
-            print(f"Found match: {match_url}")
+            match_url = BookFinder.search_book_isbn(search_request)
             matches.append((book_store.id, urlparse(match_url).path))
+            print(f"Found match: {match_url}")
+
+        except BookNotFoundError as ex:
+            print(f"Book with ISBN {isbn} not found in store {book_store.name}!")
+            print(ex)
 
     return matches
 
 
 def main():
     args = parse_arguments()
-    if not isbn.check_isbn13(args.isbn):
+    if not check_isbn13(args.isbn):
         print(f"{args.isbn} not valid")
         sys.exit(1)
 

@@ -13,6 +13,7 @@ class BookStore:
     search_result_css_selector: Optional[str]
     price_css_selector: Optional[str]
     image_css_selector: Optional[str]
+    isbn_css_selector: Optional[str]
     price_format: Optional[str]
     has_dynamically_loaded_content: bool
 
