@@ -24,10 +24,15 @@ def search_website(book_stores: list, isbn: str) -> list:
     for book_store in book_stores:
         print(f"Searching {book_store.name} for {isbn}...")
         try:
+            if not book_store.search_url or not book_store.isbn_css_selector:
+                print(f"No search URL or ISBN CSS selector for {book_store.name}. Skipping...")
+                continue
+
             search_request = IsbnSearch(book_store.search_url,
                                         book_store.search_result_css_selector,
                                         isbn,
-                                        book_store.isbn_css_selector)
+                                        book_store.isbn_css_selector,
+                                        book_store.url)
 
             match_url = BookFinder.search_book_isbn(search_request)
             matches.append((book_store.id, urlparse(match_url).path))

@@ -65,10 +65,15 @@ class BookStoreSearchJob:
             book_stores_for_book = self.book_queue.get()
             for bookstore in book_stores_for_book.book_stores:
                 try:
+                    if not bookstore.isbn_css_selector:
+                        logging.warning(f"Book store with id {bookstore.id} has no ISBN CSS selector!")
+                        continue
+
                     search_request = IsbnSearch(bookstore.search_url,
                                                 bookstore.search_result_css_selector,
                                                 book_stores_for_book.book.isbn,
-                                                bookstore.isbn_css_selector)
+                                                bookstore.isbn_css_selector,
+                                                bookstore.url)
 
                     match_url = BookFinder.search_book_isbn(search_request)
                     logging.info(f"Found match for book with id {book_stores_for_book.book.id} in book store with id "
@@ -124,7 +129,7 @@ def main():
         book_search.run()
         logging.info("Done!")
     except Exception as ex:
-        logging.error(f"Error downloading images: {ex}")
+        logging.error(f"Error searching for books: {ex}")
         sys.exit(1)
 
 

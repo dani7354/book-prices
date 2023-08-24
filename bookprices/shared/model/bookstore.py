@@ -1,6 +1,6 @@
-import urllib.parse
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import urljoin
 from bookprices.shared.model.book import Book
 
 
@@ -25,7 +25,7 @@ class BookInBookStore:
     url: str
 
     def get_full_url(self) -> str:
-        return urllib.parse.urljoin(self.book_store.url, self.url)
+        return urljoin(self.book_store.url, self.url)
 
 
 @dataclass(frozen=True)
