@@ -65,10 +65,11 @@ class BookFinder:
         response = requests.get(full_match_url)
         response.raise_for_status()
 
-        response_bs = BeautifulSoup(response.content.decode("utf-8"), options.BS_HTML_PARSER)
+        response_body = response.content.decode("utf-8")
+        response_bs = BeautifulSoup(response_body, options.BS_HTML_PARSER)
         isbn_element = response_bs.select_one(search_request.isbn_css_selector)
 
-        return search_request.isbn in str(isbn_element)
+        return search_request.isbn in str(isbn_element) or search_request.isbn in response_body
 
     @staticmethod
     def _was_redirected_to_detail_page(response: requests.Response) -> bool:
