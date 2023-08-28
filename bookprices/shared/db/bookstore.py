@@ -10,7 +10,7 @@ class BookStoreDb(BaseDb):
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
                          "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector "
                          "FROM BookStore")
                 cursor.execute(query)
                 book_stores = []
@@ -22,6 +22,7 @@ class BookStoreDb(BaseDb):
                                                  row["SearchResultCssSelector"],
                                                  row["PriceCssSelector"],
                                                  row["ImageCssSelector"],
+                                                 row["IsbnCssSelector"],
                                                  row["PriceFormat"],
                                                  row["HasDynamicallyLoadedContent"]))
 
@@ -32,7 +33,7 @@ class BookStoreDb(BaseDb):
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
                          "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector "
                          "FROM BookStore "
                          "WHERE Id NOT IN (SELECT BookStoreId FROM BookStoreBook WHERE BookId = %s)")
                 cursor.execute(query, (book_id,))
@@ -45,6 +46,7 @@ class BookStoreDb(BaseDb):
                                                  row["SearchResultCssSelector"],
                                                  row["PriceCssSelector"],
                                                  row["ImageCssSelector"],
+                                                 row["IsbnCssSelector"],
                                                  row["PriceFormat"],
                                                  row["HasDynamicallyLoadedContent"]))
 
@@ -74,7 +76,7 @@ class BookStoreDb(BaseDb):
                 query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
                          "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
                          "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
-                         "bs.HasDynamicallyLoadedContent " 
+                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector " 
                          "FROM BookStoreBook bsb " 
                          "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
                          f"WHERE bsb.BookId IN ({ids_format_string})")
@@ -107,5 +109,6 @@ class BookStoreDb(BaseDb):
                                                    row["SearchResultCssSelector"],
                                                    row["PriceCssSelector"],
                                                    row["ImageCssSelector"],
+                                                   row["IsbnCssSelector"],
                                                    row["PriceFormat"],
                                                    row["HasDynamicallyLoadedContent"])
