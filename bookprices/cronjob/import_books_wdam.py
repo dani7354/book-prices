@@ -5,6 +5,7 @@ import sys
 import queue
 from bs4 import BeautifulSoup
 from threading import Thread
+from typing import NamedTuple
 from bookprices.cronjob import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.book import BookDb
@@ -17,14 +18,17 @@ BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
 AUTHOR_CSS = "h2.author span a"
 LOG_FILE_NAME = "import_wdam_books.log"
-list_urls = ["https://www.williamdam.dk/boger-i-fokus?n=60",
-             "https://www.williamdam.dk/boeger/--type_bog,sprog_dansk?n=60",
-             "https://www.williamdam.dk/boeger/skoenlitteratur-og-relaterede-emner/historiske-romaner/--type_bog,sprog"
-             "_dansk?orderby=release_date&orderway=desc&n=60"]
+
+
+class BookList(NamedTuple):
+    url: str
+    page_count: int
+
+list_urls = [BookList("https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={0}", 100)]
 
 
 class WdamBookImport:
-    def __init__(self, db: BookDb, thread_count: int, book_list_urls: list[str]):
+    def __init__(self, db: BookDb, thread_count: int, book_list_urls: list[BookList]):
         self.db = db
         self.thread_count = thread_count
         self.book_list_urls = book_list_urls
@@ -47,13 +51,14 @@ class WdamBookImport:
     def _get_book_urls(self) -> list:
         book_urls = []
         for list_url in self.book_list_urls:
-            book_list_response = requests.get(list_url)
-            if not book_list_response.ok:
-                continue
+            for page in range(1, list_url.page_count + 1):
+                book_list_response = requests.get(list_url.url.format(page))
+                if not book_list_response.ok:
+                    continue
 
-            book_list_bs = BeautifulSoup(book_list_response.content.decode(), "html.parser")
-            book_urls_for_list = [t["href"] for t in book_list_bs.select(BOOK_URL_CSS)]
-            book_urls.extend(book_urls_for_list)
+                book_list_bs = BeautifulSoup(book_list_response.content.decode(), "html.parser")
+                book_urls_for_list = [t["href"] for t in book_list_bs.select(BOOK_URL_CSS)]
+                book_urls.extend(book_urls_for_list)
 
         return book_urls
 
