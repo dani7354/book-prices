@@ -8,5 +8,6 @@ class Book:
     isbn: str
     title: str
     author: str
+    format: str
     image_url: Optional[str]
     created: Optional[str] = None

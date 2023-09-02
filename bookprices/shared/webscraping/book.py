@@ -38,6 +38,8 @@ class BookFinder:
             return match_url
         except RequestException as ex:
             raise BookNotFoundError(f"Something went wrong while sending request to {search_request.format_url()}: {ex}")
+        except UnicodeDecodeError as ex:
+            raise BookNotFoundError(f"Something went wrong while decoding response from {search_request.format_url()}: {ex}")
 
     @classmethod
     def _get_match_url(cls, url: str, match_url_css: Optional[str]) -> str:

@@ -5,7 +5,7 @@ import sys
 import queue
 from bs4 import BeautifulSoup
 from threading import Thread
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 from bookprices.cronjob import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.book import BookDb
@@ -17,14 +17,18 @@ BOOK_URL_CSS = "a.product-name"
 BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
 AUTHOR_CSS = "h2.author span a"
+TYPE_CSS = ""
 LOG_FILE_NAME = "import_wdam_books.log"
+
+VALID_BOOK_FORMAT = {"Paperback", "Hardback", "Indbundet", "Hæftet", "Haeftet", "Bog", "Bog med hæftet ryg"}
 
 
 class BookList(NamedTuple):
     url: str
     page_count: int
 
-list_urls = [BookList("https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={0}", 100)]
+
+list_urls = [BookList("https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={0}", 150)]
 
 
 class WdamBookImport:
@@ -88,10 +92,10 @@ class WdamBookImport:
 
             book = self._parse_book(response.content.decode())
             if self._is_book_valid(book):
-                logging.debug(f"Found valid book: {book.title} by {book.author} (ISBN-13: {book.isbn})")
+                logging.debug(f"Found valid book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})")
                 books.append(book)
 
-    def _save_books_if_not_exist(self, books):
+    def _save_books_if_not_exist(self, books: list[Book]):
         saved_count = 0
         existing_books_isbn = {b.isbn for b in self.db.get_books()}
         for b in books:
@@ -108,9 +112,10 @@ class WdamBookImport:
 
     def _parse_book(self, data: str) -> Book:
         data_bs = BeautifulSoup(data, "html.parser")
-        title, author, isbn = (None, None, None)
+        title, author, isbn, format = (None, None, None, None)
 
         title = self._parse_title(data_bs)
+        format = self._parse_format(data_bs)
         author_tag = data_bs.select_one(AUTHOR_CSS)
         if author_tag:
             author = author_tag.get_text().strip()
@@ -120,24 +125,37 @@ class WdamBookImport:
             if "ISBN-13" in all_text:
                 isbn = li.select_one("span").get_text().strip()
 
-        return Book(0, isbn, title, author, None)
+        return Book(0, isbn, title, author, format, None)
 
     @staticmethod
     def _is_book_valid(book: Book) -> bool:
-        return book.author and book.title and isbn.check_isbn13(book.isbn)
+        logging.debug(f"Validating book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})...")
+        return book.author and book.title and isbn.check_isbn13(book.isbn) and book.format
 
     @staticmethod
-    def _parse_title(data_bs: BeautifulSoup) -> str:
-        title = None
+    def _parse_title(data_bs: BeautifulSoup) -> Optional[str]:
         title_tag = data_bs.select_one(TITLE_CSS)
-        if title_tag:
-            title = title_tag.get_text()
-            span_tag = title_tag.select_one("span")
-            if span_tag:
-                span_text = span_tag.get_text()
-                title = title.replace(span_text, "")
+        if not title_tag:
+            return None
+        title = title_tag.get_text()
+        span_tag = title_tag.select_one("span")
+        if span_tag:
+            span_text = span_tag.get_text()
+            title = title.replace(span_text, "")
 
         return title.strip() if title else None
+
+    @staticmethod
+    def _parse_format(data_bs: BeautifulSoup) -> Optional[str]:
+        title_tag = data_bs.select_one(TITLE_CSS)
+        if not title_tag or not (span_tag := title_tag.select_one("span")):
+            return None
+        span_text = span_tag.get_text()
+        for valid_format in VALID_BOOK_FORMAT:
+            if valid_format in span_text:
+                return valid_format
+
+        return None
 
 
 def main():

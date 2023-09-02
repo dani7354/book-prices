@@ -13,6 +13,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--title", dest="title", type=str, required=True)
     parser.add_argument("-a", "--author", dest="author", type=str, required=True)
+    parser.add_argument("-f", "--format", dest="format", type=str, required=True)
     parser.add_argument("-i", "--isbn", dest="isbn", type=str, required=True)
     parser.add_argument("-c", "--configuration", dest="configuration", type=str, required=True)
 
@@ -61,7 +62,7 @@ def main():
     book = db.book_db.get_book_by_isbn(args.isbn)
     if book is None:
         print(f"Creating new book: {args.title} by {args.author}...")
-        book = Book(0, args.isbn, args.title, args.author, None)
+        book = Book(0, args.isbn, args.title, args.author, args.format, None)
         book_id = db.book_db.create_book(book)
         if book_id == -1:
             print("Failed to add book!")

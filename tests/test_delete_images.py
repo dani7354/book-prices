@@ -28,7 +28,7 @@ def images(tmpdir):
 @pytest.fixture()
 def books(images) -> list[Book]:
     """ Provides books to play with! """
-    books = [Book(i, "isbn", "title", "author", os.path.basename(image), None) for i, image in enumerate(images)]
+    books = [Book(i, "isbn", "title", "author", "format", os.path.basename(image), None) for i, image in enumerate(images)]
 
     return books
 
