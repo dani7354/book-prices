@@ -48,7 +48,7 @@ class WdamBookImport:
         books = self._get_books()
 
         logging.info("Saving books...")
-        self._create_books_or_update(books)
+        self._create_or_update_books(books)
         logging.info("Done!")
 
     def _get_book_urls(self) -> list:
@@ -94,7 +94,7 @@ class WdamBookImport:
                 logging.debug(f"Found valid book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})")
                 books.append(book)
 
-    def _create_books_or_update(self, books: list[Book]):
+    def _create_or_update_books(self, books: list[Book]):
         created_count = 0
         updated_count = 0
         existing_books_isbn = {b.isbn: b for b in self.db.get_books()}
