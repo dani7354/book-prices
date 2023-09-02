@@ -8,8 +8,8 @@ class BookDb(BaseDb):
     def create_book(self, book: Book) -> int:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = "INSERT INTO Book(Isbn, Title, Author, Created) VALUES (%s, %s, %s, %s);"
-                cursor.execute(query, (book.isbn, book.title, book.author, datetime.now()))
+                query = "INSERT INTO Book(Isbn, Title, Author, Format, Created) VALUES (%s, %s, %s, %s, %s);"
+                cursor.execute(query, (book.isbn, book.title, book.author, book.format, datetime.now()))
                 con.commit()
 
                 query = "SELECT LAST_INSERT_ID() as Id;"
@@ -25,21 +25,27 @@ class BookDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor() as cursor:
                 query = ("UPDATE Book "
-                         "SET Title = %s, Author = %s, ImageUrl = %s "
+                         "SET Title = %s, Author = %s, Format = %s, ImageUrl = %s "
                          "WHERE Id = %s;")
-                cursor.execute(query, (book.title, book.author, book.image_url, book.id))
+                cursor.execute(query, (book.title, book.author, book.format, book.image_url, book.id))
                 con.commit()
 
-    def get_books(self) -> list:
+    def get_books(self) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
+                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
                          "FROM Book "
                          "ORDER BY Title ASC;")
                 cursor.execute(query)
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
                     books.append(book)
 
                 return books
@@ -48,7 +54,7 @@ class BookDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 phrase_with_wildcards = f"{search_phrase}%"
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
+                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Title LIKE %s OR Author LIKE %s OR Isbn = %s "
                          "ORDER BY Title ASC "
@@ -62,7 +68,13 @@ class BookDb(BaseDb):
                                        offset))
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
                     books.append(book)
 
                 return books
@@ -70,13 +82,19 @@ class BookDb(BaseDb):
     def get_book(self, book_id: int) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
+                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_id,))
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
@@ -84,13 +102,19 @@ class BookDb(BaseDb):
     def get_book_by_isbn(self, book_id: str) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Isbn, Title, Author, ImageUrl, Created "
+                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Isbn = %s;")
                 cursor.execute(query, (book_id,))
                 books = []
                 for row in cursor:
-                    book = Book(row["Id"], row["Isbn"], row["Title"], row["Author"], row["ImageUrl"], row["Created"])
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
