@@ -17,7 +17,6 @@ BOOK_URL_CSS = "a.product-name"
 BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
 AUTHOR_CSS = "h2.author span a"
-TYPE_CSS = ""
 LOG_FILE_NAME = "import_wdam_books.log"
 
 VALID_BOOK_FORMAT = {"Paperback", "Hardback", "Indbundet", "Hæftet", "Haeftet", "Bog", "Bog med hæftet ryg"}
