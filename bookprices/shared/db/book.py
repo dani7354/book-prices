@@ -30,7 +30,7 @@ class BookDb(BaseDb):
                 cursor.execute(query, (book.title, book.author, book.format, book.image_url, book.id))
                 con.commit()
 
-    def get_books(self) -> list:
+    def get_books(self) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "

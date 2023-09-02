@@ -48,7 +48,7 @@ class WdamBookImport:
         books = self._get_books()
 
         logging.info("Saving books...")
-        self._save_books_if_not_exist(books)
+        self._create_books_or_update(books)
         logging.info("Done!")
 
     def _get_book_urls(self) -> list:
@@ -94,20 +94,33 @@ class WdamBookImport:
                 logging.debug(f"Found valid book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})")
                 books.append(book)
 
-    def _save_books_if_not_exist(self, books: list[Book]):
-        saved_count = 0
-        existing_books_isbn = {b.isbn for b in self.db.get_books()}
-        for b in books:
-            if b.isbn in existing_books_isbn:
-                continue
+    def _create_books_or_update(self, books: list[Book]):
+        created_count = 0
+        updated_count = 0
+        existing_books_isbn = {b.isbn: b for b in self.db.get_books()}
+        for book in books:
             try:
-                logging.debug(f"Saving book with ISBN {b.isbn}")
-                self.db.create_book(b)
-                saved_count += 1
+                if book.isbn in existing_books_isbn:
+                    logging.debug(f"Updating book with ISBN {book.isbn}")
+                    existing_book = existing_books_isbn[book.isbn]
+                    updated_book = Book(existing_book.id,
+                                        book.title,
+                                        book.author,
+                                        book.format,
+                                        existing_book.image_url,
+                                        existing_book.created_at)
+
+                    self.db.update_book(updated_book)
+                    updated_count += 1
+                else:
+                    logging.debug(f"Saving book with ISBN {book.isbn}")
+                    self.db.create_book(book)
+                    created_count += 1
             except Exception as ex:
-                logging.error(f"Error while inserting book: {b.title}, {b.author}, {b.isbn}")
+                logging.error(f"Error while inserting book: {book.title}, {book.author}, {book.isbn}")
                 logging.error(ex)
-        logging.info(f"{saved_count} new book(s) saved!")
+        logging.info(f"{created_count} new book(s) saved!")
+        logging.info(f"{updated_count} book(s) updated!")
 
     def _parse_book(self, data: str) -> Book:
         data_bs = BeautifulSoup(data, "html.parser")
