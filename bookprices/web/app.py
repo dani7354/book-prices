@@ -34,8 +34,8 @@ def index() -> str:
     page = page if page > 0 else 1
 
     authors = db.book_db.get_authors()
-    books_current = db.book_db.search_books(search_phrase, page, BOOK_PAGESIZE)
-    books_next = db.book_db.search_books(search_phrase, page + 1, BOOK_PAGESIZE)
+    books_current = db.book_db.search_books(search_phrase, author, page, BOOK_PAGESIZE)
+    books_next = db.book_db.search_books(search_phrase, author, page + 1, BOOK_PAGESIZE)
     next_page = page + 1 if len(books_next) > 0 else None
     previous_page = page - 1 if page >= 2 else None
 

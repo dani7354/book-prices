@@ -30,7 +30,7 @@
     {% endif %}
 
     {% for b in view_model.book_list %}
-    {% set book_url = url_for('book', book_id=b.id, search=view_model.search_phrase, page=view_model.current_page) %}
+    {% set book_url = url_for('book', book_id=b.id, search=view_model.search_phrase, author=view_model.author, page=view_model.current_page) %}
     <div class="col">
         <div class="card">
             {% if b.image_url %}
