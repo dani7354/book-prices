@@ -29,6 +29,7 @@ app.debug = os.environ.get("DEBUG", False)
 @app.route("/")
 def index() -> str:
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str, default="")
+    author = request.args.get("author", type=str, default=None)
     page = request.args.get(PAGE_PARAMETER, type=int, default=1)
     page = page if page > 0 else 1
 
@@ -44,6 +45,7 @@ def index() -> str:
                                  BOOK_IMAGES_PATH,
                                  BOOK_FALLBACK_IMAGE_NAME,
                                  page,
+                                 author,
                                  previous_page,
                                  next_page)
 
