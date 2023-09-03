@@ -37,6 +37,7 @@ class PriceHistoryViewModel:
 @dataclass(frozen=True)
 class IndexViewModel:
     book_list: list[BookListItemViewModel]
+    authors: list[str]
     search_phrase: str
     current_page: int
     previous_page: Optional[int]

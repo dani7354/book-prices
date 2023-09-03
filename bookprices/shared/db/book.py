@@ -118,3 +118,16 @@ class BookDb(BaseDb):
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
+
+    def get_authors(self) -> list[str]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT DISTINCT Author "
+                         "FROM Book "
+                         "ORDER BY Author ASC;")
+                cursor.execute(query)
+                authors = []
+                for row in cursor:
+                    authors.append(row["Author"])
+
+                return authors

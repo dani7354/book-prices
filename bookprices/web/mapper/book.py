@@ -12,7 +12,8 @@ PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
 class BookMapper:
     @classmethod
     def map_index_vm(cls,
-                     books: list,
+                     books: list[Book],
+                     authors: list[str],
                      search_phrase: str,
                      image_base_url: str,
                      fallback_image: str,
@@ -21,6 +22,7 @@ class BookMapper:
                      next_page: Optional[int]) -> view_model.IndexViewModel:
 
         return view_model.IndexViewModel(cls.map_book_list(books, image_base_url, fallback_image),
+                                         authors,
                                          search_phrase,
                                          current_page,
                                          previous_page,

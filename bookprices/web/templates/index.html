@@ -5,6 +5,13 @@
     <div class="col-auto">
         <input class="form-control" name="search" type="text" value="{{ view_model.search_phrase }}">
     </div>
+     <div class="col-auto">
+         <select name="author" class="form-select" aria-label="forfatter">
+             {% for a in view_model.authors %}
+             <option value="{{ a }}">{{ a }}</option>
+             {% endfor %}
+         </select>
+    </div>
     <div class="col-auto">
         <button class="btn btn-secondary mb-3" type="submit">Søg</button>
     </div>
