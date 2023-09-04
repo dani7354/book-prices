@@ -1,7 +1,7 @@
 import os
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.price as price_mapper
-from flask import Flask, render_template, request, abort, url_for
+from flask import Flask, render_template, request, abort
 from bookprices.web.mapper.book import BookMapper
 from bookprices.web.plot.price import PriceHistory
 
@@ -92,7 +92,6 @@ def price_history(book_id: int, store_id: int) -> str:
 
     page = request.args.get(PAGE_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
-    index_url = url_for("book", book_id=book_id, search=search_phrase, page=page)
     book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
     linedata = price_mapper.map_to_linedata(book_prices, book_in_book_store.book_store.name)
     price_history_plot = PriceHistory([linedata])
@@ -100,8 +99,9 @@ def price_history(book_id: int, store_id: int) -> str:
 
     price_history_view_model = BookMapper.map_price_history(book_in_book_store,
                                                             book_prices,
-                                                            index_url,
-                                                            plot_base64)
+                                                            plot_base64,
+                                                            page,
+                                                            search_phrase)
 
     return render_template("price_history.html", view_model=price_history_view_model)
 

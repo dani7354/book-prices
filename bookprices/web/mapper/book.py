@@ -33,9 +33,15 @@ class BookMapper:
         previous_page_url = None
         next_page_url = None
         if previous_page:
-            previous_page_url = cls.create_index_url(previous_page, search_phrase, author)
+            previous_page_url = cls.create_url(previous_page,
+                                               "index",
+                                               search_phrase=search_phrase,
+                                               author=author)
         if next_page:
-            next_page_url = cls.create_index_url(next_page, search_phrase, author)
+            next_page_url = cls.create_url(next_page,
+                                           "index",
+                                           search_phrase=search_phrase,
+                                           author=author)
 
         return IndexViewModel(cls.map_book_list(books, image_base_url, fallback_image),
                               author_options,
@@ -81,10 +87,17 @@ class BookMapper:
             is_price_available = bp.price is not None
             price_str = bp.price if is_price_available else PRICE_NONE_TEXT
             created_str = bp.created if is_price_available else PRICE_CREATED_NONE_TEXT
+            price_history_url = cls.create_url(page,
+                                               "price_history",
+                                               book_id=book.id,
+                                               store_id=bp.book_store_id,
+                                               search_phrase=search_phrase,
+                                               author=author)
 
             book_price_view_models.append(BookPriceForStoreViewModel(bp.book_store_id,
                                                                      bp.book_store_name,
                                                                      bp.url,
+                                                                     price_history_url,
                                                                      price_str,
                                                                      created_str,
                                                                      is_price_available))
@@ -94,7 +107,10 @@ class BookMapper:
         else:
             book.image_url = os.path.join(image_base_url, fallback_image)
 
-        index_url = cls.create_index_url(page, search_phrase, author)
+        index_url = cls.create_url(page,
+                                   "index",
+                                   search_phrase=search_phrase,
+                                   author=author)
 
         return BookDetailsViewModel(book,
                                     book_price_view_models,
@@ -104,22 +120,28 @@ class BookMapper:
                                     search_phrase)
 
     @staticmethod
-    def create_index_url(page_number: int, search_phrase: Optional[str], author: Optional[str]) -> str:
-        params = {}
-        if search_phrase:
-            params["search"] = search_phrase
-        if author:
-            params["author"] = author
+    def create_url(page_number: int,
+                   endpoint: str,
+                   **params) -> str:
+        url_params = {name: str(value) for name, value in params.items() if value is not None}
+        url_params["page"] = str(page_number)
 
-        params["page"] = str(page_number)
+        return url_for(endpoint, **url_params)
 
-        return url_for("index", **params)
-
-    @staticmethod
-    def map_price_history(book_in_book_store: BookInBookStore,
+    @classmethod
+    def map_price_history(cls,
+                          book_in_book_store: BookInBookStore,
                           book_prices: list[BookPrice],
-                          return_url: str,
-                          plot_base64: str) -> PriceHistoryViewModel:
+                          plot_base64: str,
+                          page: Optional[int],
+                          search_phrase: Optional[str],
+                          author: Optional[str]) -> PriceHistoryViewModel:
+
+        return_url = cls.create_url(page,
+                                    "book",
+                                    book_id=book_in_book_store.book.id,
+                                    search_phrase=search_phrase,
+                                    author=author)
 
         return PriceHistoryViewModel(book_in_book_store.book,
                                      book_in_book_store.book_store,

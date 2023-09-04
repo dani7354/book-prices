@@ -26,6 +26,7 @@ class BookPriceForStoreViewModel:
     book_store_id: int
     book_store_name: str
     url: str
+    price_history_url: str
     price: float
     created: str
     is_price_available: bool
