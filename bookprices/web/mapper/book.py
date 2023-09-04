@@ -1,7 +1,9 @@
 import os
 from typing import Optional
 from urllib.parse import urlencode
-from bookprices.web.viewmodels.book import (IndexViewModel, AuthorOption, BookListItemViewModel,                                         BookPriceForStoreViewModel, PriceHistoryViewModel, BookDetailsViewModel)
+from flask import url_for
+from bookprices.web.viewmodels.book import (IndexViewModel, AuthorOption, BookListItemViewModel,
+                                            BookPriceForStoreViewModel, PriceHistoryViewModel, BookDetailsViewModel)
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore
@@ -15,7 +17,7 @@ class BookMapper:
     @classmethod
     def map_index_vm(cls,
                      books: list[Book],
-                     authors: list[str],
+                     author_names: list[str],
                      search_phrase: str,
                      image_base_url: str,
                      fallback_image: str,
@@ -25,27 +27,15 @@ class BookMapper:
                      next_page: Optional[int]) -> IndexViewModel:
 
         author_options = [AuthorOption(AUTHOR_DEFAULT_OPTION_TEXT, "", not author)]
-        for a in authors:
-            author_options.append(AuthorOption(a, a, a == author))
+        for author_name in author_names:
+            author_options.append(AuthorOption(author_name, author_name, author_name == author))
 
-        base_url = "/"
         previous_page_url = None
         next_page_url = None
-        params = {}
-        if search_phrase:
-            params["search"] = search_phrase
-        if author:
-            params["author"] = author
-
         if previous_page:
-            previous_page_url_params = params.copy()
-            previous_page_url_params["page"] = str(previous_page)
-            previous_page_url = base_url + "?" + urlencode(previous_page_url_params)
-
+            previous_page_url = cls.create_index_url(previous_page, search_phrase, author)
         if next_page:
-            next_page_url_params = params.copy()
-            next_page_url_params["page"] = str(next_page)
-            next_page_url = base_url + "?" + urlencode(next_page_url_params)
+            next_page_url = cls.create_index_url(next_page, search_phrase, author)
 
         return IndexViewModel(cls.map_book_list(books, image_base_url, fallback_image),
                               author_options,
@@ -75,14 +65,15 @@ class BookMapper:
 
         return BookListItemViewModel(book.id, book.isbn, book.title, book.author, image_url)
 
-    @staticmethod
-    def map_book_details(book: Book,
+    @classmethod
+    def map_book_details(cls,
+                         book: Book,
                          book_prices: list[BookStoreBookPrice],
                          image_base_url: str,
                          fallback_image: str,
                          plot_data: str,
-                         index_url: str,
                          page: Optional[int],
+                         author: Optional[str],
                          search_phrase: Optional[str]) -> BookDetailsViewModel:
 
         book_price_view_models = []
@@ -103,12 +94,26 @@ class BookMapper:
         else:
             book.image_url = os.path.join(image_base_url, fallback_image)
 
+        index_url = cls.create_index_url(page, search_phrase, author)
+
         return BookDetailsViewModel(book,
                                     book_price_view_models,
                                     plot_data,
                                     index_url,
                                     page,
                                     search_phrase)
+
+    @staticmethod
+    def create_index_url(page_number: int, search_phrase: Optional[str], author: Optional[str]) -> str:
+        params = {}
+        if search_phrase:
+            params["search"] = search_phrase
+        if author:
+            params["author"] = author
+
+        params["page"] = str(page_number)
+
+        return url_for("index", **params)
 
     @staticmethod
     def map_price_history(book_in_book_store: BookInBookStore,

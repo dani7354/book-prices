@@ -60,7 +60,7 @@ def book(book_id: int) -> str:
 
     page = request.args.get(PAGE_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
-    index_url = url_for("index", search=search_phrase, page=page)
+    author = request.args.get("author", type=str)
 
     latest_prices = db.bookprice_db.get_latest_prices(book.id)
     all_prices = db.bookprice_db.get_all_book_prices(book)
@@ -73,8 +73,8 @@ def book(book_id: int) -> str:
                                                BOOK_IMAGES_PATH,
                                                BOOK_FALLBACK_IMAGE_NAME,
                                                plot_base64,
-                                               index_url,
                                                page,
+                                               author,
                                                search_phrase)
 
     return render_template("book.html", view_model=book_details)
