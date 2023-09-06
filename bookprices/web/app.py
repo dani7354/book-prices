@@ -101,7 +101,7 @@ def price_history(book_id: int, store_id: int) -> str:
     price_history_plot = PriceHistory([linedata])
     plot_base64 = price_history_plot.get_plot_base64()
 
-    price_history_view_model = BookMapper.map_price_history(book_in_book_store,
+    price_history_view_model = bookmapper.map_price_history(book_in_book_store,
                                                             book_prices,
                                                             plot_base64,
                                                             page,

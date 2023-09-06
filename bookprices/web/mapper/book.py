@@ -12,8 +12,7 @@ PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
 AUTHOR_DEFAULT_OPTION_TEXT = "Alle forfattere"
 
 
-def map_index_vm(cls,
-                 books: list[Book],
+def map_index_vm(books: list[Book],
                  author_names: list[str],
                  search_phrase: str,
                  image_base_url: str,
@@ -30,11 +29,11 @@ def map_index_vm(cls,
     previous_page_url = None
     next_page_url = None
     if previous_page:
-        previous_page_url = cls.create_url(previous_page, "index", search=search_phrase, author=author)
+        previous_page_url = create_url(previous_page, "index", search=search_phrase, author=author)
     if next_page:
-        next_page_url = cls.create_url(next_page, "index", search=search_phrase, author=author)
+        next_page_url = create_url(next_page, "index", search=search_phrase, author=author)
 
-    return IndexViewModel([cls.map_book_list_item(b, image_base_url, fallback_image, search_phrase, author, current_page) for b in books],
+    return IndexViewModel([map_book_list_item(b, image_base_url, fallback_image, search_phrase, author, current_page) for b in books],
                           author_options,
                           search_phrase,
                           author,
