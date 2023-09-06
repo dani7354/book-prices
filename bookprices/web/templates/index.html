@@ -30,17 +30,16 @@
     {% endif %}
 
     {% for b in view_model.book_list %}
-    {% set book_url = url_for('book', book_id=b.id, search=view_model.search_phrase, author=view_model.author, page=view_model.current_page) %}
     <div class="col">
         <div class="card">
             {% if b.image_url %}
-            <a href="{{ book_url }}">
+            <a href="{{ b.url }}">
                 <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
             </a>
             {% endif %}
             <div class="card-body">
                 <h5 class="card-title">
-                    <a class="link-secondary" href="{{ book_url }}">{{ b.title }}</a>
+                    <a class="link-secondary" href="{{ b.url }}">{{ b.title }}</a>
                 </h5>
                 <p class="card-text">{{ b.author }}</p>
             </div>

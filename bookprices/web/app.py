@@ -1,8 +1,8 @@
 import os
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.price as price_mapper
+import bookprices.web.mapper.book as bookmapper
 from flask import Flask, render_template, request, abort
-from bookprices.web.mapper.book import BookMapper
 from bookprices.web.plot.price import PriceHistory
 
 NOT_FOUND = 404
@@ -12,8 +12,10 @@ BOOK_PAGESIZE = 12
 BOOK_IMAGES_PATH = "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
 
+AUHTOR_PARAMETER = "author"
 SEARCH_PARAMETER = "search"
 PAGE_PARAMETER = "page"
+
 
 db = database.Database(
     os.environ["MYSQL_SERVER"],
@@ -28,8 +30,8 @@ app.debug = os.environ.get("DEBUG", False)
 
 @app.route("/")
 def index() -> str:
+    author = request.args.get(AUHTOR_PARAMETER, type=str)
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str, default="")
-    author = request.args.get("author", type=str, default=None)
     page = request.args.get(PAGE_PARAMETER, type=int, default=1)
     page = page if page > 0 else 1
 
@@ -39,7 +41,7 @@ def index() -> str:
     next_page = page + 1 if len(books_next) > 0 else None
     previous_page = page - 1 if page >= 2 else None
 
-    vm = BookMapper.map_index_vm(books_current,
+    vm = bookmapper.map_index_vm(books_current,
                                  authors,
                                  search_phrase,
                                  BOOK_IMAGES_PATH,
@@ -60,7 +62,7 @@ def book(book_id: int) -> str:
 
     page = request.args.get(PAGE_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
-    author = request.args.get("author", type=str)
+    author = request.args.get(AUHTOR_PARAMETER, type=str)
 
     latest_prices = db.bookprice_db.get_latest_prices(book.id)
     all_prices = db.bookprice_db.get_all_book_prices(book)
@@ -68,7 +70,7 @@ def book(book_id: int) -> str:
     price_history_plot = PriceHistory(linedata)
     plot_base64 = price_history_plot.get_plot_base64()
 
-    book_details = BookMapper.map_book_details(book,
+    book_details = bookmapper.map_book_details(book,
                                                latest_prices,
                                                BOOK_IMAGES_PATH,
                                                BOOK_FALLBACK_IMAGE_NAME,
@@ -92,6 +94,8 @@ def price_history(book_id: int, store_id: int) -> str:
 
     page = request.args.get(PAGE_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_PARAMETER, type=str)
+    author = request.args.get(AUHTOR_PARAMETER, type=str)
+
     book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
     linedata = price_mapper.map_to_linedata(book_prices, book_in_book_store.book_store.name)
     price_history_plot = PriceHistory([linedata])
@@ -101,7 +105,8 @@ def price_history(book_id: int, store_id: int) -> str:
                                                             book_prices,
                                                             plot_base64,
                                                             page,
-                                                            search_phrase)
+                                                            search_phrase,
+                                                            author)
 
     return render_template("price_history.html", view_model=price_history_view_model)
 

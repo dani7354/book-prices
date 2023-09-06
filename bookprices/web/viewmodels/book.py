@@ -18,6 +18,7 @@ class BookListItemViewModel:
     isbn: str
     title: str
     author: str
+    url: str
     image_url: str
 
 
