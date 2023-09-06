@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import Optional
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.book import Book
 
@@ -50,22 +50,25 @@ class BookDb(BaseDb):
 
                 return books
 
-    def search_books(self, search_phrase: str, page: int, page_size: int) -> list[Book]:
+    def search_books(self, search_phrase: str, author: Optional[str], page: int, page_size: int) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 phrase_with_wildcards = f"{search_phrase}%"
+                parameters = [phrase_with_wildcards,
+                              phrase_with_wildcards,
+                              search_phrase]
                 query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
                          "FROM Book "
-                         "WHERE Title LIKE %s OR Author LIKE %s OR Isbn = %s "
-                         "ORDER BY Title ASC "
-                         "LIMIT %s "
-                         "OFFSET %s;")
-                offset = (page - 1) * page_size
-                cursor.execute(query, (phrase_with_wildcards,
-                                       phrase_with_wildcards,
-                                       search_phrase,
-                                       page_size,
-                                       offset))
+                         "WHERE (Title LIKE %s OR Author LIKE %s OR Isbn = %s) ")
+                if author:
+                    query += "AND Author = %s "
+                    parameters.append(author)
+                query += ("ORDER BY Title ASC "
+                          "LIMIT %s "
+                          "OFFSET %s;")
+                parameters.append(page_size)
+                parameters.append((page - 1) * page_size)
+                cursor.execute(query, parameters)
                 books = []
                 for row in cursor:
                     book = Book(row["Id"],
@@ -118,3 +121,16 @@ class BookDb(BaseDb):
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
+
+    def get_authors(self) -> list[str]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT DISTINCT Author "
+                         "FROM Book "
+                         "ORDER BY Author ASC;")
+                cursor.execute(query)
+                authors = []
+                for row in cursor:
+                    authors.append(row["Author"])
+
+                return authors

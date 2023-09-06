@@ -5,6 +5,17 @@
     <div class="col-auto">
         <input class="form-control" name="search" type="text" value="{{ view_model.search_phrase }}">
     </div>
+     <div class="col-auto">
+         <select name="author" class="form-select" aria-label="forfatter">
+             {% for a in view_model.authors %}
+                {% if a.selected %}
+                    <option value="{{ a.value }}" selected>{{ a.text }}</option>
+                {% else %}
+                    <option value="{{ a.value }}">{{ a.text }}</option>
+                {% endif %}
+             {% endfor %}
+         </select>
+    </div>
     <div class="col-auto">
         <button class="btn btn-secondary mb-3" type="submit">Søg</button>
     </div>
@@ -19,17 +30,16 @@
     {% endif %}
 
     {% for b in view_model.book_list %}
-    {% set book_url = url_for('book', book_id=b.id, search=view_model.search_phrase, page=view_model.current_page) %}
     <div class="col">
         <div class="card">
             {% if b.image_url %}
-            <a href="{{ book_url }}">
+            <a href="{{ b.url }}">
                 <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
             </a>
             {% endif %}
             <div class="card-body">
                 <h5 class="card-title">
-                    <a class="link-secondary" href="{{ book_url }}">{{ b.title }}</a>
+                    <a class="link-secondary" href="{{ b.url }}">{{ b.title }}</a>
                 </h5>
                 <p class="card-text">{{ b.author }}</p>
             </div>
@@ -40,17 +50,17 @@
 <nav aria-label="Pagination">
     <ul class="pagination">
         <li class="{{ 'page-item' if view_model.previous_page else 'page-item disabled' }}">
-            <a aria-label="Previous" class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.previous_page }}">
+            <a aria-label="Previous" class="page-link link-secondary" href="{{ view_model.previous_page_url }}">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.current_page }}">
+            <a class="page-link link-secondary" href="">
                 {{ view_model.current_page }}
             </a>
         </li>
         <li class="{{ 'page-item' if view_model.next_page else 'page-item disabled' }}">
-            <a aria-label="Next" class="page-link link-secondary" href="/?search={{ view_model.search_phrase }}&page={{ view_model.next_page }}">
+            <a aria-label="Next" class="page-link link-secondary" href="{{ view_model.next_page_url }}">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>

@@ -6,11 +6,19 @@ from bookprices.shared.model.bookprice import BookPrice
 
 
 @dataclass(frozen=True)
+class AuthorOption:
+    text: str
+    value: str
+    selected: bool
+
+
+@dataclass(frozen=True)
 class BookListItemViewModel:
     id: int
     isbn: str
     title: str
     author: str
+    url: str
     image_url: str
 
 
@@ -19,6 +27,7 @@ class BookPriceForStoreViewModel:
     book_store_id: int
     book_store_name: str
     url: str
+    price_history_url: str
     price: float
     created: str
     is_price_available: bool
@@ -37,10 +46,14 @@ class PriceHistoryViewModel:
 @dataclass(frozen=True)
 class IndexViewModel:
     book_list: list[BookListItemViewModel]
+    authors: list[AuthorOption]
     search_phrase: str
+    author: Optional[str]
     current_page: int
     previous_page: Optional[int]
     next_page: Optional[int]
+    previous_page_url: Optional[str]
+    next_page_url: Optional[str]
 
 
 @dataclass(frozen=True)

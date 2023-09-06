@@ -51,7 +51,7 @@
         <td>{{ p.created }}</td>
         <td>
             {% if p.is_price_available %}
-            <a href="{{ url_for('price_history', book_id=view_model.book.id, store_id=p.book_store_id, search=view_model.search_phrase, page=view_model.page) }}">
+            <a href="{{ p.price_history_url }}">
                 Prisudvikling
             </a>
             {% else %}
