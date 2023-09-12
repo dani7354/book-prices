@@ -26,14 +26,13 @@ def map_index_vm(books: list[Book],
     for author_name in author_names:
         author_options.append(AuthorOption(author_name, author_name, author_name == author))
 
-    previous_page_url = None
-    next_page_url = None
+    previous_page_url, next_page_url = None, None
     if previous_page:
         previous_page_url = create_url(previous_page, "index", search=search_phrase, author=author)
     if next_page:
         next_page_url = create_url(next_page, "index", search=search_phrase, author=author)
 
-    return IndexViewModel([map_book_list_item(b, image_base_url, fallback_image, search_phrase, author, current_page) for b in books],
+    return IndexViewModel([_map_book_item(b, image_base_url, fallback_image, search_phrase, author, current_page) for b in books],
                           author_options,
                           search_phrase,
                           author,
@@ -44,18 +43,15 @@ def map_index_vm(books: list[Book],
                           next_page_url)
 
 
-def map_book_list_item(book: Book,
-                       image_base_url: str,
-                       fallback_image: str,
-                       search_phrase: Optional[str],
-                       author: Optional[str],
-                       page: int) -> BookListItemViewModel:
+def _map_book_item(book: Book,
+                   image_base_url: str,
+                   fallback_image: str,
+                   search_phrase: Optional[str],
+                   author: Optional[str],
+                   page: int) -> BookListItemViewModel:
 
-    if book.image_url is not None:
-        image_url = os.path.join(image_base_url, book.image_url)
-    else:
-        image_url = os.path.join(image_base_url, fallback_image)
-
+    image = book.image_url if book.image_url else fallback_image
+    image_url = os.path.join(image_base_url, image)
     url = create_url(page, "book", book_id=book.id, search=search_phrase, author=author)
 
     return BookListItemViewModel(book.id, book.isbn, book.title, book.author, url, image_url)
@@ -90,17 +86,16 @@ def map_book_details(book: Book,
                                                                  created_str,
                                                                  is_price_available))
 
-    if book.image_url is not None:
-        book.image_url = os.path.join(image_base_url, book.image_url)
-    else:
-        book.image_url = os.path.join(image_base_url, fallback_image)
-
+    image_url = book.image_url if book.image_url else fallback_image
+    book.image_url = os.path.join(image_base_url, image_url)
     index_url = create_url(page, endpoint="index", search=search_phrase, author=author)
+    author_search_url = create_url(page, endpoint="index", author=book.author)
 
     return BookDetailsViewModel(book,
                                 book_price_view_models,
                                 plot_data,
                                 index_url,
+                                author_search_url,
                                 page,
                                 search_phrase)
 
