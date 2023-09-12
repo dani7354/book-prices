@@ -1,6 +1,6 @@
-beautifulsoup4==4.11.1
-flask==2.2.5
+beautifulsoup4==4.12.2
+flask==2.3.3
 mysql-connector-python==8.0.32
 requests==2.31.0
 uWSGI==2.0.22
-matplotlib==3.7.2
+matplotlib==3.7.3
