@@ -62,5 +62,6 @@ class BookDetailsViewModel:
     book_prices: list[BookPriceForStoreViewModel]
     plot_data: str
     return_url: str
+    author_search_url: str
     page: Optional[int]
     search_phrase: Optional[str]
