@@ -15,4 +15,3 @@ RUN mkdir ./config
 RUN crontab ./bookprices/cronjob/crontab
 
 CMD ["crond", "-f"]
-

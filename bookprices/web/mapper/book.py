@@ -1,11 +1,24 @@
 import os
 from typing import Optional
 from flask import url_for
-from bookprices.web.viewmodels.book import (IndexViewModel, AuthorOption, BookListItemViewModel,
-                                            BookPriceForStoreViewModel, PriceHistoryViewModel, BookDetailsViewModel)
+
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore
+from bookprices.web.settings import (
+    SEARCH_URL_PARAMETER,
+    PAGE_URL_PARAMETER,
+    AUTHOR_URL_PARAMETER,
+    BOOK_IMAGES_PATH,
+    BOOK_FALLBACK_IMAGE_NAME)
+from bookprices.web.viewmodels.book import (
+    IndexViewModel,
+    AuthorOption,
+    BookListItemViewModel,
+    BookPriceForStoreViewModel,
+    PriceHistoryViewModel,
+    BookDetailsViewModel)
+
 
 PRICE_NONE_TEXT = "-"
 PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
@@ -15,8 +28,6 @@ AUTHOR_DEFAULT_OPTION_TEXT = "Alle forfattere"
 def map_index_vm(books: list[Book],
                  author_names: list[str],
                  search_phrase: str,
-                 image_base_url: str,
-                 fallback_image: str,
                  current_page: int,
                  author: Optional[str],
                  previous_page: Optional[int],
@@ -28,11 +39,15 @@ def map_index_vm(books: list[Book],
 
     previous_page_url, next_page_url = None, None
     if previous_page:
-        previous_page_url = create_url(previous_page, "index", search=search_phrase, author=author)
+        previous_page_url = create_url(previous_page,
+                                       endpoint="index",
+                                       **{SEARCH_URL_PARAMETER: search_phrase, AUTHOR_URL_PARAMETER: author})
     if next_page:
-        next_page_url = create_url(next_page, "index", search=search_phrase, author=author)
+        next_page_url = create_url(next_page,
+                                   endpoint="index",
+                                   **{SEARCH_URL_PARAMETER: search_phrase, AUTHOR_URL_PARAMETER: author})
 
-    return IndexViewModel([_map_book_item(b, image_base_url, fallback_image, search_phrase, author, current_page) for b in books],
+    return IndexViewModel([_map_book_item(b, search_phrase, author, current_page) for b in books],
                           author_options,
                           search_phrase,
                           author,
@@ -44,23 +59,22 @@ def map_index_vm(books: list[Book],
 
 
 def _map_book_item(book: Book,
-                   image_base_url: str,
-                   fallback_image: str,
                    search_phrase: Optional[str],
                    author: Optional[str],
                    page: int) -> BookListItemViewModel:
 
-    image = book.image_url if book.image_url else fallback_image
-    image_url = os.path.join(image_base_url, image)
-    url = create_url(page, "book", book_id=book.id, search=search_phrase, author=author)
+    image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
+    image_url = os.path.join(BOOK_IMAGES_PATH, image)
+    url = create_url(page,
+                     endpoint="book",
+                     book_id=book.id,
+                     **{SEARCH_URL_PARAMETER: search_phrase, AUTHOR_URL_PARAMETER: author})
 
     return BookListItemViewModel(book.id, book.isbn, book.title, book.author, url, image_url)
 
 
 def map_book_details(book: Book,
                      book_prices: list[BookStoreBookPrice],
-                     image_base_url: str,
-                     fallback_image: str,
                      plot_data: str,
                      page: Optional[int],
                      author: Optional[str],
@@ -75,8 +89,7 @@ def map_book_details(book: Book,
                                        endpoint="price_history",
                                        book_id=book.id,
                                        store_id=bp.book_store_id,
-                                       search=search_phrase,
-                                       author=author)
+                                       **{SEARCH_URL_PARAMETER: search_phrase, AUTHOR_URL_PARAMETER: author})
 
         book_price_view_models.append(BookPriceForStoreViewModel(bp.book_store_id,
                                                                  bp.book_store_name,
@@ -86,10 +99,15 @@ def map_book_details(book: Book,
                                                                  created_str,
                                                                  is_price_available))
 
-    image_url = book.image_url if book.image_url else fallback_image
-    book.image_url = os.path.join(image_base_url, image_url)
-    index_url = create_url(page, endpoint="index", search=search_phrase, author=author)
-    author_search_url = create_url(page, endpoint="index", author=book.author)
+    image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
+    book.image_url = os.path.join(BOOK_IMAGES_PATH, image)
+    index_url = create_url(page,
+                           endpoint="index",
+                           **{SEARCH_URL_PARAMETER: search_phrase, AUTHOR_URL_PARAMETER: author})
+
+    author_search_url = create_url(page_number=1,
+                                   endpoint="index",
+                                   **{AUTHOR_URL_PARAMETER: book.author})
 
     return BookDetailsViewModel(book,
                                 book_price_view_models,
@@ -104,7 +122,7 @@ def create_url(page_number: int,
                endpoint: str,
                **params) -> str:
     url_params = {name: str(value) for name, value in params.items() if value}
-    url_params["page"] = str(page_number)
+    url_params[PAGE_URL_PARAMETER] = str(page_number)
 
     return url_for(endpoint, **url_params)
 
@@ -119,8 +137,7 @@ def map_price_history(book_in_book_store: BookInBookStore,
     return_url = create_url(page,
                             endpoint="book",
                             book_id=book_in_book_store.book.id,
-                            search=search_phrase,
-                            author=author)
+                            **{SEARCH_URL_PARAMETER: search_phrase, AUTHOR_URL_PARAMETER: author})
 
     return PriceHistoryViewModel(book_in_book_store.book,
                                  book_in_book_store.book_store,
