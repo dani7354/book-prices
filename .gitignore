@@ -6,6 +6,7 @@ docker/cronjob/images/
 docker/cronjob/config/
 docker/cronjob/log/
 docker/nginx/tls/
+docker/nginx/log/
 .vscode/
 .idea/
 .pytest_cache/

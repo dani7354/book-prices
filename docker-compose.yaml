@@ -35,6 +35,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - ./docker/nginx/log:/var/log/nginx
       - ./docker/nginx/tls:/etc/nginx/tls:ro
       - ./docker/cronjob/images:/usr/share/nginx/html/static/images/books:ro
     depends_on:
