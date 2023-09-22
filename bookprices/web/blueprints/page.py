@@ -106,5 +106,5 @@ def not_found(error):
 
 
 @page_blueprint.errorhandler(INTERNAL_SERVER_ERROR)
-def not_found(error):
+def internal_server_error(error):
     return render_template("500.html"), INTERNAL_SERVER_ERROR
