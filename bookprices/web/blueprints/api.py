@@ -1,8 +1,29 @@
-from flask import Blueprint, jsonify, request
+from typing import Union
+from flask import Blueprint, Response, jsonify
+from bookprices.shared.db.database import Database
+from bookprices.web.settings import (
+    MYSQL_HOST,
+    MYSQL_PORT,
+    MYSQL_USER,
+    MYSQL_PASSWORD,
+    MYSQL_DATABASE)
+
 
 api_blueprint = Blueprint("api", __name__)
 
+db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 
-@api_blueprint.route("/all")
-def index():
-    return jsonify({"message": "Hello, World!"})
+
+@api_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
+def prices(book_id: int, store_id: int) -> Union[Response, tuple[Response, int]]:
+    book = db.book_db.get_book(book_id)
+    if not book:
+        return jsonify({"message": f"Book with id {book_id} not found"}), 404
+
+    book_in_book_store = db.bookstore_db.get_book_store_for_book(book, store_id)
+    if not book_in_book_store:
+        return jsonify({"message": f"Book store with id {store_id} not found"}), 404
+
+    book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
+
+    return jsonify({"prices": book_prices})
