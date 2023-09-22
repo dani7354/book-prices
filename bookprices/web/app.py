@@ -2,6 +2,7 @@ import bookprices.shared.db.database as database
 import bookprices.web.mapper.price as pricemapper
 import bookprices.web.mapper.book as bookmapper
 from flask import Flask, render_template, request, abort
+from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.plot.price import PriceHistory
 from bookprices.web.settings import (
     MYSQL_HOST,
@@ -21,6 +22,7 @@ INTERNAL_SERVER_ERROR = 500
 
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 app = Flask(__name__)
+app.register_blueprint(api_blueprint, url_prefix="/api")
 app.debug = DEBUG_MODE
 
 
