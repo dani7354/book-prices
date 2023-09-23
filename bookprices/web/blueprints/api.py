@@ -1,6 +1,7 @@
 from typing import Union
 from flask import Blueprint, Response, jsonify
 from bookprices.shared.db.database import Database
+from bookprices.web.mapper.price import map_prices_for_book_in_store
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -24,6 +25,7 @@ def prices(book_id: int, store_id: int) -> Union[Response, tuple[Response, int]]
     if not book_in_book_store:
         return jsonify({"message": f"Book store with id {store_id} not found"}), 404
 
-    book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
+    book_prices_for_store = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
+    prices_response = map_prices_for_book_in_store(book_prices_for_store)
 
-    return jsonify({"prices": book_prices})
+    return jsonify(prices_response)

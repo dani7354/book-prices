@@ -1,5 +1,4 @@
 from mysql.connector import connection
-
 from bookprices.shared.model.bookstore import BookStore
 
 

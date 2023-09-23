@@ -1,7 +1,5 @@
 from datetime import date
 from collections import defaultdict
-from typing import Any
-
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.book import Book

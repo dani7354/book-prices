@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 from io import BytesIO
 from matplotlib.figure import Figure
 from dataclasses import dataclass
@@ -7,7 +8,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class LineData:
     title: str
-    dates: list[str]
+    dates: list[datetime]
     prices: list[float]
 
 
