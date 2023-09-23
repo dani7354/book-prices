@@ -8,7 +8,7 @@ MYSQL_PASSWORD = os.environ["MYSQL_PASSWORD"]
 MYSQL_DATABASE = os.environ["MYSQL_DATABASE"]
 
 # App settings
-BOOK_PAGESIZE = 12
+BOOK_PAGESIZE = 20
 BOOK_IMAGES_PATH = "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
 
