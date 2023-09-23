@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
 
@@ -9,4 +10,4 @@ class BookPrice:
     book: Book
     book_store: BookStore
     price: float
-    created: str
+    created: datetime

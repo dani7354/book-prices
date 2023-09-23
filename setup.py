@@ -1,5 +1,5 @@
-import os
 from setuptools import setup
+import os
 
 
 def get_requirements() -> list[str]:
@@ -11,23 +11,24 @@ def get_requirements() -> list[str]:
 
 
 setup(
-    name='bookprices',
-    version='1.0',
+    name="bookprices",
+    version="1.0",
     packages=[
-        'bookprices',
-        'bookprices.web',
-        'bookprices.web.mapper',
-        'bookprices.web.viewmodels',
-        'bookprices.tool',
-        'bookprices.shared',
-        'bookprices.shared.db',
-        'bookprices.shared.model',
-        'bookprices.shared.config',
-        'bookprices.shared.validation',
-        'bookprices.shared.webscraping',
-        'bookprices.cronjob'],
+        "bookprices",
+        "bookprices.web",
+        "bookprices.web.mapper",
+        "bookprices.web.viewmodels",
+        "bookprices.web.blueprints",
+        "bookprices.tool",
+        "bookprices.shared",
+        "bookprices.shared.db",
+        "bookprices.shared.model",
+        "bookprices.shared.config",
+        "bookprices.shared.validation",
+        "bookprices.shared.webscraping",
+        "bookprices.cronjob"],
     install_requires=get_requirements(),
-    url='https://github.com/dani7354/book-prices',
-    license='',
-    author='dsp',
-    author_email='d@stuhrs.dk')
+    url="https://github.com/dani7354/book-prices",
+    license="MIT",
+    author="dsp",
+    author_email="d@stuhrs.dk")
