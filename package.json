@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "apexcharts": "^3.42.0",
     "jquery": "^3.7.1"
+  },
+  "scripts": {
+    "build:jquery": "cp node_modules/jquery/dist/jquery.slim.min.js bookprices/web/assets/js/jquery.slim.min.js"
   }
 }
