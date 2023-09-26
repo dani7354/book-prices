@@ -3,8 +3,8 @@ const priceChartContainer = $("#chart");
 const priceTable = $("#price-table");
 
 function createTable(container, priceHistoryResponse) {
-    let dates_desc = priceHistoryResponse["dates"].reverse();
-    let prices = priceHistoryResponse["prices"].reverse();
+    let dates_desc = priceHistoryResponse["dates"]
+    let prices = priceHistoryResponse["prices"]
 
     $.each(dates_desc, function (index, date) {
         let price = prices[index];
