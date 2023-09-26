@@ -3,8 +3,11 @@ const priceChartContainer = $("#chart");
 const priceTable = $("#price-table");
 
 function createTable(container, priceHistoryResponse) {
-    $.each(priceHistoryResponse["dates"], function (index, date) {
-        let price = priceHistoryResponse["prices"][index];
+    let dates_desc = priceHistoryResponse["dates"].reverse();
+    let prices = priceHistoryResponse["prices"].reverse();
+
+    $.each(dates_desc, function (index, date) {
+        let price = prices[index];
         let row = $("<tr></tr>");
         row.append($("<td></td>").text(date));
         row.append($("<td></td>").text(price));
@@ -71,7 +74,3 @@ function getPriceHistoryForBookInStore() {
 $(document).ready(function () {
     getPriceHistoryForBookInStore()
 });
-
-
-
-
