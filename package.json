@@ -4,7 +4,7 @@
     "jquery": "^3.7.1"
   },
   "scripts": {
-    "build:jquery": "cp node_modules/jquery/dist/jquery.slim.min.js bookprices/web/assets/js/jquery.slim.min.js",
+    "build:jquery": "cp node_modules/jquery/dist/jquery.min.js bookprices/web/assets/js/jquery.min.js",
     "build:apexcharts": "cp node_modules/apexcharts/dist/apexcharts.min.js bookprices/web/assets/js/apexcharts.min.js"
   }
 }
