@@ -16,10 +16,12 @@ function createTable(container, priceHistoryResponse) {
 }
 
 function createChart(container, priceHistoryResponse) {
+    let dates = priceHistoryResponse["dates"];
+    let prices = priceHistoryResponse["prices"];
     var options = {
           series: [{
             name: "Pris",
-            data: priceHistoryResponse["prices"]
+            data: prices
         }],
           chart: {
           height: chartHeight,
@@ -42,7 +44,7 @@ function createChart(container, priceHistoryResponse) {
         },
         xaxis: {
           title: { text: "Dato" },
-          categories: priceHistoryResponse["dates"]
+          categories: dates
         },
         yaxis: {
           title: { text: 'Pris' }
@@ -52,7 +54,7 @@ function createChart(container, priceHistoryResponse) {
     chart.render();
 }
 
-function getPriceHistoryForBookInStore() {
+$(document).ready(function () {
     let bookId = priceChartContainer.data("book");
     let storeId = priceChartContainer.data("store");
     let url = `/api/book/${bookId}/store/${storeId}`;
@@ -66,11 +68,6 @@ function getPriceHistoryForBookInStore() {
         },
         "error" : function (error) {
             console.log(error);
-            return null;
         }
     });
-}
-
-$(document).ready(function () {
-    getPriceHistoryForBookInStore()
 });
