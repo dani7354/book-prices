@@ -10,11 +10,12 @@
         <span>Tilbage til {{ view_model.book.title }}</span>
     </a>
 </p>
-<h3>Prishistorik for <a class="link-secondary" href="{{ view_model.store_url }}">{{ view_model.book.title }} hos {{
-    view_model.book_store.name }}</a></h3>
-
-<img class="img-fluid rounded" src="data:image/png;base64,{{ view_model.plot_data }}" alt="Prisudvikling">
-<table class="table">
+<h3>Prishistorik for <a class="link-secondary" href="{{ view_model.store_url }}">
+    {{ view_model.book.title }} hos {{ view_model.book_store.name }}
+</a>
+</h3>
+<div id="chart" data-book="{{ view_model.book.id }}" data-store="{{ view_model.book_store.id }}"></div>
+<table id="price-table" class="table">
     <thead>
     <tr>
         <th scope="col">Dato</th>
@@ -22,12 +23,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for p in view_model.book_prices %}
-    <tr>
-        <td>{{ p.created }}</td>
-        <td>{{ p.price }}</td>
-    </tr>
-    {% endfor %}
     </tbody>
 </table>
+<script src="/static/assets/js/price_history.js"></script>
 {% endblock %}

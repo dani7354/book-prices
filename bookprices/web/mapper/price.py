@@ -21,7 +21,7 @@ def map_to_linedata_list(bookprices_by_bookstore: dict[BookStore, list[BookPrice
     return [map_to_linedata(prices, bookstore.name) for bookstore, prices in bookprices_by_bookstore.items()]
 
 
-def map_prices_for_book_in_store(bookprices: list[BookPrice]):
+def map_prices_for_book_in_store(bookprices: list[BookPrice]) -> PricesForBookInStoreResponse:
     dates, prices = [], []
     for p in bookprices:
         dates.append(f"{p.created.strftime(DATE_FORMAT)}")
