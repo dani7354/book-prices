@@ -2,8 +2,8 @@ const priceChartContainer = $("#chart");
 const priceTable = $("#price-table");
 
 function createChart(priceHistoryResponse) {
-    let dates = priceHistoryResponse["dates"];
-    let prices = priceHistoryResponse["prices"];
+    let dates = priceHistoryResponse["dates"].slice().reverse(); // dates are returned in descending order
+    let prices = priceHistoryResponse["prices"].slice().reverse();
 
     let options = getChartBaseOptions();
     options["series"][0] = { name: "Pris",  data: prices };
