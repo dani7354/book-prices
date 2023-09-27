@@ -1,8 +1,6 @@
 import bookprices.shared.db.database as database
-import bookprices.web.mapper.price as pricemapper
 import bookprices.web.mapper.book as bookmapper
 from flask import render_template, request, abort, Blueprint
-from bookprices.web.plot.price import PriceHistory
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -57,14 +55,8 @@ def book(book_id: int) -> str:
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
 
     latest_prices = db.bookprice_db.get_latest_prices(book.id)
-    all_prices = db.bookprice_db.get_all_book_prices(book)
-    linedata = pricemapper.map_to_linedata_list(all_prices)
-    price_history_plot = PriceHistory(linedata)
-    plot_base64 = price_history_plot.get_plot_base64()
-
     book_details = bookmapper.map_book_details(book,
                                                latest_prices,
-                                               plot_base64,
                                                page,
                                                author,
                                                search_phrase)

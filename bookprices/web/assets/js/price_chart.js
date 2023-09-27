@@ -1,13 +1,11 @@
 const chartHeight = 400;
 
-function createChart(container, priceHistoryResponse) {
-    let dates = priceHistoryResponse["dates"];
-    let prices = priceHistoryResponse["prices"];
+function getChartBaseOptions() {
     var options = {
-          series: [{ name: "Pris", data: prices }],
+          series: [],
           chart: {
           height: chartHeight,
-          type: 'line',
+          type: "line",
           zoom: {
             enabled: false
           }
@@ -16,22 +14,20 @@ function createChart(container, priceHistoryResponse) {
           enabled: false
         },
         stroke: {
-          curve: 'straight'
+          curve: "straight"
         },
         grid: {
           row: {
-            colors: ['#f3f3f3', 'transparent'],
+            colors: ["#f3f3f3", "transparent"],
             opacity: 0.5
           },
         },
         xaxis: {
           title: { text: "Dato" },
-          categories: dates
         },
         yaxis: {
-          title: { text: 'Pris' }
+          title: { text: "Pris" }
         }};
 
-    var chart = new ApexCharts(container.get(0), options);
-    chart.render();
+        return options;
 }

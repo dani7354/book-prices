@@ -75,7 +75,6 @@ def _map_book_item(book: Book,
 
 def map_book_details(book: Book,
                      book_prices: list[BookStoreBookPrice],
-                     plot_data: str,
                      page: Optional[int],
                      author: Optional[str],
                      search_phrase: Optional[str]) -> BookDetailsViewModel:
@@ -111,7 +110,6 @@ def map_book_details(book: Book,
 
     return BookDetailsViewModel(book,
                                 book_price_view_models,
-                                plot_data,
                                 index_url,
                                 author_search_url,
                                 page,

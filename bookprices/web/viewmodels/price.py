@@ -2,6 +2,18 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class PricesForBookInStoreResponse:
+class PriceHistoryResponse:
     dates: list[str]
     prices: list[str]
+
+
+@dataclass(frozen=True)
+class PriceHistoryForBookStoreResponse:
+    bookstore_name: str
+    prices: list[str]
+
+
+@dataclass(frozen=True)
+class PriceHistoryForDatesResponse:
+    dates: list[str]
+    prices: list[PriceHistoryForBookStoreResponse]
