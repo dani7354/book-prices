@@ -4,7 +4,7 @@ from bookprices.web.viewmodels.price import (PriceHistoryResponse, PriceHistoryF
                                              PriceHistoryForDatesResponse)
 
 
-DATE_FORMAT = "%d-%m-%Y"
+DATE_FORMAT = "%Y-%m-%d"
 PRICE_DECIMAL_FORMAT = ".2f"
 
 
