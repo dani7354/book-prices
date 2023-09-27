@@ -12,7 +12,7 @@ LOG_FILE_NAME = "delete_prices.log"
 
 
 class DeletePricesJob:
-    PRICE_MAX_AGE_DAYS = 30
+    PRICE_MAX_AGE_DAYS = 90
 
     def __init__(self, bookprice_db: BookPriceDb):
         self.bookprice_db = bookprice_db

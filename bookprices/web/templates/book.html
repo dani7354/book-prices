@@ -51,13 +51,11 @@
         <td>{{ p.created }}</td>
         <td>
             {% if p.is_price_available %}
-            <a href="{{ p.price_history_url }}">
-                Prisudvikling
-            </a>
+            <a class="btn btn-secondary" href="{{ p.price_history_url }}">Prisudvikling</a>
             {% else %}
-            <u class="text-muted">Prisudvikling</u>
+            <a class="btn btn-secondary disabled" aria-disabled="true">Prisudvikling</a>
             {% endif %}
-            <a href="{{ p.url }}">Link</a>
+            <a class="btn btn-secondary" href="{{ p.url }}">Link</a>
         </td>
     </tr>
     {% endfor %}
@@ -65,6 +63,9 @@
 </table>
 
 <h4>Prisudvikling</h4>
-<img class="img-fluid rounded" src="data:image/png;base64,{{ view_model.plot_data }}" alt="Prisudvikling">
+<div id="chart" data-book="{{ view_model.book.id }}"></div>
+<script src="/static/assets/js/price_chart.js"></script>
+<script src="/static/assets/js/book.js"></script>
+<noscript>Venligst aktivér JavaScript i din browser</noscript>
 {% endblock %}
 

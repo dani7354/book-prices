@@ -1,8 +1,19 @@
-const chartHeight = 400;
 const priceChartContainer = $("#chart");
 const priceTable = $("#price-table");
 
-function createTable(container, priceHistoryResponse) {
+function createChart(priceHistoryResponse) {
+    let dates = priceHistoryResponse["dates"];
+    let prices = priceHistoryResponse["prices"];
+
+    let options = getChartBaseOptions();
+    options["series"][0] = { name: "Pris",  data: prices };
+    options["xaxis"]["categories"] = dates;
+
+    var chart = new ApexCharts(priceChartContainer.get(0), options);
+    chart.render();
+}
+
+function createTable(priceHistoryResponse) {
     let dates_desc = priceHistoryResponse["dates"];
     let prices = priceHistoryResponse["prices"];
 
@@ -11,47 +22,8 @@ function createTable(container, priceHistoryResponse) {
         let row = $("<tr></tr>");
         row.append($("<td></td>").text(date));
         row.append($("<td></td>").text(price));
-        container.append(row);
+        priceTable.append(row);
     });
-}
-
-function createChart(container, priceHistoryResponse) {
-    let dates = priceHistoryResponse["dates"];
-    let prices = priceHistoryResponse["prices"];
-    var options = {
-          series: [{
-            name: "Pris",
-            data: prices
-        }],
-          chart: {
-          height: chartHeight,
-          type: 'line',
-          zoom: {
-            enabled: false
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'straight'
-        },
-        grid: {
-          row: {
-            colors: ['#f3f3f3', 'transparent'],
-            opacity: 0.5
-          },
-        },
-        xaxis: {
-          title: { text: "Dato" },
-          categories: dates
-        },
-        yaxis: {
-          title: { text: 'Pris' }
-        }};
-
-    var chart = new ApexCharts(container.get(0), options);
-    chart.render();
 }
 
 $(document).ready(function () {
@@ -63,8 +35,8 @@ $(document).ready(function () {
         "method" : "GET",
         "dataType": "json",
         "success" : function (data, status, xhr) {
-            createTable(priceTable, data);
-            createChart(priceChartContainer, data);
+            createTable(data);
+            createChart(data);
         },
         "error" : function (error) {
             console.log(error);

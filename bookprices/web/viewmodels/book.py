@@ -37,8 +37,6 @@ class BookPriceForStoreViewModel:
 class PriceHistoryViewModel:
     book: Book
     book_store: BookStore
-    book_prices: list[BookPrice]
-    plot_data: str
     store_url: str
     return_url: str
 
@@ -60,7 +58,6 @@ class IndexViewModel:
 class BookDetailsViewModel:
     book: Book
     book_prices: list[BookPriceForStoreViewModel]
-    plot_data: str
     return_url: str
     author_search_url: str
     page: Optional[int]

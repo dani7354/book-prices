@@ -1,8 +1,6 @@
 import bookprices.shared.db.database as database
-import bookprices.web.mapper.price as pricemapper
 import bookprices.web.mapper.book as bookmapper
 from flask import render_template, request, abort, Blueprint
-from bookprices.web.plot.price import PriceHistory
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -57,14 +55,8 @@ def book(book_id: int) -> str:
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
 
     latest_prices = db.bookprice_db.get_latest_prices(book.id)
-    all_prices = db.bookprice_db.get_all_book_prices(book)
-    linedata = pricemapper.map_to_linedata_list(all_prices)
-    price_history_plot = PriceHistory(linedata)
-    plot_base64 = price_history_plot.get_plot_base64()
-
     book_details = bookmapper.map_book_details(book,
                                                latest_prices,
-                                               plot_base64,
                                                page,
                                                author,
                                                search_phrase)
@@ -74,25 +66,17 @@ def book(book_id: int) -> str:
 
 @page_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
 def price_history(book_id: int, store_id: int) -> str:
-    book = db.book_db.get_book(book_id)
-    if book is None:
+    if not (book := db.book_db.get_book(book_id)):
         abort(NOT_FOUND)
 
-    book_in_book_store = db.bookstore_db.get_book_store_for_book(book, store_id)
-    if book_in_book_store is None:
+    if not (book_in_book_store := db.bookstore_db.get_book_store_for_book(book, store_id)):
         abort(NOT_FOUND)
 
     page = request.args.get(PAGE_URL_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str)
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
 
-    book_prices = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)
-    linedata = pricemapper.map_to_linedata(book_prices, book_in_book_store.book_store.name)
-    price_history_plot = PriceHistory([linedata])
-    plot_base64 = price_history_plot.get_plot_base64()
     price_history_view_model = bookmapper.map_price_history(book_in_book_store,
-                                                            book_prices,
-                                                            plot_base64,
                                                             page,
                                                             search_phrase,
                                                             author)
