@@ -128,8 +128,6 @@ def create_url(page_number: int,
 
 
 def map_price_history(book_in_book_store: BookInBookStore,
-                      book_prices: list[BookPrice],
-                      plot_base64: str,
                       page: Optional[int],
                       search_phrase: Optional[str],
                       author: Optional[str]) -> PriceHistoryViewModel:
@@ -141,7 +139,5 @@ def map_price_history(book_in_book_store: BookInBookStore,
 
     return PriceHistoryViewModel(book_in_book_store.book,
                                  book_in_book_store.book_store,
-                                 book_prices,
-                                 plot_base64,
                                  book_in_book_store.get_full_url(),
                                  return_url)

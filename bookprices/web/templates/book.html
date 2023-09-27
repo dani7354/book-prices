@@ -65,6 +65,9 @@
 </table>
 
 <h4>Prisudvikling</h4>
-<img class="img-fluid rounded" src="data:image/png;base64,{{ view_model.plot_data }}" alt="Prisudvikling">
+<div id="chart" data-book="{{ view_model.book.id }}"></div>
+<script src="/static/assets/js/price_chart.js"></script>
+<script src="/static/assets/js/book.js"></script>
+<!--<img class="img-fluid rounded" src="data:image/png;base64,{{ view_model.plot_data }}" alt="Prisudvikling"> -->
 {% endblock %}
 
