@@ -1,0 +1,12 @@
+{
+  "database": {
+    "host": "",
+    "port": "",
+    "username": "",
+    "password": "",
+    "name": ""
+  },
+  "logdir": "",
+  "imgdir": "",
+  "loglevel":
+}
