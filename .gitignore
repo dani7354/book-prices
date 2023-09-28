@@ -20,5 +20,4 @@ config.json
 *.env
 !*.example
 
-sql/*.sql
 !sql/insert_book_with_prices.sql
