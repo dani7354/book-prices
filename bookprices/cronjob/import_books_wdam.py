@@ -10,7 +10,7 @@ from bookprices.cronjob import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.model.book import Book
-from bookprices.shared.validation import isbn
+from bookprices.shared.validation import isbn as isbn_validator
 
 
 BOOK_URL_CSS = "a.product-name"
@@ -124,10 +124,10 @@ class WdamBookImport:
 
     def _parse_book(self, data: str) -> Book:
         data_bs = BeautifulSoup(data, "html.parser")
-        title, author, isbn, format = (None, None, None, None)
+        title, author, isbn, format_ = (None, None, None, None)
 
         title = self._parse_title(data_bs)
-        format = self._parse_format(data_bs)
+        format_ = self._parse_format(data_bs)
         author_tag = data_bs.select_one(AUTHOR_CSS)
         if author_tag:
             author = author_tag.get_text().strip()
@@ -137,12 +137,12 @@ class WdamBookImport:
             if "ISBN-13" in all_text:
                 isbn = li.select_one("span").get_text().strip()
 
-        return Book(0, isbn, title, author, format, None)
+        return Book(0, isbn, title, author, format_, None)
 
     @staticmethod
     def _is_book_valid(book: Book) -> bool:
         logging.debug(f"Validating book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})...")
-        return book.author and book.title and isbn.check_isbn13(book.isbn) and book.format
+        return book.author and book.title and isbn_validator.check_isbn13(book.isbn) and book.format
 
     @staticmethod
     def _parse_title(data_bs: BeautifulSoup) -> Optional[str]:

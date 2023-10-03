@@ -11,10 +11,10 @@ def check_isbn13(isbn13: str) -> bool:
 
 
 def _calculate_check_digit(isbn13: str) -> int:
-    sum = 0
+    isbn_sum = 0
     for i in range(0, ISBN_13_LENGTH - 1):
 
         multiply_by = 1 if i % 2 == 0 else 3
-        sum += int(isbn13[i]) * multiply_by
+        isbn_sum += int(isbn13[i]) * multiply_by
 
-    return (10 - (sum % 10)) % 10
+    return (10 - (isbn_sum % 10)) % 10

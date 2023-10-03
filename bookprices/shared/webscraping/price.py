@@ -21,6 +21,7 @@ class PriceFinder:
 
     @classmethod
     def get_price(cls, url: str, css_selector: str, price_format: Optional[str]):
+        """Get the price from the given URL using the given CSS selector and price format."""
         pass
 
 
@@ -90,7 +91,5 @@ class PriceFinderDynamic(PriceFinder):
         return float(price.group().replace(",", "."))
 
 
-class PriceFinderFactory:
-    @classmethod
-    def get_price_finder(cls, has_dynamically_loaded_content: bool) -> PriceFinder:
-        return PriceFinderDynamic() if has_dynamically_loaded_content else PriceFinderStatic()
+def get_price_finder(has_dynamically_loaded_content: bool) -> PriceFinder:
+    return PriceFinderDynamic() if has_dynamically_loaded_content else PriceFinderStatic()
