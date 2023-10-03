@@ -3,7 +3,6 @@ const chartContainer = $("#chart")
 function createChart(priceHistoryResponse) {
     let dates = priceHistoryResponse["dates"];
     let prices_for_bookstores = priceHistoryResponse["prices"];
-    let prices = [];
     let options = getChartBaseOptions();
     $.each(prices_for_bookstores, function (index, prices_for_bookstore) {
         options["series"][index] = { name: prices_for_bookstore.bookstore_name,  data: prices_for_bookstore.prices };
