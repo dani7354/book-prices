@@ -12,7 +12,7 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
     return {
         1: [
             BookInBookStore(book=MagicMock(),
-                            book_store=BookStore(0, "BookStore 1", "http://bookstore1.com",
+                            book_store=BookStore(0, "BookStore 1", "https://bookstore1.com",
                             search_url=None,
                             search_result_css_selector=None,
                             price_css_selector=".table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)",
@@ -22,7 +22,7 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
                             isbn_css_selector=None),
                             url="/book1"),
             BookInBookStore(book=MagicMock(),
-                            book_store=BookStore(1, "BookStore 2", "http://bookstore2.com",
+                            book_store=BookStore(1, "BookStore 2", "https://bookstore2.com",
                             search_url=None,
                             search_result_css_selector=None,
                             price_css_selector=".table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)",
@@ -40,7 +40,7 @@ def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
     db.bookstore_db.get_book_stores_for_books = MagicMock(return_value=books_in_bookstore)
     db.book_db.get_books = MagicMock(return_value=[MagicMock()])
     db.bookprice_db.create_prices = MagicMock()
-    monkeypatch.setattr(requests, "get", shared.mock_get_price)
+    monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
 
     job = PriceUpdateJob(db, thread_count=1)
     job.run()
@@ -55,7 +55,7 @@ def test_updates_prices_doesnt_save_if_no_prices_found(monkeypatch, books_in_boo
     db.bookstore_db.get_book_stores_for_books = MagicMock(return_value={1: [], 2: []})
     db.book_db.get_books = MagicMock(return_value=[MagicMock(), MagicMock()])
     db.bookprice_db.create_prices = MagicMock()
-    monkeypatch.setattr(requests, "get", shared.mock_get_price)
+    monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
 
     job = PriceUpdateJob(db, thread_count=1)
     job.run()

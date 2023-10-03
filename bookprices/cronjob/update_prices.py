@@ -9,7 +9,7 @@ from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookInBookStore
-from bookprices.shared.webscraping.price import PriceFinderFactory, PriceNotFoundException
+from bookprices.shared.webscraping.price import get_price_finder, PriceNotFoundException
 
 
 LOG_FILE_NAME = "update_prices.log"
@@ -20,7 +20,6 @@ class PriceUpdateJob:
         self._db = db
         self.thread_count = thread_count
         self._book_stores_queue = Queue()
-        self._price_finder_factory = PriceFinderFactory()
 
     def run(self):
         books = self._db.book_db.get_books()
@@ -41,7 +40,7 @@ class PriceUpdateJob:
             t.start()
 
         [t.join() for t in threads]
-        logging.info(f"Done!")
+        logging.info("Done!")
 
     def _fill_queue(self, book_stores_by_book_id: dict[int, list[BookInBookStore]]):
         for book_stores in book_stores_by_book_id.values():
@@ -57,10 +56,12 @@ class PriceUpdateJob:
         for book_in_store in book_stores:
             full_url = book_in_store.get_full_url()
             try:
-                logging.debug(f"Getting price for book ID {book_in_store.book.id} at book store ID "
-                              f"{book_in_store.book_store.id} (URL {full_url})")
+                logging.debug("Getting price for book ID %s at book store ID %s (URL %s)",
+                              book_in_store.book.id,
+                              book_in_store.book_store.id,
+                              full_url)
 
-                price_finder = PriceFinderFactory.get_price_finder(book_in_store.book_store.has_dynamically_loaded_content)
+                price_finder = get_price_finder(book_in_store.book_store.has_dynamically_loaded_content)
                 new_price_value = price_finder.get_price(book_in_store.get_full_url(),
                                                          book_in_store.book_store.price_css_selector,
                                                          book_in_store.book_store.price_format)
@@ -69,15 +70,15 @@ class PriceUpdateJob:
                                             book_in_store.book,
                                             book_in_store.book_store,
                                             new_price_value,
-                                            datetime.now().isoformat()))
+                                            datetime.now()))
             except PriceNotFoundException as ex:
                 logging.error(ex)
 
         if not new_prices:
-            logging.warning(f"No new prices found for book!")
+            logging.warning("No new prices found for book!")
             return
 
-        logging.info(f"Saving {len(new_prices)} new prices")
+        logging.info("Saving %s new prices", len(new_prices))
         self._db.bookprice_db.create_prices(new_prices)
 
 

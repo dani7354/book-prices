@@ -9,7 +9,7 @@ function createChart(priceHistoryResponse) {
     options["series"][0] = { name: "Pris",  data: prices };
     options["xaxis"]["categories"] = dates;
 
-    var chart = new ApexCharts(priceChartContainer.get(0), options);
+    let chart = new ApexCharts(priceChartContainer.get(0), options);
     chart.render();
 }
 

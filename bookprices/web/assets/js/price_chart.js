@@ -1,7 +1,7 @@
 const chartHeight = 400;
 
 function getChartBaseOptions() {
-    var options = {
+    let options = {
           series: [],
           chart: {
           height: chartHeight,
