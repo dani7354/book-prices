@@ -1,5 +1,7 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
+from bookprices.web.cache.memcahed import cache
+from bookprices.web.cache.key_generator import get_book_key, get_book_in_book_store_key, get_book_latest_prices_key
 from flask import render_template, request, abort, Blueprint
 from bookprices.web.settings import (
     MYSQL_HOST,
@@ -21,6 +23,7 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 
 @page_blueprint.route("/")
+@cache.cached(query_string=True)
 def index() -> str:
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
     search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str, default="")
@@ -46,15 +49,20 @@ def index() -> str:
 
 @page_blueprint.route("/book/<int:book_id>")
 def book(book_id: int) -> str:
-    book = db.book_db.get_book(book_id)
-    if book is None:
-        abort(NOT_FOUND)
+    cache_key = get_book_key(book_id)
+    if not (book := cache.get(cache_key)):
+        if not book and not (book := db.book_db.get_book(book_id)):
+            abort(NOT_FOUND)
+        cache.set(cache_key, book)
 
     page = request.args.get(PAGE_URL_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str)
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
 
-    latest_prices = db.bookprice_db.get_latest_prices(book.id)
+    if not (latest_prices := cache.get(get_book_latest_prices_key(book_id))):
+        latest_prices = db.bookprice_db.get_latest_prices(book.id)
+        cache.set(get_book_latest_prices_key(book_id), latest_prices)
+
     book_details = bookmapper.map_book_details(book,
                                                latest_prices,
                                                page,
@@ -66,17 +74,23 @@ def book(book_id: int) -> str:
 
 @page_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
 def price_history(book_id: int, store_id: int) -> str:
-    if not (book := db.book_db.get_book(book_id)):
-        abort(NOT_FOUND)
+    book_cache_key = get_book_key(book_id)
+    if not (book := cache.get(book_cache_key)):
+        if not book and not (book := db.book_db.get_book(book_id)):
+            abort(NOT_FOUND)
+        cache.set(book_cache_key, book)
 
-    if not (book_in_book_store := db.bookstore_db.get_book_store_for_book(book, store_id)):
-        abort(NOT_FOUND)
+    book_bookstore_cache_key = get_book_in_book_store_key(book_id, store_id)
+    if not (book_in_bookstore := cache.get(book_bookstore_cache_key)):
+        if not book_in_bookstore and not (book_in_bookstore := db.bookstore_db.get_book_store_for_book(book, store_id)):
+            abort(NOT_FOUND)
+        cache.set(book_bookstore_cache_key, book_in_bookstore)
 
     page = request.args.get(PAGE_URL_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str)
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
 
-    price_history_view_model = bookmapper.map_price_history(book_in_book_store,
+    price_history_view_model = bookmapper.map_price_history(book_in_bookstore,
                                                             page,
                                                             search_phrase,
                                                             author)

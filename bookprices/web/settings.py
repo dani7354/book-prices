@@ -7,6 +7,10 @@ MYSQL_USER = os.environ["MYSQL_USER"]
 MYSQL_PASSWORD = os.environ["MYSQL_PASSWORD"]
 MYSQL_DATABASE = os.environ["MYSQL_DATABASE"]
 
+# Cache settings
+MEMCACHED_SERVER = os.environ.get("MEMCACHED_SERVER")
+MEMCACHED_PORT = int(os.environ.get("MEMCACHED_SERVER_PORT", "0"))
+
 # App settings
 BOOK_PAGESIZE = 20
 BOOK_IMAGES_PATH = "/static/images/books/"
