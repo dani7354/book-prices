@@ -1,3 +1,4 @@
+from typing import Optional
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookstore import BookStore, BookInBookStore
 from bookprices.shared.model.book import Book
@@ -60,7 +61,7 @@ class BookStoreDb(BaseDb):
                 cursor.execute(query, (book_id, book_store_id, url))
                 con.commit()
 
-    def get_book_store_for_book(self, book: Book, book_store_id: int):
+    def get_book_store_for_book(self, book: Book, book_store_id: int) -> Optional[BookInBookStore]:
         book_stores_for_book = self.get_book_stores_for_books([book])
         for book_store_book in book_stores_for_book[book.id]:
             if book_store_book.book_store.id == book_store_id:
