@@ -14,5 +14,3 @@ def _create_cache_config() -> dict:
 
 
 cache = Cache(config=_create_cache_config())
-
-

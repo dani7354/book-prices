@@ -74,15 +74,17 @@ def book(book_id: int) -> str:
 
 @page_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
 def price_history(book_id: int, store_id: int) -> str:
-    if not (book := cache.get(get_book_key(book_id))):
+    book_cache_key = get_book_key(book_id)
+    if not (book := cache.get(book_cache_key)):
         if not book and not (book := db.book_db.get_book(book_id)):
             abort(NOT_FOUND)
-        cache.set(get_book_key(book_id), book)
+        cache.set(book_cache_key, book)
 
-    if not (book_in_bookstore := cache.get(get_book_in_book_store_key(book_id, store_id))):
+    book_bookstore_cache_key = get_book_in_book_store_key(book_id, store_id)
+    if not (book_in_bookstore := cache.get(book_bookstore_cache_key)):
         if not book_in_bookstore and not (book_in_bookstore := db.bookstore_db.get_book_store_for_book(book, store_id)):
             abort(NOT_FOUND)
-        cache.set(get_book_in_book_store_key(book_id, store_id), book_in_bookstore)
+        cache.set(book_bookstore_cache_key, book_in_bookstore)
 
     page = request.args.get(PAGE_URL_PARAMETER, type=int)
     search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str)
