@@ -23,7 +23,6 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 
 @page_blueprint.route("/")
-@cache.cached(query_string=True)
 def index() -> str:
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
     search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str, default="")
