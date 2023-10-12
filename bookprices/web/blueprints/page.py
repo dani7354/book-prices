@@ -1,8 +1,13 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
 from bookprices.web.cache.memcahed import cache
-from bookprices.web.cache.key_generator import get_book_key, get_book_in_book_store_key, get_book_latest_prices_key
 from flask import render_template, request, abort, Blueprint
+from bookprices.web.cache.key_generator import (
+    get_authors_key,
+    get_book_key,
+    get_book_list_key,
+    get_book_in_book_store_key,
+    get_book_latest_prices_key)
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -29,9 +34,20 @@ def index() -> str:
     page = request.args.get(PAGE_URL_PARAMETER, type=int, default=1)
     page = page if page > 0 else 1
 
-    authors = db.book_db.get_authors()
-    books_current = db.book_db.search_books(search_phrase, author, page, BOOK_PAGESIZE)
-    books_next = db.book_db.search_books(search_phrase, author, page + 1, BOOK_PAGESIZE)
+    if not (authors := cache.get(get_authors_key())):
+        authors = db.book_db.get_authors()
+        cache.set(get_authors_key(), authors)
+
+    books_current_cache_key = get_book_list_key(page, search_phrase, author)
+    if not (books_current := cache.get(books_current_cache_key)):
+        books_current = db.book_db.search_books(search_phrase, author, page, BOOK_PAGESIZE)
+        cache.set(books_current_cache_key, books_current)
+
+    books_next_cache_key = get_book_list_key(page + 1, search_phrase, author)
+    if not (books_next := cache.get(books_next_cache_key)):
+        books_next = db.book_db.search_books(search_phrase, author, page + 1, BOOK_PAGESIZE)
+        cache.set(books_next_cache_key, books_next)
+
     next_page = page + 1 if len(books_next) > 0 else None
     previous_page = page - 1 if page >= 2 else None
 
