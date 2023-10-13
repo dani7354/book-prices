@@ -11,7 +11,6 @@ from bookprices.web.settings import (
 
 RESPONSE_TIMEOUT = 600
 
-
 api_blueprint = Blueprint("api", __name__)
 
 db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
