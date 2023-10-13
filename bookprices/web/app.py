@@ -2,7 +2,7 @@ from flask import Flask
 from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.page import page_blueprint, not_found, internal_server_error
 from bookprices.web.settings import DEBUG_MODE, FLASK_APP_PORT
-from bookprices.web.cache.memcahed import cache
+from bookprices.web.cache.memcached import cache
 
 
 app = Flask(__name__)
