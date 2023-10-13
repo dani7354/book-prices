@@ -26,7 +26,7 @@ def _create_cache_config() -> dict:
         return {"CACHE_TYPE": "SimpleCache"}
     return {
         "DEBUG": DEBUG_MODE,
-        "CACHE_TYPE": "bookprices.web.cache.memcahed.MemcachedClient",
+        "CACHE_TYPE": "bookprices.web.cache.memcached.MemcachedClient",
         "CACHE_MEMCACHED_SERVERS": [f"{MEMCACHED_SERVER}:{MEMCACHED_PORT}"],
         "CACHE_OPTIONS": {"tcp_nodelay": True},
         "CACHE_DEFAULT_TIMEOUT": 300,

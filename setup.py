@@ -19,6 +19,7 @@ setup(
         "bookprices.web.mapper",
         "bookprices.web.viewmodels",
         "bookprices.web.blueprints",
+        "bookprices.web.cache",
         "bookprices.tool",
         "bookprices.shared",
         "bookprices.shared.db",
