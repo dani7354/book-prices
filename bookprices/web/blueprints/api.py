@@ -9,6 +9,8 @@ from bookprices.web.settings import (
     MYSQL_PASSWORD,
     MYSQL_DATABASE)
 
+RESPONSE_TIMEOUT = 600
+
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -16,7 +18,7 @@ db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 
 
 @api_blueprint.route("/book/<int:book_id>")
-@cache.cached(timeout=600)
+@cache.cached(timeout=RESPONSE_TIMEOUT)
 def book(book_id: int) -> tuple[Response, int]:
     if not (book := db.book_db.get_book(book_id)):
         return jsonify({"message": f"Book with id {book_id} not found"}), 404
@@ -28,7 +30,7 @@ def book(book_id: int) -> tuple[Response, int]:
 
 
 @api_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
-@cache.cached(timeout=600)
+@cache.cached(timeout=RESPONSE_TIMEOUT)
 def prices(book_id: int, store_id: int) -> tuple[Response, int]:
     if not (book := db.book_db.get_book(book_id)):
         return jsonify({"message": f"Book with id {book_id} not found"}), 404
