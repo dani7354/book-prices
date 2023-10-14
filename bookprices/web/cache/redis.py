@@ -1,5 +1,5 @@
 from flask_caching import Cache
-from bookprices.web.settings import DEBUG_MODE, REDIS_SERVER, REDIS_SERVER_PORT, REDIS_DB
+from bookprices.web.settings import DEBUG_MODE, REDIS_SERVER, REDIS_SERVER_PORT, REDIS_DB, CACHE_DEFAULT_TIMEOUT
 
 
 def _create_cache_config() -> dict:
@@ -11,7 +11,7 @@ def _create_cache_config() -> dict:
         "CACHE_REDIS_HOST": REDIS_SERVER,
         "CACHE_REDIS_PORT": REDIS_SERVER_PORT,
         "CACHE_REDIS_DB": REDIS_DB,
-        "CACHE_DEFAULT_TIMEOUT": 300,
+        "CACHE_DEFAULT_TIMEOUT": CACHE_DEFAULT_TIMEOUT,
     }
 
 
