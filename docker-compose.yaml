@@ -56,12 +56,10 @@ services:
       - ./docker/db/init:/docker-entrypoint-initdb.d:ro
     networks:
       - localnetwork
-  memcached:
-    container_name: memcached
-    image: memcached:1.6.21-alpine
-    command:
-      - "-m 128"
+  redis:
+    container_name: redis
+    image: redis:7.2.1-alpine
     ports:
-      - "11211:11211"
+      - "6379:6379"
     networks:
       - localnetwork
