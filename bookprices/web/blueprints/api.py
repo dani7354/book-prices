@@ -1,7 +1,7 @@
 from flask import Blueprint, Response, jsonify
 from bookprices.shared.db.database import Database
 from bookprices.web.mapper.price import map_prices_history, map_price_history_for_stores
-from bookprices.web.cache.memcached import cache
+from bookprices.web.cache.redis import cache
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,

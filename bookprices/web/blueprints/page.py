@@ -1,6 +1,6 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
-from bookprices.web.cache.memcached import cache
+from bookprices.web.cache.redis import cache
 from flask import render_template, request, abort, Blueprint
 from bookprices.web.cache.key_generator import (
     get_authors_key,

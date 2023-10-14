@@ -8,8 +8,9 @@ MYSQL_PASSWORD = os.environ["MYSQL_PASSWORD"]
 MYSQL_DATABASE = os.environ["MYSQL_DATABASE"]
 
 # Cache settings
-MEMCACHED_SERVER = os.environ.get("MEMCACHED_SERVER")
-MEMCACHED_PORT = int(os.environ.get("MEMCACHED_SERVER_PORT", "0"))
+REDIS_SERVER = os.environ.get("REDIS_SERVER")
+REDIS_SERVER_PORT = int(os.environ.get("REDIS_SERVER_PORT", "6379"))
+REDIS_DB=int(os.environ.get("REDIS_DB", "0"))
 
 # App settings
 BOOK_PAGESIZE = 20
