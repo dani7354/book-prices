@@ -15,6 +15,7 @@ from bookprices.web.settings import (
 from bookprices.web.viewmodels.book import (
     IndexViewModel,
     AuthorOption,
+    SortingOption,
     BookListItemViewModel,
     BookPriceForStoreViewModel,
     PriceHistoryViewModel,
@@ -27,6 +28,70 @@ AUTHOR_DEFAULT_OPTION_TEXT = "Alle forfattere"
 INDEX_ENDPOINT = "page.index"
 BOOK_ENDPOINT = "page.book"
 PRICE_HISTORY_ENDPOINT = "page.price_history"
+
+
+def _map_sorting_options(search_phrase: str,
+                         author: str,
+                         order_by: BookSearchSortOption,
+                         descending: bool) -> list[SortingOption]:
+    sorting_options = [
+        SortingOption(
+            text="Titel (A til Z)",
+            selected=order_by == BookSearchSortOption.Title and not descending,
+            url=create_url(page_number=1,
+                           endpoint="page.index",
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: BookSearchSortOption.Title.name,
+                              DESCENDING_URL_PARAMETER: False})),
+        SortingOption(
+            text="Titel (Z til A)",
+            selected=order_by == BookSearchSortOption.Title and descending,
+            url=create_url(page_number=1,
+                           endpoint="page.index",
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: BookSearchSortOption.Title.name,
+                              DESCENDING_URL_PARAMETER: True})),
+        SortingOption(
+            text="Forfatter (A til Z)",
+            selected=order_by == BookSearchSortOption.Author and not descending,
+            url=create_url(page_number=1,
+                           endpoint="page.index",
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: BookSearchSortOption.Author.name,
+                              DESCENDING_URL_PARAMETER: False})),
+        SortingOption(
+            text="Forfatter (Z til A)",
+            selected=order_by == BookSearchSortOption.Author and descending,
+            url=create_url(page_number=1,
+                           endpoint="page.index",
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: BookSearchSortOption.Author.name,
+                              DESCENDING_URL_PARAMETER: True})),
+        SortingOption(
+            text="Oprettet (ældste først)",
+            selected=order_by == BookSearchSortOption.Created and not descending,
+            url=create_url(page_number=1,
+                           endpoint="page.index",
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
+                              DESCENDING_URL_PARAMETER: False})),
+        SortingOption(
+            text="Oprettet (nyeste først)",
+            selected=order_by == BookSearchSortOption.Created and descending,
+            url=create_url(page_number=1,
+                           endpoint="page.index",
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
+                              DESCENDING_URL_PARAMETER: True})),
+    ]
+
+    return sorting_options
 
 
 def map_index_vm(books: list[Book],
@@ -43,6 +108,7 @@ def map_index_vm(books: list[Book],
     for author_name in author_names:
         author_options.append(AuthorOption(author_name, author_name, author_name == author))
 
+    sorting_options = _map_sorting_options(search_phrase, author, order_by, descending)
     url_parameters = {
         SEARCH_URL_PARAMETER: search_phrase,
         AUTHOR_URL_PARAMETER: author,
@@ -61,6 +127,7 @@ def map_index_vm(books: list[Book],
 
     return IndexViewModel([_map_book_item(b, current_page, url_parameters) for b in books],
                           author_options,
+                          sorting_options,
                           search_phrase,
                           author,
                           current_page,
@@ -118,7 +185,10 @@ def map_book_details(book: Book,
     book.image_url = os.path.join(BOOK_IMAGES_PATH, image)
     index_url = create_url(page,
                            endpoint=INDEX_ENDPOINT,
-                           **{SEARCH_URL_PARAMETER: search_phrase, AUTHOR_URL_PARAMETER: author})
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: order_by.name,
+                              DESCENDING_URL_PARAMETER: descending})
 
     author_search_url = create_url(page_number=1,
                                    endpoint=INDEX_ENDPOINT,
@@ -153,7 +223,7 @@ def map_price_history(book_in_book_store: BookInBookStore,
                             book_id=book_in_book_store.book.id,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
-                               ORDER_BY_URL_PARAMETER: order_by,
+                               ORDER_BY_URL_PARAMETER: order_by.name,
                                DESCENDING_URL_PARAMETER: descending})
 
     return PriceHistoryViewModel(book_in_book_store.book,

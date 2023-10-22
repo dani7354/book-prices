@@ -2,6 +2,7 @@ from werkzeug.datastructures.structures import MultiDict
 from bookprices.shared.db.book import BookSearchSortOption
 from bookprices.web.settings import (
     SEARCH_URL_PARAMETER,
+    AUTHOR_URL_PARAMETER,
     PAGE_URL_PARAMETER,
     ORDER_BY_URL_PARAMETER,
     DESCENDING_URL_PARAMETER)
@@ -10,6 +11,7 @@ from bookprices.web.settings import (
 def parse_args(request_args: MultiDict) -> dict:
     args = {
         SEARCH_URL_PARAMETER: request_args.get(SEARCH_URL_PARAMETER, type=str, default=""),
+        AUTHOR_URL_PARAMETER: request_args.get(AUTHOR_URL_PARAMETER, type=str, default=""),
         DESCENDING_URL_PARAMETER: request_args.get(DESCENDING_URL_PARAMETER, type=bool, default=False)
     }
 

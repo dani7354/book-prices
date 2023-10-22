@@ -10,7 +10,7 @@ MYSQL_DATABASE = os.environ["MYSQL_DATABASE"]
 # Cache settings
 REDIS_SERVER = os.environ.get("REDIS_SERVER")
 REDIS_SERVER_PORT = int(os.environ.get("REDIS_SERVER_PORT", "6379"))
-REDIS_DB=int(os.environ.get("REDIS_DB", "0"))
+REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
 CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 
 # App settings

@@ -2,13 +2,19 @@ from dataclasses import dataclass
 from typing import Optional
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
-from bookprices.shared.model.bookprice import BookPrice
 
 
 @dataclass(frozen=True)
 class AuthorOption:
     text: str
     value: str
+    selected: bool
+
+
+@dataclass(frozen=True)
+class SortingOption:
+    text: str
+    url: str
     selected: bool
 
 
@@ -45,6 +51,7 @@ class PriceHistoryViewModel:
 class IndexViewModel:
     book_list: list[BookListItemViewModel]
     authors: list[AuthorOption]
+    sorting_options: list[SortingOption]
     search_phrase: str
     author: Optional[str]
     current_page: int

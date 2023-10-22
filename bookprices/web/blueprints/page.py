@@ -1,6 +1,6 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
-from bookprices.shared.db.book import SearchQuery, BookSearchSortOption
+from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args
 from flask import render_template, request, abort, Blueprint
