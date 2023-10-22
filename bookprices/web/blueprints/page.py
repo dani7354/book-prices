@@ -1,5 +1,6 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
+from bookprices.shared.db.book import SearchQuery, BookSearchSortOption
 from bookprices.web.cache.redis import cache
 from flask import render_template, request, abort, Blueprint
 from bookprices.web.cache.key_generator import (
@@ -17,7 +18,9 @@ from bookprices.web.settings import (
     AUTHOR_URL_PARAMETER,
     SEARCH_URL_PARAMETER,
     PAGE_URL_PARAMETER,
-    BOOK_PAGESIZE)
+    BOOK_PAGESIZE,
+    ORDER_BY_URL_PARAMETER,
+    DESCENDING_URL_PARAMETER)
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
@@ -29,8 +32,13 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 @page_blueprint.route("/")
 def index() -> str:
+    print(request.args)
     author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
     search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str, default="")
+    order_by = request.args.get(ORDER_BY_URL_PARAMETER, type=str)
+    sort_option = sort_option if (sort_option := BookSearchSortOption.from_str(order_by)) else BookSearchSortOption.Title
+    print(sort_option.name)
+    descending = request.args.get(DESCENDING_URL_PARAMETER, type=bool, default=False)
     page = request.args.get(PAGE_URL_PARAMETER, type=int, default=1)
     page = page if page > 0 else 1
 
@@ -38,14 +46,21 @@ def index() -> str:
         authors = db.book_db.get_authors()
         cache.set(get_authors_key(), authors)
 
-    books_current_cache_key = get_book_list_key(page, search_phrase, author)
+    query = SearchQuery(search_phrase=search_phrase,
+                        author=author, page=page,
+                        page_size=BOOK_PAGESIZE,
+                        sort_option=sort_option,
+                        sort_in_descending_order=descending)
+    books_current_cache_key = get_book_list_key(query)
     if not (books_current := cache.get(books_current_cache_key)):
-        books_current = db.book_db.search_books(search_phrase, author, page, BOOK_PAGESIZE)
+
+        books_current = db.book_db.search_books(query)
         cache.set(books_current_cache_key, books_current)
 
-    books_next_cache_key = get_book_list_key(page + 1, search_phrase, author)
+    next_query = query.clone(page=page + 1)
+    books_next_cache_key = get_book_list_key(next_query)
     if not (books_next := cache.get(books_next_cache_key)):
-        books_next = db.book_db.search_books(search_phrase, author, page + 1, BOOK_PAGESIZE)
+        books_next = db.book_db.search_books(next_query)
         cache.set(books_next_cache_key, books_next)
 
     next_page = page + 1 if len(books_next) > 0 else None

@@ -20,7 +20,9 @@ BOOK_FALLBACK_IMAGE_NAME = "default.png"
 
 AUTHOR_URL_PARAMETER = "author"
 SEARCH_URL_PARAMETER = "search"
+ORDER_BY_URL_PARAMETER = "orderby"
 PAGE_URL_PARAMETER = "page"
+DESCENDING_URL_PARAMETER = "descending"
 
 FLASK_APP_PORT = int(os.environ.get("FLASK_APP_PORT", 3031))
 DEBUG_MODE = os.environ.get("DEBUG", False)

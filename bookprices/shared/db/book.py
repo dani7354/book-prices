@@ -1,7 +1,50 @@
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+from enum import Enum
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.book import Book
+
+
+class BookSearchSortOption(Enum):
+    Author = "Author"
+    Title = "Title"
+    Created = "Created"
+
+    @staticmethod
+    def from_str(value: Optional[str]) -> Optional["BookSearchSortOption"]:
+        if not value:
+            return None
+        try:
+            return BookSearchSortOption(value)
+        except ValueError:
+            return None
+
+
+@dataclass(frozen=True)
+class SearchQuery:
+    search_phrase: str
+    author: Optional[str]
+    page: int
+    page_size: int
+    sort_option: BookSearchSortOption = BookSearchSortOption.Title
+    sort_in_descending_order: bool = False
+
+    def clone(self,
+              search_phrase: Optional[str] = None,
+              author: Optional[str] = None,
+              page: Optional[int] = None,
+              page_size: Optional[int] = None,
+              sort_option: Optional[BookSearchSortOption] = None,
+              sort_in_descending_order: Optional[bool] = None):
+
+        return SearchQuery(
+            search_phrase=search_phrase if search_phrase else self.search_phrase,
+            author=author if author else self.author,
+            page=page if page else self.page,
+            page_size=page_size if page_size else self.page_size,
+            sort_option=sort_option if sort_option else self.sort_option,
+            sort_in_descending_order=sort_in_descending_order if sort_in_descending_order else self.sort_in_descending_order)
 
 
 class BookDb(BaseDb):
@@ -50,24 +93,26 @@ class BookDb(BaseDb):
 
                 return books
 
-    def search_books(self, search_phrase: str, author: Optional[str], page: int, page_size: int) -> list[Book]:
+    def search_books(self, search_query: SearchQuery) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                phrase_with_wildcards = f"{search_phrase}%"
+                phrase_with_wildcards = f"{search_query.search_phrase}%"
                 parameters = [phrase_with_wildcards,
                               phrase_with_wildcards,
-                              search_phrase]
+                              search_query.search_phrase]
                 query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
                          "FROM Book "
                          "WHERE (Title LIKE %s OR Author LIKE %s OR Isbn = %s) ")
-                if author:
+                if search_query.author:
                     query += "AND Author = %s "
-                    parameters.append(author)
-                query += ("ORDER BY Title ASC "
-                          "LIMIT %s "
-                          "OFFSET %s;")
-                parameters.append(page_size)
-                parameters.append((page - 1) * page_size)
+                    parameters.append(search_query.author)
+
+                query += f"ORDER BY {search_query.sort_option.name} "
+                query += "DESC " if search_query.sort_in_descending_order else "ASC "
+                query += "LIMIT %s OFFSET %s;"
+
+                parameters.append(search_query.page_size)
+                parameters.append((search_query.page - 1) * search_query.page_size)
                 cursor.execute(query, parameters)
                 books = []
                 for row in cursor:
