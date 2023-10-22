@@ -1,6 +1,8 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
+from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
+from bookprices.web.blueprints.urlhelper import parse_args
 from flask import render_template, request, abort, Blueprint
 from bookprices.web.cache.key_generator import (
     get_authors_key,
@@ -17,7 +19,9 @@ from bookprices.web.settings import (
     AUTHOR_URL_PARAMETER,
     SEARCH_URL_PARAMETER,
     PAGE_URL_PARAMETER,
-    BOOK_PAGESIZE)
+    BOOK_PAGESIZE,
+    ORDER_BY_URL_PARAMETER,
+    DESCENDING_URL_PARAMETER)
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
@@ -29,23 +33,32 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 @page_blueprint.route("/")
 def index() -> str:
-    author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
-    search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str, default="")
-    page = request.args.get(PAGE_URL_PARAMETER, type=int, default=1)
-    page = page if page > 0 else 1
+    args = parse_args(request.args)
+    author = args.get(AUTHOR_URL_PARAMETER)
+    search_phrase = args.get(SEARCH_URL_PARAMETER)
+    order_by = args.get(ORDER_BY_URL_PARAMETER)
+    descending = args.get(DESCENDING_URL_PARAMETER)
+    page = args.get(PAGE_URL_PARAMETER)
 
     if not (authors := cache.get(get_authors_key())):
         authors = db.book_db.get_authors()
         cache.set(get_authors_key(), authors)
 
-    books_current_cache_key = get_book_list_key(page, search_phrase, author)
+    query = SearchQuery(search_phrase=search_phrase,
+                        author=author,
+                        page=page,
+                        page_size=BOOK_PAGESIZE,
+                        sort_option=order_by,
+                        sort_in_descending_order=descending)
+    books_current_cache_key = get_book_list_key(query)
     if not (books_current := cache.get(books_current_cache_key)):
-        books_current = db.book_db.search_books(search_phrase, author, page, BOOK_PAGESIZE)
+        books_current = db.book_db.search_books(query)
         cache.set(books_current_cache_key, books_current)
 
-    books_next_cache_key = get_book_list_key(page + 1, search_phrase, author)
+    next_query = query.clone(page=page + 1)
+    books_next_cache_key = get_book_list_key(next_query)
     if not (books_next := cache.get(books_next_cache_key)):
-        books_next = db.book_db.search_books(search_phrase, author, page + 1, BOOK_PAGESIZE)
+        books_next = db.book_db.search_books(next_query)
         cache.set(books_next_cache_key, books_next)
 
     next_page = page + 1 if len(books_next) > 0 else None
@@ -57,7 +70,9 @@ def index() -> str:
                                  page,
                                  author,
                                  previous_page,
-                                 next_page)
+                                 next_page,
+                                 order_by,
+                                 descending)
 
     return render_template("index.html", view_model=vm)
 
@@ -70,9 +85,12 @@ def book(book_id: int) -> str:
             abort(NOT_FOUND)
         cache.set(cache_key, book)
 
-    page = request.args.get(PAGE_URL_PARAMETER, type=int)
-    search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str)
-    author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
+    args = parse_args(request.args)
+    page = args.get(PAGE_URL_PARAMETER)
+    search_phrase = args.get(SEARCH_URL_PARAMETER)
+    author = args.get(AUTHOR_URL_PARAMETER)
+    order_by = args.get(ORDER_BY_URL_PARAMETER)
+    descending = args.get(DESCENDING_URL_PARAMETER)
 
     if not (latest_prices := cache.get(get_book_latest_prices_key(book_id))):
         latest_prices = db.bookprice_db.get_latest_prices(book.id)
@@ -82,7 +100,9 @@ def book(book_id: int) -> str:
                                                latest_prices,
                                                page,
                                                author,
-                                               search_phrase)
+                                               search_phrase,
+                                               order_by,
+                                               descending)
 
     return render_template("book.html", view_model=book_details)
 
@@ -101,14 +121,19 @@ def price_history(book_id: int, store_id: int) -> str:
             abort(NOT_FOUND)
         cache.set(book_bookstore_cache_key, book_in_bookstore)
 
-    page = request.args.get(PAGE_URL_PARAMETER, type=int)
-    search_phrase = request.args.get(SEARCH_URL_PARAMETER, type=str)
-    author = request.args.get(AUTHOR_URL_PARAMETER, type=str)
+    args = parse_args(request.args)
+    page = args.get(PAGE_URL_PARAMETER)
+    search_phrase = args.get(SEARCH_URL_PARAMETER)
+    author = args.get(AUTHOR_URL_PARAMETER)
+    order_by = args.get(ORDER_BY_URL_PARAMETER)
+    descending = args.get(DESCENDING_URL_PARAMETER)
 
     price_history_view_model = bookmapper.map_price_history(book_in_bookstore,
                                                             page,
                                                             search_phrase,
-                                                            author)
+                                                            author,
+                                                            order_by,
+                                                            descending)
 
     return render_template("price_history.html", view_model=price_history_view_model)
 
