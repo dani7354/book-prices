@@ -27,8 +27,8 @@ class SearchQuery:
     author: Optional[str]
     page: int
     page_size: int
-    sort_option: BookSearchSortOption = BookSearchSortOption.Title
-    sort_in_descending_order: bool = False
+    sort_option: BookSearchSortOption
+    sort_in_descending_order: bool
 
     def clone(self,
               search_phrase: Optional[str] = None,
