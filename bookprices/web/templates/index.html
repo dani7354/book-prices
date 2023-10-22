@@ -20,17 +20,15 @@
         <button class="btn btn-secondary mb-3" type="submit">Søg</button>
     </div>
 </form>
-<div class="row">
-    <p> Sortering:
-        {% for o in view_model.sorting_options %}
-            {% if o.selected %}
-                <strong class="text-secondary">{{ o.text }}</strong> |
-            {% else %}
-                <a href="{{ o.url }}" class="text-secondary">{{ o.text }}</a> |
-            {% endif %}
-        {% endfor %}
-    </p>
-</div>
+<form class="mb-3">
+     {% for o in view_model.sorting_options %}
+        {% if o.selected %}
+            <a href="{{ o.url }}" class="btn btn-sm btn-secondary active">{{ o.text }}</a>
+        {% else %}
+            <a href="{{ o.url }}" class="btn btn-sm btn-secondary">{{ o.text }}</a>
+        {% endif %}
+    {% endfor %}
+</form>
 <div class="row row-cols-1 row-cols-md-4 g-4 pb-5">
     {% if view_model.book_list|length == 0 %}
      <div class="col">
