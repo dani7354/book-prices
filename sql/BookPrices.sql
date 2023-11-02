@@ -56,7 +56,7 @@ CREATE TABLE `BookPrice` (
   KEY `Created` (`Created`),
   CONSTRAINT `BookPrice_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `BookPrice_ibfk_2` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=107852 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=116046 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,11 +124,13 @@ DROP TABLE IF EXISTS `FailedPriceUpdate`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `FailedPriceUpdate` (
+  `Id` mediumint unsigned NOT NULL AUTO_INCREMENT,
   `BookId` mediumint unsigned NOT NULL,
   `BookStoreId` mediumint unsigned NOT NULL,
   `Reason` varchar(100) NOT NULL,
   `Created` datetime NOT NULL,
-  PRIMARY KEY (`BookId`,`BookStoreId`),
+  PRIMARY KEY (`Id`),
+  KEY `PriceUpdateFailed_ibfk_1` (`BookId`),
   KEY `PriceUpdateFailed_ibfk_2` (`BookStoreId`),
   CONSTRAINT `PriceUpdateFailed_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `PriceUpdateFailed_ibfk_2` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
@@ -144,4 +146,4 @@ CREATE TABLE `FailedPriceUpdate` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-11-02  5:51:31
+-- Dump completed on 2023-11-02 21:44:13

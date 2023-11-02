@@ -30,7 +30,7 @@ class BookStoreSearchJob:
     def _get_book_stores_for_book(self, book: Book) -> list[BookStore]:
         logging.info(f"Getting book stores with no information for book with id {book.id}...")
         book_stores = []
-        for book_store in self.db.bookstore_db.get_missing_book_stores(book.id):
+        for book_store in self.db.bookstore_db.get_missing_bookstores(book.id):
             if book_store.search_url is not None:
                 book_stores.append(book_store)
 
@@ -55,7 +55,7 @@ class BookStoreSearchJob:
 
     def _create_book_store_for_book(self, book: Book, book_store: BookStore, url: str):
         try:
-            self.db.bookstore_db.create_book_store_for_book(book.id, book_store.id, url)
+            self.db.bookstore_db.create_bookstore_for_book(book.id, book_store.id, url)
         except Exception as ex:
             logging.error(f"Error while inserting url {url} for book {book.id} and book store {book_store.id}.")
             logging.error(ex)

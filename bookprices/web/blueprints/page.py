@@ -117,7 +117,7 @@ def price_history(book_id: int, store_id: int) -> str:
 
     book_bookstore_cache_key = get_book_in_book_store_key(book_id, store_id)
     if not (book_in_bookstore := cache.get(book_bookstore_cache_key)):
-        if not book_in_bookstore and not (book_in_bookstore := db.bookstore_db.get_book_store_for_book(book, store_id)):
+        if not book_in_bookstore and not (book_in_bookstore := db.bookstore_db.get_bookstore_for_book(book, store_id)):
             abort(NOT_FOUND)
         cache.set(book_bookstore_cache_key, book_in_bookstore)
 

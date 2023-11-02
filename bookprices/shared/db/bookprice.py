@@ -4,7 +4,7 @@ from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore, BookStoreBookPrice
-from bookprices.shared.model.error import FailedPriceUpdate
+from bookprices.shared.model.error import FailedPriceUpdate, FailedUpdateReason
 
 
 class BookPriceDb(BaseDb):
@@ -126,3 +126,25 @@ class BookPriceDb(BaseDb):
                                                                      row["Price"],
                                                                      row["Created"]))
                 return prices_by_bookstores
+
+    def get_failed_price_updates(self, book_id: int, bookstore_id: int, limit: int):
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, BookId, BookStoreId, Reason, Created "
+                         "FROM FailedPriceUpdate "
+                         "WHERE BookId = %s AND BookStoreId = %s "
+                         "ORDER BY Created DESC "
+                         "LIMIT %s;")
+
+                cursor.execute(query, (book_id, bookstore_id, limit))
+                failed_price_updates = []
+                for row in cursor:
+                    failed_price_updates.append(
+                        FailedPriceUpdate(row["Id"],
+                                          row["BookId"],
+                                          row["BookStoreId"],
+                                          FailedUpdateReason.from_str(row["Reason"]),
+                                          row["Created"]))
+
+                return failed_price_updates
+

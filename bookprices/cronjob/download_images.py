@@ -69,7 +69,7 @@ class DownloadImagesJob:
         return books_without_image
 
     def _get_image_source_for_books(self, books: list[Book]) -> dict[int, ImageSource]:
-        book_stores_for_book = self.db.bookstore_db.get_book_stores_for_books(books)
+        book_stores_for_book = self.db.bookstore_db.get_bookstores_for_books(books)
         image_source_for_books = {}
         for book_id, book_in_book_stores in book_stores_for_book.items():
             for bsb in book_in_book_stores:

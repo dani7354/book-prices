@@ -32,7 +32,7 @@ class PriceUpdateJob:
             logging.info("No books found")
             return
 
-        if not (book_stores_by_book_id := self._db.bookstore_db.get_book_stores_for_books(books)):
+        if not (book_stores_by_book_id := self._db.bookstore_db.get_bookstores_for_books(books)):
             logging.info("No book stores found for books")
             return
 
@@ -96,7 +96,7 @@ class PriceUpdateJob:
 
     def _log_failed_price_update(self, book_id: int, bookstore_id: int, reason: FailedUpdateReason):
         self._db.bookprice_db.create_failed_price_update(
-            FailedPriceUpdate(book_id, bookstore_id, reason, datetime.now()))
+            FailedPriceUpdate(None, book_id, bookstore_id, reason, datetime.now()))
 
 
 def main():

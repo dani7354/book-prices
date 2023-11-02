@@ -74,7 +74,7 @@ def main():
         print(f"Book already exists with id {book.id}!")
 
     book_stores_website_search = []
-    for book_store in db.bookstore_db.get_missing_book_stores(book.id):
+    for book_store in db.bookstore_db.get_missing_bookstores(book.id):
         if book_store.search_url is not None:
             book_stores_website_search.append(book_store)
     if len(book_stores_website_search) == 0:
@@ -88,7 +88,7 @@ def main():
     print(f"Inserting {len(matches_from_websites)} URLs...")
     for store_id, url in matches_from_websites:
         try:
-            db.bookstore_db.create_book_store_for_book(book.id, store_id, url)
+            db.bookstore_db.create_bookstore_for_book(book.id, store_id, url)
         except Exception as ex:
             print(f"Error while inserting url {url} for book {book.id} and book store {store_id}.")
             print(ex)
