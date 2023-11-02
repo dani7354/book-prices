@@ -4,6 +4,7 @@ from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore, BookStoreBookPrice
+from bookprices.shared.model.error import FailedPriceUpdate
 
 
 class BookPriceDb(BaseDb):
@@ -18,6 +19,17 @@ class BookPriceDb(BaseDb):
                 query = ("INSERT INTO BookPrice (BookId, BookStoreId, Price, Created) "
                          "VALUES (%s, %s, %s, %s)")
                 cursor.executemany(query, price_rows)
+                con.commit()
+
+    def create_failed_price_update(self, failed_price_update: FailedPriceUpdate):
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("INSERT INTO FailedPriceUpdate (BookId, BookStoreId, Reason, Created) "
+                         "VALUES (%s, %s, %s, %s)")
+                cursor.execute(query, (failed_price_update.book_id,
+                                       failed_price_update.bookstore_id,
+                                       failed_price_update.reason.value,
+                                       failed_price_update.created))
                 con.commit()
 
     def delete_prices_older_than(self, earliest_date: date):
