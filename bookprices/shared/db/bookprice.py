@@ -4,7 +4,7 @@ from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore, BookStoreBookPrice
-from bookprices.shared.model.error import FailedPriceUpdate, FailedUpdateReason
+from bookprices.shared.model.error import FailedPriceUpdate, FailedUpdateReason, FailedPriceUpdateCount
 
 
 class BookPriceDb(BaseDb):
@@ -38,6 +38,14 @@ class BookPriceDb(BaseDb):
                 query = ("DELETE FROM BookPrice "
                          "WHERE Created < %s")
                 cursor.execute(query, (str(earliest_date),))
+                con.commit()
+
+    def delete_failed_price_updates(self, book_id: int, bookstore_id: int):
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("DELETE FROM FailedPriceUpdate "
+                         "WHERE BookId = %s AND BookStoreId = %s")
+                cursor.execute(query, (book_id, bookstore_id))
                 con.commit()
 
     def get_latest_prices(self, book_id: int) -> list[BookStoreBookPrice]:
@@ -127,7 +135,25 @@ class BookPriceDb(BaseDb):
                                                                      row["Created"]))
                 return prices_by_bookstores
 
-    def get_failed_price_updates(self, book_id: int, bookstore_id: int, limit: int):
+    def get_failed_price_update_counts(self) -> list[FailedPriceUpdateCount]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT BookId, BookStoreId, COUNT(*) AS Count "
+                         "FROM FailedPriceUpdate "
+                         "GROUP BY BookId, BookStoreId;")
+
+                cursor.execute(query)
+                failed_price_update_counts = []
+                for row in cursor:
+                    book_id = row["BookId"]
+                    bookstore_id = row["BookStoreId"]
+                    count = row["Count"]
+
+                    failed_price_update_counts.append(FailedPriceUpdateCount(book_id, bookstore_id, count))
+
+                return failed_price_update_counts
+
+    def get_latest_failed_price_updates(self, book_id: int, bookstore_id: int, limit: int) -> list[FailedPriceUpdate]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, BookId, BookStoreId, Reason, Created "
@@ -147,4 +173,3 @@ class BookPriceDb(BaseDb):
                                           row["Created"]))
 
                 return failed_price_updates
-

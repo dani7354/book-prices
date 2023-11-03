@@ -25,3 +25,10 @@ class FailedPriceUpdate:
     bookstore_id: int
     reason: FailedUpdateReason
     created: datetime
+
+
+@dataclass
+class FailedPriceUpdateCount:
+    book_id: int
+    bookstore_id: int
+    count: int

@@ -5,8 +5,7 @@ import sys
 import shared
 from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
-from bookprices.shared.model.error import FailedUpdateReason
-
+from bookprices.shared.model.error import FailedUpdateReason, FailedPriceUpdateCount
 
 LOG_FILE_NAME = f"{os.path.basename(__file__)}.log"
 
@@ -19,22 +18,31 @@ class DeleteUnavailableBooksJob:
 
     def run(self):
         logging.info("Deleting unavailable books...")
-        books = self.db.book_db.get_books()
-        bookstores_for_books = self.db.bookstore_db.get_bookstores_for_books(books)
+        failed_price_update_counts = self.db.bookprice_db.get_failed_price_update_counts()
         delete_count = 0
-        for book_id, bookstores in bookstores_for_books.items():
-            for bookstore_book in bookstores:
-                if self.is_book_unavailable(book_id, bookstore_book.book_store.id):
-                    delete_count += 1
-                    logging.info(f"Deleting book {book_id} from bookstore {bookstore_book.book_store.id}")
-                    self.db.bookstore_db.delete_book_from_bookstore(book_id, bookstore_book.book_store.id)
+        for failed_update_count in failed_price_update_counts:
+            if self.is_book_unavailable(failed_update_count):
+                delete_count += 1
+                logging.info("Deleting book %s from bookstore %s",
+                             failed_update_count.book_id, failed_update_count.bookstore_id)
+                self.db.bookstore_db.delete_book_from_bookstore(
+                    failed_update_count.book_id, failed_update_count.bookstore_id)
+                logging.info("Deleting failed price updates for book %s from bookstore %s",
+                             failed_update_count.book_id, failed_update_count.bookstore_id)
+                self.db.bookprice_db.delete_failed_price_updates(
+                    failed_update_count.book_id, failed_update_count.bookstore_id)
+
         logging.info(f"Deleted {delete_count} unavailable books from bookstores!")
 
-    def is_book_unavailable(self, book_id: int, bookstore_id: int):
-        failed_price_updates = self.db.bookprice_db.get_failed_price_updates(
-            book_id, bookstore_id, self.FAILED_UPDATE_LIMIT)
+    def is_book_unavailable(self, failed_update_count: FailedPriceUpdateCount):
+        if failed_update_count.count < self.FAILED_UPDATE_LIMIT:
+            return False
+
+        failed_price_updates = self.db.bookprice_db.get_latest_failed_price_updates(
+            failed_update_count.book_id, failed_update_count.bookstore_id, self.FAILED_UPDATE_LIMIT)
         if len(failed_price_updates) < self.FAILED_UPDATE_LIMIT:
             return False
+
         return all(f.reason == FailedUpdateReason.PAGE_NOT_FOUND for f in failed_price_updates)
 
 
