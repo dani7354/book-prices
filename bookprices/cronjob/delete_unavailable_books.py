@@ -7,7 +7,8 @@ from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.error import FailedUpdateReason, FailedPriceUpdateCount
 
-LOG_FILE_NAME = f"{os.path.basename(__file__)}.log"
+
+LOG_FILE_NAME = f"delete_unavailable_books.log"
 
 
 class DeleteUnavailableBooksJob:

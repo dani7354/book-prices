@@ -93,6 +93,28 @@ class BookDb(BaseDb):
 
                 return books
 
+    def get_books_by_ids(self, ids: set[int]) -> list[Book]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                ids_format_string = ",".join(["%s"] * len(ids))
+                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
+                         "FROM Book "
+                         f"WHERE Id IN ({ids_format_string}) "
+                         "ORDER BY Title ASC;")
+                cursor.execute(query, tuple(ids))
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
+                    books.append(book)
+
+                return books
+
     def search_books(self, search_query: SearchQuery) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
@@ -146,6 +168,14 @@ class BookDb(BaseDb):
                     books.append(book)
 
                 return books[0] if len(books) > 0 else None
+
+    def get_book_count(self) -> int:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = "SELECT COUNT(*) as BookCount FROM Book;"
+                cursor.execute(query)
+                for row in cursor:
+                    return row["BookCount"]
 
     def get_book_by_isbn(self, book_id: str) -> Book:
         with self.get_connection() as con:

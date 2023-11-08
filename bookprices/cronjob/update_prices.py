@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import sys
+import math
 from datetime import datetime
 from queue import Queue
 from threading import Thread
@@ -22,13 +23,25 @@ LOG_FILE_NAME = "update_prices.log"
 
 
 class PriceUpdateJob:
+    BATCH_COUNT = 12
+
     def __init__(self, db: Database, thread_count: int):
         self._db = db
         self.thread_count = thread_count
         self._book_stores_queue = Queue()
 
     def run(self) -> None:
-        if not (books := self._db.book_db.get_books()):
+        book_count = self._db.book_db.get_book_count()
+        logging.info("%s books found in DB", book_count)
+
+        update_batch_size = math.ceil(book_count / self.BATCH_COUNT)
+        logging.info("Updating prices for %s books", update_batch_size)
+
+        if not (book_ids := self._db.bookprice_db.get_book_ids_with_oldest_prices(update_batch_size)):
+            logging.info("No books found with oldest prices")
+            return
+
+        if not (books := self._db.book_db.get_books_by_ids(book_ids)):
             logging.info("No books found")
             return
 
