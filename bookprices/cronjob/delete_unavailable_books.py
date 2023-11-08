@@ -21,7 +21,7 @@ class DeleteUnavailableBooksJob:
         failed_price_update_counts = self.db.bookprice_db.get_failed_price_update_counts()
         delete_count = 0
         for failed_update_count in failed_price_update_counts:
-            if self.is_book_unavailable(failed_update_count):
+            if self._is_book_unavailable(failed_update_count):
                 delete_count += 1
                 logging.info("Deleting book %s from bookstore %s",
                              failed_update_count.book_id, failed_update_count.bookstore_id)
@@ -34,7 +34,7 @@ class DeleteUnavailableBooksJob:
 
         logging.info(f"Deleted {delete_count} unavailable books from bookstores!")
 
-    def is_book_unavailable(self, failed_update_count: FailedPriceUpdateCount):
+    def _is_book_unavailable(self, failed_update_count: FailedPriceUpdateCount):
         if failed_update_count.count < self.FAILED_UPDATE_LIMIT:
             return False
 
