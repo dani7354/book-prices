@@ -8,7 +8,7 @@ from bookprices.shared.db.database import Database
 from bookprices.shared.model.error import FailedUpdateReason, FailedPriceUpdateCount
 
 
-LOG_FILE_NAME = f"delete_unavailable_books.log"
+LOG_FILE_NAME = "delete_unavailable_books.log"
 
 
 class DeleteUnavailableBooksJob:

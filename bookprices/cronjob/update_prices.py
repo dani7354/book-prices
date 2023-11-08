@@ -128,7 +128,7 @@ def main():
         price_update_job = PriceUpdateJob(db, shared.THREAD_COUNT)
         price_update_job.run()
     except Exception as ex:
-        logging.fatal(f"An error occurred while updating prices!")
+        logging.fatal("An error occurred while updating prices!")
         logging.fatal(ex)
         sys.exit(1)
 
