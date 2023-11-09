@@ -108,7 +108,7 @@ class WdamBookImport:
                                         book.author,
                                         book.format,
                                         existing_book.image_url,
-                                        existing_book.created_at)
+                                        existing_book.created)
 
                     self.db.update_book(updated_book)
                     updated_count += 1

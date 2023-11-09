@@ -34,7 +34,7 @@ def prices(book_id: int, store_id: int) -> tuple[Response, int]:
     if not (book := db.book_db.get_book(book_id)):
         return jsonify({"message": f"Book with id {book_id} not found"}), 404
 
-    if not (book_in_book_store := db.bookstore_db.get_book_store_for_book(book, store_id)):
+    if not (book_in_book_store := db.bookstore_db.get_bookstore_for_book(book, store_id)):
         return jsonify({"message": f"Book store with id {store_id} not found"}), 404
 
     book_prices_for_store = db.bookprice_db.get_book_prices_for_store(book, book_in_book_store.book_store)

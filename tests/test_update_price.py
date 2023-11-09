@@ -37,8 +37,10 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
 
 def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
     db = Database("", "", "", "", "")
-    db.bookstore_db.get_book_stores_for_books = MagicMock(return_value=books_in_bookstore)
-    db.book_db.get_books = MagicMock(return_value=[MagicMock()])
+    db.bookstore_db.get_bookstores_for_books = MagicMock(return_value=books_in_bookstore)
+    db.book_db.get_books_by_ids = MagicMock(return_value=[MagicMock()])
+    db.book_db.get_book_count = MagicMock(return_value=1)
+    db.bookprice_db.get_book_ids_with_oldest_prices = MagicMock(return_value=[1])
     db.bookprice_db.create_prices = MagicMock()
     monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
 
@@ -52,8 +54,10 @@ def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
 
 def test_updates_prices_doesnt_save_if_no_prices_found(monkeypatch, books_in_bookstore):
     db = Database("", "", "", "", "")
-    db.bookstore_db.get_book_stores_for_books = MagicMock(return_value={1: [], 2: []})
-    db.book_db.get_books = MagicMock(return_value=[MagicMock(), MagicMock()])
+    db.bookstore_db.get_bookstores_for_books = MagicMock(return_value={1: [], 2: []})
+    db.book_db.get_books_by_ids = MagicMock(return_value=[MagicMock()])
+    db.book_db.get_book_count = MagicMock(return_value=1)
+    db.bookprice_db.get_book_ids_with_oldest_prices = MagicMock(return_value=[1])
     db.bookprice_db.create_prices = MagicMock()
     monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
 
