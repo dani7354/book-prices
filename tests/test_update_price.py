@@ -42,7 +42,7 @@ def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
     db.book_db.get_book_count = MagicMock(return_value=1)
     db.bookprice_db.get_book_ids_with_oldest_prices = MagicMock(return_value=[1])
     db.bookprice_db.create_prices = MagicMock()
-    monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
+    monkeypatch.setattr(requests, "get", lambda url, allow_redirects: shared.create_fake_response("price_format.html"))
 
     job = PriceUpdateJob(db, thread_count=1)
     job.run()
