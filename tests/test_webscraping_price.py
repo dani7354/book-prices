@@ -14,7 +14,7 @@ from bookprices.shared.webscraping.price import (
                           (".table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2)", r"\d+"),
                           (".table > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(2)", r"\d+\.\d+")])
 def test_get_price_value_without_currency(monkeypatch, css_selector, value_format):
-    monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
+    monkeypatch.setattr(requests, "get", lambda url, allow_redirects: shared.create_fake_response("price_format.html"))
 
     price = get_price("https://fake.com", css_selector, value_format)
 
@@ -25,7 +25,7 @@ def test_get_price_value_without_currency(monkeypatch, css_selector, value_forma
                          [("#price", r"\d+"),
                           (".price", r"\d+")])
 def test_get_price_raise_price_selector_error(monkeypatch, css_selector, value_format):
-    monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
+    monkeypatch.setattr(requests, "get", lambda url, allow_redirects: shared.create_fake_response("price_format.html"))
     with pytest.raises(PriceSelectorError):
         _ = get_price("https://fake.com", css_selector, value_format)
 
@@ -34,6 +34,6 @@ def test_get_price_raise_price_selector_error(monkeypatch, css_selector, value_f
                          [(".table > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(2)", None),
                           (".table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(2)", None)])
 def test_get_price_raise_price_format_error(monkeypatch, css_selector, value_format):
-    monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
+    monkeypatch.setattr(requests, "get", lambda url, allow_redirects: shared.create_fake_response("price_format.html"))
     with pytest.raises(PriceFormatError):
         _ = get_price("https://fake.com", css_selector, value_format)

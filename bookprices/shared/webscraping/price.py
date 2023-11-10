@@ -46,8 +46,11 @@ def _parse_price(response_content: str, css_path: str, price_format: Optional[st
 
 def get_price(url: str, css_selector: str, price_format: Optional[str]) -> float:
     try:
-        response = requests.get(url)
+        response = requests.get(url, allow_redirects=False)
         response.raise_for_status()
+        if response.status_code in (301, 302):
+            raise PriceNotFoundException(
+                f"Price not found {url}: Redirected to {response.headers['Location']} ({response.status_code})")
         price = _parse_price(response.content.decode(), css_selector, price_format)
 
         return price
