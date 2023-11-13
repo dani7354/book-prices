@@ -103,12 +103,13 @@ class WdamBookImport:
                 if book.isbn in existing_books_isbn:
                     logging.debug(f"Updating book with ISBN {book.isbn}")
                     existing_book = existing_books_isbn[book.isbn]
-                    updated_book = Book(existing_book.id,
-                                        book.title,
-                                        book.author,
-                                        book.format,
-                                        existing_book.image_url,
-                                        existing_book.created)
+                    updated_book = Book(id=existing_book.id,
+                                        isbn=existing_book.isbn,
+                                        title=book.title,
+                                        author=book.author,
+                                        format=book.format,
+                                        image_url=existing_book.image_url,
+                                        created=existing_book.created)
 
                     self.db.update_book(updated_book)
                     updated_count += 1

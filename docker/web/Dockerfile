@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim-bullseye
+FROM python:3.11-slim-bullseye
 EXPOSE 3031
 
 RUN apt-get update && apt-get install -y build-essential
