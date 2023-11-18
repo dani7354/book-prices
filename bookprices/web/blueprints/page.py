@@ -96,13 +96,13 @@ def book(book_id: int) -> str:
         latest_prices = db.bookprice_db.get_latest_prices(book.id)
         cache.set(get_book_latest_prices_key(book_id), latest_prices)
 
-    book_details = bookmapper.map_book_details(book,
-                                               latest_prices,
-                                               page,
-                                               author,
-                                               search_phrase,
-                                               order_by,
-                                               descending)
+    book_details = bookmapper._map_book_details(book,
+                                                latest_prices,
+                                                page,
+                                                author,
+                                                search_phrase,
+                                                order_by,
+                                                descending)
 
     return render_template("book.html", view_model=book_details)
 
