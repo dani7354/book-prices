@@ -5,6 +5,7 @@ from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore
 from bookprices.shared.db.book import BookSearchSortOption
 from bookprices.web.settings import (
+    SITE_HOSTNAME,
     SEARCH_URL_PARAMETER,
     PAGE_URL_PARAMETER,
     AUTHOR_URL_PARAMETER,
@@ -94,6 +95,11 @@ def _map_sorting_options(search_phrase: str,
     return sorting_options
 
 
+def _add_ref_to_bookstore_url(url: str) -> str:
+    url_stripped = url.rstrip("/")
+    return f"{url_stripped}?ref={SITE_HOSTNAME}"
+
+
 def map_index_vm(books: list[Book],
                  author_names: list[str],
                  search_phrase: str,
@@ -175,7 +181,7 @@ def map_book_details(book: Book,
 
         book_price_view_models.append(BookPriceForStoreViewModel(bp.book_store_id,
                                                                  bp.book_store_name,
-                                                                 bp.url,
+                                                                 _add_ref_to_bookstore_url(bp.url),
                                                                  price_history_url,
                                                                  price_str,
                                                                  created_str,
@@ -202,15 +208,6 @@ def map_book_details(book: Book,
                                 search_phrase)
 
 
-def create_url(page_number: int,
-               endpoint: str,
-               **params) -> str:
-    url_params = {name: str(value) for name, value in params.items() if value}
-    url_params[PAGE_URL_PARAMETER] = str(page_number)
-
-    return url_for(endpoint, **url_params)
-
-
 def map_price_history(book_in_book_store: BookInBookStore,
                       page: Optional[int],
                       search_phrase: Optional[str],
@@ -228,5 +225,14 @@ def map_price_history(book_in_book_store: BookInBookStore,
 
     return PriceHistoryViewModel(book_in_book_store.book,
                                  book_in_book_store.book_store,
-                                 book_in_book_store.get_full_url(),
+                                 _add_ref_to_bookstore_url(book_in_book_store.get_full_url()),
                                  return_url)
+
+
+def create_url(page_number: int,
+               endpoint: str,
+               **params) -> str:
+    url_params = {name: str(value) for name, value in params.items() if value}
+    url_params[PAGE_URL_PARAMETER] = str(page_number)
+
+    return url_for(endpoint, **url_params)
