@@ -1,7 +1,7 @@
 FROM python:3.12-slim-bullseye
 EXPOSE 3031
 
-RUN apt-get update && apt-get install -y build-essential
+RUN apt-get update && apt-get install -y build-essential && apt-get clean
 
 RUN adduser --no-create-home bookprices
 WORKDIR /usr/local/bookprices_web

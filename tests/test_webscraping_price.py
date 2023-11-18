@@ -18,7 +18,7 @@ def test_get_price_value_without_currency(monkeypatch, css_selector, value_forma
 
     price = get_price("https://fake.com", css_selector, value_format)
 
-    assert price == 229.0
+    assert price == 229
 
 
 @pytest.mark.parametrize("css_selector,value_format",

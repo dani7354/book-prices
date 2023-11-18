@@ -15,7 +15,8 @@
 </a>
 </h3>
 <div id="chart" data-book="{{ view_model.book.id }}" data-store="{{ view_model.book_store.id }}"></div>
-<table id="price-table" class="table">
+<h4 id="price-table-heading">Seneste priser</h4>
+<table id="price-table" aria-describedby="price-table-heading" class="table">
     <thead>
     <tr>
         <th scope="col">Dato</th>
