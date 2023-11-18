@@ -49,7 +49,7 @@ def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
 
     args, _ = db.bookprice_db.create_prices.call_args
     assert len(args[0]) == 2
-    assert args[0][0].price == 229.0
+    assert args[0][0].price == 229
 
 
 def test_updates_prices_doesnt_save_if_no_prices_found(monkeypatch, books_in_bookstore):
