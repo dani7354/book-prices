@@ -14,6 +14,8 @@ REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
 CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 
 # App settings
+SITE_HOSTNAME = "bogpriser.stuhrs.dk"
+
 BOOK_PAGESIZE = 20
 BOOK_IMAGES_PATH = "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
