@@ -166,13 +166,13 @@ def _map_book_item(book: Book,
     return BookListItemViewModel(book.id, book.isbn, book.title, book.author, url, image_url)
 
 
-def _map_book_details(book: Book,
-                      book_prices: list[BookStoreBookPrice],
-                      page: Optional[int],
-                      author: Optional[str],
-                      search_phrase: Optional[str],
-                      order_by: BookSearchSortOption,
-                      descending: bool) -> BookDetailsViewModel:
+def map_book_details(book: Book,
+                     book_prices: list[BookStoreBookPrice],
+                     page: Optional[int],
+                     author: Optional[str],
+                     search_phrase: Optional[str],
+                     order_by: BookSearchSortOption,
+                     descending: bool) -> BookDetailsViewModel:
 
     book_price_view_models = []
     for bp in book_prices:
