@@ -115,6 +115,21 @@ class BookDb(BaseDb):
 
                 return books
 
+    def get_next_book_ids(self, offset: int, limit: int) -> set[int]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id "
+                         "FROM Book "
+                         "ORDER BY Id "
+                         "LIMIT %s OFFSET %s;")
+
+                cursor.execute(query, (offset, limit))
+                book_ids = set()
+                for row in cursor:
+                    book_ids.add(row["Id"])
+
+                return book_ids
+
     def search_books(self, search_query: SearchQuery) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
