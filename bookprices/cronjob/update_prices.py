@@ -34,7 +34,7 @@ class PriceUpdateJob:
         book_count = self._db.book_db.get_book_count()
         logging.info("%s books found in DB", book_count)
 
-        offset = 1 * datetime.now().hour % book_count
+        offset = datetime.now().hour * self.BATCH_SIZE % book_count
         logging.info("Updating prices for books at offset %s (batch size: %s)", offset, self.BATCH_SIZE)
 
         if not (book_ids := self._db.book_db.get_next_book_ids(offset, self.BATCH_SIZE)):

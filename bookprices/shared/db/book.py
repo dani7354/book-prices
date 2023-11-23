@@ -121,12 +121,12 @@ class BookDb(BaseDb):
                 query = ("SELECT Id "
                          "FROM Book "
                          "ORDER BY Id "
-                         "OFFSET %s LIMIT %s;")
+                         "LIMIT %s OFFSET %s;")
 
                 cursor.execute(query, (offset, limit))
                 book_ids = set()
                 for row in cursor:
-                    book_ids.add(row["BookId"])
+                    book_ids.add(row["Id"])
 
                 return book_ids
 
