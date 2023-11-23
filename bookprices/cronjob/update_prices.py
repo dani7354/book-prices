@@ -23,7 +23,7 @@ LOG_FILE_NAME = "update_prices.log"
 
 
 class PriceUpdateJob:
-    BATCH_COUNT = 12
+    BATCH_SIZE = 300
 
     def __init__(self, db: Database, thread_count: int):
         self._db = db
@@ -34,10 +34,10 @@ class PriceUpdateJob:
         book_count = self._db.book_db.get_book_count()
         logging.info("%s books found in DB", book_count)
 
-        update_batch_size = math.ceil(book_count / self.BATCH_COUNT)
-        logging.info("Updating prices for %s books", update_batch_size)
+        offset = 1 * datetime.now().hour % book_count
+        logging.info("Updating prices for books at offset %s (batch size: %s)", offset, self.BATCH_SIZE)
 
-        if not (book_ids := self._db.bookprice_db.get_book_ids_with_oldest_prices(update_batch_size)):
+        if not (book_ids := self._db.book_db.get_next_book_ids(offset, self.BATCH_SIZE)):
             logging.info("No books found with oldest prices")
             return
 
