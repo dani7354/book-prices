@@ -123,7 +123,7 @@ class BookDb(BaseDb):
                          "ORDER BY Id "
                          "LIMIT %s OFFSET %s;")
 
-                cursor.execute(query, (offset, limit))
+                cursor.execute(query, (limit, offset))
                 book_ids = set()
                 for row in cursor:
                     book_ids.add(row["Id"])
