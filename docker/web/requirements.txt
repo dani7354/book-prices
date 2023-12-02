@@ -3,3 +3,4 @@ flask-caching~=2.1.0
 mysql-connector-python~=8.2.0
 uWSGI~=2.0.23
 redis~=5.0.1
+newrelic~=9.2.0
