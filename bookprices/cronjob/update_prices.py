@@ -116,7 +116,7 @@ def main():
     try:
         args = shared.parse_arguments()
         configuration = loader.load(args.configuration)
-        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
+        shared.setup_logging(configuration.loglevel)
         logging.info("Config loaded!")
 
         db = Database(configuration.database.db_host,

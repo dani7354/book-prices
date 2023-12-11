@@ -1,5 +1,4 @@
 from hashlib import md5
-from typing import Optional
 from bookprices.shared.db.book import SearchQuery
 
 
