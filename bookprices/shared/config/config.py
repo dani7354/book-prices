@@ -1,18 +1,17 @@
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
 class Database:
-    def __init__(self, db_host, db_port, db_user, db_password, db_name):
-        self.db_host = db_host
-        self.db_port = db_port
-        self.db_user = db_user
-        self.db_password = db_password
-        self.db_name = db_name
+    db_host: str
+    db_port: str
+    db_user: str
+    db_password: str
+    db_name: str
 
 
+@dataclass(frozen=True)
 class Config:
-    def __init__(self, database, logdir, imgdir, loglevel):
-        self.database = database
-        self.logdir = logdir
-        self.imgdir = imgdir
-        self.loglevel = loglevel
-
-
-
+    database: Database
+    imgdir: str
+    loglevel: int

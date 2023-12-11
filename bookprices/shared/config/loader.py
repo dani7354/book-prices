@@ -16,6 +16,5 @@ def load(file) -> Config:
                            database_section["username"],
                            database_section["password"],
                            database_section["name"]),
-                  json_content["logdir"],
                   json_content["imgdir"],
                   json_content["loglevel"])
