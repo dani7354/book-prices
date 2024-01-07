@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import logging
 import sys
 import shared
@@ -41,10 +40,9 @@ class DeleteUnavailableBooksJob:
 
         failed_price_updates = self.db.bookprice_db.get_latest_failed_price_updates(
             failed_update_count.book_id, failed_update_count.bookstore_id, self.FAILED_UPDATE_LIMIT)
-        if len(failed_price_updates) < self.FAILED_UPDATE_LIMIT:
-            return False
 
-        return all(f.reason == FailedUpdateReason.PAGE_NOT_FOUND for f in failed_price_updates)
+        return len([f for f in failed_price_updates
+                    if f.reason == FailedUpdateReason.PAGE_NOT_FOUND]) >= self.FAILED_UPDATE_LIMIT
 
 
 def main():
