@@ -2,6 +2,7 @@ from flask import Blueprint, Response, jsonify
 from bookprices.shared.db.database import Database
 from bookprices.web.mapper.price import map_prices_history, map_price_history_for_stores
 from bookprices.web.cache.redis import cache
+from bookprices.web.blueprints.urlhelper import parse_args, SEARCH_URL_PARAMETER
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -41,3 +42,14 @@ def prices(book_id: int, store_id: int) -> tuple[Response, int]:
     price_history_response = map_prices_history(book_prices_for_store)
 
     return jsonify(price_history_response), 200
+
+
+@api_blueprint.route("/book/suggestions?search_phrase=<string:search_phrase>")
+@cache.cached(timeout=RESPONSE_TIMEOUT)
+def search_suggestions(search_phrase: str) -> tuple[Response, int]:
+    if not search_phrase:
+        return jsonify([]), 200
+
+    suggestions = db.book_db.get_search_suggestions(search_phrase)
+
+    return jsonify(suggestions), 200
