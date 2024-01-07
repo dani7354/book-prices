@@ -231,17 +231,33 @@ class BookDb(BaseDb):
                 query = ("SELECT DISTINCT Title as Suggestion "
                          "FROM Book "
                          "WHERE Title LIKE %s "
-                         "ORDER BY Title ASC "
                          "UNION "
                          "SELECT DISTINCT Author as Suggestion "
                          "FROM Book "
                          "WHERE Author LIKE %s "
-                         "ORDER BY Phrase ASC "
+                         "ORDER BY Suggestion ASC "
                          "LIMIT 100;")
                 phrase_with_wildcards = f"{search_phrase}%"
+                print("Searching!")
                 cursor.execute(query, (phrase_with_wildcards, phrase_with_wildcards,))
                 suggestions = []
                 for row in cursor:
                     suggestions.append(row["Suggestion"])
+
+                return suggestions
+
+    def get_search_suggestions_for_author(self, search_phrase: str, author: str) -> list[str]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT DISTINCT Title "
+                         "FROM Book "
+                         "WHERE Title LIKE %s AND Author = %s "
+                         "ORDER BY Title ASC "
+                         "LIMIT 100;")
+                phrase_with_wildcards = f"{search_phrase}%"
+                cursor.execute(query, (phrase_with_wildcards, author))
+                suggestions = []
+                for row in cursor:
+                    suggestions.append(row["Title"])
 
                 return suggestions
