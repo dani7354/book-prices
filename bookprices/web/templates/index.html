@@ -3,10 +3,11 @@
 <h1>Bøger</h1>
 <form action="/" class="row g-3" enctype="application/x-www-form-urlencoded" method="get">
     <div class="col-auto">
-        <input class="form-control" name="search" type="text" value="{{ view_model.search_phrase }}">
+        <input  id="search-input" class="form-control" name="search" type="text" list="search-suggestions" value="{{ view_model.search_phrase }}">
+        <datalist id="search-suggestions"></datalist>
     </div>
      <div class="col-auto">
-         <select name="author" class="form-select" aria-label="forfatter">
+         <select id="author-select" class="form-select" name="author" aria-label="forfatter">
              {% for a in view_model.authors %}
                 {% if a.selected %}
                     <option value="{{ a.value }}" selected>{{ a.text }}</option>
@@ -74,4 +75,8 @@
         </li>
     </ul>
 </nav>
+<script src="/static/assets/js/search.js"
+        integrity="sha256-x6jrCBrfzLs34vymj15wO7JYE4dv8+guDsw2gTwLBw4=
+        sha384-zMJ85kLYeyaHQm2oOTy8r4EuIf/zjM9KhxZCppMcXBS9m4eXL372gZax+tjMYbhG
+        sha512-Z5RQ0pcYZQJlrLNIlEk+0uyUsXLCCOPQj7E6RZRTZGzsguRny81XjfK3PKplLa6Y3yYKFIagzg8j2Ck5HsGehQ=="></script>
 {% endblock %}
