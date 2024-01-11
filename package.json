@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "apexcharts": "^3.42.0",
+    "apexcharts": "^3.45.1",
     "bootstrap": "^5.3.2",
     "jquery": "^3.7.1"
   },
