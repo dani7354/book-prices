@@ -1,5 +1,6 @@
 venv/
 test/
+bookprices/web/assets/images/*
 bookprices.egg-info/
 docker/db/data/
 docker/db/init/
