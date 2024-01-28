@@ -45,6 +45,15 @@ def _create_url(page_number: int,
     return url_for(endpoint, **url_params)
 
 
+def _get_image_url(book: Book) -> str:
+    if book.image_url:
+        book_image_path = os.path.join(BOOK_IMAGES_PATH, book.image_url)
+        if os.path.exists(book_image_path):
+            return book_image_path
+
+    return str(os.path.join(BOOK_IMAGES_PATH, BOOK_FALLBACK_IMAGE_NAME))
+
+
 def _map_sorting_options(search_phrase: str,
                          author: str,
                          order_by: BookSearchSortOption,
@@ -156,8 +165,7 @@ def _map_book_item(book: Book,
                    page: int,
                    url_parameters: dict) -> BookListItemViewModel:
 
-    image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
-    image_url = os.path.join(BOOK_IMAGES_PATH, image)
+    image_url = _get_image_url(book)
     url = _create_url(page,
                       endpoint=BOOK_ENDPOINT,
                       book_id=book.id,

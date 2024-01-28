@@ -14,10 +14,11 @@ REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
 CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 
 # App settings
+DEBUG_MODE = os.environ.get("DEBUG", False)
 SITE_HOSTNAME = "bogpriser.stuhrs.dk"
 
 BOOK_PAGESIZE = 20
-BOOK_IMAGES_PATH = "/static/images/books/"
+BOOK_IMAGES_PATH = "/static/assets/images/books/" if DEBUG_MODE else "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
 
 AUTHOR_URL_PARAMETER = "author"
@@ -27,4 +28,3 @@ PAGE_URL_PARAMETER = "page"
 DESCENDING_URL_PARAMETER = "descending"
 
 FLASK_APP_PORT = int(os.environ.get("FLASK_APP_PORT", 3031))
-DEBUG_MODE = os.environ.get("DEBUG", False)
