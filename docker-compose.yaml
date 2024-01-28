@@ -4,6 +4,8 @@ networks:
 services:
   job:
     container_name: job
+    profiles:
+      - default
     build:
       context: ./
       dockerfile: docker/cronjob/Dockerfile
@@ -17,6 +19,8 @@ services:
       - localnetwork
   web:
     container_name: web
+    profiles:
+      - default
     build: 
       context: ./
       dockerfile: docker/web/Dockerfile
@@ -26,6 +30,8 @@ services:
       - localnetwork
   nginx:
     container_name: nginx
+    profiles:
+      - default
     restart: always
     build:
       context: ./
@@ -46,6 +52,9 @@ services:
       - localnetwork
   db:
     container_name: db
+    profiles:
+      - default
+      - db_only
     image: mysql:8.0.33
     command: --default-authentication-plugin=caching_sha2_password
     restart: always
@@ -59,6 +68,9 @@ services:
       - localnetwork
   redis:
     container_name: redis
+    profiles:
+      - default
+      - db_only
     image: redis:7.2.1-alpine
     ports:
       - "6379:6379"
