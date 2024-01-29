@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Bøger</h1>
+<form action="/search" class="row g-3" enctype="application/x-www-form-urlencoded" method="get">
+    <div class="col-auto">
+        <input  id="search-input" class="form-control" name="search" type="text" list="search-suggestions" value="{{ view_model.search_phrase }}">
+        <datalist id="search-suggestions"></datalist>
+    </div>
+     <div class="col-auto">
+         <select id="author-select" class="form-select" name="author" aria-label="forfatter">
+             {% for a in view_model.authors %}
+                {% if a.selected %}
+                    <option value="{{ a.value }}" selected>{{ a.text }}</option>
+                {% else %}
+                    <option value="{{ a.value }}">{{ a.text }}</option>
+                {% endif %}
+             {% endfor %}
+         </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-secondary mb-3" type="submit">Søg</button>
+    </div>
+</form>
+<form class="mb-3">
+     {% for o in view_model.sorting_options %}
+        {% if o.selected %}
+            <a href="{{ o.url }}" class="btn btn-sm btn-secondary active">{{ o.text }}</a>
+        {% else %}
+            <a href="{{ o.url }}" class="btn btn-sm btn-secondary">{{ o.text }}</a>
+        {% endif %}
+    {% endfor %}
+</form>
+<div class="row row-cols-1 row-cols-md-4 g-4 pb-5">
+    {% if view_model.book_list|length == 0 %}
+     <div class="col">
+        <h3>Ingen bøger fundet</h3>
+        <p>Prøv en anden titel eller forfatter</p>
+     </div>
+    {% endif %}
+
+    {% for b in view_model.book_list %}
+    <div class="col">
+        <div class="card">
+            {% if b.image_url %}
+            <a href="{{ b.url }}">
+                <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
+            </a>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a class="link-secondary" href="{{ b.url }}">{{ b.title }}</a>
+                </h5>
+                <p class="card-text">{{ b.author }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        <li class="{{ 'page-item' if view_model.previous_page else 'page-item disabled' }}">
+            <a aria-label="Previous" class="page-link link-secondary" href="{{ view_model.previous_page_url }}">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link link-secondary" href="">
+                {{ view_model.current_page }}
+            </a>
+        </li>
+        <li class="{{ 'page-item' if view_model.next_page else 'page-item disabled' }}">
+            <a aria-label="Next" class="page-link link-secondary" href="{{ view_model.next_page_url }}">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+<script src="/static/assets/js/search.js"
+        integrity="sha256-x6jrCBrfzLs34vymj15wO7JYE4dv8+guDsw2gTwLBw4=
+        sha384-zMJ85kLYeyaHQm2oOTy8r4EuIf/zjM9KhxZCppMcXBS9m4eXL372gZax+tjMYbhG
+        sha512-Z5RQ0pcYZQJlrLNIlEk+0uyUsXLCCOPQj7E6RZRTZGzsguRny81XjfK3PKplLa6Y3yYKFIagzg8j2Ck5HsGehQ=="></script>
+{% endblock %}

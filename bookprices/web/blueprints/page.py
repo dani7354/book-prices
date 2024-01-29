@@ -33,6 +33,16 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 @page_blueprint.route("/")
 def index() -> str:
+    return render_template("index.html")
+
+
+@page_blueprint.route("/about")
+def about() -> str:
+    return render_template("about.html")
+
+
+@page_blueprint.route("/search")
+def search() -> str:
     args = parse_args(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
@@ -74,7 +84,7 @@ def index() -> str:
                                  order_by,
                                  descending)
 
-    return render_template("index.html", view_model=vm)
+    return render_template("search.html", view_model=vm)
 
 
 @page_blueprint.route("/book/<int:book_id>")
