@@ -15,6 +15,7 @@ from bookprices.web.settings import (
     BOOK_FALLBACK_IMAGE_NAME)
 from bookprices.web.viewmodels.book import (
     IndexViewModel,
+    SearchViewModel,
     AuthorOption,
     SortingOption,
     BookListItemViewModel,
@@ -118,15 +119,21 @@ def _map_sorting_options(search_phrase: str,
     return sorting_options
 
 
-def map_index_vm(books: list[Book],
-                 author_names: list[str],
-                 search_phrase: str,
-                 current_page: int,
-                 author: Optional[str],
-                 previous_page: Optional[int],
-                 next_page: Optional[int],
-                 order_by: BookSearchSortOption,
-                 descending: bool) -> IndexViewModel:
+def map_index_vm(newest_books: list[Book], latest_updated_books: list[Book]) -> IndexViewModel:
+    return IndexViewModel(
+        [map_book_item(b, 1, {}) for b in newest_books],
+        [map_book_item(b, 1, {}) for b in latest_updated_books])
+
+
+def map_search_vm(books: list[Book],
+                  author_names: list[str],
+                  search_phrase: str,
+                  current_page: int,
+                  author: Optional[str],
+                  previous_page: Optional[int],
+                  next_page: Optional[int],
+                  order_by: BookSearchSortOption,
+                  descending: bool) -> SearchViewModel:
 
     author_options = [AuthorOption(AUTHOR_DEFAULT_OPTION_TEXT, "", not author)]
     for author_name in author_names:
@@ -149,21 +156,21 @@ def map_index_vm(books: list[Book],
                                     endpoint=SEARCH_ENDPOINT,
                                     **url_parameters)
 
-    return IndexViewModel([_map_book_item(b, current_page, url_parameters) for b in books],
-                          author_options,
-                          sorting_options,
-                          search_phrase,
-                          author,
-                          current_page,
-                          previous_page,
-                          next_page,
-                          previous_page_url,
-                          next_page_url)
+    return SearchViewModel([map_book_item(b, current_page, url_parameters) for b in books],
+                           author_options,
+                           sorting_options,
+                           search_phrase,
+                           author,
+                           current_page,
+                           previous_page,
+                           next_page,
+                           previous_page_url,
+                           next_page_url)
 
 
-def _map_book_item(book: Book,
-                   page: int,
-                   url_parameters: dict) -> BookListItemViewModel:
+def map_book_item(book: Book,
+                  page: int,
+                  url_parameters: dict) -> BookListItemViewModel:
 
     image_url = _get_image_url(book)
     url = _create_url(page,

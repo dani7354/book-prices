@@ -6,7 +6,7 @@
     <div class="card-body">
         <form action="/search" class="row g-3" enctype="application/x-www-form-urlencoded" method="get">
             <div class="col-auto">
-                <input  id="search-input" class="form-control" name="search" type="text" placeholder="Titel, forfatter, isbn" list="search-suggestions" value="{{ view_model.search_phrase }}">
+                <input  id="search-input" class="form-control" name="search" type="text" placeholder="Titel, forfatter eller ISBN-13" list="search-suggestions" value="{{ view_model.search_phrase }}">
                 <datalist id="search-suggestions"></datalist>
             </div>
              <div class="col-auto">

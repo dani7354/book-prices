@@ -1,5 +1,44 @@
 {% extends "base.html" %}
 {% set active_page = "index" %}
 {% block content %}
-<h1>Hjem TODO...</h1>
+<h2>Senest tilføjet</h2>
+<div class="row row-cols-1 row-cols-md-4 g-4 pb-5">
+    {% for b in view_model.newest_books %}
+    <div class="col">
+        <div class="card">
+            {% if b.image_url %}
+            <a href="{{ b.url }}">
+                <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
+            </a>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a class="link-secondary" href="{{ b.url }}">{{ b.title }}</a>
+                </h5>
+                <p class="card-text">{{ b.author }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<h2>Senest opdateret</h2>
+<div class="row row-cols-1 row-cols-md-4 g-4 pb-5">
+    {% for b in view_model.latest_prices_books %}
+    <div class="col">
+        <div class="card">
+            {% if b.image_url %}
+            <a href="{{ b.url }}">
+                <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
+            </a>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a class="link-secondary" href="{{ b.url }}">{{ b.title }}</a>
+                </h5>
+                <p class="card-text">{{ b.author }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

@@ -48,7 +48,7 @@ class PriceHistoryViewModel:
 
 
 @dataclass(frozen=True)
-class IndexViewModel:
+class SearchViewModel:
     book_list: list[BookListItemViewModel]
     authors: list[AuthorOption]
     sorting_options: list[SortingOption]
@@ -69,3 +69,9 @@ class BookDetailsViewModel:
     author_search_url: str
     page: Optional[int]
     search_phrase: Optional[str]
+
+
+@dataclass(frozen=True)
+class IndexViewModel:
+    newest_books: list[BookListItemViewModel]
+    latest_prices_books: list[BookListItemViewModel]

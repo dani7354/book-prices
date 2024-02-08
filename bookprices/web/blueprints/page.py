@@ -33,7 +33,11 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 @page_blueprint.route("/")
 def index() -> str:
-    return render_template("index.html")
+    newest_books = db.book_db.get_newest_books(limit=8)
+    newest_prices_books = db.book_db.get_books_with_newest_prices(limit=8)
+    view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
+
+    return render_template("index.html", view_model=view_model)
 
 
 @page_blueprint.route("/about")
@@ -74,15 +78,15 @@ def search() -> str:
     next_page = page + 1 if len(books_next) > 0 else None
     previous_page = page - 1 if page >= 2 else None
 
-    vm = bookmapper.map_index_vm(books_current,
-                                 authors,
-                                 search_phrase,
-                                 page,
-                                 author,
-                                 previous_page,
-                                 next_page,
-                                 order_by,
-                                 descending)
+    vm = bookmapper.map_search_vm(books_current,
+                                  authors,
+                                  search_phrase,
+                                  page,
+                                  author,
+                                  previous_page,
+                                  next_page,
+                                  order_by,
+                                  descending)
 
     return render_template("search.html", view_model=vm)
 

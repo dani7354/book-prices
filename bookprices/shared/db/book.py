@@ -130,6 +130,54 @@ class BookDb(BaseDb):
 
                 return book_ids
 
+    def get_newest_books(self, limit: int) -> list[Book]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
+                         "FROM Book "
+                         "ORDER BY Created DESC "
+                         "LIMIT %s;")
+
+                cursor.execute(query, (limit,))
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
+                    books.append(book)
+
+                return books
+
+    def get_books_with_newest_prices(self, limit: int) -> list[Book]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = (
+                    "SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created, "
+                    "MAX(bp.Created) as PriceUpdated "
+                    "FROM Book b "
+                    "JOIN BookPrice bp ON b.Id = bp.BookId "
+                    "GROUP BY b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created "
+                    "ORDER BY PriceUpdated DESC "
+                    "LIMIT %s;")
+
+                cursor.execute(query, (limit,))
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
+                    books.append(book)
+
+                return books
+
     def search_books(self, search_query: SearchQuery) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
