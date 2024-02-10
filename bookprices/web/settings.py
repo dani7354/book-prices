@@ -14,7 +14,7 @@ REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
 CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 
 # App settings
-DEBUG_MODE = os.environ.get("DEBUG", False)
+DEBUG_MODE = os.environ.get("DEBUG", "False") == "True"
 SITE_HOSTNAME = "bogpriser.stuhrs.dk"
 
 BOOK_PAGESIZE = 20

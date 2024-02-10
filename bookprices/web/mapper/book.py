@@ -48,9 +48,7 @@ def _create_url(page_number: int,
 def _get_image_url(book: Book) -> str:
     if book.image_url:
         book_image_path = os.path.join(BOOK_IMAGES_PATH, book.image_url)
-        if os.path.exists(book_image_path):
-            return book_image_path
-
+        return book_image_path
     return str(os.path.join(BOOK_IMAGES_PATH, BOOK_FALLBACK_IMAGE_NAME))
 
 
@@ -244,6 +242,3 @@ def map_price_history(book_in_book_store: BookInBookStore,
                                  book_in_book_store.book_store,
                                  _add_ref_to_bookstore_url(book_in_book_store.get_full_url()),
                                  return_url)
-
-
-
