@@ -6,4 +6,3 @@ flask~=3.0.0
 flask-caching~=2.1.0
 redis~=5.0.1
 pytest~=7.4.3
-newrelic~=9.2.0
