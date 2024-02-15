@@ -16,7 +16,7 @@ from bookprices.shared.validation import isbn as isbn_validator
 BOOK_URL_CSS = "a.product-name"
 BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
-AUTHOR_CSS = "h2.author span a"
+AUTHOR_CSS = "h2.wd_text_large > span:nth-child(1) > a:nth-child(1)"
 LOG_FILE_NAME = "import_wdam_books.log"
 
 VALID_BOOK_FORMAT = {"Paperback", "Hardback", "Indbundet", "Hæftet", "Haeftet", "Bog", "Bog med hæftet ryg"}
