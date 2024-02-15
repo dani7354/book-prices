@@ -13,5 +13,6 @@ class Database:
 @dataclass(frozen=True)
 class Config:
     database: Database
+    logdir: str
     imgdir: str
     loglevel: int

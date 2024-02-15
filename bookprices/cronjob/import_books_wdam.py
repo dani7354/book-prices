@@ -175,7 +175,7 @@ def main():
     try:
         args = shared.parse_arguments()
         configuration = loader.load(args.configuration)
-        shared.setup_logging(configuration.loglevel)
+        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
         books_db = BookDb(configuration.database.db_host,
                           configuration.database.db_port,
                           configuration.database.db_user,
