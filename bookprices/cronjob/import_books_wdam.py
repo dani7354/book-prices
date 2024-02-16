@@ -16,7 +16,7 @@ from bookprices.shared.validation import isbn as isbn_validator
 BOOK_URL_CSS = "a.product-name"
 BOOK_DETAILS_LIST_CSS = "ul.list li"
 TITLE_CSS = "h1"
-AUTHOR_CSS = "h2.author span a"
+AUTHOR_CSS = "h2.wd_text_large > span:nth-child(1) > a:nth-child(1)"
 LOG_FILE_NAME = "import_wdam_books.log"
 
 VALID_BOOK_FORMAT = {"Paperback", "Hardback", "Indbundet", "Hæftet", "Haeftet", "Bog", "Bog med hæftet ryg"}
@@ -175,7 +175,7 @@ def main():
     try:
         args = shared.parse_arguments()
         configuration = loader.load(args.configuration)
-        shared.setup_logging(configuration.loglevel)
+        shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
         books_db = BookDb(configuration.database.db_host,
                           configuration.database.db_port,
                           configuration.database.db_user,
