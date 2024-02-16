@@ -1,6 +1,7 @@
-from argparse import ArgumentParser, Namespace
+import os
 import logging
-
+from argparse import ArgumentParser, Namespace
+from datetime import date
 
 THREAD_COUNT = 10
 
@@ -12,8 +13,10 @@ def parse_arguments() -> Namespace:
     return parser.parse_args()
 
 
-def setup_logging(loglevel: int):
+def setup_logging(directory: str, filename_base: str, loglevel: int):
+    logfile = os.path.join(directory, f"{str(date.today())}_{filename_base}")
     logging.basicConfig(
+        filename=logfile,
         filemode="a",
         format='%(asctime)s - %(levelname)s: %(message)s',
         level=loglevel)
