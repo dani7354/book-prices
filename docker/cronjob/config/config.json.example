@@ -6,6 +6,7 @@
     "password": "",
     "name": ""
   },
+  "logdir": "",
   "imgdir": "",
   "loglevel":
 }
