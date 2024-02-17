@@ -14,7 +14,7 @@
 <ul>
     {% for bookstore in view_model.bookstores %}
     <li>
-        <a target="_blank" class="link-secondary" href="{{ bookstore.url }}">{{ bookstore.name }}</a>
+        <a target="_blank" rel="noopener" class="link-secondary" href="{{ bookstore.url }}">{{ bookstore.name }}</a>
     </li>
     {% endfor %}
 </ul>
