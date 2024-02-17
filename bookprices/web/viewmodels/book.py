@@ -69,9 +69,3 @@ class BookDetailsViewModel:
     author_search_url: str
     page: Optional[int]
     search_phrase: Optional[str]
-
-
-@dataclass(frozen=True)
-class IndexViewModel:
-    newest_books: list[BookListItemViewModel]
-    latest_prices_books: list[BookListItemViewModel]

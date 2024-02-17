@@ -152,7 +152,7 @@ class BookDb(BaseDb):
 
                 return books
 
-    def get_books_with_newest_prices(self, limit: int) -> list[Book]:
+    def get_books_with_newest_prices(self, limit: int, offset: int = 0) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = (
@@ -162,9 +162,10 @@ class BookDb(BaseDb):
                     "JOIN BookPrice bp ON b.Id = bp.BookId "
                     "GROUP BY b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created "
                     "ORDER BY PriceUpdated DESC "
-                    "LIMIT %s;")
+                    "LIMIT %s "
+                    "OFFSET %s;")
 
-                cursor.execute(query, (limit,))
+                cursor.execute(query, (limit, offset))
                 books = []
                 for row in cursor:
                     book = Book(row["Id"],

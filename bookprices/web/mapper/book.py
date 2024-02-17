@@ -14,7 +14,6 @@ from bookprices.web.settings import (
     BOOK_IMAGES_PATH,
     BOOK_FALLBACK_IMAGE_NAME)
 from bookprices.web.viewmodels.book import (
-    IndexViewModel,
     SearchViewModel,
     AuthorOption,
     SortingOption,
@@ -22,7 +21,7 @@ from bookprices.web.viewmodels.book import (
     BookPriceForStoreViewModel,
     PriceHistoryViewModel,
     BookDetailsViewModel)
-
+from bookprices.web.viewmodels.page import IndexViewModel
 
 PRICE_NONE_TEXT = "-"
 PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
@@ -118,9 +117,16 @@ def _map_sorting_options(search_phrase: str,
 
 
 def map_index_vm(newest_books: list[Book], latest_updated_books: list[Book]) -> IndexViewModel:
+    newest_books_url = _create_url(
+        page_number=1,
+        endpoint=SEARCH_ENDPOINT,
+        **{ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
+           DESCENDING_URL_PARAMETER: True})
+
     return IndexViewModel(
         [map_book_item(b, 1, {}) for b in newest_books],
-        [map_book_item(b, 1, {}) for b in latest_updated_books])
+        [map_book_item(b, 1, {}) for b in latest_updated_books],
+        newest_books_url)
 
 
 def map_search_vm(books: list[Book],
