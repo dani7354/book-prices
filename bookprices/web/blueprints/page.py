@@ -4,8 +4,10 @@ from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args
 from flask import render_template, request, abort, Blueprint
+from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
+    get_bookstores_key,
     get_book_key,
     get_book_list_key,
     get_book_in_book_store_key,
@@ -42,7 +44,13 @@ def index() -> str:
 
 @page_blueprint.route("/about")
 def about() -> str:
-    return render_template("about.html")
+    bookstores_cache_key = get_bookstores_key()
+    if not (bookstores := cache.get(bookstores_cache_key)):
+        bookstores = db.bookstore_db.get_bookstores()
+        cache.set(bookstores_cache_key, bookstores)
+    view_model = AboutViewModel(bookstores)
+
+    return render_template("about.html", view_model=view_model)
 
 
 @page_blueprint.route("/search")

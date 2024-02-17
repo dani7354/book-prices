@@ -1,5 +1,29 @@
 {% extends "base.html" %}
 {% set active_page = "about" %}
 {% block content %}
-<h1>About. TODO...</h1>
+
+<h2>Hvad er det her?</h2>
+<p>
+    Det skulle forestille at være en hjemmeside, hvor man kan holde sig
+    à jour med priser på bøger - primært romaner på dansk. Selvom man bør støtte sin lokale fysiske boghandler - hvis
+    man stadig er heldig at have sådan en - så er det bare nemmere (og ofte billigere!) at
+    bestille et læs bøger hjem, når ens kostbare lønkroner ruller ind
+    på kontoen. Og her kan denne side hjælpe med at give et overblik.
+<p>
+    Priserne hentes mindst en gang i døgnet fra webbutikkerne nedenfor og gemmes i op til 30 dage.
+<ul>
+    {% for bookstore in view_model.bookstores %}
+    <li>
+        <a target="_blank" class="link-secondary" href="{{ bookstore.url }}">{{ bookstore.name }}</a>
+    </li>
+    {% endfor %}
+</ul>
+<p>
+    Evt. forsendelsesgebyrer er IKKE inkluderet i de viste priser.
+<p>
+    Som sidens skrabede, uæstetiske design og manglende funktionalitet måske afslører,
+    er her tale om et hobbyprojekt. Der findes andre finpudsede løsninger derude, hvor man tilmed får et bedre
+    overblik over priser på aktuelle bøger. Blandt disse kan jeg anbefale
+    <a target="_blank" href="https://bog.nu">bog.nu</a>, hvor man også kan læse vurderinger af bøgerne.
+
 {% endblock %}

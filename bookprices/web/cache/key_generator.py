@@ -6,6 +6,10 @@ def get_authors_key() -> str:
     return "authors"
 
 
+def get_bookstores_key() -> str:
+    return "bookstores"
+
+
 def get_book_key(book_id: int) -> str:
     return f"book_{book_id}"
 
