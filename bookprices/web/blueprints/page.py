@@ -4,8 +4,10 @@ from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args
 from flask import render_template, request, abort, Blueprint
+from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
+    get_bookstores_key,
     get_book_key,
     get_book_list_key,
     get_book_in_book_store_key,
@@ -33,6 +35,26 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 @page_blueprint.route("/")
 def index() -> str:
+    newest_books = db.book_db.get_newest_books(limit=8)
+    newest_prices_books = db.book_db.get_books_with_newest_prices(limit=8)
+    view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
+
+    return render_template("index.html", view_model=view_model)
+
+
+@page_blueprint.route("/about")
+def about() -> str:
+    bookstores_cache_key = get_bookstores_key()
+    if not (bookstores := cache.get(bookstores_cache_key)):
+        bookstores = db.bookstore_db.get_bookstores()
+        cache.set(bookstores_cache_key, bookstores)
+    view_model = AboutViewModel(bookstores)
+
+    return render_template("about.html", view_model=view_model)
+
+
+@page_blueprint.route("/search")
+def search() -> str:
     args = parse_args(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
@@ -64,17 +86,17 @@ def index() -> str:
     next_page = page + 1 if len(books_next) > 0 else None
     previous_page = page - 1 if page >= 2 else None
 
-    vm = bookmapper.map_index_vm(books_current,
-                                 authors,
-                                 search_phrase,
-                                 page,
-                                 author,
-                                 previous_page,
-                                 next_page,
-                                 order_by,
-                                 descending)
+    vm = bookmapper.map_search_vm(books_current,
+                                  authors,
+                                  search_phrase,
+                                  page,
+                                  author,
+                                  previous_page,
+                                  next_page,
+                                  order_by,
+                                  descending)
 
-    return render_template("index.html", view_model=vm)
+    return render_template("search.html", view_model=vm)
 
 
 @page_blueprint.route("/book/<int:book_id>")

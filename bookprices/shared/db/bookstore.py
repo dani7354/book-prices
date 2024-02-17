@@ -6,7 +6,7 @@ from bookprices.shared.model.book import Book
 
 class BookStoreDb(BaseDb):
 
-    def get_bookstores(self) -> list:
+    def get_bookstores(self) -> list[BookStore]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "

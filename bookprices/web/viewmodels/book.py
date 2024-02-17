@@ -48,7 +48,7 @@ class PriceHistoryViewModel:
 
 
 @dataclass(frozen=True)
-class IndexViewModel:
+class SearchViewModel:
     book_list: list[BookListItemViewModel]
     authors: list[AuthorOption]
     sorting_options: list[SortingOption]
