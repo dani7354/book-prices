@@ -10,6 +10,14 @@ def get_bookstores_key() -> str:
     return "bookstores"
 
 
+def get_index_latest_books_key() -> str:
+    return "index_latest_books"
+
+
+def get_index_latest_prices_books_key() -> str:
+    return "index_latest_prices_books"
+
+
 def get_book_key(book_id: int) -> str:
     return f"book_{book_id}"
 

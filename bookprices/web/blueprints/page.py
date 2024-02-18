@@ -8,6 +8,8 @@ from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
     get_bookstores_key,
+    get_index_latest_books_key,
+    get_index_latest_prices_books_key,
     get_book_key,
     get_book_list_key,
     get_book_in_book_store_key,
@@ -35,8 +37,12 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 @page_blueprint.route("/")
 def index() -> str:
-    newest_books = db.book_db.get_newest_books(limit=8)
-    newest_prices_books = db.book_db.get_books_with_newest_prices(limit=8)
+    if not (newest_books := cache.get(get_index_latest_books_key())):
+        newest_books = db.book_db.get_newest_books(limit=8)
+        cache.set(get_index_latest_books_key(), newest_books)
+    if not (newest_prices_books := cache.get(get_index_latest_prices_books_key())):
+        newest_prices_books = db.book_db.get_books_with_newest_prices(limit=8)
+        cache.set(get_index_latest_prices_books_key(), newest_prices_books)
     view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
 
     return render_template("index.html", view_model=view_model)
