@@ -9,9 +9,24 @@
 
 
 -- Get the 100 latest price updates
-SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created, MAX(bp.Created) AS PriceUpdated
+-- Slow
+SELECT b.Id, MAX(b.Isbn), MAX(b.Title), MAX(b.Author), MAX(b.Format), MAX(b.ImageUrl), MAX(b.Created), MAX(bp.Id) AS PriceId
 FROM Book b
-JOIN BookPrice bp ON b.Id = bp.BookId
-GROUP BY b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created
-ORDER BY PriceUpdated DESC
-LIMIT 100;
+INNER JOIN BookPrice bp ON b.Id = bp.BookId
+GROUP BY b.Id
+ORDER BY PriceId DESC
+LIMIT 8;
+
+-- Faster with temporary table
+WITH LatestPriceUpdate AS (
+    SELECT bp.BookId, MAX(bp.Id) AS NewestPriceId
+    FROM BookPrice bp
+    GROUP BY bp.BookId
+    ORDER BY NewestPriceId DESC
+    LIMIT 8
+)
+
+SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created
+FROM Book b
+INNER JOIN LatestPriceUpdate lpu ON b.Id = lpu.BookId;
+ORDER BY lpu.NewestPriceId DESC;
