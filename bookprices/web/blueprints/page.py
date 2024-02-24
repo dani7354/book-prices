@@ -2,9 +2,9 @@ import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
 from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
-from bookprices.web.blueprints.urlhelper import parse_args
+from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from flask import render_template, request, abort, Blueprint
-from bookprices.web.viewmodels.page import AboutViewModel
+from bookprices.web.viewmodels.page import AboutViewModel, LoginViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
     get_bookstores_key,
@@ -59,9 +59,18 @@ def about() -> str:
     return render_template("about.html", view_model=view_model)
 
 
+@page_blueprint.route("/login")
+def login() -> str:
+    #view_model = LoginViewModel(
+    #    GOOGLE_CLIENT_ID,
+    #    GOOGLE_REDIRECT_URI)
+
+    return render_template("login.html")
+
+
 @page_blueprint.route("/search")
 def search() -> str:
-    args = parse_args(request.args)
+    args = parse_args_for_search(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
     order_by = args.get(ORDER_BY_URL_PARAMETER)
@@ -113,7 +122,7 @@ def book(book_id: int) -> str:
             abort(NOT_FOUND)
         cache.set(cache_key, book)
 
-    args = parse_args(request.args)
+    args = parse_args_for_search(request.args)
     page = args.get(PAGE_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
     author = args.get(AUTHOR_URL_PARAMETER)
@@ -149,7 +158,7 @@ def price_history(book_id: int, store_id: int) -> str:
             abort(NOT_FOUND)
         cache.set(book_bookstore_cache_key, book_in_bookstore)
 
-    args = parse_args(request.args)
+    args = parse_args_for_search(request.args)
     page = args.get(PAGE_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
     author = args.get(AUTHOR_URL_PARAMETER)

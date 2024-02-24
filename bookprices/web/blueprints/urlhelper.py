@@ -8,7 +8,7 @@ from bookprices.web.settings import (
     DESCENDING_URL_PARAMETER)
 
 
-def parse_args(request_args: MultiDict) -> dict:
+def parse_args_for_search(request_args: MultiDict) -> dict:
     args = {
         SEARCH_URL_PARAMETER: request_args.get(SEARCH_URL_PARAMETER, type=str, default=""),
         AUTHOR_URL_PARAMETER: request_args.get(AUTHOR_URL_PARAMETER, type=str, default=""),
