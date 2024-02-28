@@ -16,10 +16,11 @@ CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 # Google settings
 GOOGLE_CLIENT_SECRETS_FILE = os.environ["GOOGLE_CLIENT_SECRETS_FILE"]
 GOOGLE_OAUTH_REDIRECT_URI = os.environ["GOOGLE_OAUTH_REDIRECT_URI"]
+GOOGLE_API_SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid"]
 
 # App settings
 DEBUG_MODE = os.environ.get("DEBUG", "False") == "True"
-SITE_HOSTNAME = "bogpriser.stuhrs.dk"
+SITE_HOSTNAME = os.environ.get("SITE_HOSTNAME", "localhost")
 
 BOOK_PAGESIZE = 20
 BOOK_IMAGES_PATH = "/static/assets/images/books/" if DEBUG_MODE else "/static/images/books/"

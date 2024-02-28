@@ -1,7 +1,9 @@
-from flask import Blueprint, request, redirect, url_for, session
-import google.oauth2.credentials
 import google_auth_oauthlib.flow
-from bookprices.shared.db import database
+from flask import Blueprint, request, redirect, url_for, session, Response
+from bookprices.shared.db.database import Database
+from bookprices.web.cache.redis import cache
+from bookprices.web.service.auth_service import AuthService
+from bookprices.web.service.google_api_service import GoogleApiService
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -9,69 +11,57 @@ from bookprices.web.settings import (
     MYSQL_PASSWORD,
     MYSQL_DATABASE,
     GOOGLE_CLIENT_SECRETS_FILE,
-    GOOGLE_OAUTH_REDIRECT_URI)
+    GOOGLE_OAUTH_REDIRECT_URI,
+    GOOGLE_API_SCOPES)
 
 
 auth_blueprint = Blueprint("auth", __name__)
 
-
-db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
-
-
-def credentials_to_dict(credentials):
-    return {'token': credentials.token,
-          'refresh_token': credentials.refresh_token,
-          'token_uri': credentials.token_uri,
-          'client_id': credentials.client_id,
-          'client_secret': credentials.client_secret,
-          'scopes': credentials.scopes}
+auth_service = AuthService(
+    Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE),
+    cache)
 
 
 @auth_blueprint.route("/authorize")
-def authorize():
-    # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
+def authorize() -> Response:
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      GOOGLE_CLIENT_SECRETS_FILE, scopes=["https://www.googleapis.com/auth/userinfo.email", "openid"])
-
-    # The URI created here must exactly match one of the authorized redirect URIs
-    # for the OAuth 2.0 client, which you configured in the API Console. If this
-    # value doesn't match an authorized URI, you will get a 'redirect_uri_mismatch'
-    # error.
+      GOOGLE_CLIENT_SECRETS_FILE, scopes=GOOGLE_API_SCOPES)
     flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
-
     authorization_url, state = flow.authorization_url(
-      access_type='offline',
-      include_granted_scopes='true')
-
-    # Store the state so the callback can verify the auth server response.
-    session['state'] = state
+      access_type="offline",
+      include_granted_scopes="true")
+    session["state"] = state
 
     return redirect(authorization_url)
 
 
 @auth_blueprint.route("/oauth2callback")
-def oauth2callback():
-    # Specify the state when creating the flow in the callback so that it can
-    # verified in the authorization server response.
-    state = session['state']
-
+def oauth2callback() -> tuple[str, int]:
+    state = session["state"]
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        GOOGLE_CLIENT_SECRETS_FILE, scopes=["https://www.googleapis.com/auth/userinfo.email", "openid"], state=state)
+        GOOGLE_CLIENT_SECRETS_FILE, scopes=GOOGLE_API_SCOPES, state=state)
     flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
     authorization_response = request.url
-    print("AUTH RESPONSE: ", authorization_response)
-    print("AUTH URL:", request.url)
     flow.fetch_token(authorization_response=authorization_response)
 
-    # Store credentials in the session.
-    # ACTION ITEM: In a production app, you likely want to save these
-    #              credentials in a persistent database instead.
     credentials = flow.credentials
-    session['credentials'] = credentials_to_dict(credentials)
+    google_api_service = GoogleApiService(credentials.token)
+    user_info = google_api_service.get_user_info()
+    if not user_info:
+        return "Unauthorized", 401
+
+    user = auth_service.get_user(user_info.id)
+    if not user:
+        return "Forbidden", 403  # User not allowed to access the application
 
     return "Authenticated!", 200
 
+
+@auth_blueprint.route("/logout")
+def clear() -> tuple[str, int]:
+    session.clear()
+    return "Session cleared!", 200
 
 
