@@ -1,12 +1,16 @@
 import os
+from typing import Optional
 from flask import Flask
 from flask_login import LoginManager
+from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.auth import auth_blueprint
 from bookprices.web.blueprints.page import page_blueprint, not_found, internal_server_error
-from bookprices.web.service.auth_service import AuthService
-from bookprices.web.settings import DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME
+from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
+from bookprices.web.settings import (
+    DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,
+    MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 
 static_folder = "static"
 static_url_path = None
@@ -31,9 +35,13 @@ cache.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
 @login_manager.user_loader
-def load_user(user_id):
-    return AuthService.get_user(user_id)
+def load_user(user_id: str) -> Optional[WebUser]:
+    auth_service = AuthService(
+        Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE),
+        cache)
+    return auth_service.get_user(user_id)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from flask import render_template, request, abort, Blueprint
+from flask_login import current_user
 from bookprices.web.viewmodels.page import AboutViewModel, LoginViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
@@ -44,6 +45,8 @@ def index() -> str:
         newest_prices_books = db.book_db.get_books_with_newest_prices(limit=8)
         cache.set(get_index_latest_prices_books_key(), newest_prices_books)
     view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
+
+    print(current_user)
 
     return render_template("index.html", view_model=view_model)
 

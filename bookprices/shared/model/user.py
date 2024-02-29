@@ -12,3 +12,6 @@ class User:
     google_api_token: str
     created: datetime
     updated: datetime
+
+    def get_id(self) -> str:
+        return self.id

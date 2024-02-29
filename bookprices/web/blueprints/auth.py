@@ -1,9 +1,12 @@
 import google_auth_oauthlib.flow
-from flask import Blueprint, request, redirect, url_for, session, Response
+from flask import Blueprint, request, redirect, url_for, session, Response, jsonify
 from bookprices.shared.db.database import Database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.google_api_service import GoogleApiService
+from flask_login import (
+    login_user,
+    logout_user)
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -36,32 +39,27 @@ def authorize() -> Response:
 
 
 @auth_blueprint.route("/oauth2callback")
-def oauth2callback() -> tuple[str, int]:
+def oauth2callback() -> Response | tuple[Response, int]:
     state = session["state"]
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         GOOGLE_CLIENT_SECRETS_FILE, scopes=GOOGLE_API_SCOPES, state=state)
     flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
-    authorization_response = request.url
-    flow.fetch_token(authorization_response=authorization_response)
+    flow.fetch_token(authorization_response=request.url)
+    google_api_service = GoogleApiService(flow.credentials.token)
+    if not (user_info := google_api_service.get_user_info()):
+        return jsonify({"Error": "Unauthorized"}), 401
 
-    credentials = flow.credentials
-    google_api_service = GoogleApiService(credentials.token)
-    user_info = google_api_service.get_user_info()
-    if not user_info:
-        return "Unauthorized", 401
-
-    user = auth_service.get_user(user_info.id)
-    if not user:
-        return "Forbidden", 403  # User not allowed to access the application
-
-    return "Authenticated!", 200
+    if not (user := auth_service.get_user(user_info.id)):
+        return jsonify({"Error": "Forbidden"}), 403  # User not allowed to access the application
+    login_user(user)
+    return redirect(url_for("page.index"))
 
 
-@auth_blueprint.route("/logout")
-def clear() -> tuple[str, int]:
-    session.clear()
-    return "Session cleared!", 200
+@auth_blueprint.route("/logout", methods=["POST"])
+def logout() -> Response:
+    logout_user()
+    return redirect(url_for("page.index"))
 
 
