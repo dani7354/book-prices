@@ -14,6 +14,14 @@ class WebUser(flask_login.UserMixin):
     def is_active(self) -> bool:
         return self._user_model.is_active
 
+    @property
+    def email(self) -> str:
+        return self._user_model.email
+
+    @property
+    def name(self) -> str:
+        return self._user_model.firstname
+
     def get_id(self) -> str:
         return self._user_model.id
 
@@ -29,5 +37,3 @@ class AuthService:
             if user:
                 self.cache.set(get_user_key(user_id), user)
         return WebUser(user) if user else None
-
-

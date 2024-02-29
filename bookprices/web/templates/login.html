@@ -2,23 +2,6 @@
 {% set active_page = "login" %}
 {% block content %}
 <h1>Log ind</h1>
-
-<script src="https://accounts.google.com/gsi/client" async></script>
-<div id="g_id_onload"
-     data-client_id="{{ view_model.google_client_id }}"
-     data-context="signin"
-     data-ux_mode="redirect"
-     data-login_uri="{{ view_model.google_redirect_uri }}"
-     data-auto_prompt="false">
-</div>
-
-<div class="g_id_signin"
-     data-type="standard"
-     data-shape="rectangular"
-     data-theme="outline"
-     data-text="signin_with"
-     data-size="large"
-     data-logo_alignment="left">
-</div>
+<a href="{{ url_for('auth.authorize') }}">Log ind via Google - kun for tilmeldte brugere!</a>
 
 {% endblock %}

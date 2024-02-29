@@ -1,7 +1,9 @@
 from bookprices.shared.db.bookprice import BookPrice
 from bookprices.shared.db.bookstore import BookStore
-from bookprices.web.viewmodels.price import (PriceHistoryResponse, PriceHistoryForBookStoreResponse,
-                                             PriceHistoryForDatesResponse)
+from bookprices.web.viewmodels.price import (
+    PriceHistoryResponse,
+    PriceHistoryForBookStoreResponse,
+    PriceHistoryForDatesResponse)
 
 
 DATE_FORMAT = "%Y-%m-%d"
@@ -17,7 +19,8 @@ def map_prices_history(bookprices: list[BookPrice]) -> PriceHistoryResponse:
     return PriceHistoryResponse(dates, prices)
 
 
-def map_price_history_for_stores(bookprices_by_bookstore: dict[BookStore, list[BookPrice]]) -> PriceHistoryForDatesResponse:
+def map_price_history_for_stores(
+        bookprices_by_bookstore: dict[BookStore, list[BookPrice]]) -> PriceHistoryForDatesResponse:
     all_dates = sorted({price.created.strftime(DATE_FORMAT) for prices in bookprices_by_bookstore.values()
                         for price in prices})
     price_history_for_stores = []

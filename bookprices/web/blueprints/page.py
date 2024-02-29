@@ -1,10 +1,12 @@
+import flask_login
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
 from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
-from flask import render_template, request, abort, Blueprint
+from flask import render_template, request, abort, Blueprint, redirect, Response, url_for
 from flask_login import current_user
+from typing import Union
 from bookprices.web.viewmodels.page import AboutViewModel, LoginViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
@@ -60,15 +62,6 @@ def about() -> str:
     view_model = AboutViewModel(bookstores)
 
     return render_template("about.html", view_model=view_model)
-
-
-@page_blueprint.route("/login")
-def login() -> str:
-    #view_model = LoginViewModel(
-    #    GOOGLE_CLIENT_ID,
-    #    GOOGLE_REDIRECT_URI)
-
-    return render_template("login.html")
 
 
 @page_blueprint.route("/search")
@@ -176,6 +169,19 @@ def price_history(book_id: int, store_id: int) -> str:
                                                             descending)
 
     return render_template("price_history.html", view_model=price_history_view_model)
+
+
+@page_blueprint.route("/login")
+def login() -> Union[Response, str]:
+    if current_user.is_authenticated:
+        return redirect(url_for("page.index"))
+    return render_template("login.html")
+
+
+@page_blueprint.route("/admin")
+@flask_login.login_required
+def admin() -> str:
+    return "Admin"
 
 
 @page_blueprint.errorhandler(NOT_FOUND)

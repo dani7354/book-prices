@@ -49,6 +49,25 @@
                   <a class="{{ 'nav-link active' if active_page == 'about' else 'nav-link' }}" href="/about">Om siden</a>
                 </li>
               </ul>
+              <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ current_user.email }}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
+                      <li><a class="dropdown-item" href="#">Dashboard</a></li>
+                      <li><a class="dropdown-item" href="#">Noget andet</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Log ud</a></li>
+                    </ul>
+                  </li>
+                {% else %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="/login">Log ind</a>
+                  </li>
+                {% endif %}
+              </ul>
             </div>
           </div>
         </nav>
