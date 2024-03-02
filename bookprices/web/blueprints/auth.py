@@ -6,6 +6,7 @@ from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.csrf import CSRFService
 from bookprices.web.service.google_api_service import GoogleApiService
+from bookprices.web.blueprints.urlhelper import format_url_for_redirection
 from flask_login import (
     login_user,
     logout_user)
@@ -72,10 +73,5 @@ def oauth2callback() -> Response | tuple[Response, int]:
 @auth_blueprint.route("/logout", methods=["POST"])
 def logout() -> tuple[Response, int]:
     redirect_url_from_request = request.args.get("redirect_url", url_for("page.index"))
-    parsed_redirect_url = urlparse(redirect_url_from_request)
-    redirect_url = f"{parsed_redirect_url.path}"
-    if parsed_redirect_url.query:
-        redirect_url += f"?{parsed_redirect_url.query}"
     logout_user()
-
-    return jsonify({"redirect_url": redirect_url}), 200
+    return jsonify({"redirect_url":  format_url_for_redirection(redirect_url_from_request)}), 200

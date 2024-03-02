@@ -1,3 +1,4 @@
+from urllib3.util import parse_url, Url
 from werkzeug.datastructures.structures import MultiDict
 from bookprices.shared.db.book import BookSearchSortOption
 from bookprices.web.settings import (
@@ -27,3 +28,9 @@ def parse_args_for_search(request_args: MultiDict) -> dict:
         args[PAGE_URL_PARAMETER] = 1
 
     return args
+
+
+def format_url_for_redirection(url: str) -> str:
+    parsed_url = parse_url(url)
+
+    return Url(path=parsed_url.path, query=parsed_url.query).url
