@@ -1,5 +1,6 @@
 import google_auth_oauthlib.flow
 from flask import Blueprint, request, redirect, url_for, session, Response, jsonify
+from urllib.parse import urlparse
 from bookprices.shared.db.database import Database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
@@ -70,5 +71,11 @@ def oauth2callback() -> Response | tuple[Response, int]:
 
 @auth_blueprint.route("/logout", methods=["POST"])
 def logout() -> tuple[Response, int]:
+    redirect_url_from_request = request.args.get("redirect_url", url_for("page.index"))
+    parsed_redirect_url = urlparse(redirect_url_from_request)
+    redirect_url = f"{parsed_redirect_url.path}"
+    if parsed_redirect_url.query:
+        redirect_url += f"?{parsed_redirect_url.query}"
     logout_user()
-    return jsonify({"Message": "Logged out"}), 200
+
+    return jsonify({"redirect_url": redirect_url}), 200

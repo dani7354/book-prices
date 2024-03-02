@@ -2,15 +2,16 @@ const logoutUrl = "/auth/logout";
 const csrfTokenNodeId = "#csrf-token";
 
 function logoutUser() {
+    let url = `${logoutUrl}?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     $.ajax({
-        url: logoutUrl,
+        url: url,
         type: "POST",
         dataType: "json",
         data: {
             "csrf_token": $(csrfTokenNodeId).val()
         },
-        success: function() {
-            window.location.href = "/";
+        success: function(data) {
+            window.location = data.redirect_url;
         },
         error: function(error) {
             console.log(error);
