@@ -1,6 +1,5 @@
 import google_auth_oauthlib.flow
 from flask import Blueprint, request, redirect, url_for, session, Response, jsonify
-from urllib.parse import urlparse
 from bookprices.shared.db.database import Database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
@@ -46,7 +45,9 @@ def authorize() -> Response:
     authorization_url, state = flow.authorization_url(
       access_type="offline",
       include_granted_scopes="true")
+
     session["state"] = state
+    session["redirect_url"] = redirect_url if (redirect_url := request.args.get("next")) else url_for("page.index")
 
     return redirect(authorization_url)
 
@@ -66,12 +67,16 @@ def oauth2callback() -> Response | tuple[Response, int]:
 
     if not (user := auth_service.get_user(user_info.id)):
         return jsonify({"Error": "Forbidden"}), 403  # User not allowed to access the application
+
     login_user(user)
-    return redirect(url_for("page.index"))
+    redirect_url = format_url_for_redirection(session.pop("redirect_url", url_for("page.index")))
+
+    return redirect(redirect_url)
 
 
 @auth_blueprint.route("/logout", methods=["POST"])
 def logout() -> tuple[Response, int]:
     redirect_url_from_request = request.args.get("redirect_url", url_for("page.index"))
     logout_user()
+
     return jsonify({"redirect_url":  format_url_for_redirection(redirect_url_from_request)}), 200

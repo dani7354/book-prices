@@ -4,8 +4,8 @@ import bookprices.web.mapper.book as bookmapper
 import bookprices.web.mapper.user as usermapper
 from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
-from bookprices.web.blueprints.urlhelper import parse_args_for_search
-from flask import render_template, request, abort, Blueprint, redirect, Response, url_for
+from bookprices.web.blueprints.urlhelper import parse_args_for_search, format_url_for_redirection
+from flask import render_template, request, abort, Blueprint, redirect, Response, url_for, session
 from flask_login import current_user
 from typing import Union
 from bookprices.web.service import csrf
@@ -182,10 +182,12 @@ def price_history(book_id: int, store_id: int) -> str:
 
 @page_blueprint.route("/login")
 def login() -> Union[Response, str]:
+    redirect_url = redirect_url if (redirect_url := format_url_for_redirection(request.args.get("next"))) \
+        else url_for("page.index")
     if current_user.is_authenticated:
-        return redirect(url_for("page.index"))
+        return redirect(redirect_url)
 
-    return render_template("login.html")
+    return render_template("login.html", redirect_url=redirect_url)
 
 
 @page_blueprint.route("/admin")

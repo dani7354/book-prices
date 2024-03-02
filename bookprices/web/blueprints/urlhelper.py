@@ -32,5 +32,5 @@ def parse_args_for_search(request_args: MultiDict) -> dict:
 
 def format_url_for_redirection(url: str) -> str:
     parsed_url = parse_url(url)
-
+    
     return Url(path=parsed_url.path, query=parsed_url.query).url
