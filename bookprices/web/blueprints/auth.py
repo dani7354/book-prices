@@ -19,9 +19,9 @@ from bookprices.web.settings import (
     GOOGLE_OAUTH_REDIRECT_URI,
     GOOGLE_API_SCOPES)
 
+PAGE_INDEX_ENDPOINT = "page.index"
 
 auth_blueprint = Blueprint("auth", __name__)
-
 auth_service = AuthService(
     Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE),
     cache)
@@ -47,7 +47,8 @@ def authorize() -> Response:
       include_granted_scopes="true")
 
     session["state"] = state
-    session["redirect_url"] = redirect_url if (redirect_url := request.args.get("next")) else url_for("page.index")
+    session["redirect_url"] = redirect_url if (redirect_url := request.args.get("next"))\
+        else url_for(PAGE_INDEX_ENDPOINT)
 
     return redirect(authorization_url)
 
@@ -69,14 +70,14 @@ def oauth2callback() -> Response | tuple[Response, int]:
         return jsonify({"Error": "Forbidden"}), 403  # User not allowed to access the application
 
     login_user(user)
-    redirect_url = format_url_for_redirection(session.pop("redirect_url", url_for("page.index")))
+    redirect_url = format_url_for_redirection(session.pop("redirect_url", url_for(PAGE_INDEX_ENDPOINT)))
 
     return redirect(redirect_url)
 
 
 @auth_blueprint.route("/logout", methods=["POST"])
 def logout() -> tuple[Response, int]:
-    redirect_url_from_request = request.args.get("redirect_url", url_for("page.index"))
+    redirect_url_from_request = request.args.get("redirect_url", url_for(PAGE_INDEX_ENDPOINT))
     logout_user()
 
     return jsonify({"redirect_url":  format_url_for_redirection(redirect_url_from_request)}), 200

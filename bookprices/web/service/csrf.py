@@ -1,6 +1,5 @@
 import os
 from typing import ClassVar
-from functools import wraps
 from flask import session
 
 

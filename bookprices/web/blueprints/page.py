@@ -7,7 +7,6 @@ from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args_for_search, format_url_for_redirection
 from flask import render_template, request, abort, Blueprint, redirect, Response, url_for, session
 from flask_login import current_user
-from typing import Union
 from bookprices.web.service import csrf
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
@@ -180,7 +179,7 @@ def price_history(book_id: int, store_id: int) -> str:
 
 
 @page_blueprint.route("/login")
-def login() -> Union[Response, str]:
+def login() -> Response | str:
     redirect_url = redirect_url if (redirect_url := format_url_for_redirection(request.args.get("next"))) \
         else url_for("page.index")
     if current_user.is_authenticated:
