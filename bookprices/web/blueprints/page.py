@@ -44,6 +44,7 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 def include_csrf_token() -> dict[str, str]:
     csrf_service = csrf.CSRFService()
     csrf_token = csrf_service.generate_token()
+
     return {"csrf_token": csrf_token}
 
 
@@ -56,8 +57,6 @@ def index() -> str:
         newest_prices_books = db.book_db.get_books_with_newest_prices(limit=8)
         cache.set(get_index_latest_prices_books_key(), newest_prices_books)
     view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
-
-    print(current_user)
 
     return render_template("index.html", view_model=view_model)
 
@@ -200,6 +199,7 @@ def admin() -> str:
 @flask_login.login_required
 def user() -> str:
     view_model = usermapper.map_user_view_model(flask_login.current_user)
+
     return render_template("user.html", view_model=view_model)
 
 
