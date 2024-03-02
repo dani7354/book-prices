@@ -1,13 +1,15 @@
 import flask_login
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
+import bookprices.web.mapper.user as usermapper
 from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from flask import render_template, request, abort, Blueprint, redirect, Response, url_for
 from flask_login import current_user
 from typing import Union
-from bookprices.web.viewmodels.page import AboutViewModel, LoginViewModel
+from bookprices.web.service import csrf
+from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
     get_bookstores_key,
@@ -36,6 +38,13 @@ INTERNAL_SERVER_ERROR = 500
 page_blueprint = Blueprint("page", __name__)
 
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+
+
+@page_blueprint.context_processor
+def include_csrf_token() -> dict[str, str]:
+    csrf_service = csrf.CSRFService()
+    csrf_token = csrf_service.generate_token()
+    return {"csrf_token": csrf_token}
 
 
 @page_blueprint.route("/")
@@ -175,13 +184,21 @@ def price_history(book_id: int, store_id: int) -> str:
 def login() -> Union[Response, str]:
     if current_user.is_authenticated:
         return redirect(url_for("page.index"))
+
     return render_template("login.html")
 
 
 @page_blueprint.route("/admin")
 @flask_login.login_required
 def admin() -> str:
-    return "Admin"
+    return render_template("admin.html")
+
+
+@page_blueprint.route("/user")
+@flask_login.login_required
+def user() -> str:
+    view_model = usermapper.map_user_view_model(flask_login.current_user)
+    return render_template("user.html", view_model=view_model)
 
 
 @page_blueprint.errorhandler(NOT_FOUND)

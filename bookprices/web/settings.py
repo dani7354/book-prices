@@ -34,5 +34,5 @@ DESCENDING_URL_PARAMETER = "descending"
 GOOGLE_AUTH_ERROR_URL_PARAMETER = "error"
 GOOGLE_AUTH_CODE_URL_PARAMETER = "code"
 
-FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "supersecretkey")
+FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", os.urandom(32))
 FLASK_APP_PORT = int(os.environ.get("FLASK_APP_PORT", 3031))

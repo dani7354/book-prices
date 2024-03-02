@@ -13,9 +13,3 @@ class IndexViewModel:
 @dataclass(frozen=True)
 class AboutViewModel:
     bookstores: list[BookStore]
-
-
-@dataclass(frozen=True)
-class LoginViewModel:
-    google_client_id: str
-    google_redirect_uri: str

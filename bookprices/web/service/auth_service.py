@@ -1,4 +1,5 @@
 import flask_login
+from datetime import datetime
 from flask_caching import Cache
 from typing import Optional
 from bookprices.shared.db. database import Database
@@ -11,6 +12,10 @@ class WebUser(flask_login.UserMixin):
         self._user_model = user_model
 
     @property
+    def id(self) -> str:
+        return self._user_model.id
+
+    @property
     def is_active(self) -> bool:
         return self._user_model.is_active
 
@@ -19,11 +24,23 @@ class WebUser(flask_login.UserMixin):
         return self._user_model.email
 
     @property
-    def name(self) -> str:
+    def firstname(self) -> str:
         return self._user_model.firstname
 
+    @property
+    def lastname(self) -> str:
+        return self._user_model.lastname
+
+    @property
+    def created(self) -> datetime:
+        return self._user_model.created
+
+    @property
+    def updated(self) -> datetime:
+        return self._user_model.updated
+
     def get_id(self) -> str:
-        return self._user_model.id
+        return self.id
 
 
 class AuthService:

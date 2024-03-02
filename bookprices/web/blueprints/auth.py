@@ -3,6 +3,7 @@ from flask import Blueprint, request, redirect, url_for, session, Response, json
 from bookprices.shared.db.database import Database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
+from bookprices.web.service.csrf import CSRFService
 from bookprices.web.service.google_api_service import GoogleApiService
 from flask_login import (
     login_user,
@@ -23,6 +24,16 @@ auth_blueprint = Blueprint("auth", __name__)
 auth_service = AuthService(
     Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE),
     cache)
+
+
+@auth_blueprint.before_request  # TODO: move this when POST request methods are added to other BluePrints
+def validate_csrf_token() -> None | tuple[Response, int]:
+    if request.method == "POST":
+        if not (csrf_token := request.form.get("csrf_token")):
+            return jsonify({"Error": "CSRF token not present in request payload"}), 400
+        if not CSRFService().is_token_valid(csrf_token):
+            return jsonify({"Error": "CSRF token invalid"}), 400
+    return None
 
 
 @auth_blueprint.route("/authorize")
@@ -58,8 +69,6 @@ def oauth2callback() -> Response | tuple[Response, int]:
 
 
 @auth_blueprint.route("/logout", methods=["POST"])
-def logout() -> Response:
+def logout() -> tuple[Response, int]:
     logout_user()
-    return redirect(url_for("page.index"))
-
-
+    return jsonify({"Message": "Logged out"}), 200

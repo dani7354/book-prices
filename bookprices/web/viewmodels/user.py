@@ -1,14 +1,12 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 
 @dataclass(frozen=True)
-class User:
+class UserInfoViewModel:
     id: str
     email: str
     firstname: str
     lastname: str
     is_active: bool
-    google_api_token: str
-    created: datetime
-    updated: datetime
+    created: str
+    updated: str
