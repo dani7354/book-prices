@@ -58,3 +58,8 @@
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
 }
+
+.google-icon {
+  height: 48px;
+  width: 48px;
+}
