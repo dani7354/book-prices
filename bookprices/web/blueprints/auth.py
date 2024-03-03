@@ -1,4 +1,5 @@
 import google_auth_oauthlib.flow
+from enum import Enum
 from flask import Blueprint, request, redirect, url_for, session, Response, jsonify
 from bookprices.shared.db.database import Database
 from bookprices.web.cache.redis import cache
@@ -27,6 +28,11 @@ auth_service = AuthService(
     cache)
 
 
+class SessionKey(Enum):
+    STATE = "state"
+    REDIRECT_URL = "redirect_url"
+
+
 @auth_blueprint.before_request  # TODO: move this when POST request methods are added to other BluePrints
 def validate_csrf_token() -> None | tuple[Response, int]:
     if request.method == "POST":
@@ -46,8 +52,8 @@ def authorize() -> Response:
       access_type="offline",
       include_granted_scopes="true")
 
-    session["state"] = state
-    session["redirect_url"] = redirect_url if (redirect_url := request.args.get("next"))\
+    session[SessionKey.STATE.value] = state
+    session[SessionKey.REDIRECT_URL.value] = redirect_url if (redirect_url := request.args.get("next")) \
         else url_for(PAGE_INDEX_ENDPOINT)
 
     return redirect(authorization_url)
@@ -55,7 +61,7 @@ def authorize() -> Response:
 
 @auth_blueprint.route("/oauth2callback")
 def oauth2callback() -> Response | tuple[Response, int]:
-    state = session["state"]
+    state = session[SessionKey.STATE.value]
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         GOOGLE_CLIENT_SECRETS_FILE, scopes=GOOGLE_API_SCOPES, state=state)
     flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
@@ -69,8 +75,10 @@ def oauth2callback() -> Response | tuple[Response, int]:
     if not (user := auth_service.get_user(user_info.id)):
         return jsonify({"Error": "Forbidden"}), 403  # User not allowed to access the application
 
+    if user.google_api_token != flow.credentials.token:
+        auth_service.update_user_token(user_info.id, flow.credentials.token)
     login_user(user)
-    redirect_url = format_url_for_redirection(session.pop("redirect_url", url_for(PAGE_INDEX_ENDPOINT)))
+    redirect_url = format_url_for_redirection(session.pop(SessionKey.REDIRECT_URL.value, url_for(PAGE_INDEX_ENDPOINT)))
 
     return redirect(redirect_url)
 
