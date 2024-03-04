@@ -203,10 +203,10 @@ def user() -> str:
 
 
 @page_blueprint.errorhandler(NOT_FOUND)
-def not_found(error):
+def not_found(error) -> tuple[str, int]:
     return render_template("404.html"), NOT_FOUND
 
 
 @page_blueprint.errorhandler(INTERNAL_SERVER_ERROR)
-def internal_server_error(error):
+def internal_server_error(error) -> tuple[str, int]:
     return render_template("500.html"), INTERNAL_SERVER_ERROR
