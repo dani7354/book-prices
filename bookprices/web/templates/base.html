@@ -81,7 +81,7 @@
         {% if csrf_token %}
         <!-- Used for validating POST requests -->
         <form >
-            <input type="hidden" aria-hidden="true" id="csrf-token" value="{{ csrf_token }}">
+            <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
         </form>
         {% endif %}
     </main>
