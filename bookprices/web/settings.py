@@ -15,7 +15,6 @@ CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 
 # Google settings
 GOOGLE_CLIENT_SECRETS_FILE = os.environ["GOOGLE_CLIENT_SECRETS_FILE"]
-GOOGLE_OAUTH_REDIRECT_URI = os.environ["GOOGLE_OAUTH_REDIRECT_URI"]
 GOOGLE_API_SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid"]
 
 # App settings

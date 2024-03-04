@@ -17,7 +17,6 @@ from bookprices.web.settings import (
     MYSQL_PASSWORD,
     MYSQL_DATABASE,
     GOOGLE_CLIENT_SECRETS_FILE,
-    GOOGLE_OAUTH_REDIRECT_URI,
     GOOGLE_API_SCOPES)
 
 PAGE_INDEX_ENDPOINT = "page.index"
@@ -47,7 +46,7 @@ def validate_csrf_token() -> None | tuple[Response, int]:
 def authorize() -> Response:
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
       GOOGLE_CLIENT_SECRETS_FILE, scopes=GOOGLE_API_SCOPES)
-    flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
+    flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
     authorization_url, state = flow.authorization_url(
       access_type="offline",
       include_granted_scopes="true")
