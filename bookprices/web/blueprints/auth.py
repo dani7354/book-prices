@@ -33,7 +33,7 @@ class SessionKey(Enum):
     REDIRECT_URL = "redirect_url"
 
 
-@auth_blueprint.before_request  # TODO: move this when POST request methods are added to other BluePrints
+@auth_blueprint.before_request
 def validate_csrf_token() -> None | tuple[Response, int]:
     if request.method == "POST":
         if not (csrf_token := request.form.get("csrf_token")):
