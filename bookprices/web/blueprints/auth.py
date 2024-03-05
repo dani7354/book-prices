@@ -60,7 +60,8 @@ def authorize() -> Response:
 
 @auth_blueprint.route("/oauth2callback")
 def oauth2callback() -> Response | tuple[Response, int]:
-    state = session[SessionKey.STATE.value]
+    if not (state := session.get(SessionKey.STATE.value)):
+        return jsonify({"Error": "State not found in session"}), 400
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         GOOGLE_CLIENT_SECRETS_FILE, scopes=GOOGLE_API_SCOPES, state=state)
     flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
@@ -69,10 +70,10 @@ def oauth2callback() -> Response | tuple[Response, int]:
     flow.fetch_token(authorization_response=request.url)
     google_api_service = GoogleApiService(flow.credentials.token)
     if not (user_info := google_api_service.get_user_info()):
-        return jsonify({"Error": "Unauthorized"}), 401
+        return jsonify({"Error": "User not found"}), 401
 
-    if not (user := auth_service.get_user(user_info.id)):
-        return jsonify({"Error": "Forbidden"}), 403  # User not allowed to access the application
+    if not (user := auth_service.get_user(user_info.id)) or not user.is_active:
+        return jsonify({"Error": "Access not allowed"}), 403  # User not allowed to access the application
 
     if user.google_api_token != flow.credentials.token:
         auth_service.update_user_token(user_info.id, flow.credentials.token)
