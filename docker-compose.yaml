@@ -26,6 +26,8 @@ services:
       dockerfile: docker/web/Dockerfile
     image: dsp8ef9/bookprices_web:latest
     env_file: ./docker/web/.web.env
+    volumes:
+      - ./google_client_secrets.json:/usr/local/bookprices_web/google_client_secrets.json:ro
     networks:
       - localnetwork
   nginx:

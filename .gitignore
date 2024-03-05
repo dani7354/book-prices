@@ -16,6 +16,7 @@ node_modules/
 
 .DS_Store
 config.json
+google_client_secrets.json
 *.pyc
 *.log
 *.env

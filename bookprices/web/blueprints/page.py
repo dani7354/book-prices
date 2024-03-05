@@ -1,9 +1,13 @@
+import flask_login
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
+import bookprices.web.mapper.user as usermapper
 from bookprices.shared.db.book import SearchQuery
 from bookprices.web.cache.redis import cache
-from bookprices.web.blueprints.urlhelper import parse_args
-from flask import render_template, request, abort, Blueprint
+from bookprices.web.blueprints.urlhelper import parse_args_for_search, format_url_for_redirection
+from flask import render_template, request, abort, Blueprint, redirect, Response, url_for, session
+from flask_login import current_user
+from bookprices.web.service import csrf
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
@@ -35,6 +39,14 @@ page_blueprint = Blueprint("page", __name__)
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 
 
+@page_blueprint.context_processor
+def include_csrf_token() -> dict[str, str]:
+    csrf_service = csrf.CSRFService()
+    csrf_token = csrf_service.generate_token()
+
+    return {"csrf_token": csrf_token}
+
+
 @page_blueprint.route("/")
 def index() -> str:
     if not (newest_books := cache.get(get_index_latest_books_key())):
@@ -61,7 +73,7 @@ def about() -> str:
 
 @page_blueprint.route("/search")
 def search() -> str:
-    args = parse_args(request.args)
+    args = parse_args_for_search(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
     order_by = args.get(ORDER_BY_URL_PARAMETER)
@@ -113,7 +125,7 @@ def book(book_id: int) -> str:
             abort(NOT_FOUND)
         cache.set(cache_key, book)
 
-    args = parse_args(request.args)
+    args = parse_args_for_search(request.args)
     page = args.get(PAGE_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
     author = args.get(AUTHOR_URL_PARAMETER)
@@ -149,7 +161,7 @@ def price_history(book_id: int, store_id: int) -> str:
             abort(NOT_FOUND)
         cache.set(book_bookstore_cache_key, book_in_bookstore)
 
-    args = parse_args(request.args)
+    args = parse_args_for_search(request.args)
     page = args.get(PAGE_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
     author = args.get(AUTHOR_URL_PARAMETER)
@@ -166,11 +178,35 @@ def price_history(book_id: int, store_id: int) -> str:
     return render_template("price_history.html", view_model=price_history_view_model)
 
 
+@page_blueprint.route("/login")
+def login() -> Response | str:
+    redirect_url = redirect_url if (redirect_url := format_url_for_redirection(request.args.get("next"))) \
+        else url_for("page.index")
+    if current_user.is_authenticated:
+        return redirect(redirect_url)
+
+    return render_template("login.html", redirect_url=redirect_url)
+
+
+@page_blueprint.route("/admin")
+@flask_login.login_required
+def admin() -> str:
+    return render_template("admin.html")
+
+
+@page_blueprint.route("/user")
+@flask_login.login_required
+def user() -> str:
+    view_model = usermapper.map_user_view_model(flask_login.current_user)
+
+    return render_template("user.html", view_model=view_model)
+
+
 @page_blueprint.errorhandler(NOT_FOUND)
-def not_found(error):
+def not_found(error) -> tuple[str, int]:
     return render_template("404.html"), NOT_FOUND
 
 
 @page_blueprint.errorhandler(INTERNAL_SERVER_ERROR)
-def internal_server_error(error):
+def internal_server_error(error) -> tuple[str, int]:
     return render_template("500.html"), INTERNAL_SERVER_ERROR
