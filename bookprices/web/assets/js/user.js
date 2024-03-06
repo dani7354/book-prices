@@ -1,4 +1,5 @@
 const logoutUrl = "/auth/logout";
+const logoutButtonId = "#logout-link";
 const csrfTokenNodeId = "#csrf-token";
 
 function logoutUser() {
@@ -18,3 +19,9 @@ function logoutUser() {
         }
     });
 }
+
+$(document).ready(function() {
+    $(logoutButtonId).click(function() {
+        logoutUser();
+    });
+})

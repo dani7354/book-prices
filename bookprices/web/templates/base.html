@@ -18,11 +18,14 @@
             sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs
             sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="></script>
     <script src="/static/assets/js/apexcharts.min.js"
-           integrity="sha256-SQkKKOiAPbEWrvIQnoPnAiUIFiQDiTPKu21mYmmY1G8=
-           sha384-6foQBJHuUSRZT7FlYD0AkFDsYH7bowmqBulLZUb8S1qBoEItSgOaXiGkxDn9kSLP
-           sha512-vIqZt7ReO939RQssENNbZ+Iu3j0CSsgk41nP3AYabLiIFajyebORlk7rKPjGddmO1FQkbuOb2EVK6rJkiHsmag=="></script>
+            integrity="sha256-SQkKKOiAPbEWrvIQnoPnAiUIFiQDiTPKu21mYmmY1G8=
+            sha384-6foQBJHuUSRZT7FlYD0AkFDsYH7bowmqBulLZUb8S1qBoEItSgOaXiGkxDn9kSLP
+            sha512-vIqZt7ReO939RQssENNbZ+Iu3j0CSsgk41nP3AYabLiIFajyebORlk7rKPjGddmO1FQkbuOb2EVK6rJkiHsmag=="></script>
     {% if current_user.is_authenticated %}
-     <script src="/static/assets/js/user.js"></script>
+     <script src="/static/assets/js/user.js"
+             integrity="sha256-h7YCLNcyg8TTCzCSuid5k3P7Y8Bt+iIbv/RMWm500eA=
+             sha384-OoqpIaE5i10DuV3qWjp+XpENBc2W9JbF2FokyHImKUvfmQr7R2D5XQBhSDjmeN8L
+             sha512-21Dh+wrxyGUhxcrfsTBh8xpEEM68CDyswd2VxsbQl0bbbIgV9oAj8l3GuxRA9ouDRqnfkeTQcVUKX+pVn8Kpqw=="></script>
     {% endif %}
 </head>
 <body>
@@ -62,7 +65,7 @@
                       <li><a class="{{ 'dropdown-item disabled' if active_page == 'user' else 'dropdown-item' }}" href="{{ url_for('page.user' )}}">Redigér bruger</a></li>
                       <li><a class="{{ 'dropdown-item disabled' if active_page == 'admin' else 'dropdown-item' }}" href="{{ url_for('page.admin' )}}">Sideoversigt</a></li>
                       <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" href="javascript:logoutUser()">Log ud</a></li>
+                      <li><a id="logout-link" class="dropdown-item">Log ud</a></li>
                     </ul>
                   </li>
                 {% else %}
