@@ -28,4 +28,4 @@ jobs:
             -Dsonar.projectKey=dani7354_book-prices
             -Dsonar.organization=dani7354
             -Dsonar.sources=.
-            -Dsonar.python.version=3.11
+            -Dsonar.python.version=3.12
