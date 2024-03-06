@@ -23,7 +23,6 @@ if DEBUG_MODE:
 
 app = Flask(__name__, static_url_path=static_url_path, static_folder=static_folder)
 app.debug = DEBUG_MODE
-app.config["SECRET_KEY"] = FLASK_SECRET_KEY
 app.config.update(
     TESTING=DEBUG_MODE,
     SECRET_KEY=FLASK_SECRET_KEY,
