@@ -62,7 +62,7 @@
                       <li><a class="{{ 'dropdown-item disabled' if active_page == 'user' else 'dropdown-item' }}" href="{{ url_for('page.user' )}}">Redigér bruger</a></li>
                       <li><a class="{{ 'dropdown-item disabled' if active_page == 'admin' else 'dropdown-item' }}" href="{{ url_for('page.admin' )}}">Sideoversigt</a></li>
                       <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" href="javascript:logoutUser()">Log ud</a></li>
+                      <li><a id="logout-link" class="dropdown-item">Log ud</a></li>
                     </ul>
                   </li>
                 {% else %}

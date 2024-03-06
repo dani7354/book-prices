@@ -1,5 +1,6 @@
 const logoutUrl = "/auth/logout";
 const csrfTokenNodeId = "#csrf-token";
+const logoutButtonId = "#logout-link";
 
 function logoutUser() {
     let url = `${logoutUrl}?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`;
@@ -18,3 +19,9 @@ function logoutUser() {
         }
     });
 }
+
+$(document).ready(function() {
+    $(logoutButtonId).click(function() {
+        logoutUser();
+    });
+})
