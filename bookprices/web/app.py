@@ -24,6 +24,14 @@ if DEBUG_MODE:
 app = Flask(__name__, static_url_path=static_url_path, static_folder=static_folder)
 app.debug = DEBUG_MODE
 app.config["SECRET_KEY"] = FLASK_SECRET_KEY
+app.config.update(
+    TESTING=DEBUG_MODE,
+    SECRET_KEY=FLASK_SECRET_KEY,
+    SESSION_COOKIE_DOMAIN=SITE_HOSTNAME,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=not DEBUG_MODE,
+    SESSION_COOKIE_SAMESITE="Lax",
+)
 
 app.register_blueprint(api_blueprint, url_prefix="/api")
 app.register_blueprint(page_blueprint)
@@ -42,6 +50,7 @@ def load_user(user_id: str) -> Optional[WebUser]:
     auth_service = AuthService(
         Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE),
         cache)
+
     return auth_service.get_user(user_id)
 
 
