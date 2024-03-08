@@ -1,3 +1,5 @@
+from typing import overload
+
 import flask_login
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
@@ -8,6 +10,7 @@ from bookprices.web.blueprints.urlhelper import parse_args_for_search, format_ur
 from flask import render_template, request, abort, Blueprint, redirect, Response, url_for, session
 from flask_login import current_user
 from bookprices.web.service import csrf
+from bookprices.web.viewmodels.book import CreateBookViewModel
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
     get_authors_key,
@@ -145,6 +148,22 @@ def book(book_id: int) -> str:
                                                descending)
 
     return render_template("book.html", view_model=book_details)
+
+
+@flask_login.login_required
+@page_blueprint.route("/book/create", methods=["GET", "POST"])
+def create() -> str | Response:
+    if request.method == "POST":
+        view_model = CreateBookViewModel(isbn=request.form.get("isbn"),
+                                         title=request.form.get("title"),
+                                         author=request.form.get("author"),
+                                         format=request.form.get("format"))
+        if view_model.is_valid():
+            book_id = db.book_db.create_book(view_model.isbn, view_model.title, view_model.author, view_model.format)
+            return redirect(url_for("page.book", book_id=book_id))
+        return render_template("create_book.html", view_model=view_model)
+
+    return render_template("create_book.html", view_model=CreateBookViewModel.empty())
 
 
 @page_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
