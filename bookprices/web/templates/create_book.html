@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% set active_page = "create_book" %}
+{% set errors = view_model.errors %}
 {% block content %}
     <h2>Tilføj bog</h2>
     <form method="post" action="{{ url_for('page.create') }}">
@@ -8,21 +9,41 @@
             <input name="{{ view_model.isbn_field_name }}" type="text" class="form-control"
                    minlength="13" maxlength="13" id="{{ view_model.isbn_field_name }}"
                    value="{{ view_model.isbn }}" required="required">
+            {% if view_model.isbn_field_name in errors %}
+                {% for error in errors[view_model.isbn_field_name] %}
+                    <span id="isbn-error" class="form-text text-danger">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="mb-3">
             <label for="{{ view_model.title_field_name }}" class="form-label">Titel</label>
             <input name="{{ view_model.title_field_name }}" type="text" class="form-control"
                    id="{{ view_model.title_field_name }}" value="{{ view_model.title }}" required="required">
+            {% if view_model.title_field_name in errors %}
+                {% for error in errors[view_model.title_field_name] %}
+                    <span id="title-error" class="form-text text-danger">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="mb-3">
             <label for="{{ view_model.author_field_name }}" class="form-label">Forfatter</label>
             <input name="{{ view_model.author_field_name }}" type="text" class="form-control"
                    id="{{ view_model.author_field_name }}" value="{{ view_model.author }}" required="required">
+            {% if view_model.author_field_name in errors %}
+                {% for error in errors[view_model.author_field_name] %}
+                    <span id="author-error" class="form-text text-danger">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="mb-3">
             <label for="{{ view_model.format_field_name }}" class="form-label">Format</label>
             <input name="{{ view_model.format_field_name }}" type="text" class="form-control"
                    id="{{ view_model.format_field_name }}" value="{{ view_model.format }}" required="required">
+            {% if view_model.format_field_name in errors %}
+                {% for error in errors[view_model.format_field_name] %}
+                    <span id="format-error" class="form-text text-danger">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         <button type="submit" class="btn btn-primary">Gem</button>
     </form>

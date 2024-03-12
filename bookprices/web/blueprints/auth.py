@@ -4,7 +4,6 @@ from flask import Blueprint, request, redirect, url_for, session, Response, json
 from bookprices.shared.db.database import Database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
-from bookprices.web.service.csrf import CSRFService
 from bookprices.web.service.google_api_service import GoogleApiService
 from bookprices.web.blueprints.urlhelper import format_url_for_redirection
 from flask_login import (
@@ -30,16 +29,6 @@ auth_service = AuthService(
 class SessionKey(Enum):
     STATE = "state"
     REDIRECT_URL = "redirect_url"
-
-
-@auth_blueprint.before_request
-def validate_csrf_token() -> None | tuple[Response, int]:
-    if request.method == "POST":
-        if not (csrf_token := request.form.get("csrf_token")):
-            return jsonify({"Error": "CSRF token not present in request payload"}), 400
-        if not CSRFService().is_token_valid(csrf_token):
-            return jsonify({"Error": "CSRF token invalid"}), 400
-    return None
 
 
 @auth_blueprint.route("/authorize")

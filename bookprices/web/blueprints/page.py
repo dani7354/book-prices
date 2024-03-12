@@ -5,6 +5,7 @@ import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
 import bookprices.web.mapper.user as usermapper
 from bookprices.shared.db.book import SearchQuery
+from bookprices.shared.model.book import Book
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args_for_search, format_url_for_redirection
 from flask import render_template, request, abort, Blueprint, redirect, Response, url_for, session
@@ -150,18 +151,28 @@ def book(book_id: int) -> str:
     return render_template("book.html", view_model=book_details)
 
 
-@flask_login.login_required
 @page_blueprint.route("/book/create", methods=["GET", "POST"])
+@flask_login.login_required
 def create() -> str | Response:
     if request.method == "POST":
-        view_model = CreateBookViewModel(isbn=request.form.get("isbn"),
-                                         title=request.form.get("title"),
-                                         author=request.form.get("author"),
-                                         format=request.form.get("format"))
-        if view_model.is_valid():
-            book_id = db.book_db.create_book(view_model.isbn, view_model.title, view_model.author, view_model.format)
-            return redirect(url_for("page.book", book_id=book_id))
-        return render_template("create_book.html", view_model=view_model)
+        view_model = CreateBookViewModel(isbn=request.form.get(CreateBookViewModel.isbn_field_name),
+                                         title=request.form.get(CreateBookViewModel.title_field_name),
+                                         author=request.form.get(CreateBookViewModel.author_field_name),
+                                         format=request.form.get(CreateBookViewModel.format_field_name))
+        if not view_model.is_valid():
+            return render_template("create_book.html", view_model=view_model)
+        if db.book_db.get_book_by_isbn(view_model.isbn):
+            view_model.add_error(view_model.isbn_field_name, "Bogen findes allerede")
+            return render_template("create_book.html", view_model=view_model)
+
+        book_id = db.book_db.create_book(
+            Book(id=0,
+                 isbn=view_model.isbn,
+                 title=view_model.title,
+                 author=view_model.author,
+                 format=view_model.format))
+
+        return redirect(url_for("page.book", book_id=book_id))
 
     return render_template("create_book.html", view_model=CreateBookViewModel.empty())
 

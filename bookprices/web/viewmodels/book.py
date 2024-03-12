@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, ClassVar
 from collections import defaultdict
 from bookprices.shared.model.book import Book
@@ -93,32 +93,38 @@ class CreateBookViewModel:
     title: str
     author: str
     format: str
+    errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
     def is_valid(self) -> bool:
-        return not self.get_errors()
+        return not self.validate_input()
 
-    def get_errors(self) -> dict[str, list[str]]:
-        errors = defaultdict(list)
+    def validate_input(self) -> None:
         if len(self.title) < self._title_min_length:
-            errors[self.title_field_name].append(f"Title must be at least {self._title_min_length} characters long")
+            self.errors[self.title_field_name].append(
+                f"Title must be at least {self._title_min_length} characters long")
         if len(self.title) > self._title_max_length:
-            errors[self.title_field_name].append(f"Title must be at most {self._title_max_length} characters long")
+            self.errors[self.title_field_name].append(f"Title must be at most {self._title_max_length} characters long")
         if len(self.author) < self._author_min_length:
-            errors[self.author_field_name].append(f"Author must be at least {self._author_min_length} characters long")
+            self.errors[self.author_field_name].append(
+                f"Author must be at least {self._author_min_length} characters long")
         if len(self.author) > self._author_max_length:
-            errors[self.author_field_name].append(f"Author must be at most {self._author_max_length} characters long")
+            self.errors[self.author_field_name].append(
+                f"Author must be at most {self._author_max_length} characters long")
         if len(self.isbn) < self._isbn_min_length:
-            errors[self.isbn_field_name].append(f"ISBN must be at least {self._isbn_min_length} characters long")
+            self.errors[self.isbn_field_name].append(f"ISBN must be at least {self._isbn_min_length} characters long")
         if len(self.isbn) > self._isbn_max_length:
-            errors[self.isbn_field_name].append(f"ISBN must be at most {self._isbn_max_length} characters long")
+            self.errors[self.isbn_field_name].append(f"ISBN must be at most {self._isbn_max_length} characters long")
         if not check_isbn13(self.isbn):
-            errors[self.isbn_field_name].append("ISBN is not valid")
+            self.errors[self.isbn_field_name].append("ISBN is not valid")
         if len(self.format) < self._format_min_length:
-            errors[self.format_field_name].append(f"Format must be at least {self._format_min_length} characters long")
+            self.errors[self.format_field_name].append(
+                f"Format must be at least {self._format_min_length} characters long")
         if len(self.format) > self._format_max_length:
-            errors[self.format_field_name].append(f"Format must be at most {self._format_max_length} characters long")
+            self.errors[self.format_field_name].append(
+                f"Format must be at most {self._format_max_length} characters long")
 
-        return errors
+    def add_error(self, field_name: str, message: str) -> None:
+        self.errors[field_name].append(message)
 
     @staticmethod
     def empty() -> "CreateBookViewModel":
