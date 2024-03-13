@@ -1,33 +1,59 @@
 {% extends "base.html" %}
 {% set active_page = "user" %}
+{% set errors = view_model.input_errors %}
 {% block content %}
 <h1>Redigér bruger (kun visning)</h1>
-<form action="" method="post">
+<form action="{{ url_for('page.user') }}" method="post">
     <div class="mb-3">
         <label for="id" class="form-label">Id</label>
-        <input type="text" class="form-control" id="id" value="{{ view_model.id }}" disabled>
+        <input type="text" class="form-control" id="id" value="{{ view_model.id }}" disabled="disabled">
     </div>
     <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" value="{{ view_model.email }}" disabled>
-    </div>
-    <div class="mb-3">
-        <label for="firstname" class="form-label">Fornavn</label>
-        <input type="text" class="form-control" id="firstname" value="{{ view_model.firstname }}" disabled>
-    </div>
-    <div class="mb-3">
-        <label for="lastname" class="form-label">Efternavn</label>
-        <input type="text" class="form-control" id="lastname" value="{{ view_model.lastname }}" disabled>
-    </div>
-    <div class="mb-3">
-        <label for="is-active" class="form-label">Aktiv</label>
-        {% if view_model.is_active %}
-        <input type="checkbox" class="form-check-input" id="is-active" checked="checked" disabled="disabled">
-        {% else %}
-        <input type="checkbox" class="form-check-input" id="is-active" disabled="disabled">
+        <label for="{{ view_model.email_field_name }}" class="form-label">Email</label>
+        <input type="email" class="form-control" id="{{ view_model.email_field_name }}"
+               name="{{ view_model.email_field_name }}" value="{{ view_model.email }}"
+               minlength="{{ view_model.email_min_length }}" maxlength="{{ view_model.email_max_length }}"
+               required="required">
+        {% if view_model.email_field_name in errors %}
+            {% for error in errors[view_model.email_field_name] %}
+                <span id="email-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
         {% endif %}
     </div>
-    <button type="submit" class="btn btn-primary disabled">Gem</button>
-    <a href="{{ url_for('page.user') }}" class="btn btn-secondary disabled">Annuller</a>
+    <div class="mb-3">
+        <label for="{{ view_model.firstname_field_name }}" class="form-label">Fornavn</label>
+        <input type="text" class="form-control" id="{{ view_model.firstname_field_name }}"
+               name="{{ view_model.firstname_field_name }}" value="{{ view_model.firstname }}"
+               minlength="{{ view_model.firstname_min_length }}" maxlength="{{ view_model.firstname_max_length }}"
+               required="required">
+        {% if view_model.firstname_field_name in errors %}
+            {% for error in errors[view_model.firstname_field_name] %}
+                <span id="firstname-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.lastname_field_name }}" class="form-label">Efternavn</label>
+        <input type="text" class="form-control" id="{{ view_model.lastname_field_name }}"
+               name="{{ view_model.lastname_field_name }}" value="{{ view_model.lastname }}"
+               minlength="{{ view_model.lastname_min_length }}" maxlength="{{ view_model.lastname_max_length }}"
+               required="required">
+        {% if view_model.lastname_field_name in errors %}
+            {% for error in errors[view_model.lastname_field_name] %}
+                <span id="lastname-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.is_active_field_name }}" class="form-label">Aktiv</label>
+        {% if view_model.is_active %}
+        <input type="checkbox" class="form-check-input" id="{{ view_model.is_active_field_name }}"
+               name="{{ view_model.is_active_field_name }}" checked="checked">
+        {% else %}
+        <input type="checkbox" class="form-check-input" id="{{ view_model.is_active_field_name }}"
+               name="{{ view_model.is_active_field_name }}">
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Gem</button>
 </form>
 {% endblock %}

@@ -1,5 +1,3 @@
-from typing import overload
-
 import flask_login
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
@@ -11,6 +9,7 @@ from bookprices.web.blueprints.urlhelper import parse_args_for_search, format_ur
 from flask import render_template, request, abort, Blueprint, redirect, Response, url_for, session
 from flask_login import current_user
 from bookprices.web.service import csrf
+from bookprices.web.service.auth_service import AuthService
 from bookprices.web.viewmodels.book import CreateBookViewModel
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
@@ -34,6 +33,7 @@ from bookprices.web.settings import (
     BOOK_PAGESIZE,
     ORDER_BY_URL_PARAMETER,
     DESCENDING_URL_PARAMETER)
+from bookprices.web.viewmodels.user import UserEditViewModel
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
@@ -41,6 +41,7 @@ INTERNAL_SERVER_ERROR = 500
 page_blueprint = Blueprint("page", __name__)
 
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+auth_service = AuthService(db, cache)
 
 
 @page_blueprint.context_processor
@@ -224,10 +225,28 @@ def admin() -> str:
     return render_template("admin.html")
 
 
-@page_blueprint.route("/user")
+@page_blueprint.route("/user", methods=["GET", "POST"])
 @flask_login.login_required
 def user() -> str:
-    view_model = usermapper.map_user_view_model(flask_login.current_user)
+    if request.method == "POST":
+        view_model = UserEditViewModel(
+            id=flask_login.current_user.id,
+            email=email.strip() if (email := request.form.get(UserEditViewModel.email_field_name)) else "",
+            firstname=firstname.strip() if (firstname := request.form.get(UserEditViewModel.firstname_field_name)) else "",
+            lastname=lastname.strip() if (lastname := request.form.get(UserEditViewModel.lastname_field_name)) else "",
+            is_active=True if request.form.get(UserEditViewModel.is_active_field_name) else False)
+
+        if not view_model.is_valid():
+            return render_template("user.html", view_model=view_model)
+
+        auth_service.update_user_info(
+            view_model.id,
+            view_model.email,
+            view_model.firstname,
+            view_model.lastname,
+            view_model.is_active)
+    else:
+        view_model = usermapper.map_user_view_model(flask_login.current_user)
 
     return render_template("user.html", view_model=view_model)
 
