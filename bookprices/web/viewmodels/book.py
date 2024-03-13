@@ -80,14 +80,14 @@ class CreateBookViewModel:
     isbn_field_name: ClassVar[str] = "isbn"
     format_field_name: ClassVar[str] = "format"
 
-    _title_min_length: ClassVar[int] = 2
-    _title_max_length: ClassVar[int] = 255
-    _author_min_length: ClassVar[int] = 2
-    _author_max_length: ClassVar[int] = 255
-    _isbn_min_length: ClassVar[int] = 13
-    _isbn_max_length: ClassVar[int] = 13
-    _format_min_length: ClassVar[int] = 2
-    _format_max_length: ClassVar[int] = 255
+    title_min_length: ClassVar[int] = 1
+    title_max_length: ClassVar[int] = 255
+    author_min_length: ClassVar[int] = 1
+    author_max_length: ClassVar[int] = 255
+    isbn_min_length: ClassVar[int] = 13
+    isbn_max_length: ClassVar[int] = 13
+    format_min_length: ClassVar[int] = 3
+    format_max_length: ClassVar[int] = 255
 
     isbn: str
     title: str
@@ -99,29 +99,32 @@ class CreateBookViewModel:
         return not self.validate_input()
 
     def validate_input(self) -> None:
-        if len(self.title) < self._title_min_length:
-            self.errors[self.title_field_name].append(
-                f"Title must be at least {self._title_min_length} characters long")
-        if len(self.title) > self._title_max_length:
-            self.errors[self.title_field_name].append(f"Title must be at most {self._title_max_length} characters long")
-        if len(self.author) < self._author_min_length:
+        def min_length_not_met(field_name: str, min_length: int) -> str:
+            return f"{field_name} skal være mindst {min_length} tegn"
+
+        def max_length_exceeded(field_name: str, max_length: int) -> str:
+            return f"{field_name} må maks. være {max_length} tegn"
+
+        if len(self.title.strip()) < self.title_min_length:
+            self.errors[self.title_field_name].append(min_length_not_met("Titlen", self.title_min_length))
+        if len(self.title.strip()) > self.title_max_length:
+            self.errors[self.title_field_name].append(max_length_exceeded("Titlen", self.title_max_length))
+        if len(self.author.strip()) < self.author_min_length:
             self.errors[self.author_field_name].append(
-                f"Author must be at least {self._author_min_length} characters long")
-        if len(self.author) > self._author_max_length:
+                min_length_not_met("Forfatter", self.author_min_length))
+        if len(self.author.strip()) > self.author_max_length:
             self.errors[self.author_field_name].append(
-                f"Author must be at most {self._author_max_length} characters long")
-        if len(self.isbn) < self._isbn_min_length:
-            self.errors[self.isbn_field_name].append(f"ISBN must be at least {self._isbn_min_length} characters long")
-        if len(self.isbn) > self._isbn_max_length:
-            self.errors[self.isbn_field_name].append(f"ISBN must be at most {self._isbn_max_length} characters long")
-        if not check_isbn13(self.isbn):
-            self.errors[self.isbn_field_name].append("ISBN is not valid")
-        if len(self.format) < self._format_min_length:
-            self.errors[self.format_field_name].append(
-                f"Format must be at least {self._format_min_length} characters long")
-        if len(self.format) > self._format_max_length:
-            self.errors[self.format_field_name].append(
-                f"Format must be at most {self._format_max_length} characters long")
+                max_length_exceeded("Forfatter", self.author_max_length))
+        if len(self.isbn.strip()) < self.isbn_min_length:
+            self.errors[self.isbn_field_name].append(min_length_not_met("ISBN", self.isbn_min_length))
+        if len(self.isbn.strip()) > self.isbn_max_length:
+            self.errors[self.isbn_field_name].append(max_length_exceeded("ISBN", self.isbn_max_length))
+        if not check_isbn13(self.isbn.strip()):
+            self.errors[self.isbn_field_name].append("ISBN er ikke gyldig")
+        if len(self.format.strip()) < self.format_min_length:
+            self.errors[self.format_field_name].append(min_length_not_met("Format", self.format_min_length))
+        if len(self.format.strip()) > self.format_max_length:
+            self.errors[self.format_field_name].append(max_length_exceeded("Format", self.format_max_length))
 
     def add_error(self, field_name: str, message: str) -> None:
         self.errors[field_name].append(message)
