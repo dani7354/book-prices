@@ -37,6 +37,7 @@ from bookprices.web.viewmodels.user import UserEditViewModel
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
+CREATE_BOOK_TEMPLATE = "create_book.html"
 
 page_blueprint = Blueprint("page", __name__)
 
@@ -156,16 +157,22 @@ def book(book_id: int) -> str:
 @flask_login.login_required
 def create() -> str | Response:
     if request.method == "POST":
+        isbn = request.form.get(CreateBookViewModel.isbn_field_name) or ""
+        title = request.form.get(CreateBookViewModel.title_field_name) or ""
+        author = request.form.get(CreateBookViewModel.author_field_name) or ""
+        book_format = request.form.get(CreateBookViewModel.format_field_name) or ""
+
         view_model = CreateBookViewModel(
-            isbn=isbn.strip() if (isbn := request.form.get(CreateBookViewModel.isbn_field_name)) else "",
-            title=title.strip() if (title := request.form.get(CreateBookViewModel.title_field_name)) else "",
-            author=author.strip() if (author := request.form.get(CreateBookViewModel.author_field_name)) else "",
-            format=book_format.strip() if (book_format := request.form.get(CreateBookViewModel.format_field_name)) else "")
+            isbn=isbn.strip(),
+            title=title.strip(),
+            author=author.strip(),
+            format=book_format.strip())
+
         if not view_model.is_valid():
-            return render_template("create_book.html", view_model=view_model)
+            return render_template(CREATE_BOOK_TEMPLATE, view_model=view_model)
         if db.book_db.get_book_by_isbn(view_model.isbn):
             view_model.add_error(view_model.isbn_field_name, "Bogen findes allerede")
-            return render_template("create_book.html", view_model=view_model)
+            return render_template(CREATE_BOOK_TEMPLATE, view_model=view_model)
 
         book_id = db.book_db.create_book(
             Book(id=0,
@@ -176,7 +183,7 @@ def create() -> str | Response:
 
         return redirect(url_for("page.book", book_id=book_id))
 
-    return render_template("create_book.html", view_model=CreateBookViewModel.empty())
+    return render_template(CREATE_BOOK_TEMPLATE, view_model=CreateBookViewModel.empty())
 
 
 @page_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
@@ -230,12 +237,17 @@ def admin() -> str:
 @flask_login.login_required
 def user() -> str:
     if request.method == "POST":
+        email = request.form.get(UserEditViewModel.email_field_name)
+        firstname = request.form.get(UserEditViewModel.firstname_field_name)
+        lastname = request.form.get(UserEditViewModel.lastname_field_name)
+        is_active = bool(request.form.get(UserEditViewModel.is_active_field_name))
+
         view_model = UserEditViewModel(
             id=flask_login.current_user.id,
-            email=email.strip() if (email := request.form.get(UserEditViewModel.email_field_name)) else "",
-            firstname=firstname.strip() if (firstname := request.form.get(UserEditViewModel.firstname_field_name)) else "",
-            lastname=lastname.strip() if (lastname := request.form.get(UserEditViewModel.lastname_field_name)) else "",
-            is_active=True if request.form.get(UserEditViewModel.is_active_field_name) else False)
+            email=email.strip(),
+            firstname=firstname.strip(),
+            lastname=lastname.strip(),
+            is_active=is_active)
 
         if not view_model.is_valid():
             return render_template("user.html", view_model=view_model)
