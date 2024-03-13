@@ -156,10 +156,11 @@ def book(book_id: int) -> str:
 @flask_login.login_required
 def create() -> str | Response:
     if request.method == "POST":
-        view_model = CreateBookViewModel(isbn=request.form.get(CreateBookViewModel.isbn_field_name),
-                                         title=request.form.get(CreateBookViewModel.title_field_name),
-                                         author=request.form.get(CreateBookViewModel.author_field_name),
-                                         format=request.form.get(CreateBookViewModel.format_field_name))
+        view_model = CreateBookViewModel(
+            isbn=isbn.strip() if (isbn := request.form.get(CreateBookViewModel.isbn_field_name)) else "",
+            title=title.strip() if (title := request.form.get(CreateBookViewModel.title_field_name)) else "",
+            author=author.strip() if (author := request.form.get(CreateBookViewModel.author_field_name)) else "",
+            format=book_format.strip() if (book_format := request.form.get(CreateBookViewModel.format_field_name)) else "")
         if not view_model.is_valid():
             return render_template("create_book.html", view_model=view_model)
         if db.book_db.get_book_by_isbn(view_model.isbn):
