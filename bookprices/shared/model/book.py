@@ -9,5 +9,5 @@ class Book:
     title: str
     author: str
     format: str
-    image_url: Optional[str]
+    image_url: Optional[str] = None
     created: Optional[str] = None

@@ -1,6 +1,5 @@
 const logoutUrl = "/auth/logout";
 const logoutButtonId = "#logout-link";
-const csrfTokenNodeId = "#csrf-token";
 
 function logoutUser() {
     let url = `${logoutUrl}?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`;

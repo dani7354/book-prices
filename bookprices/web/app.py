@@ -1,6 +1,6 @@
 import os
 from typing import Optional
-from flask import Flask
+from flask import Flask, request, jsonify, Response
 from flask_login import LoginManager
 from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
@@ -8,6 +8,7 @@ from bookprices.web.blueprints.auth import auth_blueprint
 from bookprices.web.blueprints.page import page_blueprint, not_found, internal_server_error
 from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
+from bookprices.web.service.csrf import CSRFService
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,
     MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
@@ -42,6 +43,17 @@ cache.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "page.login"
+
+
+@app.before_request
+def validate_csrf_token() -> None | tuple[Response, int]:
+    if request.method == "POST":
+        if not (csrf_token := request.form.get("csrf_token")):
+            return jsonify({"Error": "CSRF token not present in request payload"}), 400
+        if not CSRFService().is_token_valid(csrf_token):
+            return jsonify({"Error": "CSRF token invalid"}), 400
+
+    return None  # token is valid or HTTP method is not POST
 
 
 @login_manager.user_loader

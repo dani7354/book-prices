@@ -1,7 +1,10 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, ClassVar
+from collections import defaultdict
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
+from bookprices.shared.validation.isbn import check_isbn13
+from bookprices.web.shared.input_validation_message import min_length_not_met, max_length_exceeded
 
 
 @dataclass(frozen=True)
@@ -69,3 +72,67 @@ class BookDetailsViewModel:
     author_search_url: str
     page: Optional[int]
     search_phrase: Optional[str]
+
+
+@dataclass(frozen=True)
+class CreateBookViewModel:
+    title_field_name: ClassVar[str] = "title"
+    author_field_name: ClassVar[str] = "author"
+    isbn_field_name: ClassVar[str] = "isbn"
+    format_field_name: ClassVar[str] = "format"
+
+    title_min_length: ClassVar[int] = 1
+    title_max_length: ClassVar[int] = 255
+    author_min_length: ClassVar[int] = 1
+    author_max_length: ClassVar[int] = 255
+    isbn_min_length: ClassVar[int] = 13
+    isbn_max_length: ClassVar[int] = 13
+    format_min_length: ClassVar[int] = 3
+    format_max_length: ClassVar[int] = 255
+
+    isbn: str
+    title: str
+    author: str
+    format: str
+    errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
+
+    def is_valid(self) -> bool:
+        if not self.errors:
+            self._validate_input()
+
+        return not self.errors
+
+    def _validate_input(self) -> None:
+        if len(self.title.strip()) < self.title_min_length:
+            self.errors[self.title_field_name].append(
+                min_length_not_met("Titlen", self.title_min_length))
+        if len(self.title.strip()) > self.title_max_length:
+            self.errors[self.title_field_name].append(
+                max_length_exceeded("Titlen", self.title_max_length))
+        if len(self.author.strip()) < self.author_min_length:
+            self.errors[self.author_field_name].append(
+                min_length_not_met("Forfatter", self.author_min_length))
+        if len(self.author.strip()) > self.author_max_length:
+            self.errors[self.author_field_name].append(
+                max_length_exceeded("Forfatter", self.author_max_length))
+        if len(self.isbn.strip()) < self.isbn_min_length:
+            self.errors[self.isbn_field_name].append(
+                min_length_not_met("ISBN", self.isbn_min_length))
+        if len(self.isbn.strip()) > self.isbn_max_length:
+            self.errors[self.isbn_field_name].append(
+                max_length_exceeded("ISBN", self.isbn_max_length))
+        if not check_isbn13(self.isbn.strip()):
+            self.errors[self.isbn_field_name].append("ISBN er ikke gyldig")
+        if len(self.format.strip()) < self.format_min_length:
+            self.errors[self.format_field_name].append(
+                min_length_not_met("Format", self.format_min_length))
+        if len(self.format.strip()) > self.format_max_length:
+            self.errors[self.format_field_name].append(
+                max_length_exceeded("Format", self.format_max_length))
+
+    def add_error(self, field_name: str, message: str) -> None:
+        self.errors[field_name].append(message)
+
+    @staticmethod
+    def empty() -> "CreateBookViewModel":
+        return CreateBookViewModel("", "", "", "")

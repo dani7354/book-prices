@@ -62,3 +62,12 @@ class AuthService:
     def update_user_token(self, user_id: str, token: str) -> None:
         self.db.user_db.update_user_token(user_id, token)
         self.cache.delete(get_user_key(user_id))
+
+    def update_user_info(self, user_id: str, email: str, firstname: str, lastname: str, is_active: bool) -> None:
+        self.db.user_db.update_user_info(
+            user_id=user_id,
+            email=email,
+            firstname=firstname,
+            lastname=lastname,
+            is_active=is_active)
+        self.cache.delete(get_user_key(user_id))

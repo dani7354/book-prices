@@ -33,3 +33,12 @@ class UserDb(BaseDb):
                          "WHERE Id = %s")
                 cursor.execute(query, (token, user_id))
                 con.commit()
+
+    def update_user_info(self, user_id: str, email: str, firstname: str, lastname: str, is_active: bool):
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("UPDATE User "
+                         "SET Email = %s, FirstName = %s, LastName = %s, IsActive = %s "
+                         "WHERE Id = %s")
+                cursor.execute(query, (email, firstname, lastname, is_active, user_id))
+                con.commit()
