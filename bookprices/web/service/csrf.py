@@ -13,3 +13,10 @@ class CSRFService:
 
     def is_token_valid(self, token: str) -> bool:
         return session.get(self._token_session_key) == token
+
+
+def get_csrf_token() -> dict[str, str]:
+    csrf_service = CSRFService()
+    csrf_token = csrf_service.generate_token()
+
+    return {"csrf_token": csrf_token}

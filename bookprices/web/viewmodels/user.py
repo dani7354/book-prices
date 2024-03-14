@@ -1,12 +1,14 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import ClassVar
+from typing import ClassVar, Optional
 from bookprices.web.shared.input_validation_message import min_length_not_met, max_length_exceeded
 
 
 @dataclass(frozen=True)
 class UserEditViewModel:
     id_field_name: ClassVar[str] = "id"
+    created_field_name: ClassVar[str] = "created"
+    updated_field_name: ClassVar[str] = "updated"
     email_field_name: ClassVar[str] = "email"
     firstname_field_name: ClassVar[str] = "firstname"
     lastname_field_name: ClassVar[str] = "lastname"
@@ -24,6 +26,9 @@ class UserEditViewModel:
     firstname: str
     lastname: str
     is_active: bool
+    created: Optional[str] = None
+    updated: Optional[str] = None
+    image_url: Optional[str] = None
     input_errors: dict[str, list[str]] = field(init=False, default_factory=lambda: defaultdict(list))
 
     def validate_input(self) -> None:

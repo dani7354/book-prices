@@ -6,6 +6,7 @@ from dataclasses import dataclass
 class UserInfo:
     id: str
     email: str
+    picture_url: str
 
 
 class GoogleApiService:
@@ -21,4 +22,5 @@ class GoogleApiService:
         json_content = response.json()
         return UserInfo(
             id=json_content["id"],
-            email=json_content["email"])
+            email=json_content["email"],
+            picture_url=json_content["picture"])
