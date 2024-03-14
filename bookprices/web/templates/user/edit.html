@@ -4,7 +4,7 @@
 {% block content %}
 <h1>Redigér bruger</h1>
 {% if view_model.image_url %}
-<img class="img-thumbnail rounded mx-auto d-block" src="{{ view_model.image_url }}" alt="picture {{ view_model.email }}">
+<img class="img-thumbnail rounded mx-auto d-block" src="{{ view_model.image_url }}" alt="{{ view_model.email }}">
 {% endif %}
 <form action="{{ url_for('user.index') }}" method="post">
     <div class="mb-3">
