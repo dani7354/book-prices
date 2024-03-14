@@ -43,6 +43,10 @@ class WebUser(flask_login.UserMixin):
     def google_api_token(self) -> str:
         return self._user_model.google_api_token
 
+    @property
+    def image_url(self) -> str:
+        return self._user_model.image_url
+
     def get_id(self) -> str:
         return self.id
 
@@ -59,8 +63,8 @@ class AuthService:
                 self.cache.set(get_user_key(user_id), user)
         return WebUser(user) if user else None
 
-    def update_user_token(self, user_id: str, token: str) -> None:
-        self.db.user_db.update_user_token(user_id, token)
+    def update_user_token_and_image_url(self, user_id: str, token: str, image_url: str) -> None:
+        self.db.user_db.update_user_token_and_image_url(user_id, token, image_url)
         self.cache.delete(get_user_key(user_id))
 
     def update_user_info(self, user_id: str, email: str, firstname: str, lastname: str, is_active: bool) -> None:

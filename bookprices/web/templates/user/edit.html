@@ -2,11 +2,25 @@
 {% set active_page = "user" %}
 {% set errors = view_model.input_errors %}
 {% block content %}
-<h1>Redigér bruger (kun visning)</h1>
-<form action="{{ url_for('page.user') }}" method="post">
+<h1>Redigér bruger</h1>
+{% if view_model.image_url %}
+<img class="img-thumbnail rounded mx-auto d-block" src="{{ view_model.image_url }}" alt="picture {{ view_model.email }}">
+{% endif %}
+<form action="{{ url_for('user.index') }}" method="post">
     <div class="mb-3">
-        <label for="id" class="form-label">Id</label>
-        <input type="text" class="form-control" id="id" value="{{ view_model.id }}" disabled="disabled">
+        <label for="{{ view_model.id_field_name }}" class="form-label">Id</label>
+        <input type="text" class="form-control" id="{{ view_model.id_field_name }}"
+               value="{{ view_model.id }}" disabled="disabled">
+    </div>
+     <div class="mb-3">
+        <label for="{{ view_model.created_field_name }}" class="form-label">Oprettet</label>
+        <input type="text" class="form-control" id="{{ view_model.created_field_name }}"
+               value="{{ view_model.created }}" disabled="disabled">
+    </div>
+     <div class="mb-3">
+        <label for="{{ view_model.updated_field_name }}" class="form-label">Opdateret</label>
+        <input type="text" class="form-control" id="{{ view_model.updated_field_name }}"
+               value="{{ view_model.updated }}" disabled="disabled">
     </div>
     <div class="mb-3">
         <label for="{{ view_model.email_field_name }}" class="form-label">Email</label>

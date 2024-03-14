@@ -1,15 +1,15 @@
 import flask_login
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
-import bookprices.web.mapper.user as usermapper
 from bookprices.shared.db.book import SearchQuery
 from bookprices.shared.model.book import Book
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args_for_search, format_url_for_redirection
-from flask import render_template, request, abort, Blueprint, redirect, Response, url_for, session
+from flask import render_template, request, abort, Blueprint, redirect, Response, url_for
 from flask_login import current_user
-from bookprices.web.service import csrf
 from bookprices.web.service.auth_service import AuthService
+from bookprices.web.service.csrf import get_csrf_token
+from bookprices.web.shared.enum import HttpMethod
 from bookprices.web.viewmodels.book import CreateBookViewModel
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
@@ -33,7 +33,6 @@ from bookprices.web.settings import (
     BOOK_PAGESIZE,
     ORDER_BY_URL_PARAMETER,
     DESCENDING_URL_PARAMETER)
-from bookprices.web.viewmodels.user import UserEditViewModel
 
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
@@ -47,13 +46,10 @@ auth_service = AuthService(db, cache)
 
 @page_blueprint.context_processor
 def include_csrf_token() -> dict[str, str]:
-    csrf_service = csrf.CSRFService()
-    csrf_token = csrf_service.generate_token()
-
-    return {"csrf_token": csrf_token}
+    return get_csrf_token()
 
 
-@page_blueprint.route("/")
+@page_blueprint.route("/", methods=[HttpMethod.GET.value])
 def index() -> str:
     if not (newest_books := cache.get(get_index_latest_books_key())):
         newest_books = db.book_db.get_newest_books(limit=8)
@@ -66,7 +62,7 @@ def index() -> str:
     return render_template("index.html", view_model=view_model)
 
 
-@page_blueprint.route("/about")
+@page_blueprint.route("/about", methods=[HttpMethod.GET.value])
 def about() -> str:
     bookstores_cache_key = get_bookstores_key()
     if not (bookstores := cache.get(bookstores_cache_key)):
@@ -77,7 +73,7 @@ def about() -> str:
     return render_template("about.html", view_model=view_model)
 
 
-@page_blueprint.route("/search")
+@page_blueprint.route("/search", methods=[HttpMethod.GET.value])
 def search() -> str:
     args = parse_args_for_search(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
@@ -123,7 +119,7 @@ def search() -> str:
     return render_template("search.html", view_model=vm)
 
 
-@page_blueprint.route("/book/<int:book_id>")
+@page_blueprint.route("/book/<int:book_id>", methods=[HttpMethod.GET.value])
 def book(book_id: int) -> str:
     cache_key = get_book_key(book_id)
     if not (book := cache.get(cache_key)):
@@ -153,7 +149,7 @@ def book(book_id: int) -> str:
     return render_template("book.html", view_model=book_details)
 
 
-@page_blueprint.route("/book/create", methods=["GET", "POST"])
+@page_blueprint.route("/book/create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @flask_login.login_required
 def create() -> str | Response:
     if request.method == "POST":
@@ -186,7 +182,7 @@ def create() -> str | Response:
     return render_template(CREATE_BOOK_TEMPLATE, view_model=CreateBookViewModel.empty())
 
 
-@page_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
+@page_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
 def price_history(book_id: int, store_id: int) -> str:
     book_cache_key = get_book_key(book_id)
     if not (book := cache.get(book_cache_key)):
@@ -217,7 +213,7 @@ def price_history(book_id: int, store_id: int) -> str:
     return render_template("price_history.html", view_model=price_history_view_model)
 
 
-@page_blueprint.route("/login")
+@page_blueprint.route("/login", methods=[HttpMethod.GET.value])
 def login() -> Response | str:
     redirect_url = redirect_url if (redirect_url := format_url_for_redirection(request.args.get("next"))) \
         else url_for("page.index")
@@ -227,41 +223,10 @@ def login() -> Response | str:
     return render_template("login.html", redirect_url=redirect_url)
 
 
-@page_blueprint.route("/admin")
+@page_blueprint.route("/admin", methods=[HttpMethod.GET.value])
 @flask_login.login_required
 def admin() -> str:
     return render_template("admin.html")
-
-
-@page_blueprint.route("/user", methods=["GET", "POST"])
-@flask_login.login_required
-def user() -> str:
-    if request.method == "POST":
-        email = request.form.get(UserEditViewModel.email_field_name)
-        firstname = request.form.get(UserEditViewModel.firstname_field_name)
-        lastname = request.form.get(UserEditViewModel.lastname_field_name)
-        is_active = bool(request.form.get(UserEditViewModel.is_active_field_name))
-
-        view_model = UserEditViewModel(
-            id=flask_login.current_user.id,
-            email=email.strip(),
-            firstname=firstname.strip(),
-            lastname=lastname.strip(),
-            is_active=is_active)
-
-        if not view_model.is_valid():
-            return render_template("user.html", view_model=view_model)
-
-        auth_service.update_user_info(
-            view_model.id,
-            view_model.email,
-            view_model.firstname,
-            view_model.lastname,
-            view_model.is_active)
-    else:
-        view_model = usermapper.map_user_view_model(flask_login.current_user)
-
-    return render_template("user.html", view_model=view_model)
 
 
 @page_blueprint.errorhandler(NOT_FOUND)
