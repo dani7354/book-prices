@@ -30,3 +30,10 @@ SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created
 FROM Book b
 INNER JOIN LatestPriceUpdate lpu ON b.Id = lpu.BookId;
 ORDER BY lpu.NewestPriceId DESC;
+
+-- Get failed update count for bookstores by reason
+SELECT fpu.Reason, bs.Id as BookStoreId, MAX(bs.Name) AS BookStore, COUNT(fpu.Id) AS FailedUpdateCount
+FROM FailedPriceUpdate fpu
+INNER JOIN BookStore bs ON bs.Id = fpu.BookStoreId
+GROUP BY bs.Id, fpu.Reason
+ORDER BY FailedUpdateCount DESC;

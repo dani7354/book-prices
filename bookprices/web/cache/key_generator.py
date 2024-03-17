@@ -37,3 +37,7 @@ def get_book_list_key(search_query: SearchQuery) -> str:
 
 def get_user_key(user_id: str) -> str:
     return f"user_{user_id}"
+
+
+def get_failed_count_by_reason_key() -> str:
+    return "failed_count_by_reason"
