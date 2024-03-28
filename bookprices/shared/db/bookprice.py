@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from collections import defaultdict
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookprice import BookPrice
@@ -192,17 +192,18 @@ class BookPriceDb(BaseDb):
 
                 return failed_price_updates
 
-    def get_failed_price_update_count_by_reason(self) -> list[FailedPriceUpdateCountByReason]:
+    def get_failed_price_update_count_by_reason(self, date_from: datetime) -> list[FailedPriceUpdateCountByReason]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT fpu.Reason, bs.Id as BookStoreId, MAX(bs.Name) AS BookStoreName, "
                          "COUNT(fpu.Id) AS FailedUpdateCount "
                          "FROM FailedPriceUpdate fpu "
                          "INNER JOIN BookStore bs ON bs.Id = fpu.BookStoreId "
+                         "WHERE fpu.Created > %s"
                          "GROUP BY bs.Id, fpu.Reason "
                          "ORDER BY FailedUpdateCount DESC")
 
-                cursor.execute(query)
+                cursor.execute(query, (date_from, ))
                 failed_price_update_counts = []
                 for row in cursor:
                     failed_price_update_counts.append(

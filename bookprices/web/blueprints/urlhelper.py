@@ -6,7 +6,7 @@ from bookprices.web.settings import (
     AUTHOR_URL_PARAMETER,
     PAGE_URL_PARAMETER,
     ORDER_BY_URL_PARAMETER,
-    DESCENDING_URL_PARAMETER)
+    DESCENDING_URL_PARAMETER, TIMEPERIOD_DAYS_URL_PARAMETER)
 
 
 def parse_args_for_search(request_args: MultiDict) -> dict:
@@ -26,6 +26,17 @@ def parse_args_for_search(request_args: MultiDict) -> dict:
         args[PAGE_URL_PARAMETER] = page
     else:
         args[PAGE_URL_PARAMETER] = 1
+
+    return args
+
+
+def parse_args_for_failed_updates(request_args: MultiDict, days_default_value: int) -> dict:
+    args = {
+        TIMEPERIOD_DAYS_URL_PARAMETER: request_args.get(
+            TIMEPERIOD_DAYS_URL_PARAMETER,
+            type=int,
+            default=days_default_value)
+    }
 
     return args
 

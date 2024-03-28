@@ -1,16 +1,25 @@
-from dataclasses import dataclass, field
-from typing import ClassVar
-
-from bookprices.shared.model.error import FailedUpdateReason
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class FailedPriceUpdateCountRow:
-    book_store_name: str
-    count_by_reason: dict[str, int] = field(default_factory=lambda: {reason.value: 0 for reason in FailedUpdateReason})
+class TimePeriodSelectOption:
+    text: str
+    days: int
 
 
 @dataclass(frozen=True)
-class FailedPriceUpdateCountTable:
-    column_names: list[str]
-    rows: list[FailedPriceUpdateCountRow]
+class IndexViewModel:
+    timeperiod_options: list[TimePeriodSelectOption]
+
+
+@dataclass(frozen=True)
+class TableResponse:
+    title: str
+    columns: list[str]
+    rows: list[dict[str, str]]
+
+
+@dataclass(frozen=True)
+class FailedPriceUpdatesResponse:
+    translations: dict[str, str]
+    table: TableResponse

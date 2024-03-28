@@ -2,8 +2,21 @@
 {% set active_page = "status" %}
 {% block content %}
 <h1>Status</h1>
-<h3>Mislykkede prisopdateringer</h3>
-<table id="failed-price-updates"></table>
+ <div class="col-4">
+     <div class="form-group">
+         <label for="timeperiod-select">Vælg tid: </label>
+         <select id="timeperiod-select" class="form-select" name="timeperiod" aria-label="Tid">
+             {% for a in view_model.timeperiod_options %}
+                <option value="{{ a.days }}">{{ a.text }}</option>
+             {% endfor %}
+        </select>
+     </div>
+
+ </div>
+<div class="mt-4">
+    <h3 id="failed-price-updates-heading"></h3>
+    <table aria-describedby="failed-price-updates-heading" id="failed-price-updates" class="table"></table>
+</div>
 
 <script src="/static/assets/js/status.js"></script>
 {% endblock %}
