@@ -1,6 +1,5 @@
 const timePeriodSelect = $("#timeperiod-select");
-const failedPriceUpdateTable = $("#failed-price-updates");
-const failedPriceUpdateTableHeading = $("#failed-price-updates-heading");
+const failedPriceUpdatesContainer = $("#failed-price-updates-container");
 
 const baseUrl = "/status";
 
@@ -13,12 +12,20 @@ function tryGetTranslation(translations, translationKey) {
 }
 
 function initializeFailedPriceUpdateTable(title, columns, rows, translations) {
-    failedPriceUpdateTableHeading.text(title);
-    failedPriceUpdateTable.empty();
+    failedPriceUpdatesContainer.empty();
+    failedPriceUpdatesContainer.append($("<h3></h3>")
+        .attr("id", "failed-price-updates-heading")
+        .text("Fejlede prisopdateringer"));
+
+    let table = $("<table></table>")
+        .attr("class", "table table-striped table-bordered")
+        .attr("aria-describedby", "failed-price-updates-heading");
+    failedPriceUpdatesContainer.append(table);
+
     let tableHeader = $("<thead></thead>");
     let tableHeaderRow = $("<tr></tr>");
     tableHeader.append(tableHeaderRow);
-    failedPriceUpdateTable.append(tableHeader);
+    table.append(tableHeader);
 
     $.each(columns, (index, columnKey) => {
         let columnName = tryGetTranslation(translations, columnKey);
@@ -32,7 +39,7 @@ function initializeFailedPriceUpdateTable(title, columns, rows, translations) {
         $.each(columns, (index, columnName) => {
             tableRow.append($("<td></td>").text(row[columnName]));
         });
-        failedPriceUpdateTable.append(tableRow);
+        table.append(tableRow);
     });
 }
 
