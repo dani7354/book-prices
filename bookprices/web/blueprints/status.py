@@ -4,11 +4,11 @@ from bookprices.shared.db import database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.status_service import StatusService
 from bookprices.web.mapper.price import map_failed_price_update_counts
-from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, \
-    TIMEPERIOD_DAYS_URL_PARAMETER
 from bookprices.web.shared.enum import HttpMethod
 from bookprices.web.viewmodels.status import IndexViewModel
 from bookprices.web.blueprints.urlhelper import parse_args_for_failed_updates
+from bookprices.web.settings import (
+    MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, TIMEPERIOD_DAYS_URL_PARAMETER)
 
 status_blueprint = Blueprint("status", __name__)
 
