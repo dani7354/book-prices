@@ -199,7 +199,7 @@ class BookPriceDb(BaseDb):
                          "COUNT(fpu.Id) AS FailedUpdateCount "
                          "FROM FailedPriceUpdate fpu "
                          "INNER JOIN BookStore bs ON bs.Id = fpu.BookStoreId "
-                         "WHERE fpu.Created > %s"
+                         "WHERE fpu.Created >= %s"
                          "GROUP BY bs.Id, fpu.Reason "
                          "ORDER BY FailedUpdateCount DESC")
 

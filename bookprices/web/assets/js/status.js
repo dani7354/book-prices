@@ -28,7 +28,7 @@ function initializeFailedPriceUpdateTable(title, columns, rows, translations) {
     });
 
     $.each(rows, (index, row) => {
-        tableRow = $("<tr></tr>");
+        let tableRow = $("<tr></tr>");
         $.each(columns, (index, columnName) => {
             tableRow.append($("<td></td>").text(row[columnName]));
         });
@@ -43,10 +43,10 @@ function getFailedPriceUpdates() {
             "method" : "GET",
             "dataType": "json",
             "success" : function (data, status, xhr) {
-                title = data["table"]["title"];
-                columns = data["table"]["columns"];
-                rows = data["table"]["rows"];
-                translations = data["translations"]
+                let title = data["table"]["title"];
+                let columns = data["table"]["columns"];
+                let rows = data["table"]["rows"];
+                let translations = data["translations"]
                 initializeFailedPriceUpdateTable(title, columns, rows, translations);
             },
             "error" : function (error) {
