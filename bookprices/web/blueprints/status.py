@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, Response, jsonify
+from flask_login import login_required
+
 from bookprices.shared.db import database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.failed_update_service import FailedUpdateService
@@ -13,11 +15,13 @@ failed_update_service = FailedUpdateService(db, cache)
 
 
 @status_blueprint.route("/", methods=["GET"])
+@login_required
 def index() -> str:
     return render_template("status/index.html")
 
 
 @status_blueprint.route("/failed_price_updates", methods=["GET"])
+@login_required
 def failed_price_updates() -> tuple[Response, int]:
     failed_updates = failed_update_service.get_failed_price_updates_by_bookstore()
     response = map_failed_price_update_counts(failed_updates)

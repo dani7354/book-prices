@@ -42,11 +42,10 @@ def map_failed_price_update_counts(
 
     rows_by_bookstore = {}
     for failed_update_count in failed_update_counts:
-        if row := rows_by_bookstore.get(failed_update_count.bookstore_id):
-            row.count_by_reason[failed_update_count.reason.value] = failed_update_count.count
-        else:
+        if not (row := rows_by_bookstore.get(failed_update_count.bookstore_id)):
             row = FailedPriceUpdateCountRow(book_store_name=failed_update_count.bookstore_name)
             rows_by_bookstore[failed_update_count.bookstore_id] = row
+        row.count_by_reason[failed_update_count.reason.value] = failed_update_count.count
 
     return FailedPriceUpdateCountTable(column_names=column_names, rows=list(rows_by_bookstore.values()))
 
