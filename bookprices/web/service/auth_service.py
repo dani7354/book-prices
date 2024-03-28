@@ -53,25 +53,25 @@ class WebUser(flask_login.UserMixin):
 
 class AuthService:
     def __init__(self, db: Database, cache: Cache):
-        self.db = db
-        self.cache = cache
+        self._db = db
+        self._cache = cache
 
     def get_user(self, user_id: str) -> Optional[WebUser]:
-        if not (user := self.cache.get(get_user_key(user_id))):
-            user = self.db.user_db.get_user_by_id(user_id)
+        if not (user := self._cache.get(get_user_key(user_id))):
+            user = self._db.user_db.get_user_by_id(user_id)
             if user:
-                self.cache.set(get_user_key(user_id), user)
+                self._cache.set(get_user_key(user_id), user)
         return WebUser(user) if user else None
 
     def update_user_token_and_image_url(self, user_id: str, token: str, image_url: str) -> None:
-        self.db.user_db.update_user_token_and_image_url(user_id, token, image_url)
-        self.cache.delete(get_user_key(user_id))
+        self._db.user_db.update_user_token_and_image_url(user_id, token, image_url)
+        self._cache.delete(get_user_key(user_id))
 
     def update_user_info(self, user_id: str, email: str, firstname: str, lastname: str, is_active: bool) -> None:
-        self.db.user_db.update_user_info(
+        self._db.user_db.update_user_info(
             user_id=user_id,
             email=email,
             firstname=firstname,
             lastname=lastname,
             is_active=is_active)
-        self.cache.delete(get_user_key(user_id))
+        self._cache.delete(get_user_key(user_id))
