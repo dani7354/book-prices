@@ -37,3 +37,11 @@ FROM FailedPriceUpdate fpu
 INNER JOIN BookStore bs ON bs.Id = fpu.BookStoreId
 GROUP BY bs.Id, fpu.Reason
 ORDER BY FailedUpdateCount DESC;
+
+
+SELECT bs.Name as BookStore, COUNT(*) as ImportCount
+FROM Book b
+INNER JOIN BookStoreBook bsb ON b.Id = bsb.BookId
+INNER JOIN BookStore bs ON bsb.BookStoreId = bs.Id
+WHERE b.Created > '2019-01-01'
+GROUP BY bsb.BookStoreId
