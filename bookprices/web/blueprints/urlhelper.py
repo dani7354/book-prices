@@ -30,7 +30,7 @@ def parse_args_for_search(request_args: MultiDict) -> dict:
     return args
 
 
-def parse_args_for_failed_updates(request_args: MultiDict, days_default_value: int) -> dict:
+def parse_args_for_status_endpoint(request_args: MultiDict, days_default_value: int) -> dict:
     args = {
         TIMEPERIOD_DAYS_URL_PARAMETER: request_args.get(
             TIMEPERIOD_DAYS_URL_PARAMETER,

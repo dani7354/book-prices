@@ -32,11 +32,3 @@ class FailedPriceUpdateCount:
     book_id: int
     bookstore_id: int
     count: int
-
-
-@dataclass(frozen=True)
-class FailedPriceUpdateCountByReason:
-    bookstore_id: int
-    bookstore_name: str
-    count: int
-    reason: FailedUpdateReason

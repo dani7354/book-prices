@@ -31,6 +31,7 @@ FROM Book b
 INNER JOIN LatestPriceUpdate lpu ON b.Id = lpu.BookId;
 ORDER BY lpu.NewestPriceId DESC;
 
+
 -- Get failed update count for bookstores by reason
 SELECT fpu.Reason, bs.Id as BookStoreId, MAX(bs.Name) AS BookStore, COUNT(fpu.Id) AS FailedUpdateCount
 FROM FailedPriceUpdate fpu
@@ -39,9 +40,12 @@ GROUP BY bs.Id, fpu.Reason
 ORDER BY FailedUpdateCount DESC;
 
 
+-- Get import count for bookstores
+SET @FromDate = '2019-01-01';
+
 SELECT bs.Name as BookStore, COUNT(*) as ImportCount
 FROM Book b
 INNER JOIN BookStoreBook bsb ON b.Id = bsb.BookId
 INNER JOIN BookStore bs ON bsb.BookStoreId = bs.Id
-WHERE b.Created > '2019-01-01'
+WHERE b.Created >= @FromDate
 GROUP BY bsb.BookStoreId
