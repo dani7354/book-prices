@@ -23,11 +23,11 @@ class StatusService:
 
     def get_book_import_count_by_bookstore(self, days: int) -> list[BookImportCount]:
         date_from = datetime.now() - timedelta(days=days)
-        if import_counts := self._cache.get(get_book_import_count_key(date_from)):
-            return import_counts
-        import_count = self._db.status_db.get_book_import_count_by_bookstore(date_from)
-        if import_count:
-            self._cache.set(get_book_import_count_key(date_from), import_count)
+        #if import_counts := self._cache.get(get_book_import_count_key(date_from)):
+        #    return import_counts
+        import_counts = self._db.status_db.get_book_import_count_by_bookstore(date_from)
+        if import_counts:
+            self._cache.set(get_book_import_count_key(date_from), import_counts)
 
         return import_counts
 

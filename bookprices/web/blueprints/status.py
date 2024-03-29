@@ -36,7 +36,7 @@ def failed_price_updates() -> tuple[Response, int]:
     return jsonify(response), 200
 
 
-@status_blueprint.route("/book-import-count", methods=[HttpMethod.GET.value])
+@status_blueprint.route("/book-import-counts", methods=[HttpMethod.GET.value])
 @login_required
 def book_import_counts() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
