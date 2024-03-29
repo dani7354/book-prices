@@ -43,7 +43,6 @@ def book_import_counts() -> tuple[Response, int]:
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)
     import_counts = status_service.get_book_import_count_by_bookstore(
         days=args[TIMEPERIOD_DAYS_URL_PARAMETER])
-
     response = map_book_import_counts(import_counts)
 
     return jsonify(response), 200
