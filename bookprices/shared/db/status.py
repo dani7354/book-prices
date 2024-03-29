@@ -33,20 +33,20 @@ class StatusDb(BaseDb):
     def get_book_import_count_by_bookstore(self, from_date: datetime) -> list[BookImportCount]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT bs.Name as BookStoreName, COUNT(*) as ImportCount "
-                         "FROM Book "
-                         "INNER JOIN BookStore bs ON bs.Id = Book.BookStoreId "
-                         "INNER JOIN BookStoreBook bsb ON bsb.BookId = Book.Id AND bsb.BookStoreId = bs.Id "
-                         "WHERE Created >= %s "
-                         "GROUP BY bsb.BookStoreId "
-                         "ORDER BY ImportCount DESC ")
+                query = (
+                      "SELECT bs.Name as BookStore, COUNT(*) as ImportCount "
+                      "FROM Book b "
+                      "INNER JOIN BookStoreBook bsb ON b.Id = bsb.BookId "
+                      "INNER JOIN BookStore bs ON bsb.BookStoreId = bs.Id "
+                      "WHERE b.Created >= %s "
+                      "GROUP BY bsb.BookStoreId ")
 
                 cursor.execute(query, (from_date.strftime(self.FILTER_DATE_FORMAT),))
                 book_import_counts = []
                 for row in cursor:
                     book_import_counts.append(
                         BookImportCount(
-                            bookstore_name=row["BookStoreName"],
+                            bookstore_name=row["BookStore"],
                             count=row["ImportCount"]))
 
                 return book_import_counts

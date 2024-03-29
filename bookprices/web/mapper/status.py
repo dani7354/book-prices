@@ -5,7 +5,7 @@ from bookprices.web.viewmodels.status import FailedPriceUpdatesResponse, TableRe
 BOOKSTORE_COLUMN_NAME = "book_store"
 
 
-def _get_translations() -> dict[str, str]:
+def _get_base_translations() -> dict[str, str]:
     return {BOOKSTORE_COLUMN_NAME: "Boghandler"}
 
 
@@ -26,7 +26,7 @@ def map_failed_price_update_counts(
         columns=column_names,
         rows=list(rows_by_bookstore.values()))
 
-    return FailedPriceUpdatesResponse(table=table_response, translations=_get_translations())
+    return FailedPriceUpdatesResponse(table=table_response, translations=_get_base_translations())
 
 
 def map_book_import_counts(book_import_counts: list[BookImportCount]) -> BookImportCountsResponse:
@@ -37,9 +37,11 @@ def map_book_import_counts(book_import_counts: list[BookImportCount]) -> BookImp
             import_count_column_name: str(import_count.count)} for import_count in book_import_counts]
 
     table_response = TableResponse(
-        title="Antal importerede bøger",
+        title="Importerede bøger",
         columns=columns,
         rows=rows)
 
-    return BookImportCountsResponse(table=table_response, translations=_get_translations())
+    translations = _get_base_translations()
+    translations[import_count_column_name] = "Antal"
 
+    return BookImportCountsResponse(table=table_response, translations=translations)
