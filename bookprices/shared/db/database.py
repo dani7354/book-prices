@@ -1,6 +1,7 @@
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.db.bookstore import BookStoreDb
 from bookprices.shared.db.bookprice import BookPriceDb
+from bookprices.shared.db.status import StatusDb
 from bookprices.shared.db.user import UserDb
 
 
@@ -39,3 +40,10 @@ class Database:
             self.db_user,
             self.db_password,
             self.db_name)
+
+        self.status_db = StatusDb(
+                self.db_host,
+                self.db_port,
+                self.db_user,
+                self.db_password,
+                self.db_name)

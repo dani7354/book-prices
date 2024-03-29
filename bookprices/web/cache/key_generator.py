@@ -43,3 +43,8 @@ def get_user_key(user_id: str) -> str:
 def get_failed_count_by_reason_key(date_from: datetime) -> str:
     date_from_str = date_from.strftime("%Y-%m-%d")
     return f"failed_count_by_reason_{date_from_str}"
+
+
+def get_book_import_count_key(date_from: datetime) -> str:
+    date_from_str = date_from.strftime("%Y-%m-%d")
+    return f"book_import_count_{date_from_str}"
