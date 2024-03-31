@@ -33,6 +33,7 @@ if DEBUG_MODE:
 
 
 # logging
+default_handler.level = logging.INFO
 default_handler.setFormatter(RequestFormatter.get_formatter())
 
 
