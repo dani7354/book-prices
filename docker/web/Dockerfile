@@ -18,6 +18,10 @@ RUN pip3 install -r requirements.txt
 RUN pip3 install -e .
 
 WORKDIR /usr/local/bookprices_web/bookprices/web
+
+RUN mkdir -p ./log/uwsgi
+RUN chown -R bookprices:bookprices ./log
+
 COPY ./docker/web/start.sh start.sh
 RUN chmod +x start.sh
 

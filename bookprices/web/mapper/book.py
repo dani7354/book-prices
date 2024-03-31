@@ -26,9 +26,9 @@ from bookprices.web.viewmodels.page import IndexViewModel
 PRICE_NONE_TEXT = "-"
 PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
 AUTHOR_DEFAULT_OPTION_TEXT = "Alle forfattere"
-SEARCH_ENDPOINT = "page.search"
-BOOK_ENDPOINT = "page.book"
-PRICE_HISTORY_ENDPOINT = "page.price_history"
+SEARCH_ENDPOINT = "book.search"
+BOOK_ENDPOINT = "book.book"
+PRICE_HISTORY_ENDPOINT = "book.price_history"
 
 
 def _add_ref_to_bookstore_url(url: str) -> str:
