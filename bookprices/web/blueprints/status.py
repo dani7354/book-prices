@@ -4,7 +4,7 @@ from bookprices.shared.db import database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.status_service import StatusService
 from bookprices.web.mapper.status import map_failed_price_update_counts, map_book_import_counts
-from bookprices.web.shared.enum import HttpMethod
+from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, StatusTemplate
 from bookprices.web.viewmodels.status import IndexViewModel
 from bookprices.web.blueprints.urlhelper import parse_args_for_status_endpoint
 from bookprices.web.settings import (
@@ -21,7 +21,7 @@ status_service = StatusService(db, cache)
 def index() -> str:
     view_model = IndexViewModel(timeperiod_options=status_service.get_timeperiod_options())
 
-    return render_template("status/index.html", view_model=view_model)
+    return render_template(StatusTemplate.INDEX.value, view_model=view_model)
 
 
 @status_blueprint.route("/failed-price-updates", methods=[HttpMethod.GET.value])
@@ -33,7 +33,7 @@ def failed_price_updates() -> tuple[Response, int]:
         days=args[TIMEPERIOD_DAYS_URL_PARAMETER])
     response = map_failed_price_update_counts(failed_updates)
 
-    return jsonify(response), 200
+    return jsonify(response), HttpStatusCode.OK
 
 
 @status_blueprint.route("/book-import-counts", methods=[HttpMethod.GET.value])
@@ -45,4 +45,4 @@ def book_import_counts() -> tuple[Response, int]:
         days=args[TIMEPERIOD_DAYS_URL_PARAMETER])
     response = map_book_import_counts(import_counts)
 
-    return jsonify(response), 200
+    return jsonify(response), HttpStatusCode.OK

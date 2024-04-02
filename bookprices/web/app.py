@@ -1,20 +1,26 @@
+import logging
 import os
+from logging.config import dictConfig
 from typing import Optional
 from flask import Flask, request, jsonify, Response
+from flask.logging import default_handler
 from flask_login import LoginManager
 from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.auth import auth_blueprint
+from bookprices.web.blueprints.book import book_blueprint
+from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
+from bookprices.web.blueprints.logging_configuration import RequestFormatter
 from bookprices.web.blueprints.status import status_blueprint
 from bookprices.web.blueprints.user import user_blueprint
-from bookprices.web.blueprints.page import page_blueprint, not_found, internal_server_error
-from bookprices.web.service import csrf
+from bookprices.web.blueprints.page import page_blueprint
 from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import CSRFService
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,
     MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+from bookprices.web.shared.enum import HttpStatusCode
 
 static_folder = "static"
 static_url_path = None
@@ -25,6 +31,12 @@ if DEBUG_MODE:
     # This is needed for testing Google OAuth2 locally, since the redirect url is using http
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
+
+# logging
+default_handler.setFormatter(RequestFormatter.get_formatter())
+
+
+# app
 app = Flask(__name__, static_url_path=static_url_path, static_folder=static_folder)
 app.debug = DEBUG_MODE
 app.config.update(
@@ -36,14 +48,15 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
 )
 
-app.register_blueprint(api_blueprint, url_prefix="/api")
 app.register_blueprint(page_blueprint)
+app.register_blueprint(book_blueprint)
+app.register_blueprint(api_blueprint, url_prefix="/api")
 app.register_blueprint(auth_blueprint, url_prefix="/auth")
 app.register_blueprint(user_blueprint, url_prefix="/user")
 app.register_blueprint(status_blueprint, url_prefix="/status")
+app.register_error_handler(HttpStatusCode.NOT_FOUND, not_found_html)
+app.register_error_handler(HttpStatusCode.INTERNAL_SERVER_ERROR, internal_server_error_html)
 
-app.register_error_handler(404, not_found)
-app.register_error_handler(500, internal_server_error)
 cache.init_app(app)
 
 login_manager = LoginManager()

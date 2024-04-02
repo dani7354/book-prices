@@ -67,7 +67,7 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
                       <li><a class="{{ 'dropdown-item disabled' if active_page == 'user' else 'dropdown-item' }}" href="{{ url_for('user.index' )}}">Redigér bruger</a></li>
-                      <li><a class="{{ 'dropdown-item disabled' if active_page == 'create_book' else 'dropdown-item' }}" href="{{ url_for('page.create' )}}">Tilføj bog</a></li>
+                      <li><a class="{{ 'dropdown-item disabled' if active_page == 'create_book' else 'dropdown-item' }}" href="{{ url_for('book.create' )}}">Tilføj bog</a></li>
                       <li><a class="{{ 'dropdown-item disabled' if active_page == 'status' else 'dropdown-item' }}" href="{{ url_for('status.index' )}}">Status</a></li>
                       <li><hr class="dropdown-divider"></li>
                       <li><a id="logout-link" class="dropdown-item">Log ud</a></li>

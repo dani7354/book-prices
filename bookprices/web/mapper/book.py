@@ -13,6 +13,7 @@ from bookprices.web.settings import (
     DESCENDING_URL_PARAMETER,
     BOOK_IMAGES_PATH,
     BOOK_FALLBACK_IMAGE_NAME)
+from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.book import (
     SearchViewModel,
     AuthorOption,
@@ -26,9 +27,6 @@ from bookprices.web.viewmodels.page import IndexViewModel
 PRICE_NONE_TEXT = "-"
 PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
 AUTHOR_DEFAULT_OPTION_TEXT = "Alle forfattere"
-SEARCH_ENDPOINT = "page.search"
-BOOK_ENDPOINT = "page.book"
-PRICE_HISTORY_ENDPOINT = "page.price_history"
 
 
 def _add_ref_to_bookstore_url(url: str) -> str:
@@ -61,7 +59,7 @@ def _map_sorting_options(search_phrase: str,
             text="Titel: A til Z",
             selected=order_by == BookSearchSortOption.Title and not descending,
             url=_create_url(page_number=1,
-                            endpoint=SEARCH_ENDPOINT,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: BookSearchSortOption.Title.name,
@@ -70,7 +68,7 @@ def _map_sorting_options(search_phrase: str,
             text="Titel: Z til A",
             selected=order_by == BookSearchSortOption.Title and descending,
             url=_create_url(page_number=1,
-                            endpoint=SEARCH_ENDPOINT,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: BookSearchSortOption.Title.name,
@@ -79,7 +77,7 @@ def _map_sorting_options(search_phrase: str,
             text="Forfatter: A til Z",
             selected=order_by == BookSearchSortOption.Author and not descending,
             url=_create_url(page_number=1,
-                            endpoint=SEARCH_ENDPOINT,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: BookSearchSortOption.Author.name,
@@ -88,7 +86,7 @@ def _map_sorting_options(search_phrase: str,
             text="Forfatter: Z til A",
             selected=order_by == BookSearchSortOption.Author and descending,
             url=_create_url(page_number=1,
-                            endpoint=SEARCH_ENDPOINT,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: BookSearchSortOption.Author.name,
@@ -97,7 +95,7 @@ def _map_sorting_options(search_phrase: str,
             text="Ældste først",
             selected=order_by == BookSearchSortOption.Created and not descending,
             url=_create_url(page_number=1,
-                            endpoint=SEARCH_ENDPOINT,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
@@ -106,7 +104,7 @@ def _map_sorting_options(search_phrase: str,
             text="Nyeste først",
             selected=order_by == BookSearchSortOption.Created and descending,
             url=_create_url(page_number=1,
-                            endpoint=SEARCH_ENDPOINT,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
@@ -119,7 +117,7 @@ def _map_sorting_options(search_phrase: str,
 def map_index_vm(newest_books: list[Book], latest_updated_books: list[Book]) -> IndexViewModel:
     newest_books_url = _create_url(
         page_number=1,
-        endpoint=SEARCH_ENDPOINT,
+        endpoint=Endpoint.BOOK_SEARCH.value,
         **{ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
            DESCENDING_URL_PARAMETER: True})
 
@@ -153,11 +151,11 @@ def map_search_vm(books: list[Book],
     previous_page_url, next_page_url = None, None
     if previous_page:
         previous_page_url = _create_url(previous_page,
-                                        endpoint=SEARCH_ENDPOINT,
+                                        endpoint=Endpoint.BOOK_SEARCH.value,
                                         **url_parameters)
     if next_page:
         next_page_url = _create_url(next_page,
-                                    endpoint=SEARCH_ENDPOINT,
+                                    endpoint=Endpoint.BOOK_SEARCH.value,
                                     **url_parameters)
 
     return SearchViewModel([map_book_item(b, current_page, url_parameters) for b in books],
@@ -178,7 +176,7 @@ def map_book_item(book: Book,
 
     image_url = _get_image_url(book)
     url = _create_url(page,
-                      endpoint=BOOK_ENDPOINT,
+                      endpoint=Endpoint.BOOK.value,
                       book_id=book.id,
                       **url_parameters)
 
@@ -199,7 +197,7 @@ def map_book_details(book: Book,
         price_str = bp.price if is_price_available else PRICE_NONE_TEXT
         created_str = bp.created if is_price_available else PRICE_CREATED_NONE_TEXT
         price_history_url = _create_url(page,
-                                        endpoint=PRICE_HISTORY_ENDPOINT,
+                                        endpoint=Endpoint.PRICE_HISTORY.value,
                                         book_id=book.id,
                                         store_id=bp.book_store_id,
                                         **{SEARCH_URL_PARAMETER: search_phrase,
@@ -218,14 +216,14 @@ def map_book_details(book: Book,
     image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
     book.image_url = os.path.join(BOOK_IMAGES_PATH, image)
     index_url = _create_url(page,
-                            endpoint=SEARCH_ENDPOINT,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: order_by.name,
                                DESCENDING_URL_PARAMETER: descending})
 
     author_search_url = _create_url(page_number=1,
-                                    endpoint=SEARCH_ENDPOINT,
+                                    endpoint=Endpoint.BOOK_SEARCH.value,
                                     **{AUTHOR_URL_PARAMETER: book.author})
 
     return BookDetailsViewModel(book,
@@ -244,7 +242,7 @@ def map_price_history(book_in_book_store: BookInBookStore,
                       descending: bool) -> PriceHistoryViewModel:
 
     return_url = _create_url(page,
-                             endpoint=BOOK_ENDPOINT,
+                             endpoint=Endpoint.BOOK.value,
                              book_id=book_in_book_store.book.id,
                              **{SEARCH_URL_PARAMETER: search_phrase,
                                 AUTHOR_URL_PARAMETER: author,
