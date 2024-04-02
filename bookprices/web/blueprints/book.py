@@ -26,7 +26,7 @@ def search() -> str:
     args = parse_args_for_search(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
-    order_by = args.get(ORDER_BY_URL_PARAMETER).create
+    order_by = args.get(ORDER_BY_URL_PARAMETER)
     descending = args.get(DESCENDING_URL_PARAMETER)
     page = args.get(PAGE_URL_PARAMETER)
 
