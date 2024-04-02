@@ -1,5 +1,4 @@
 import google_auth_oauthlib.flow
-from enum import Enum
 from flask import Blueprint, request, redirect, url_for, session, Response, jsonify, abort, current_app
 from werkzeug.local import LocalProxy
 from bookprices.shared.db.database import Database
@@ -9,7 +8,7 @@ from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.google_api_service import GoogleApiService
 from bookprices.web.blueprints.urlhelper import format_url_for_redirection
-from bookprices.web.shared.enum import HttpMethod, HttpStatusCode
+from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, SessionKey, Endpoint
 from flask_login import (
     login_user,
     logout_user)
@@ -22,7 +21,6 @@ from bookprices.web.settings import (
     GOOGLE_CLIENT_SECRETS_FILE,
     GOOGLE_API_SCOPES)
 
-PAGE_INDEX_ENDPOINT = "page.index"
 
 logger = LocalProxy(lambda: current_app.logger)
 
@@ -38,11 +36,6 @@ auth_service = AuthService(
     cache)
 
 
-class SessionKey(Enum):
-    STATE = "state"
-    REDIRECT_URL = "redirect_url"
-
-
 @auth_blueprint.route("/authorize", methods=[HttpMethod.GET.value])
 def authorize() -> Response:
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -54,7 +47,7 @@ def authorize() -> Response:
 
     session[SessionKey.STATE.value] = state
     session[SessionKey.REDIRECT_URL.value] = redirect_url if (redirect_url := request.args.get("next")) \
-        else url_for(PAGE_INDEX_ENDPOINT)
+        else url_for(Endpoint.PAGE_INDEX.value)
 
     logger.info("Redirecting to Google OAuth2 authorization URL...")
 
@@ -87,14 +80,15 @@ def oauth2callback() -> Response | tuple[Response, int]:
 
     logger.info("Logging in user %s", user_info.email)
     login_user(user)
-    redirect_url = format_url_for_redirection(session.pop(SessionKey.REDIRECT_URL.value, url_for(PAGE_INDEX_ENDPOINT)))
+    redirect_url = format_url_for_redirection(
+        session.pop(SessionKey.REDIRECT_URL.value, url_for(Endpoint.PAGE_INDEX.value)))
 
     return redirect(redirect_url)
 
 
 @auth_blueprint.route("/logout", methods=[HttpMethod.POST.value])
 def logout() -> tuple[Response, int]:
-    redirect_url_from_request = request.args.get("redirect_url", url_for(PAGE_INDEX_ENDPOINT))
+    redirect_url_from_request = request.args.get("redirect_url", url_for(Endpoint.PAGE_INDEX.value))
     logout_user()
 
     return jsonify({"redirect_url":  format_url_for_redirection(redirect_url_from_request)}), HttpStatusCode.OK

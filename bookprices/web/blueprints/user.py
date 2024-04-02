@@ -1,23 +1,18 @@
 import flask_login
 import bookprices.web.mapper.user as usermapper
-from enum import StrEnum
 from flask import Blueprint, request, render_template, Response, redirect, url_for
 from bookprices.shared.db import database
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT
-from bookprices.web.shared.enum import HttpMethod
+from bookprices.web.shared.enum import HttpMethod, UserTemplate
 from bookprices.web.viewmodels.user import UserEditViewModel
 
 user_blueprint = Blueprint("user", __name__)
 
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 auth_service = AuthService(db, cache)
-
-
-class UserTemplate(StrEnum):
-    EDIT_USER = "user/edit.html"
 
 
 @user_blueprint.context_processor

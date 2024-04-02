@@ -1,4 +1,3 @@
-import flask_login
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
 from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
@@ -8,7 +7,7 @@ from flask import render_template, request, Blueprint, redirect, Response, url_f
 from flask_login import current_user
 from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.shared.enum import HttpMethod, HttpStatusCode
+from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, PageTemplate, Endpoint
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.web.cache.key_generator import (
     get_bookstores_key,
@@ -45,7 +44,7 @@ def index() -> str:
         cache.set(get_index_latest_prices_books_key(), newest_prices_books)
     view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
 
-    return render_template("index.html", view_model=view_model)
+    return render_template(PageTemplate.INDEX.value, view_model=view_model)
 
 
 @page_blueprint.route("/about", methods=[HttpMethod.GET.value])
@@ -56,20 +55,14 @@ def about() -> str:
         cache.set(bookstores_cache_key, bookstores)
     view_model = AboutViewModel(bookstores)
 
-    return render_template("about.html", view_model=view_model)
+    return render_template(PageTemplate.ABOUT.value, view_model=view_model)
 
 
 @page_blueprint.route("/login", methods=[HttpMethod.GET.value])
 def login() -> Response | str:
     redirect_url = redirect_url if (redirect_url := format_url_for_redirection(request.args.get("next"))) \
-        else url_for("page.index")
+        else url_for(Endpoint.PAGE_INDEX.value)
     if current_user.is_authenticated:
         return redirect(redirect_url)
 
-    return render_template("login.html", redirect_url=redirect_url)
-
-
-@page_blueprint.route("/admin", methods=[HttpMethod.GET.value])
-@flask_login.login_required
-def admin() -> str:
-    return render_template("admin.html")
+    return render_template(PageTemplate.LOGIN.value, redirect_url=redirect_url)

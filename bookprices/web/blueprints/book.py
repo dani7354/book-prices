@@ -1,6 +1,7 @@
 import flask_login
+from werkzeug.local import LocalProxy
 import bookprices.web.mapper.book as bookmapper
-from flask import Blueprint, abort, request, render_template, Response, redirect, url_for
+from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app
 from bookprices.shared.db import database
 from bookprices.shared.db.book import SearchQuery
 from bookprices.shared.model.book import Book
@@ -11,18 +12,23 @@ from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE)
 from bookprices.web.cache.redis import cache
-from bookprices.web.shared.enum import HttpStatusCode, HttpMethod
+from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate
 from bookprices.web.viewmodels.book import CreateBookViewModel
 
 
-CREATE_BOOK_TEMPLATE = "book/create.html"
-
+logger = LocalProxy(lambda: current_app.logger)
 book_blueprint = Blueprint("book", __name__)
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 
 
 @book_blueprint.route("/search", methods=[HttpMethod.GET.value])
 def search() -> str:
+    logger.debug("search")
+    logger.info("search")
+    logger.warning("search")
+    logger.error("search")
+    logger.fatal("search")
+
     args = parse_args_for_search(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
@@ -64,7 +70,7 @@ def search() -> str:
                                   order_by,
                                   descending)
 
-    return render_template("book/search.html", view_model=vm)
+    return render_template(BookTemplate.SEARCH.value, view_model=vm)
 
 
 @book_blueprint.route("/book/<int:book_id>", methods=[HttpMethod.GET.value])
@@ -94,7 +100,7 @@ def book(book_id: int) -> str:
                                                order_by,
                                                descending)
 
-    return render_template("book/book.html", view_model=book_details)
+    return render_template(BookTemplate.BOOK.value, view_model=book_details)
 
 
 @book_blueprint.route("/book/create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
@@ -113,10 +119,10 @@ def create() -> str | Response:
             format=book_format.strip())
 
         if not view_model.is_valid():
-            return render_template(CREATE_BOOK_TEMPLATE, view_model=view_model)
+            return render_template(BookTemplate.CREATE.value, view_model=view_model)
         if db.book_db.get_book_by_isbn(view_model.isbn):
             view_model.add_error(view_model.isbn_field_name, "Bogen findes allerede")
-            return render_template(CREATE_BOOK_TEMPLATE, view_model=view_model)
+            return render_template(BookTemplate.CREATE.value, view_model=view_model)
 
         book_id = db.book_db.create_book(
             Book(id=0,
@@ -127,7 +133,7 @@ def create() -> str | Response:
 
         return redirect(url_for("book.book", book_id=book_id))
 
-    return render_template(CREATE_BOOK_TEMPLATE, view_model=CreateBookViewModel.empty())
+    return render_template(BookTemplate.CREATE.value, view_model=CreateBookViewModel.empty())
 
 
 @book_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
@@ -158,4 +164,4 @@ def price_history(book_id: int, store_id: int) -> str:
                                                             order_by,
                                                             descending)
 
-    return render_template("book/price_history.html", view_model=price_history_view_model)
+    return render_template(BookTemplate.PRICE_HISTORY.value, view_model=price_history_view_model)
