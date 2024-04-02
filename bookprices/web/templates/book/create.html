@@ -3,7 +3,7 @@
 {% set errors = view_model.errors %}
 {% block content %}
     <h2>Tilføj bog</h2>
-    <form method="post" action="{{ url_for('page.create') }}">
+    <form method="post" action="{{ url_for('book.create') }}">
         <div class="mb-3">
             <label for="{{ view_model.isbn_field_name }}" class="form-label">ISBN-13</label>
             <input name="{{ view_model.isbn_field_name }}" type="text" class="form-control"

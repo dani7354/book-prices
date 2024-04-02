@@ -23,16 +23,10 @@ db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL
 
 @book_blueprint.route("/search", methods=[HttpMethod.GET.value])
 def search() -> str:
-    logger.debug("search")
-    logger.info("search")
-    logger.warning("search")
-    logger.error("search")
-    logger.fatal("search")
-
     args = parse_args_for_search(request.args)
     author = args.get(AUTHOR_URL_PARAMETER)
     search_phrase = args.get(SEARCH_URL_PARAMETER)
-    order_by = args.get(ORDER_BY_URL_PARAMETER)
+    order_by = args.get(ORDER_BY_URL_PARAMETER).create
     descending = args.get(DESCENDING_URL_PARAMETER)
     page = args.get(PAGE_URL_PARAMETER)
 
