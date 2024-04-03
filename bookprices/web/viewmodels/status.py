@@ -29,3 +29,9 @@ class FailedPriceUpdatesResponse:
 class BookImportCountsResponse:
     translations: dict[str, str]
     table: TableResponse
+
+
+@dataclass(frozen=True)
+class PriceCountsResponse:
+    translations: dict[str, str]
+    table: TableResponse

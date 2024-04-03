@@ -1,6 +1,7 @@
 const timePeriodSelect = $("#timeperiod-select");
 const failedPriceUpdatesContainer = $("#failed-price-updates-container");
 const bookImportCountsContainer = $("#book-import-counts-container");
+const bookPriceCountsContainer = $("#book-price-counts-container");
 
 const baseUrl = "/status";
 
@@ -82,7 +83,39 @@ function getBookImportCounts() {
                 let rows = data["table"]["rows"];
                 let translations = data["translations"];
                 let headingId = "book-import-counts-heading";
-                initializeTable(bookImportCountsContainer, title, columns, rows, translations, headingId);
+                initializeTable(
+                    bookImportCountsContainer,
+                    title,
+                    columns,
+                    rows,
+                    translations,
+                    headingId);
+            },
+            "error" : function (error) {
+                console.log(error);
+            }
+    });
+}
+
+function getBookPriceCounts() {
+    let selectedTimePeriodDays = encodeURIComponent(timePeriodSelect.val());
+    let url = `${baseUrl}/price-counts?days=${selectedTimePeriodDays}`;
+    $.ajax(url, {
+            "method" : "GET",
+            "dataType": "json",
+            "success" : function (data, status, xhr) {
+                let title = data["table"]["title"];
+                let columns = data["table"]["columns"];
+                let rows = data["table"]["rows"];
+                let translations = data["translations"];
+                let headingId = "book-price-counts-heading";
+                initializeTable(
+                    bookPriceCountsContainer,
+                    title,
+                    columns,
+                    rows,
+                    translations,
+                    headingId);
             },
             "error" : function (error) {
                 console.log(error);
@@ -93,9 +126,11 @@ function getBookImportCounts() {
 $(document).ready(() => {
     getFailedPriceUpdates();
     getBookImportCounts();
+    getBookPriceCounts();
 
     timePeriodSelect.on("change", () => {
         getFailedPriceUpdates();
         getBookImportCounts();
+        getBookPriceCounts();
     });
 });

@@ -1,7 +1,7 @@
 from datetime import datetime
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.error import FailedUpdateReason
-from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount
+from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount, PriceCount
 
 
 class StatusDb(BaseDb):
@@ -50,3 +50,23 @@ class StatusDb(BaseDb):
                             count=row["ImportCount"]))
 
                 return book_import_counts
+
+    def get_price_count_by_bookstore(self, from_date: datetime) -> list[PriceCount]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = (
+                      "SELECT bs.Name as BookStore, COUNT(*) as PriceCount "
+                      "FROM BookPrice bp "
+                      "INNER JOIN BookStore bs ON bp.BookStoreId = bs.Id "
+                      "WHERE bp.Created >= %s "
+                      "GROUP BY bp.BookStoreId ")
+
+                cursor.execute(query, (from_date.strftime(self.FILTER_DATE_FORMAT),))
+                price_counts = []
+                for row in cursor:
+                    price_counts.append(
+                        PriceCount(
+                            bookstore_name=row["BookStore"],
+                            count=row["PriceCount"]))
+
+                return price_counts
