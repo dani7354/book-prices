@@ -50,7 +50,7 @@ def book_import_counts() -> tuple[Response, int]:
 
 @status_blueprint.route("/price-counts", methods=[HttpMethod.GET.value])
 @login_required
-def book_import_counts() -> tuple[Response, int]:
+def book_price_counts() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)
     price_counts = status_service.get_price_count_by_bookstore(

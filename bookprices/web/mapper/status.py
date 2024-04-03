@@ -55,7 +55,7 @@ def map_price_counts(price_counts: list[PriceCount]) -> PriceCountsResponse:
     rows = [{BOOKSTORE_COLUMN_NAME: price_count.bookstore_name,
             price_count_column_name: str(price_count.count)} for price_count in price_counts]
 
-    table = TableResponse(title="Priser", columns=columns, rows=rows)
+    table = TableResponse(title="Opdaterede priser", columns=columns, rows=rows)
 
     translations = _get_base_translations()
     translations[price_count_column_name] = "Priser"
