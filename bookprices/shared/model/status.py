@@ -14,3 +14,9 @@ class FailedPriceUpdateCountByReason:
 class BookImportCount:
     bookstore_name: str
     count: int
+
+
+@dataclass(frozen=True)
+class PriceCount:
+    bookstore_name: str
+    count: int

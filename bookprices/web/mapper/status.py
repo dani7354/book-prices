@@ -1,6 +1,7 @@
 from bookprices.shared.model.error import FailedUpdateReason
-from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount
-from bookprices.web.viewmodels.status import FailedPriceUpdatesResponse, TableResponse, BookImportCountsResponse
+from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount, PriceCount
+from bookprices.web.viewmodels.status import FailedPriceUpdatesResponse, TableResponse, BookImportCountsResponse, \
+    PriceCountsResponse
 
 BOOKSTORE_COLUMN_NAME = "book_store"
 
@@ -45,3 +46,18 @@ def map_book_import_counts(book_import_counts: list[BookImportCount]) -> BookImp
     translations[import_count_column_name] = "Antal"
 
     return BookImportCountsResponse(table=table_response, translations=translations)
+
+
+def map_price_counts(price_counts: list[PriceCount]) -> PriceCountsResponse:
+    price_count_column_name = "price_count"
+
+    columns = [BOOKSTORE_COLUMN_NAME, price_count_column_name]
+    rows = [{BOOKSTORE_COLUMN_NAME: price_count.bookstore_name,
+            price_count_column_name: str(price_count.count)} for price_count in price_counts]
+
+    table = TableResponse(title="Priser", columns=columns, rows=rows)
+
+    translations = _get_base_translations()
+    translations[price_count_column_name] = "Priser"
+
+    return PriceCountsResponse(table=table, translations=translations)
