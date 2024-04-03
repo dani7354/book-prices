@@ -289,7 +289,6 @@ class BookDb(BaseDb):
                          "ORDER BY Suggestion ASC "
                          "LIMIT 100;")
                 phrase_with_wildcards = f"{search_phrase}%"
-                print("Searching!")
                 cursor.execute(query, (phrase_with_wildcards, phrase_with_wildcards,))
                 suggestions = []
                 for row in cursor:
