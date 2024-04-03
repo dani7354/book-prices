@@ -1,7 +1,7 @@
 from bookprices.shared.model.error import FailedUpdateReason
 from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount, PriceCount
-from bookprices.web.viewmodels.status import FailedPriceUpdatesResponse, TableResponse, BookImportCountsResponse, \
-    PriceCountsResponse
+from bookprices.web.viewmodels.status import (
+    FailedPriceUpdatesResponse, TableResponse, BookImportCountsResponse,PriceCountsResponse)
 
 BOOKSTORE_COLUMN_NAME = "book_store"
 
