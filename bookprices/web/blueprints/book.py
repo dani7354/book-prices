@@ -8,6 +8,7 @@ from bookprices.shared.model.book import Book
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.cache.key_generator import (
     get_book_key, get_book_latest_prices_key, get_book_in_book_store_key, get_book_list_key, get_authors_key)
+from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE)
@@ -19,6 +20,11 @@ from bookprices.web.viewmodels.book import CreateBookViewModel
 logger = LocalProxy(lambda: current_app.logger)
 book_blueprint = Blueprint("book", __name__)
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+
+
+@book_blueprint.context_processor
+def include_csrf_token() -> dict[str, str]:
+    return get_csrf_token()
 
 
 @book_blueprint.route("/search", methods=[HttpMethod.GET.value])
