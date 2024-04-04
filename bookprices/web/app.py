@@ -1,9 +1,9 @@
 import logging
 import os
 from logging.config import dictConfig
+from flask.logging import default_handler
 from typing import Optional
 from flask import Flask, request, jsonify, Response
-from flask.logging import default_handler
 from flask_login import LoginManager
 from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
@@ -33,8 +33,22 @@ if DEBUG_MODE:
 
 
 # logging
-default_handler.setFormatter(RequestFormatter.get_formatter())
-
+dictConfig({
+    "version": 1,
+    "formatters": {
+        "default": {
+            "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+        },
+    },
+    "handlers": {"wsgi": {
+        "class": 'logging.StreamHandler',
+        "formatter": "default"
+    }},
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["wsgi"]
+    }
+})
 
 # app
 app = Flask(__name__, static_url_path=static_url_path, static_folder=static_folder)
@@ -47,7 +61,12 @@ app.config.update(
     SESSION_COOKIE_SECURE=not DEBUG_MODE,
     SESSION_COOKIE_SAMESITE="Lax",
 )
+default_handler.setLevel(logging.INFO)
+default_handler.setFormatter(RequestFormatter.get_formatter())
+app.logger.addHandler(default_handler)
 
+
+# blueprints
 app.register_blueprint(page_blueprint)
 app.register_blueprint(book_blueprint)
 app.register_blueprint(api_blueprint, url_prefix="/api")
