@@ -14,7 +14,7 @@ def parse_arguments() -> Namespace:
 
 
 def setup_logging(directory: str, filename_base: str, loglevel: int):
-    logfile = os.path.join(directory, f"{str(date.today())}_{filename_base}")
+    logfile = os.path.join(directory, filename_base)
     logging.basicConfig(
         filename=logfile,
         filemode="a",
