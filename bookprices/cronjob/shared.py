@@ -1,7 +1,6 @@
 import os
 import logging
 from argparse import ArgumentParser, Namespace
-from datetime import date
 
 THREAD_COUNT = 10
 
