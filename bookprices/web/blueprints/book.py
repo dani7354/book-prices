@@ -3,7 +3,7 @@ from werkzeug.local import LocalProxy
 import bookprices.web.mapper.book as bookmapper
 from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app
 from bookprices.shared.db import database
-from bookprices.shared.db.book import SearchQuery
+from bookprices.shared.db.book import SearchQuery, BookSearchSortOption
 from bookprices.shared.model.book import Book
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.cache.key_generator import (
@@ -46,15 +46,20 @@ def search() -> str:
                         page_size=BOOK_PAGESIZE,
                         sort_option=order_by,
                         sort_in_descending_order=descending)
+
+    book_search_function = db.book_db.search_books_with_newest_prices \
+        if order_by == BookSearchSortOption.PriceUpdated \
+        else db.book_db.search_books
+
     books_current_cache_key = get_book_list_key(query)
     if not (books_current := cache.get(books_current_cache_key)):
-        books_current = db.book_db.search_books(query)
+        books_current = book_search_function(query)
         cache.set(books_current_cache_key, books_current)
 
     next_query = query.clone(page=page + 1)
     books_next_cache_key = get_book_list_key(next_query)
     if not (books_next := cache.get(books_next_cache_key)):
-        books_next = db.book_db.search_books(next_query)
+        books_next = book_search_function(next_query)
         cache.set(books_next_cache_key, books_next)
 
     next_page = page + 1 if len(books_next) > 0 else None

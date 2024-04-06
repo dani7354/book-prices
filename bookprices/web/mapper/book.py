@@ -109,22 +109,43 @@ def _map_sorting_options(search_phrase: str,
                                AUTHOR_URL_PARAMETER: author,
                                ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
                                DESCENDING_URL_PARAMETER: True})),
+        SortingOption(
+            text="Seneste priser",
+            selected=order_by == BookSearchSortOption.PriceUpdated,
+            url=_create_url(page_number=1,
+                            endpoint=Endpoint.BOOK_SEARCH.value,
+                            **{SEARCH_URL_PARAMETER: search_phrase,
+                               AUTHOR_URL_PARAMETER: author,
+                               ORDER_BY_URL_PARAMETER: BookSearchSortOption.PriceUpdated.name,
+                               DESCENDING_URL_PARAMETER: True})),
     ]
 
     return sorting_options
 
 
 def map_index_vm(newest_books: list[Book], latest_updated_books: list[Book]) -> IndexViewModel:
+    url_parameters_newest_books = {
+        ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
+        DESCENDING_URL_PARAMETER: True,
+    }
     newest_books_url = _create_url(
         page_number=1,
         endpoint=Endpoint.BOOK_SEARCH.value,
-        **{ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
-           DESCENDING_URL_PARAMETER: True})
+        **url_parameters_newest_books)
+
+    url_parameters_latest_prices = {
+        ORDER_BY_URL_PARAMETER: BookSearchSortOption.PriceUpdated.name,
+        DESCENDING_URL_PARAMETER: True,
+    }
+    latest_prices_url = _create_url(
+        page_number=1,
+        endpoint=Endpoint.BOOK_SEARCH.value,
+        **url_parameters_latest_prices)
 
     return IndexViewModel(
-        [map_book_item(b, 1, {}) for b in newest_books],
-        [map_book_item(b, 1, {}) for b in latest_updated_books],
-        newest_books_url)
+        [map_book_item(book=b, page=1, url_parameters=url_parameters_newest_books) for b in newest_books],
+        [map_book_item(book=b, page=1, url_parameters=url_parameters_latest_prices) for b in latest_updated_books],
+        newest_books_url=newest_books_url, latest_prices_books_url=latest_prices_url)
 
 
 def map_search_vm(books: list[Book],

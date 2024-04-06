@@ -1,5 +1,6 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
+from bookprices.shared.db.book import SearchQuery, BookSearchSortOption
 from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import format_url_for_redirection
@@ -37,11 +38,27 @@ def include_csrf_token() -> dict[str, str]:
 @page_blueprint.route("/", methods=[HttpMethod.GET.value])
 def index() -> str:
     if not (newest_books := cache.get(get_index_latest_books_key())):
-        newest_books = db.book_db.get_newest_books(limit=8)
+        newest_books = db.book_db.search_books(
+            SearchQuery(
+                page=1,
+                page_size=8,
+                search_phrase="",
+                author=None,
+                sort_option=BookSearchSortOption.Created,
+                sort_in_descending_order=True))
         cache.set(get_index_latest_books_key(), newest_books)
+
     if not (newest_prices_books := cache.get(get_index_latest_prices_books_key())):
-        newest_prices_books = db.book_db.get_books_with_newest_prices(limit=8)
+        newest_prices_books = db.book_db.search_books_with_newest_prices(
+            SearchQuery(
+                page=1,
+                page_size=8,
+                search_phrase="",
+                author=None,
+                sort_option=BookSearchSortOption.PriceUpdated,
+                sort_in_descending_order=True))
         cache.set(get_index_latest_prices_books_key(), newest_prices_books)
+
     view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
 
     return render_template(PageTemplate.INDEX.value, view_model=view_model)
