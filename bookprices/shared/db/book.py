@@ -189,7 +189,7 @@ class BookDb(BaseDb):
                     query += "AND b.Author = %s "
                     parameters.append(search_query.author)
 
-                query += f"ORDER BY lpu.NewestPriceId DESC "
+                query += "ORDER BY lpu.NewestPriceId DESC "
 
                 cursor.execute(query, parameters)
                 books = []
