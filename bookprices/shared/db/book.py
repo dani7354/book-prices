@@ -10,6 +10,7 @@ class BookSearchSortOption(Enum):
     Author = "Author"
     Title = "Title"
     Created = "Created"
+    PriceUpdated = "PriceUpdated"
 
     @staticmethod
     def from_str(value: Optional[str]) -> Optional["BookSearchSortOption"]:
@@ -130,57 +131,6 @@ class BookDb(BaseDb):
 
                 return book_ids
 
-    def get_newest_books(self, limit: int) -> list[Book]:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
-                         "FROM Book "
-                         "ORDER BY Created DESC "
-                         "LIMIT %s;")
-
-                cursor.execute(query, (limit,))
-                books = []
-                for row in cursor:
-                    book = Book(row["Id"],
-                                row["Isbn"],
-                                row["Title"],
-                                row["Author"],
-                                row["Format"],
-                                row["ImageUrl"],
-                                row["Created"])
-                    books.append(book)
-
-                return books
-
-    def get_books_with_newest_prices(self, limit: int, offset: int = 0) -> list[Book]:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("WITH LatestUpdatedBook AS ( "
-                         "SELECT bp.BookId, MAX(bp.Id) AS NewestPriceId "
-                         "FROM BookPrice bp "
-                         "GROUP BY bp.BookId "
-                         "ORDER BY NewestPriceId DESC "
-                         "LIMIT %s OFFSET %s) "
-
-                         "SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created "
-                         "FROM Book b "
-                         "INNER JOIN LatestUpdatedBook lpu ON b.Id = lpu.BookId "
-                         "ORDER BY lpu.NewestPriceId DESC; ")
-
-                cursor.execute(query, (limit, offset))
-                books = []
-                for row in cursor:
-                    book = Book(row["Id"],
-                                row["Isbn"],
-                                row["Title"],
-                                row["Author"],
-                                row["Format"],
-                                row["ImageUrl"],
-                                row["Created"])
-                    books.append(book)
-
-                return books
-
     def search_books(self, search_query: SearchQuery) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
@@ -201,6 +151,46 @@ class BookDb(BaseDb):
 
                 parameters.append(search_query.page_size)
                 parameters.append((search_query.page - 1) * search_query.page_size)
+                cursor.execute(query, parameters)
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
+                    books.append(book)
+
+                return books
+
+    def search_books_with_newest_prices(self, search_query: SearchQuery) -> list[Book]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                phrase_with_wildcards = f"{search_query.search_phrase}%"
+
+                query = ("WITH LatestUpdatedBook AS ( "
+                         "SELECT bp.BookId, MAX(bp.Id) AS NewestPriceId "
+                         "FROM BookPrice bp "
+                         "GROUP BY bp.BookId "
+                         "ORDER BY NewestPriceId DESC "
+                         "LIMIT %s OFFSET %s) "
+
+                         "SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created "
+                         "FROM Book b "
+                         "INNER JOIN LatestUpdatedBook lpu ON b.Id = lpu.BookId "
+                         "WHERE (b.Title LIKE %s OR b.Author LIKE %s OR b.Isbn = %s) ")
+
+                parameters = [search_query.page_size, (search_query.page - 1) * search_query.page_size,
+                              phrase_with_wildcards, phrase_with_wildcards, search_query.search_phrase]
+
+                if search_query.author:
+                    query += "AND b.Author = %s "
+                    parameters.append(search_query.author)
+
+                query += "ORDER BY lpu.NewestPriceId DESC "
+
                 cursor.execute(query, parameters)
                 books = []
                 for row in cursor:
