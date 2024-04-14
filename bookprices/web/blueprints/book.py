@@ -3,11 +3,11 @@ from werkzeug.local import LocalProxy
 import bookprices.web.mapper.book as bookmapper
 from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app
 from bookprices.shared.db import database
-from bookprices.shared.db.book import SearchQuery, BookSearchSortOption
 from bookprices.shared.model.book import Book
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.cache.key_generator import (
-    get_book_key, get_book_latest_prices_key, get_book_in_book_store_key, get_book_list_key, get_authors_key)
+    get_book_key, get_book_latest_prices_key, get_book_in_book_store_key)
+from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
@@ -20,6 +20,7 @@ from bookprices.web.viewmodels.book import CreateBookViewModel
 logger = LocalProxy(lambda: current_app.logger)
 book_blueprint = Blueprint("book", __name__)
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+service = BookService(db, cache)
 
 
 @book_blueprint.context_processor
@@ -36,36 +37,14 @@ def search() -> str:
     descending = args.get(DESCENDING_URL_PARAMETER)
     page = args.get(PAGE_URL_PARAMETER)
 
-    if not (authors := cache.get(get_authors_key())):
-        authors = db.book_db.get_authors()
-        cache.set(get_authors_key(), authors)
+    authors = service.get_authors()
+    current_books = service.search(search_phrase, author, page, BOOK_PAGESIZE, order_by, descending)
+    next_books = service.search(search_phrase, author, page + 1, BOOK_PAGESIZE, order_by, descending)
 
-    query = SearchQuery(search_phrase=search_phrase,
-                        author=author,
-                        page=page,
-                        page_size=BOOK_PAGESIZE,
-                        sort_option=order_by,
-                        sort_in_descending_order=descending)
-
-    book_search_function = db.book_db.search_books_with_newest_prices \
-        if order_by == BookSearchSortOption.PriceUpdated \
-        else db.book_db.search_books
-
-    books_current_cache_key = get_book_list_key(query)
-    if not (books_current := cache.get(books_current_cache_key)):
-        books_current = book_search_function(query)
-        cache.set(books_current_cache_key, books_current)
-
-    next_query = query.clone(page=page + 1)
-    books_next_cache_key = get_book_list_key(next_query)
-    if not (books_next := cache.get(books_next_cache_key)):
-        books_next = book_search_function(next_query)
-        cache.set(books_next_cache_key, books_next)
-
-    next_page = page + 1 if len(books_next) > 0 else None
+    next_page = page + 1 if len(next_books) > 0 else None
     previous_page = page - 1 if page >= 2 else None
 
-    vm = bookmapper.map_search_vm(books_current,
+    vm = bookmapper.map_search_vm(current_books,
                                   authors,
                                   search_phrase,
                                   page,
