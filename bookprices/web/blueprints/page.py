@@ -1,19 +1,17 @@
 import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
-from bookprices.shared.db.book import SearchQuery, BookSearchSortOption
+from bookprices.shared.db.book import BookSearchSortOption
 from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import format_url_for_redirection
 from flask import render_template, request, Blueprint, redirect, Response, url_for
 from flask_login import current_user
 from bookprices.web.service.auth_service import AuthService
+from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, PageTemplate, Endpoint
 from bookprices.web.viewmodels.page import AboutViewModel
-from bookprices.web.cache.key_generator import (
-    get_bookstores_key,
-    get_index_latest_books_key,
-    get_index_latest_prices_books_key)
+from bookprices.web.cache.key_generator import get_bookstores_key
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -28,6 +26,7 @@ page_blueprint.register_error_handler(HttpStatusCode.INTERNAL_SERVER_ERROR, inte
 
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 auth_service = AuthService(db, cache)
+book_service = BookService(db, cache)
 
 
 @page_blueprint.context_processor
@@ -37,27 +36,21 @@ def include_csrf_token() -> dict[str, str]:
 
 @page_blueprint.route("/", methods=[HttpMethod.GET.value])
 def index() -> str:
-    if not (newest_books := cache.get(get_index_latest_books_key())):
-        newest_books = db.book_db.search_books(
-            SearchQuery(
-                page=1,
-                page_size=8,
-                search_phrase="",
-                author=None,
-                sort_option=BookSearchSortOption.Created,
-                sort_in_descending_order=True))
-        cache.set(get_index_latest_books_key(), newest_books)
+    newest_books = book_service.search(
+        search_phrase="",
+        author=None,
+        page=1,
+        page_size=8,
+        sort_option=BookSearchSortOption.Created,
+        descending=True)
 
-    if not (newest_prices_books := cache.get(get_index_latest_prices_books_key())):
-        newest_prices_books = db.book_db.search_books_with_newest_prices(
-            SearchQuery(
-                page=1,
-                page_size=8,
-                search_phrase="",
-                author=None,
-                sort_option=BookSearchSortOption.PriceUpdated,
-                sort_in_descending_order=True))
-        cache.set(get_index_latest_prices_books_key(), newest_prices_books)
+    newest_prices_books = book_service.search(
+        search_phrase="",
+        author=None,
+        page=1,
+        page_size=8,
+        sort_option=BookSearchSortOption.PriceUpdated,
+        descending=True)
 
     view_model = bookmapper.map_index_vm(newest_books=newest_books, latest_updated_books=newest_prices_books)
 
