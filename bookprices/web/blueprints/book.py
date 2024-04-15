@@ -57,8 +57,7 @@ def search() -> str:
 
 @book_blueprint.route("/book/<int:book_id>", methods=[HttpMethod.GET.value])
 def book(book_id: int) -> str:
-    book_result = service.get_book(book_id)
-    if not book_result:
+    if not (book_result := service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
 
     args = parse_args_for_search(request.args)
@@ -115,12 +114,10 @@ def create() -> str | Response:
 
 @book_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
 def price_history(book_id: int, store_id: int) -> str:
-    book_result = service.get_book(book_id)
-    if not book_result:
+    if not (book_result := service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
 
-    book_in_bookstore = service.get_book_in_bookstore(book_result, store_id)
-    if not book_in_bookstore:
+    if not (book_in_bookstore := service.get_book_in_bookstore(book_result, store_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen er ikke tilknyttet den valgte boghandel")
 
     args = parse_args_for_search(request.args)
