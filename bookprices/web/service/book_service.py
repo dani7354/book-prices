@@ -2,9 +2,11 @@ from flask_caching import Cache
 from bookprices.shared.db.book import BookSearchSortOption, SearchQuery
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.book import Book
-from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore
+from bookprices.shared.model.bookprice import BookPrice
+from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore, BookStore
 from bookprices.web.cache.key_generator import (
-    get_authors_key, get_book_list_key, get_book_latest_prices_key, get_book_in_book_store_key, get_book_key)
+    get_authors_key, get_book_list_key, get_book_latest_prices_key, get_book_in_book_store_key, get_book_key,
+    get_prices_for_book_in_bookstore_key, get_prices_for_book_key)
 
 
 class BookService:
@@ -65,3 +67,18 @@ class BookService:
             if book_in_bookstore := self._db.bookstore_db.get_bookstore_for_book(book, bookstore_id):
                 self._cache.set(cache_key, book_in_bookstore)
         return book_in_bookstore
+
+    def get_prices_for_book_in_bookstore(self, book: Book, bookstore: BookStore) -> list[BookPrice]:
+        cache_key = get_prices_for_book_in_bookstore_key(book.id, bookstore.id)
+        if not (prices := self._cache.get(cache_key)):
+            if prices := self._db.bookprice_db.get_book_prices_for_store(book, bookstore):
+                self._cache.set(cache_key, prices)
+        return prices
+
+    def get_all_prices_for_book(self, book: Book):
+        cache_key = get_prices_for_book_key(book.id)
+        if not (book_prices := self._cache.get(cache_key)):
+            if book_prices := self._db.bookprice_db.get_all_book_prices(book):
+                self._cache.set(cache_key, book_prices)
+
+        return book_prices
