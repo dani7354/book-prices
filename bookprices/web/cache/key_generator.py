@@ -26,6 +26,14 @@ def get_book_in_book_store_key(book_id: int, store_id: int) -> str:
     return f"book_{book_id}_store_{store_id}"
 
 
+def get_prices_for_book_in_bookstore_key(book_id: int, store_id: int) -> str:
+    return f"prices_for_book_{book_id}_store_{store_id}"
+
+
+def get_prices_for_book_key(book_id: int) -> str:
+    return f"prices_for_book_{book_id}"
+
+
 def get_book_list_key(search_query: SearchQuery) -> str:
     return md5(f"book_list_{search_query.page}_{search_query.search_phrase}_{search_query.author}_"
                f"{search_query.sort_in_descending_order}_{search_query.sort_option.name}".encode()).hexdigest()
