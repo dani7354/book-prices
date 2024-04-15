@@ -5,8 +5,6 @@ from flask import Blueprint, abort, request, render_template, Response, redirect
 from bookprices.shared.db import database
 from bookprices.shared.model.book import Book
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
-from bookprices.web.cache.key_generator import (
-    get_book_key, get_book_latest_prices_key, get_book_in_book_store_key)
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
@@ -59,11 +57,9 @@ def search() -> str:
 
 @book_blueprint.route("/book/<int:book_id>", methods=[HttpMethod.GET.value])
 def book(book_id: int) -> str:
-    cache_key = get_book_key(book_id)
-    if not (book := cache.get(cache_key)):
-        if not book and not (book := db.book_db.get_book(book_id)):
-            abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
-        cache.set(cache_key, book)
+    book_result = service.get_book(book_id)
+    if not book_result:
+        abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
 
     args = parse_args_for_search(request.args)
     page = args.get(PAGE_URL_PARAMETER)
@@ -72,11 +68,8 @@ def book(book_id: int) -> str:
     order_by = args.get(ORDER_BY_URL_PARAMETER)
     descending = args.get(DESCENDING_URL_PARAMETER)
 
-    if not (latest_prices := cache.get(get_book_latest_prices_key(book_id))):
-        latest_prices = db.bookprice_db.get_latest_prices(book.id)
-        cache.set(get_book_latest_prices_key(book_id), latest_prices)
-
-    book_details = bookmapper.map_book_details(book,
+    latest_prices = service.get_latest_prices(book_id)
+    book_details = bookmapper.map_book_details(book_result,
                                                latest_prices,
                                                page,
                                                author,
@@ -122,17 +115,13 @@ def create() -> str | Response:
 
 @book_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
 def price_history(book_id: int, store_id: int) -> str:
-    book_cache_key = get_book_key(book_id)
-    if not (book := cache.get(book_cache_key)):
-        if not book and not (book := db.book_db.get_book(book_id)):
-            abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
-        cache.set(book_cache_key, book)
+    book_result = service.get_book(book_id)
+    if not book_result:
+        abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
 
-    book_bookstore_cache_key = get_book_in_book_store_key(book_id, store_id)
-    if not (book_in_bookstore := cache.get(book_bookstore_cache_key)):
-        if not book_in_bookstore and not (book_in_bookstore := db.bookstore_db.get_bookstore_for_book(book, store_id)):
-            abort(HttpStatusCode.NOT_FOUND, "Bogen er ikke tilknyttet den valgte boghandel")
-        cache.set(book_bookstore_cache_key, book_in_bookstore)
+    book_in_bookstore = service.get_book_in_bookstore(book_result, store_id)
+    if not book_in_bookstore:
+        abort(HttpStatusCode.NOT_FOUND, "Bogen er ikke tilknyttet den valgte boghandel")
 
     args = parse_args_for_search(request.args)
     page = args.get(PAGE_URL_PARAMETER)
