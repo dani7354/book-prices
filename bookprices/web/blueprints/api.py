@@ -5,7 +5,6 @@ from bookprices.web.mapper.price import map_prices_history, map_price_history_fo
 from bookprices.web.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from werkzeug.local import LocalProxy
-
 from bookprices.web.service.book_service import BookService
 from bookprices.web.settings import (
     MYSQL_HOST,
