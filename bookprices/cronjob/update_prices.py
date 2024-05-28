@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import logging
 import sys
-import math
 from datetime import datetime
 from queue import Queue
 from threading import Thread
