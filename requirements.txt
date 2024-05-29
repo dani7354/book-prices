@@ -1,7 +1,7 @@
 setuptools~=68.2.2
 mysql-connector-python~=8.4.0
 requests~=2.32.0
-beautifulsoup4~=4.12.2
+beautifulsoup4~=4.12.3
 flask~=3.0.3
 flask-caching~=2.3.0
 flask-session~=0.8.0
