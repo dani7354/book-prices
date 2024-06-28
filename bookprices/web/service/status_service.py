@@ -2,7 +2,7 @@ from flask_caching import Cache
 from datetime import timedelta, datetime
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount, PriceCount
-from bookprices.web.cache.key_generator import (
+from bookprices.shared.cache.key_generator import (
     get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key)
 from bookprices.web.viewmodels.status import TimePeriodSelectOption
 

@@ -15,7 +15,7 @@ from bookprices.web.blueprints.status import status_blueprint
 from bookprices.web.blueprints.user import user_blueprint
 from bookprices.web.blueprints.page import page_blueprint
 from bookprices.web.service.auth_service import AuthService, WebUser
-from bookprices.web.cache.redis import cache
+from bookprices.shared.cache.redis import cache
 from bookprices.web.service.csrf import CSRFService
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,

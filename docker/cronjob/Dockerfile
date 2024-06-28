@@ -7,7 +7,7 @@ COPY ./bookprices bookprices
 COPY ./setup.py setup.py
 COPY ./docker/cronjob/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-RUN pip install -e .
+#RUN pip install -e .
 
 # create directory for config
 RUN mkdir ./config

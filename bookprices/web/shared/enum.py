@@ -15,6 +15,12 @@ class HttpStatusCode(IntEnum):
     INTERNAL_SERVER_ERROR = 500
 
 
+class CacheTtl(IntEnum):  # TODO: Add more and change
+    SHORT = 60
+    MEDIUM = 300
+    LONG = 900
+
+
 class Endpoint(Enum):
     PAGE_INDEX = "page.index"
     ABOUT = "page.about"

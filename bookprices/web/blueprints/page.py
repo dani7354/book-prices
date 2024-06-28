@@ -2,7 +2,7 @@ import bookprices.shared.db.database as database
 import bookprices.web.mapper.book as bookmapper
 from bookprices.shared.db.book import BookSearchSortOption
 from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
-from bookprices.web.cache.redis import cache
+from bookprices.shared.cache.redis import cache
 from bookprices.web.blueprints.urlhelper import format_url_for_redirection
 from flask import render_template, request, Blueprint, redirect, Response, url_for
 from flask_login import current_user
@@ -11,7 +11,7 @@ from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, PageTemplate, Endpoint
 from bookprices.web.viewmodels.page import AboutViewModel
-from bookprices.web.cache.key_generator import get_bookstores_key
+from bookprices.shared.cache.key_generator import get_bookstores_key
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,

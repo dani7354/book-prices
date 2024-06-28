@@ -4,7 +4,7 @@ from bookprices.shared.db.database import Database
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore, BookStore
-from bookprices.web.cache.key_generator import (
+from bookprices.shared.cache.key_generator import (
     get_authors_key, get_book_list_key, get_book_latest_prices_key, get_book_in_book_store_key, get_book_key,
     get_prices_for_book_in_bookstore_key, get_prices_for_book_key)
 

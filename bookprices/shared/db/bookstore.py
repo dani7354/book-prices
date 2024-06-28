@@ -77,7 +77,7 @@ class BookStoreDb(BaseDb):
 
         return None
 
-    def get_bookstores_for_books(self, books: list) -> dict:
+    def get_bookstores_for_books(self, books: list[Book]) -> dict[int, list[BookInBookStore]]:
         book_dict = {b.id: b for b in books}
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:

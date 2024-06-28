@@ -4,7 +4,7 @@ from werkzeug.local import LocalProxy
 from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.error_handler import (
     not_found_api, internal_server_error_api, bad_request_api, forbidden_api, unauthorized_api)
-from bookprices.web.cache.redis import cache
+from bookprices.shared.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.google_api_service import GoogleApiService
 from bookprices.web.blueprints.urlhelper import format_url_for_redirection
