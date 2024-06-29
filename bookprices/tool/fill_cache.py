@@ -33,7 +33,7 @@ class CacheFiller:
             urls = self._get_urls_for_book(self._db, book, self._base_url)
             print(f"{len(urls)} created for book {book.id}")
             for url in urls:
-                response = requests.get(url, verify=False)
+                response = requests.get(url, verify=True)
                 print(f"{url} => {response.status_code}...")
 
     def _fill_book_queue(self, database: Database) -> None:
