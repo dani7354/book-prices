@@ -28,6 +28,10 @@ class DeletePricesJob:
         logging.info(f"Found {len(bookprice_ids)} prices to delete")
 
         ids_to_delete = [bookprice_id.id for bookprice_id in bookprice_ids]
+        if not ids_to_delete:
+            logging.info("No prices to delete!")
+            return
+
         logging.info("Deleting prices from the database...")
         self.bookprice_db.delete_prices(ids_to_delete)
 

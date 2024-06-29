@@ -46,7 +46,7 @@ class BookPriceDb(BaseDb):
             with con.cursor() as cursor:
                 query = ("DELETE FROM BookPrice "
                          f"WHERE Id IN ({ids_format_string})")
-                cursor.execute(query, (tuple(ids)))
+                cursor.execute(query, tuple(ids))
                 con.commit()
 
     def get_prices_older_than(self, earliest_date: date) -> list[BookPriceIds]:
