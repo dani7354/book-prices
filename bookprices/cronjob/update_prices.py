@@ -6,6 +6,7 @@ from queue import Queue
 from threading import Thread
 from bookprices.cronjob import shared
 from bookprices.shared.cache.client import CacheClient
+from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.bookprice import BookPrice
@@ -25,9 +26,9 @@ LOG_FILE_NAME = "update_prices.log"
 class PriceUpdateJob:
     BATCH_SIZE = 300
 
-    def __init__(self, db: Database, cache: CacheClient, thread_count: int):
+    def __init__(self, db: Database, cache_key_remover: BookPriceKeyRemover, thread_count: int):
         self._db = db
-        self._cache = cache
+        self._cache_key_remover = cache_key_remover
         self.thread_count = thread_count
         self._book_stores_queue = Queue()
 
@@ -107,6 +108,11 @@ class PriceUpdateJob:
 
         logging.info("Saving %s new prices", len(new_prices))
         self._db.bookprice_db.create_prices(new_prices)
+
+        logging.info("Removing cache keys for affected books and bookstores...")
+        for book_price in new_prices:
+            self._cache_key_remover.remove_keys_for_book(book_price.book.id)
+            self._cache_key_remover.remove_keys_for_book_and_bookstore(book_price.book.id, book_price.book_store.id)
 
     def _log_failed_price_update(self, book_id: int, bookstore_id: int, reason: FailedUpdateReason):
         self._db.bookprice_db.create_failed_price_update(
