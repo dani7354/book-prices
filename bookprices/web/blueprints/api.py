@@ -28,7 +28,6 @@ book_service = BookService(db, cache)
 
 
 @api_blueprint.route("/book/<int:book_id>")
-@cache.cached(timeout=RESPONSE_CACHE_TIMEOUT)
 def book(book_id: int) -> tuple[Response, int]:
     if not (book_result := book_service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen blev ikke fundet")
@@ -40,7 +39,6 @@ def book(book_id: int) -> tuple[Response, int]:
 
 
 @api_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
-@cache.cached(timeout=RESPONSE_CACHE_TIMEOUT)
 def prices(book_id: int, store_id: int) -> tuple[Response, int]:
     if not (book_result := book_service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen blev ikke fundet")
