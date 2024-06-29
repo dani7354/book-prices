@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, Response, jsonify, request
 from flask_login import login_required
 from bookprices.shared.db import database
-from bookprices.shared.cache.redis import cache
+from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.service.status_service import StatusService
 from bookprices.web.mapper.status import map_failed_price_update_counts, map_book_import_counts, map_price_counts

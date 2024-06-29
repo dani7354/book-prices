@@ -2,7 +2,7 @@ import flask_login
 import bookprices.web.mapper.user as usermapper
 from flask import Blueprint, request, render_template, Response, redirect, url_for
 from bookprices.shared.db import database
-from bookprices.shared.cache.redis import cache
+from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT

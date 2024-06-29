@@ -2,6 +2,8 @@ from flask_caching import Cache
 from bookprices.web.settings import DEBUG_MODE, REDIS_SERVER, REDIS_SERVER_PORT, REDIS_DB, CACHE_DEFAULT_TIMEOUT
 
 
+
+
 def _create_cache_config() -> dict:
     if not REDIS_SERVER:
         return {"CACHE_TYPE": "SimpleCache"}
