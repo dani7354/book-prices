@@ -2,6 +2,9 @@
 import argparse
 import sys
 from urllib.parse import urlparse
+
+from bookprices.shared.cache.client import RedisClient
+from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config import loader
 from bookprices.shared.webscraping.book import BookFinder, IsbnSearch, BookNotFoundError
 from bookprices.shared.db.database import Database
@@ -59,11 +62,15 @@ def main():
                   configuration.database.db_password,
                   configuration.database.db_name)
 
+    cache_key_remover = BookPriceKeyRemover(
+        RedisClient(configuration.cache.host, configuration.cache.database, configuration.cache.port))
+
     book = db.book_db.get_book_by_isbn(args.isbn)
     if book is None:
         print(f"Creating new book: {args.title} by {args.author}...")
         book = Book(0, args.isbn, args.title, args.author, args.format, None)
         book_id = db.book_db.create_book(book)
+        cache_key_remover.remove_key_for_authors()
         if book_id == -1:
             print("Failed to add book!")
             sys.exit(1)

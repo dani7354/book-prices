@@ -36,6 +36,7 @@ class BookService:
         if not (books := self._cache.get(books_current_cache_key)):
             if books := book_search_function(query):
                 self._cache.set(books_current_cache_key, books)
+
         return books
 
     def _get_search_function(self, sort_option: BookSearchSortOption) -> callable:
@@ -47,12 +48,17 @@ class BookService:
         if not (book := self._cache.get(cache_key)):
             if book := self._db.book_db.get_book(book_id):
                 self._cache.set(cache_key, book)
+
         return book
+
+    def get_book_by_isbn(self, isbn: str) -> Book | None:
+        return self._db.book_db.get_book_by_isbn(isbn)
 
     def get_authors(self) -> list[str]:
         if not (authors := self._cache.get(get_authors_key())):
             if authors := self._db.book_db.get_authors():
                 self._cache.set(get_authors_key(), authors)
+
         return authors
 
     def get_latest_prices(self, book_id: int) -> list[BookStoreBookPrice]:
@@ -66,6 +72,7 @@ class BookService:
         if not (book_in_bookstore := self._cache.get(cache_key)):
             if book_in_bookstore := self._db.bookstore_db.get_bookstore_for_book(book, bookstore_id):
                 self._cache.set(cache_key, book_in_bookstore)
+
         return book_in_bookstore
 
     def get_prices_for_book_in_bookstore(self, book: Book, bookstore: BookStore) -> list[BookPrice]:
@@ -73,6 +80,7 @@ class BookService:
         if not (prices := self._cache.get(cache_key)):
             if prices := self._db.bookprice_db.get_book_prices_for_store(book, bookstore):
                 self._cache.set(cache_key, prices)
+
         return prices
 
     def get_all_prices_for_book(self, book: Book):
@@ -82,3 +90,9 @@ class BookService:
                 self._cache.set(cache_key, book_prices)
 
         return book_prices
+
+    def create_book(self, book: Book) -> int:
+        book_id = self._db.book_db.create_book(book)
+        self._cache.delete(get_authors_key())
+
+        return book_id

@@ -96,11 +96,11 @@ def create() -> str | Response:
 
         if not view_model.is_valid():
             return render_template(BookTemplate.CREATE.value, view_model=view_model)
-        if db.book_db.get_book_by_isbn(view_model.isbn):
+        if service.get_book_by_isbn(view_model.isbn):
             view_model.add_error(view_model.isbn_field_name, "Bogen findes allerede")
             return render_template(BookTemplate.CREATE.value, view_model=view_model)
 
-        book_id = db.book_db.create_book(
+        book_id = service.create_book(
             Book(id=0,
                  isbn=view_model.isbn,
                  title=view_model.title,
