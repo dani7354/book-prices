@@ -10,8 +10,8 @@ class CacheClient:
 
 
 class RedisClient(CacheClient):
-    def __init__(self, host, port=6379):
-        self.redis = Redis(host=host, port=port)
+    def __init__(self, host, db: int, port: int):
+        self.redis = Redis(host=host, db=db, port=port)
 
     def delete_key(self, key: str) -> None:
         self.redis.delete(key)

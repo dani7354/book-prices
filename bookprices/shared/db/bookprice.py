@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import date
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.book import Book
-from bookprices.shared.model.bookprice import BookPrice
+from bookprices.shared.model.bookprice import BookPrice, BookPriceIds
 from bookprices.shared.model.bookstore import BookStore, BookStoreBookPrice
 from bookprices.shared.model.error import FailedPriceUpdate, FailedUpdateReason, FailedPriceUpdateCount
 
@@ -39,6 +39,26 @@ class BookPriceDb(BaseDb):
                          "WHERE Created < %s")
                 cursor.execute(query, (str(earliest_date),))
                 con.commit()
+
+    def delete_prices(self, ids: list[int]) -> None:
+        with self.get_connection() as con:
+            ids_format_string = ",".join(["%s"] * len(ids))
+            with con.cursor() as cursor:
+                query = ("DELETE FROM BookPrice "
+                         f"WHERE Id IN ({ids_format_string})")
+                cursor.execute(query, (tuple(ids)))
+                con.commit()
+
+    def get_prices_older_than(self, earliest_date: date) -> list[BookPriceIds]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, BookId, BookStoreId "
+                         "FROM BookPrice "
+                         "WHERE Created < %s")
+                cursor.execute(query, (str(earliest_date),))
+                prices = [BookPriceIds(row["Id"], row["BookId"], row["BookStoreId"]) for row in cursor]
+
+                return prices
 
     def delete_failed_price_updates(self, book_id: int, bookstore_id: int):
         with self.get_connection() as con:
