@@ -4,7 +4,7 @@ from flask_caching import Cache
 from typing import Optional
 from bookprices.shared.db. database import Database
 from bookprices.shared.model.user import User
-from bookprices.web.cache.key_generator import get_user_key
+from bookprices.shared.cache.key_generator import get_user_key
 
 
 class WebUser(flask_login.UserMixin):

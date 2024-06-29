@@ -11,8 +11,16 @@ class Database:
 
 
 @dataclass(frozen=True)
+class Cache:
+    host: str
+    port: int
+    database: int
+
+
+@dataclass(frozen=True)
 class Config:
     database: Database
+    cache: Cache
     logdir: str
     imgdir: str
     loglevel: int

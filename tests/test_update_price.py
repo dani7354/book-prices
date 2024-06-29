@@ -2,8 +2,10 @@ import pytest
 import requests
 from unittest.mock import MagicMock
 from bookprices.cronjob.update_prices import PriceUpdateJob
+from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.model.bookstore import BookInBookStore, BookStore
 from bookprices.shared.db.database import Database
+from fake.cache import FakeCacheClient
 import shared
 
 
@@ -35,7 +37,15 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
     }
 
 
-def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
+@pytest.fixture
+def cache_key_remover():
+    fake_cache_client = FakeCacheClient()
+    cache_key_remover = BookPriceKeyRemover(fake_cache_client)
+
+    return cache_key_remover
+
+
+def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore, cache_key_remover):
     db = Database("", "", "", "", "")
     db.bookstore_db.get_bookstores_for_books = MagicMock(return_value=books_in_bookstore)
     db.book_db.get_books_by_ids = MagicMock(return_value=[MagicMock()])
@@ -44,7 +54,7 @@ def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
     db.bookprice_db.create_prices = MagicMock()
     monkeypatch.setattr(requests, "get", lambda url, allow_redirects: shared.create_fake_response("price_format.html"))
 
-    job = PriceUpdateJob(db, thread_count=1)
+    job = PriceUpdateJob(db, cache_key_remover, thread_count=1)
     job.run()
 
     args, _ = db.bookprice_db.create_prices.call_args
@@ -52,7 +62,7 @@ def test_updates_prices_creates_prices(monkeypatch, books_in_bookstore):
     assert args[0][0].price == 229
 
 
-def test_updates_prices_doesnt_save_if_no_prices_found(monkeypatch, books_in_bookstore):
+def test_updates_prices_doesnt_save_if_no_prices_found(monkeypatch, books_in_bookstore, cache_key_remover):
     db = Database("", "", "", "", "")
     db.bookstore_db.get_bookstores_for_books = MagicMock(return_value={1: [], 2: []})
     db.book_db.get_books_by_ids = MagicMock(return_value=[MagicMock()])
@@ -61,7 +71,7 @@ def test_updates_prices_doesnt_save_if_no_prices_found(monkeypatch, books_in_boo
     db.bookprice_db.create_prices = MagicMock()
     monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("price_format.html"))
 
-    job = PriceUpdateJob(db, thread_count=1)
+    job = PriceUpdateJob(db, cache_key_remover, thread_count=1)
     job.run()
 
     assert db.bookprice_db.create_prices.call_count == 0

@@ -2,8 +2,9 @@ from flask_caching import Cache
 from datetime import timedelta, datetime
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount, PriceCount
-from bookprices.web.cache.key_generator import (
+from bookprices.shared.cache.key_generator import (
     get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key)
+from bookprices.web.shared.enum import CacheTtlOption
 from bookprices.web.viewmodels.status import TimePeriodSelectOption
 
 
@@ -17,7 +18,8 @@ class StatusService:
         if failed_counts := self._cache.get(get_failed_count_by_reason_key(date_from)):
             return failed_counts
         if failed_count := self._db.status_db.get_failed_price_update_count_by_reason(date_from):
-            self._cache.set(get_failed_count_by_reason_key(date_from), failed_count)
+            self._cache.set(
+                get_failed_count_by_reason_key(date_from), failed_count, timeout=CacheTtlOption.MEDIUM)
 
         return failed_count
 
@@ -26,7 +28,7 @@ class StatusService:
         if import_counts := self._cache.get(get_book_import_count_key(date_from)):
             return import_counts
         if import_counts := self._db.status_db.get_book_import_count_by_bookstore(date_from):
-            self._cache.set(get_book_import_count_key(date_from), import_counts)
+            self._cache.set(get_book_import_count_key(date_from), import_counts, timeout=CacheTtlOption.MEDIUM)
 
         return import_counts
 
@@ -36,7 +38,7 @@ class StatusService:
         if price_counts := self._cache.get(cache_key):
             return price_counts
         if price_counts := self._db.status_db.get_price_count_by_bookstore(date_from):
-            self._cache.set(cache_key, price_counts)
+            self._cache.set(cache_key, price_counts, timeout=CacheTtlOption.MEDIUM)
 
         return price_counts
 

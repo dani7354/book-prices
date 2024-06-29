@@ -11,7 +11,7 @@ from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, PageTemplate, Endpoint
 from bookprices.web.viewmodels.page import AboutViewModel
-from bookprices.web.cache.key_generator import get_bookstores_key
+from bookprices.shared.cache.key_generator import get_bookstores_key
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,

@@ -6,6 +6,11 @@
     "password": "",
     "name": ""
   },
+    "cache": {
+    "host": "",
+    "port": "",
+    "database": 0
+  },
   "logdir": "",
   "imgdir": "",
   "loglevel":

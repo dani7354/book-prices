@@ -11,3 +11,10 @@ class BookPrice:
     book_store: BookStore
     price: float
     created: datetime
+
+
+@dataclass(frozen=True)
+class BookPriceIds:
+    id: int
+    book_id: int
+    bookstore_id: int

@@ -8,10 +8,10 @@ fi
 
 case $2 in
 all | default)
-  docker compose -f "$docker_compose_filepath" --profile default up
+  docker compose -f "$docker_compose_filepath" --profile default up --build
   ;;
 db)
-  docker compose -f "$docker_compose_filepath" --profile db_only up
+  docker compose -f "$docker_compose_filepath" --profile db_only up --build
   ;;
 *)
   echo "Invalid or missing argument for mode (all, db)"
