@@ -5,6 +5,7 @@ from datetime import datetime
 from queue import Queue
 from threading import Thread
 from bookprices.cronjob import shared
+from bookprices.shared.cache.client import CacheClient
 from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.bookprice import BookPrice
@@ -24,8 +25,9 @@ LOG_FILE_NAME = "update_prices.log"
 class PriceUpdateJob:
     BATCH_SIZE = 300
 
-    def __init__(self, db: Database, thread_count: int):
+    def __init__(self, db: Database, cache: CacheClient, thread_count: int):
         self._db = db
+        self._cache = cache
         self.thread_count = thread_count
         self._book_stores_queue = Queue()
 
