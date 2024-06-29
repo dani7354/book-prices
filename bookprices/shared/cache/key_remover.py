@@ -20,3 +20,7 @@ class BookPriceKeyRemover:
             key_generator.get_book_in_book_store_key(book_id, bookstore_id)
         ]
         self._cache.delete_keys(keys)
+
+    def remove_key_for_authors(self) -> None:
+        key = key_generator.get_authors_key()
+        self._cache.delete_key(key)

@@ -5,7 +5,7 @@ from datetime import datetime
 from queue import Queue
 from threading import Thread
 from bookprices.cronjob import shared
-from bookprices.shared.cache.client import CacheClient
+from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
@@ -29,7 +29,7 @@ class PriceUpdateJob:
     def __init__(self, db: Database, cache_key_remover: BookPriceKeyRemover, thread_count: int):
         self._db = db
         self._cache_key_remover = cache_key_remover
-        self.thread_count = thread_count
+        self._thread_count = thread_count
         self._book_stores_queue = Queue()
 
     def run(self) -> None:
@@ -53,7 +53,7 @@ class PriceUpdateJob:
 
         self._fill_queue(book_stores_by_book_id)
         threads = []
-        for _ in range(self.thread_count):
+        for _ in range(self._thread_count):
             t = Thread(target=self._get_updated_prices_for_books)
             threads.append(t)
             t.start()
@@ -132,7 +132,10 @@ def main():
                       configuration.database.db_password,
                       configuration.database.db_name)
 
-        price_update_job = PriceUpdateJob(db, shared.THREAD_COUNT)
+        cache_key_remover = BookPriceKeyRemover(
+            RedisClient(configuration.cache.host, configuration.cache.database, configuration.cache.port))
+
+        price_update_job = PriceUpdateJob(db, cache_key_remover, shared.THREAD_COUNT)
         price_update_job.run()
     except Exception as ex:
         logging.fatal("An error occurred while updating prices!")

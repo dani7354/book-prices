@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from typing import NamedTuple, Optional
 from bookprices.cronjob import shared
+from bookprices.shared.cache.client import RedisClient
+from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config import loader
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.model.book import Book
@@ -31,11 +33,13 @@ list_urls = [BookList("https://www.williamdam.dk/boeger/skoenlitteratur/romaner/
 
 
 class WdamBookImport:
-    def __init__(self, db: BookDb, thread_count: int, book_list_urls: list[BookList]):
-        self.db = db
-        self.thread_count = thread_count
-        self.book_list_urls = book_list_urls
-        self.book_url_queue = queue.Queue()
+    def __init__(self, db: BookDb, cache_key_remover: BookPriceKeyRemover, thread_count: int,
+                 book_list_urls: list[BookList]):
+        self._db = db
+        self._cache_key_remover = cache_key_remover
+        self._thread_count = thread_count
+        self._book_list_urls = book_list_urls
+        self._book_url_queue = queue.Queue()
 
     def run(self):
         logging.info("Getting book urls...")
@@ -53,7 +57,7 @@ class WdamBookImport:
 
     def _get_book_urls(self) -> list:
         book_urls = []
-        for list_url in self.book_list_urls:
+        for list_url in self._book_list_urls:
             for page in range(1, list_url.page_count + 1):
                 book_list_response = requests.get(list_url.url.format(page))
                 if not book_list_response.ok:
@@ -67,12 +71,12 @@ class WdamBookImport:
 
     def _fill_queue(self, book_urls: list):
         for u in book_urls:
-            self.book_url_queue.put(u)
+            self._book_url_queue.put(u)
 
     def _get_books(self) -> list:
         books = []
         threads = []
-        for _ in range(self.thread_count):
+        for _ in range(self._thread_count):
             t = Thread(target=self._get_next_book, args=(books,))
             threads.append(t)
             t.start()
@@ -83,8 +87,8 @@ class WdamBookImport:
         return books
 
     def _get_next_book(self, books: list):
-        while not self.book_url_queue.empty():
-            url = self.book_url_queue.get()
+        while not self._book_url_queue.empty():
+            url = self._book_url_queue.get()
             response = requests.get(url)
             if not response.ok:
                 continue
@@ -97,7 +101,7 @@ class WdamBookImport:
     def _create_or_update_books(self, books: list[Book]):
         created_count = 0
         updated_count = 0
-        existing_books_isbn = {b.isbn: b for b in self.db.get_books()}
+        existing_books_isbn = {b.isbn: b for b in self._db.get_books()}
         for book in books:
             try:
                 if book.isbn in existing_books_isbn:
@@ -111,11 +115,14 @@ class WdamBookImport:
                                         image_url=existing_book.image_url,
                                         created=existing_book.created)
 
-                    self.db.update_book(updated_book)
+                    self._db.update_book(updated_book)
+                    self._cache_key_remover.remove_keys_for_book(updated_book.id)
+                    self._cache_key_remover.remove_key_for_authors()
                     updated_count += 1
                 else:
                     logging.debug(f"Saving book with ISBN {book.isbn}")
-                    self.db.create_book(book)
+                    self._db.create_book(book)
+                    self._cache_key_remover.remove_key_for_authors()
                     created_count += 1
             except Exception as ex:
                 logging.error(f"Error while inserting book: {book.title}, {book.author}, {book.isbn}")
@@ -182,7 +189,10 @@ def main():
                           configuration.database.db_password,
                           configuration.database.db_name)
 
-        book_import = WdamBookImport(books_db, shared.THREAD_COUNT, list_urls)
+        cache_key_remover = BookPriceKeyRemover(
+            RedisClient(configuration.cache.host, configuration.cache.database, configuration.cache.port))
+
+        book_import = WdamBookImport(books_db, cache_key_remover, shared.THREAD_COUNT, list_urls)
         book_import.run()
     except Exception as ex:
         logging.error(f"Failed to import books: {ex}")

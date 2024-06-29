@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import logging
+import sys
 from urllib.parse import urlparse
 from queue import Queue
-import sys
 from threading import Thread
 from typing import NamedTuple
 from bookprices.cronjob import shared
+from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config import loader
 from bookprices.shared.db.database import Database
@@ -132,7 +133,10 @@ def main():
                       configuration.database.db_password,
                       configuration.database.db_name)
 
-        book_search = BookStoreSearchJob(db, shared.THREAD_COUNT)
+        cache_key_remover = BookPriceKeyRemover(
+            RedisClient(configuration.cache.host, configuration.cache.database, configuration.cache.port))
+
+        book_search = BookStoreSearchJob(db, cache_key_remover, shared.THREAD_COUNT)
         book_search.run()
         logging.info("Done!")
     except Exception as ex:
