@@ -8,7 +8,9 @@ docker/db/init/
 docker/cronjob/images/*
 !docker/cronjob/images/.empty
 
-docker/cronjob/log/
+docker/cronjob/log/*
+!docker/cronjob/log/.empty
+
 docker/nginx/tls/
 docker/nginx/log/
 node_modules/
