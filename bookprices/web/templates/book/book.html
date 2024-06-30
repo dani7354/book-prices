@@ -18,14 +18,14 @@
 </h3>
 <div class="container pb-4">
     <div class="row">
-        <div class="col-4">
+        <div class="col-sm-4 pb-4">
             {% if view_model.book.image_url %}
             <div class="text-center">
                 <img src="{{ view_model.book.image_url }}" class="img-fluid rounded" alt="{{ view_model.book.title }}">
             </div>
             {% endif %}
         </div>
-        <div class="col">
+        <div class="col-sm-8 text-left">
             <p><strong>Titel:</strong> {{ view_model.book.title }}</p>
             <p><strong>Forfatter(e):</strong> {{ view_model.book.author }}</p>
             <p><strong>Format:</strong> {{ view_model.book.format }}</p>
@@ -35,33 +35,35 @@
 </div>
 
 <h4 id="latest-prices-heading">Seneste priser</h4>
-<table aria-describedby="latest-prices-heading" class="table">
-    <thead>
-    <tr>
-        <th scope="col">Butik</th>
-        <th scope="col">Pris</th>
-        <th scope="col">Hentet</th>
-        <th scope="col"></th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for p in view_model.book_prices %}
-    <tr>
-        <td>{{ p.book_store_name }}</td>
-        <td>{{ p.price }}</td>
-        <td>{{ p.created }}</td>
-        <td>
-            {% if p.is_price_available %}
-            <a class="btn btn-secondary" href="{{ p.price_history_url }}">Prisudvikling</a>
-            {% else %}
-            <a class="btn btn-secondary disabled" aria-disabled="true">Prisudvikling</a>
-            {% endif %}
-            <a class="btn btn-secondary" target="_blank" rel="noopener" href="{{ p.url }}">Link</a>
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="container pb-4">
+    <table aria-describedby="latest-prices-heading" class="table mb-6">
+        <thead>
+        <tr>
+            <th scope="col">Butik</th>
+            <th scope="col">Pris</th>
+            <th scope="col">Hentet</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for p in view_model.book_prices %}
+        <tr>
+            <td>{{ p.book_store_name }}</td>
+            <td>{{ p.price }}</td>
+            <td>{{ p.created }}</td>
+            <td>
+                {% if p.is_price_available %}
+                <a class="btn btn-secondary mb-1" href="{{ p.price_history_url }}">Prisudvikling</a>
+                {% else %}
+                <a class="btn btn-secondary disabled mb-1" aria-disabled="true">Prisudvikling</a>
+                {% endif %}
+                <a class="btn btn-secondary mb-1" target="_blank" rel="noopener" href="{{ p.url }}">Link</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <h4>Prisudvikling</h4>
 <div id="chart" data-book="{{ view_model.book.id }}"></div>
