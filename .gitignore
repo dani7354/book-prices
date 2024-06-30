@@ -2,8 +2,13 @@ venv/
 test/
 bookprices/web/assets/images/*
 bookprices.egg-info/
-docker/db/data/
-docker/db/init/
+node_modules/
+
+docker/db/data/*
+!docker/db/data/.empty
+
+docker/db/init/*
+!docker/db/init/.empty
 
 docker/cronjob/images/*
 !docker/cronjob/images/.empty
@@ -16,8 +21,6 @@ docker/nginx/tls/*
 
 docker/nginx/log/*
 !docker/nginx/log/.empty
-
-node_modules/
 
 .vscode/
 .idea/
