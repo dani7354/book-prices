@@ -63,6 +63,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      - ./docker/db/config/my.cnf:/etc/my.cnf:ro
       - ./docker/db/data:/var/lib/mysql
       - ./docker/db/init:/docker-entrypoint-initdb.d:ro
     networks:
