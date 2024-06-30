@@ -4,7 +4,10 @@ bookprices/web/assets/images/*
 bookprices.egg-info/
 docker/db/data/
 docker/db/init/
-docker/cronjob/images/
+
+docker/cronjob/images/*
+!docker/cronjob/images/.empty
+
 docker/cronjob/log/
 docker/nginx/tls/
 docker/nginx/log/
