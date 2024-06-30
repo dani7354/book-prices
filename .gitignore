@@ -10,6 +10,9 @@ docker/db/data/*
 docker/db/init/*
 !docker/db/init/.empty
 
+docker/db/config/*.cnf
+!docker/db/config/.empty
+
 docker/cronjob/images/*
 !docker/cronjob/images/.empty
 
