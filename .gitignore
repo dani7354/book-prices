@@ -11,8 +11,12 @@ docker/cronjob/images/*
 docker/cronjob/log/*
 !docker/cronjob/log/.empty
 
-docker/nginx/tls/
-docker/nginx/log/
+docker/nginx/tls/*
+!docker/nginx/tls/.empty
+
+docker/nginx/log/*
+!docker/nginx/log/.empty
+
 node_modules/
 
 .vscode/
