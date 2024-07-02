@@ -32,8 +32,8 @@ $(document).ready(function () {
         "method" : "GET",
         "dataType": "json",
         "success" : function (data, status, xhr) {
-            datesDesc = data["dates"];
-            prices = data["prices"];
+            let datesDesc = data["dates"];
+            let prices = data["prices"];
             if (datesDesc.length === 0 || prices.length === 0) {
                 $("h3").text("Priser ikke hentet for den valgte webbutik");
                 priceTable.remove();
