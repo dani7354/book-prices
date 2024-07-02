@@ -7,7 +7,6 @@ from bookprices.shared.model.book import Book
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.service.sri import get_sri_attribute_values
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE)
@@ -25,11 +24,6 @@ service = BookService(db, cache)
 @book_blueprint.context_processor
 def include_csrf_token() -> dict[str, str]:
     return get_csrf_token()
-
-
-@book_blueprint.context_processor
-def include_sri_attribute_values() -> dict[str, str]:
-    return get_sri_attribute_values()
 
 
 @book_blueprint.route("/search", methods=[HttpMethod.GET.value])

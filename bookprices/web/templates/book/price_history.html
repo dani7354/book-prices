@@ -27,13 +27,9 @@
     <tbody>
     </tbody>
 </table>
-<script src="/static/assets/js/price_chart.js"
-        integrity="sha256-nplyvECabg1ucrGD67kLnowW4omKElWJh4XdHmWEThU=
-        sha384-wHjoO1W6m3By/6IG0EDWFgSBvAA3bNfM2qZytT83CBoz7o7FtPlFU5VVBFCsrrZD
-        sha512-DnLignW8sRBNHfGw7u4jZHvDjewlfa2R0vly+JJWiS0SJxHQVmDd8aEVLc0D3tCvuQJn4oBsfjv7lhDoZ450Ig=="></script>
-<script src="/static/assets/js/price_history.js"
-       integrity="sha256-RmfvHz3ntUTdzVfX98t2/bErZPvpWxsHoorT8diM4E4=
-       sha384-qA1jRP/EfN4JFEUwoZ8c8sBBBqCkDIc9d8vNOU1IL/5340cNGaNUvls8OKRPEanl
-       sha512-ndQ99e89Kq8Pot1u98/x1m11+hLHl0fD8WeEnE1lfbjSVlIQ+VRRI+XbUqkV8uaY1/b2fMZtJFDlE5lC1yKbYA=="></script>
+<script src="{{ url_for('static', filename='js/price_chart.js') }}"
+        integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/price_history.js') }}"
+        integrity="{{ sri_attribute_values['price_history_js'] }}"></script>
 <noscript>Venligst aktivér JavaScript i din browser</noscript>
 {% endblock %}

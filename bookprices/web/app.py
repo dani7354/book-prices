@@ -17,6 +17,7 @@ from bookprices.web.blueprints.page import page_blueprint
 from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import CSRFService
+from bookprices.web.service.sri import get_sri_attribute_values
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,
     MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
@@ -92,6 +93,11 @@ def validate_csrf_token() -> None | tuple[Response, int]:
             return jsonify({"Error": "CSRF token invalid"}), 400
 
     return None  # token is valid or HTTP method is not POST
+
+
+@app.context_processor
+def include_sri_attribute_values() -> dict[str, str]:
+    return get_sri_attribute_values()
 
 
 @login_manager.user_loader
