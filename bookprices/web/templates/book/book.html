@@ -34,6 +34,7 @@
     </div>
 </div>
 
+{% if view_model.book_prices %}
 <h4 id="latest-prices-heading">Seneste priser</h4>
 <div class="container pb-4">
     <table aria-describedby="latest-prices-heading" class="table mb-6">
@@ -53,6 +54,7 @@
             <td>{{ p.created }}</td>
             <td>
                 {% if p.is_price_available %}
+                {% set any_prices_available = True %}
                 <a class="btn btn-secondary mb-1" href="{{ p.price_history_url }}">Prisudvikling</a>
                 {% else %}
                 <a class="btn btn-secondary disabled mb-1" aria-disabled="true">Prisudvikling</a>
@@ -64,7 +66,11 @@
         </tbody>
     </table>
 </div>
+{% else %}
+<p>Butiksoplysninger mangler for denne bog.</p>
+{% endif %}
 
+{% if any_prices_available %}
 <h4>Prisudvikling</h4>
 <div id="chart" data-book="{{ view_model.book.id }}"></div>
 <script src="/static/assets/js/price_chart.js"
@@ -75,6 +81,7 @@
         integrity="sha256-JgxBFm9mLSK3fp3T1m+xKA53BSESdLU539ubqoNU9hM=
         sha384-CFgcxa+ns728v2fZ5BuO8tXDFjUOoXrqzFuQj9OTj/l3hfJRZxWtqEEXkGouaqts
         sha512-h+NIDb7LNRIEAjRpKewcUzRtuh6HgYb2cZAA82w8py4J8fRG0b18kZqAiElv/o/QGhEJaH28QPOhItyHchn2Bw=="></script>
+{% endif %}
 <noscript>Venligst aktivér JavaScript i din browser</noscript>
 {% endblock %}
 
