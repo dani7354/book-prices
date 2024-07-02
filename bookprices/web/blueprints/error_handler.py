@@ -5,6 +5,9 @@ from bookprices.web.shared.enum import HttpStatusCode
 logger = LocalProxy(lambda: current_app.logger)
 
 
+
+
+
 def not_found_html(error) -> tuple[str, int]:
     logger.error(error)
     return render_template("404.html"), HttpStatusCode.NOT_FOUND
