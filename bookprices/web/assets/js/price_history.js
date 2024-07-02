@@ -1,6 +1,9 @@
 const priceChartContainer = $("#chart");
 const priceTable = $("#price-table");
 
+const pageHeading = $("h3");
+const priceTableHeading = $("#price-table-heading");
+
 function createChart(datesDesc, prices) {
     let datesAsc = datesDesc.slice().reverse(); // dates are returned in descending order
     let pricesOrdered = prices.slice().reverse();
@@ -35,9 +38,9 @@ $(document).ready(function () {
             let datesDesc = data["dates"];
             let prices = data["prices"];
             if (datesDesc.length === 0 || prices.length === 0) {
-                $("h3").text("Priser ikke hentet for den valgte webbutik");
                 priceTable.remove();
                 priceTableHeading.remove();
+                pageHeading.text("Priser ikke hentet for den valgte webbutik");
             }
             else {
                 createTable(datesDesc, prices);
