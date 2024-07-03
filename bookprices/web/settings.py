@@ -41,9 +41,7 @@ SRI_ATTRIBUTE_VALUES = {
     "bootstrap_js": ("sha256-nXxM3vVk1ByhwczQW2ZCRZedoIL4U5PuQKMoprvQKzE= "
                      "sha384-6yr0NH5/NO/eJn8MXILS94sAfqCcf2wpWTTxRwskNor6dIjwbYjw1/PZpr654rQ5 "
                      "sha512-GTHq28lFyjvEmJ5HcqINJlsDRfYe7v0v6Ru7X8FyOUSngYz+KJs6v3iMiMxGN1z07sbd3zKH0H4WZ3sZMHUPHw=="),
-    "price_history_js": ("sha256-RmfvHz3ntUTdzVfX98t2/bErZPvpWxsHoorT8diM4E4= "
-                         "sha384-qA1jRP/EfN4JFEUwoZ8c8sBBBqCkDIc9d8vNOU1IL/5340cNGaNUvls8OKRPEanl "
-                         "sha512-ndQ99e89Kq8Pot1u98/x1m11+hLHl0fD8WeEnE1lfbjSVlIQ+VRRI+XbUqkV8uaY1/b2fMZtJFDlE5lC1yKbYA=="),
+    "price_history_js": "",
     "search_js": ("sha256-x6jrCBrfzLs34vymj15wO7JYE4dv8+guDsw2gTwLBw4= "
                   "sha384-zMJ85kLYeyaHQm2oOTy8r4EuIf/zjM9KhxZCppMcXBS9m4eXL372gZax+tjMYbhG "
                   "sha512-Z5RQ0pcYZQJlrLNIlEk+0uyUsXLCCOPQj7E6RZRTZGzsguRny81XjfK3PKplLa6Y3yYKFIagzg8j2Ck5HsGehQ=="),

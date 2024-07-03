@@ -9,14 +9,39 @@ from bookprices.web.viewmodels.price import (
 DATE_FORMAT = "%Y-%m-%d"
 PRICE_DECIMAL_FORMAT = ".2f"
 
+GREEN_ROW_CSS_CLASS = "table-success"
+RED_ROW_CSS_CLASS = "table-danger"
+YELLOW_ROW_CSS_CLASS = "table-warning"
+
+
+def _get_css_classes_for_price_rows(prices: list[BookPrice]) -> list[str]:
+    min_price = min(prices, key=lambda p: p.price).price
+    max_price = max(prices, key=lambda p: p.price).price
+    price_diff_margin = 5.00
+
+    if max_price - min_price < price_diff_margin * 2:
+        return [""] * len(prices)
+
+    css_classes = []
+    for bp in prices:
+        if bp.price <= min_price + price_diff_margin:
+            css_classes.append(GREEN_ROW_CSS_CLASS)
+        elif bp.price >= max_price - price_diff_margin:
+            css_classes.append(RED_ROW_CSS_CLASS)
+        else:
+            css_classes.append(YELLOW_ROW_CSS_CLASS)
+
+    return css_classes
+
 
 def map_prices_history(bookprices: list[BookPrice]) -> PriceHistoryResponse:
     dates, prices = [], []
     for p in bookprices:
         dates.append(f"{p.created.strftime(DATE_FORMAT)}")
         prices.append(f"{p.price:{PRICE_DECIMAL_FORMAT}}")
+    row_css_classes = _get_css_classes_for_price_rows(bookprices)
 
-    return PriceHistoryResponse(dates, prices)
+    return PriceHistoryResponse(dates, prices, row_css_classes)
 
 
 def map_price_history_for_stores(

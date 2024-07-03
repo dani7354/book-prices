@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class PriceHistoryResponse:
     dates: list[str]
     prices: list[str]
+    row_css_classes: list[str]
 
 
 @dataclass(frozen=True)
