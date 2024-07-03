@@ -54,7 +54,6 @@
             <td>{{ p.created }}</td>
             <td>
                 {% if p.is_price_available %}
-                {% set any_prices_available = True %}
                 <a class="btn btn-secondary mb-1" href="{{ p.price_history_url }}">Prisudvikling</a>
                 {% else %}
                 <a class="btn btn-secondary disabled mb-1" aria-disabled="true">Prisudvikling</a>
@@ -70,14 +69,13 @@
 <p>Butiksoplysninger mangler for denne bog.</p>
 {% endif %}
 
-{% if any_prices_available %}
+{% if view_model.book_prices %}
 <h4>Prisudvikling</h4>
 <div id="chart" data-book="{{ view_model.book.id }}"></div>
-<script src="{{ url_for('static', filename='js/price_chart.js' )}}"
-        integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
-<script src="{{ url_for('static', filename='js/book.js') }}"
-        integrity="{{ sri_attribute_values['book_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/price_chart.js') }}" integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/book.js') }}" integrity="{{ sri_attribute_values['book_js'] }}"></script>
 {% endif %}
+
 <noscript>Venligst aktivér JavaScript i din browser</noscript>
 {% endblock %}
 

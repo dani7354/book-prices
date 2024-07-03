@@ -47,12 +47,9 @@ SRI_ATTRIBUTE_VALUES = {
     "search_js": ("sha256-x6jrCBrfzLs34vymj15wO7JYE4dv8+guDsw2gTwLBw4= "
                   "sha384-zMJ85kLYeyaHQm2oOTy8r4EuIf/zjM9KhxZCppMcXBS9m4eXL372gZax+tjMYbhG "
                   "sha512-Z5RQ0pcYZQJlrLNIlEk+0uyUsXLCCOPQj7E6RZRTZGzsguRny81XjfK3PKplLa6Y3yYKFIagzg8j2Ck5HsGehQ=="),
-    "status_js": ("sha256-RmfvHz3ntUTdzVfX98t2/bErZPvpWxsHoorT8diM4E4= "
-                  "sha384-qA1jRP/EfN4JFEUwoZ8c8sBBBqCkDIc9d8vNOU1IL/5340cNGaNUvls8OKRPEanl "
-                  "sha512-ndQ99e89Kq8Pot1u98/x1m11+hLHl0fD8WeEnE1lfbjSVlIQ+VRRI+XbUqkV8uaY1/b2fMZtJFDlE5lC1yKbYA=="),
-    "csrf_js": ("sha256-Eg1O8JrbgxYIUgnyQQhCPNNeo0+h/jHim532iHZEi4A= "
-                "sha384-OLGIjnFbaqt0Tx8qLBcv7CB343YAVGmqM/cfv8NWk+T1OeLYVTNeymzlDIgDIzYi "
-                "sha512-mv6vdq5vpzmjN1FIaD+jvAZBbS5YbPiZ273pY9frjSHJD5oc94TeigwJ1lIeDWduYUXdd7lUAPYvA7OE8j8IiQ=="),
+    "status_js": ("sha256-XYZXq+s4OIy2MDUnUh0CyPQo32JaSnRqBjO8S8yjFMI= "
+                  "sha384-XZWXnzhX84m11+foEW7WMsw2EE4A9dFc/uXOEnuPt6SgypYJl2Wmv555+5wyM+Sv "
+                  "sha512-E/xXX/VCt9W5AqeNz+YQVF2jNVnO7w3A4Fi7l0XHtHo+1GtjZGLNb6Eb+amyCZztKfPhfXpxW7PGBPmjm30MBA=="),
     "book_js": ("sha256-JgxBFm9mLSK3fp3T1m+xKA53BSESdLU539ubqoNU9hM= "
                 "sha384-CFgcxa+ns728v2fZ5BuO8tXDFjUOoXrqzFuQj9OTj/l3hfJRZxWtqEEXkGouaqts "
                 "sha512-h+NIDb7LNRIEAjRpKewcUzRtuh6HgYb2cZAA82w8py4J8fRG0b18kZqAiElv/o/QGhEJaH28QPOhItyHchn2Bw=="),
