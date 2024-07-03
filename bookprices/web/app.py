@@ -23,12 +23,8 @@ from bookprices.web.settings import (
     MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 from bookprices.web.shared.enum import HttpStatusCode
 
-static_folder = "static"
-static_url_path = None
-if DEBUG_MODE:
-    static_folder = "assets"
-    static_url_path = "/static/assets"
 
+if DEBUG_MODE:
     # This is needed for testing Google OAuth2 locally, since the redirect url is using http
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -52,7 +48,7 @@ dictConfig({
 })
 
 # app
-app = Flask(__name__, static_url_path=static_url_path, static_folder=static_folder)
+app = Flask(__name__, static_url_path="/static/assets", static_folder="assets")
 app.debug = DEBUG_MODE
 app.config.update(
     TESTING=DEBUG_MODE,
