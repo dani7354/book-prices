@@ -17,17 +17,14 @@ from bookprices.web.blueprints.page import page_blueprint
 from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import CSRFService
+from bookprices.web.service.sri import get_sri_attribute_values
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,
     MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 from bookprices.web.shared.enum import HttpStatusCode
 
-static_folder = "static"
-static_url_path = None
-if DEBUG_MODE:
-    static_folder = "assets"
-    static_url_path = "/static/assets"
 
+if DEBUG_MODE:
     # This is needed for testing Google OAuth2 locally, since the redirect url is using http
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -51,7 +48,7 @@ dictConfig({
 })
 
 # app
-app = Flask(__name__, static_url_path=static_url_path, static_folder=static_folder)
+app = Flask(__name__, static_url_path="/static/assets", static_folder="assets")
 app.debug = DEBUG_MODE
 app.config.update(
     TESTING=DEBUG_MODE,
@@ -92,6 +89,11 @@ def validate_csrf_token() -> None | tuple[Response, int]:
             return jsonify({"Error": "CSRF token invalid"}), 400
 
     return None  # token is valid or HTTP method is not POST
+
+
+@app.context_processor
+def include_sri_attribute_values() -> dict[str, str]:
+    return get_sri_attribute_values()
 
 
 @login_manager.user_loader

@@ -4,32 +4,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bogpriser</title>
-    <link rel="icon" type="image/x-icon" href="/static/assets/icon/favicon.svg">
-    <link href="/static/assets/css/bootstrap.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icon/favicon.svg') }}">
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
     <!-- Custom styles for this template -->
-    <link href="/static/assets/css/style.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <!-- JS -->
-    <script src="/static/assets/js/bootstrap.bundle.js"
-            integrity="sha256-nXxM3vVk1ByhwczQW2ZCRZedoIL4U5PuQKMoprvQKzE=
-            sha384-6yr0NH5/NO/eJn8MXILS94sAfqCcf2wpWTTxRwskNor6dIjwbYjw1/PZpr654rQ5
-            sha512-GTHq28lFyjvEmJ5HcqINJlsDRfYe7v0v6Ru7X8FyOUSngYz+KJs6v3iMiMxGN1z07sbd3zKH0H4WZ3sZMHUPHw=="></script>
-    <script src="/static/assets/js/jquery.min.js"
-            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=
-            sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs
-            sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="></script>
-    <script src="/static/assets/js/apexcharts.min.js"
-            integrity="sha256-SQkKKOiAPbEWrvIQnoPnAiUIFiQDiTPKu21mYmmY1G8=
-            sha384-6foQBJHuUSRZT7FlYD0AkFDsYH7bowmqBulLZUb8S1qBoEItSgOaXiGkxDn9kSLP
-            sha512-vIqZt7ReO939RQssENNbZ+Iu3j0CSsgk41nP3AYabLiIFajyebORlk7rKPjGddmO1FQkbuOb2EVK6rJkiHsmag=="></script>
-    <script src="/static/assets/js/csrf.js"
-            integrity="sha256-Eg1O8JrbgxYIUgnyQQhCPNNeo0+h/jHim532iHZEi4A=
-            sha384-OLGIjnFbaqt0Tx8qLBcv7CB343YAVGmqM/cfv8NWk+T1OeLYVTNeymzlDIgDIzYi
-            sha512-mv6vdq5vpzmjN1FIaD+jvAZBbS5YbPiZ273pY9frjSHJD5oc94TeigwJ1lIeDWduYUXdd7lUAPYvA7OE8j8IiQ=="></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"
+            integrity="{{ sri_attribute_values['bootstrap_js'] }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"
+            integrity="{{ sri_attribute_values['jquery_js'] }}"></script>
+    <script src="{{ url_for('static', filename='js/apexcharts.min.js') }}"
+            integrity="{{ sri_attribute_values['apexcharts_js'] }}"></script>
+    <script src="{{ url_for('static', filename='js/csrf.js') }}"
+            integrity="{{ sri_attribute_values['csrf_js'] }}"></script>
     {% if current_user.is_authenticated %}
-     <script src="/static/assets/js/user.js"
-             integrity="sha256-aKEHc3Kf8tAfE6tLYbIuOlYCT2D/9WTU7um9NJKuMcY=
-             sha384-ZpmdIt4+irNcJCErXLguTvncm+Y+fbhfwwgYWWfI1b6egMRJwMcl6m2pDVS1Wc67
-             sha512-jnl4HxlOclxy2kNihl24xNf2gfVPXRkZIv2NHc380tDtbhGQgFB936VL+HMYtk7K3K7OLjnjNFBkRmcb+JW18w=="></script>
+     <script src="{{ url_for('static', filename='js/user.js') }}"
+             integrity="{{ sri_attribute_values['user_js'] }}"></script>
     {% endif %}
 </head>
 <body>

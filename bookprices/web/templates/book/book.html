@@ -54,7 +54,6 @@
             <td>{{ p.created }}</td>
             <td>
                 {% if p.is_price_available %}
-                {% set any_prices_available = True %}
                 <a class="btn btn-secondary mb-1" href="{{ p.price_history_url }}">Prisudvikling</a>
                 {% else %}
                 <a class="btn btn-secondary disabled mb-1" aria-disabled="true">Prisudvikling</a>
@@ -70,18 +69,13 @@
 <p>Butiksoplysninger mangler for denne bog.</p>
 {% endif %}
 
-{% if any_prices_available %}
+{% if view_model.book_prices %}
 <h4>Prisudvikling</h4>
 <div id="chart" data-book="{{ view_model.book.id }}"></div>
-<script src="/static/assets/js/price_chart.js"
-        integrity="sha256-nplyvECabg1ucrGD67kLnowW4omKElWJh4XdHmWEThU=
-        sha384-wHjoO1W6m3By/6IG0EDWFgSBvAA3bNfM2qZytT83CBoz7o7FtPlFU5VVBFCsrrZD
-        sha512-DnLignW8sRBNHfGw7u4jZHvDjewlfa2R0vly+JJWiS0SJxHQVmDd8aEVLc0D3tCvuQJn4oBsfjv7lhDoZ450Ig=="></script>
-<script src="/static/assets/js/book.js"
-        integrity="sha256-JgxBFm9mLSK3fp3T1m+xKA53BSESdLU539ubqoNU9hM=
-        sha384-CFgcxa+ns728v2fZ5BuO8tXDFjUOoXrqzFuQj9OTj/l3hfJRZxWtqEEXkGouaqts
-        sha512-h+NIDb7LNRIEAjRpKewcUzRtuh6HgYb2cZAA82w8py4J8fRG0b18kZqAiElv/o/QGhEJaH28QPOhItyHchn2Bw=="></script>
+<script src="{{ url_for('static', filename='js/price_chart.js') }}" integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/book.js') }}" integrity="{{ sri_attribute_values['book_js'] }}"></script>
 {% endif %}
+
 <noscript>Venligst aktivér JavaScript i din browser</noscript>
 {% endblock %}
 
