@@ -17,19 +17,19 @@ YELLOW_ROW_CSS_CLASS = "table-warning"
 def _get_css_classes_for_price_rows(prices: list[BookPrice]) -> list[str]:
     min_price = min(prices, key=lambda p: p.price).price
     max_price = max(prices, key=lambda p: p.price).price
-    price_diff_margin = 5.00
-
-    if max_price - min_price < price_diff_margin * 2:
-        return [""] * len(prices)
+    min_max_diff = max_price - min_price
+    price_diff_margin = min_max_diff * 0.1
 
     css_classes = []
     for bp in prices:
-        if bp.price <= min_price + price_diff_margin:
+        if bp.price <= min_price + price_diff_margin < max_price - price_diff_margin:
             css_classes.append(GREEN_ROW_CSS_CLASS)
-        elif bp.price >= max_price - price_diff_margin:
+        elif bp.price >= max_price - price_diff_margin > min_price + price_diff_margin:
             css_classes.append(RED_ROW_CSS_CLASS)
-        else:
+        elif bp.price > min_price + price_diff_margin < max_price - price_diff_margin:
             css_classes.append(YELLOW_ROW_CSS_CLASS)
+        else:
+            css_classes.append("")
 
     return css_classes
 
