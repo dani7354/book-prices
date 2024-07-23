@@ -8,7 +8,7 @@ services:
     build:
       context: ./
       dockerfile: docker/cronjob/Dockerfile
-    image: dsp8ef9/bookprices_job:latest
+    image: dsp8ef9/bookprices_cronjob:latest
     env_file: ./docker/cronjob/.cronjob.env
     volumes:
       - ./docker/cronjob/log:/usr/local/bookprices_job/log
