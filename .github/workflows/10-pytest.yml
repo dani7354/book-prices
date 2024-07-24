@@ -18,8 +18,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install -e .
           pip install pytest
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
       - name: Run pytest
         run: |
           python -m pytest --import-mode=append tests/
