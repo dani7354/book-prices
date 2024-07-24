@@ -70,7 +70,9 @@ jobs:
 
   deploy_to_production:
     runs-on: ubuntu-latest
-    environment: Production
+    environment:
+      name: Production
+      url: https://github.com/${{ github.repository }}/releases/tag/v${{ vars.DEV_VERSION }}
     name: Deployment
     needs: [  build_book_prices_nginx, build_book_prices_web, build_book_prices_job ]
     steps:
