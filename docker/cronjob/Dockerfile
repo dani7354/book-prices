@@ -1,7 +1,7 @@
 FROM python:3.12-alpine
 
 ENV VENV_PATH=/opt/venv
-RUN python3 -m venv $VENV_PATH
+RUN python3 -m venv "$VENV_PATH"
 ENV PATH="$VENV_PATH/bin:$PATH"
 
 WORKDIR /usr/local/bookprices_job
