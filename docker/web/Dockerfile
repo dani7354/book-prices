@@ -2,27 +2,24 @@ FROM python:3.12-slim-bullseye
 EXPOSE 3031
 
 RUN apt-get update && apt-get install -y build-essential && apt-get clean
-
 RUN adduser --no-create-home bookprices
+
+ENV VENV_PATH=/opt/venv
+RUN python3 -m venv $VENV_PATH
+ENV PATH="$VENV_PATH/bin:$PATH"
+
 WORKDIR /usr/local/bookprices_web
 
-# move application files
 COPY ./bookprices bookprices
 COPY ./docker/web/bookprices_web.ini bookprices/web/bookprices_web.ini
 
-
-# install python dependencies
-COPY ./setup.py setup.py
 COPY ./docker/web/requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
-RUN pip3 install -e .
+RUN pip install -r requirements.txt
+ENV PYTHONPATH "${PYTHONPATH}:/usr/local/bookprices_web/"
 
 WORKDIR /usr/local/bookprices_web/bookprices/web
 
 RUN mkdir -p ./log/uwsgi
 RUN chown -R bookprices:bookprices ./log
 
-COPY ./docker/web/start.sh start.sh
-RUN chmod +x start.sh
-
-CMD ["./start.sh"]
+CMD ["uwsgi", "/usr/local/bookprices_web/bookprices/web/bookprices_web.ini"]
