@@ -1,4 +1,4 @@
-FROM nginx:1.25-bullseye
+FROM nginx:1.27-bullseye
 EXPOSE 80
 EXPOSE 443
 
