@@ -25,7 +25,7 @@ jobs:
           file: docker/nginx/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.NGINX_DOCKER_IMAGE_NAME}}:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.NGINX_DOCKER_IMAGE_NAME }}:latest
 
       - name: Build and push web
         uses: docker/build-push-action@v3
@@ -33,7 +33,7 @@ jobs:
           file: docker/web/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.WEB_DOCKER_IMAGE_NAME}}:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.WEB_DOCKER_IMAGE_NAME }}:latest
 
       - name: Build and push cron
         uses: docker/build-push-action@v3
@@ -41,7 +41,7 @@ jobs:
           file: docker/cronjob/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.CRONJOB_DOCKER_IMAGE_NAME}}:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.CRONJOB_DOCKER_IMAGE_NAME }}:latest
 
   deploy_to_production:
     runs-on: ubuntu-latest
