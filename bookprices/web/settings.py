@@ -53,9 +53,9 @@ SRI_ATTRIBUTE_VALUES = {
     "book_js": ("sha256-JgxBFm9mLSK3fp3T1m+xKA53BSESdLU539ubqoNU9hM= "
                 "sha384-CFgcxa+ns728v2fZ5BuO8tXDFjUOoXrqzFuQj9OTj/l3hfJRZxWtqEEXkGouaqts "
                 "sha512-h+NIDb7LNRIEAjRpKewcUzRtuh6HgYb2cZAA82w8py4J8fRG0b18kZqAiElv/o/QGhEJaH28QPOhItyHchn2Bw=="),
-    "apexcharts_js": ("sha256-SQkKKOiAPbEWrvIQnoPnAiUIFiQDiTPKu21mYmmY1G8= "
-                      "sha384-6foQBJHuUSRZT7FlYD0AkFDsYH7bowmqBulLZUb8S1qBoEItSgOaXiGkxDn9kSLP "
-                      "sha512-vIqZt7ReO939RQssENNbZ+Iu3j0CSsgk41nP3AYabLiIFajyebORlk7rKPjGddmO1FQkbuOb2EVK6rJkiHsmag=="),
+    "apexcharts_js": ("sha256-915+5CITY11Fs7oLFzCKxXjBniynVwhIrYRVo/REP7s= "
+                      "sha384-zsHAhvHERmA7hoYJ2S0LrAnuGJuU8AnyAdR/+G1ejaV1ekkMpoL94H41P+UJKRTF " 
+                      "sha512-QbaChpzUJcRVsOFtDhh/VZMuljqvlPRIhIXsvfREDZcdqzIKdNvAhwrgW+flSxtbxK/BFpdX1y5NSO6bSYHlOA=="),
     "user_js": ("sha256-aKEHc3Kf8tAfE6tLYbIuOlYCT2D/9WTU7um9NJKuMcY= "
                 "sha384-ZpmdIt4+irNcJCErXLguTvncm+Y+fbhfwwgYWWfI1b6egMRJwMcl6m2pDVS1Wc67 "
                 "sha512-jnl4HxlOclxy2kNihl24xNf2gfVPXRkZIv2NHc380tDtbhGQgFB936VL+HMYtk7K3K7OLjnjNFBkRmcb+JW18w=="),
