@@ -4,12 +4,12 @@
 <h1>Søg</h1>
 <div class="card mb-4">
     <div class="card-body">
-        <form action="/search" class="row g-3" enctype="application/x-www-form-urlencoded" method="get">
-            <div class="col-auto">
+        <form action="/search" class="col" enctype="application/x-www-form-urlencoded" method="get">
+            <div class="row g-3 mb-3">
                 <input  id="search-input" class="form-control" name="search" type="text" placeholder="Titel, forfatter eller ISBN-13" list="search-suggestions" value="{{ view_model.search_phrase }}">
                 <datalist id="search-suggestions"></datalist>
             </div>
-             <div class="col-auto">
+             <div class="row g-3 mb-3">
                  <select id="author-select" class="form-select" name="author" aria-label="forfatter">
                      {% for a in view_model.authors %}
                         {% if a.selected %}
@@ -20,9 +20,7 @@
                      {% endfor %}
                  </select>
             </div>
-            <div class="col-auto">
-                <button class="btn btn-secondary mb-3" type="submit">Søg</button>
-            </div>
+            <button class="btn btn-secondary" type="submit">Søg</button>
         </form>
 
     </div>
@@ -31,9 +29,9 @@
  <form class="mb-3">
          {% for o in view_model.sorting_options %}
             {% if o.selected %}
-                <a href="{{ o.url }}" class="btn btn-sm btn-secondary active">{{ o.text }}</a>
+                <a href="{{ o.url }}" class="btn btn-sm btn-secondary mb-1 active">{{ o.text }}</a>
             {% else %}
-                <a href="{{ o.url }}" class="btn btn-sm btn-secondary">{{ o.text }}</a>
+                <a href="{{ o.url }}" class="btn btn-sm btn-secondary mb-1">{{ o.text }}</a>
             {% endif %}
          {% endfor %}
  </form>
