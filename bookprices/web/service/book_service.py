@@ -35,8 +35,8 @@ class BookService:
         book_search_function = self._get_search_function(sort_option)
         books_current_cache_key = get_book_list_key(query)
         if not (books := self._cache.get(books_current_cache_key)):
-            books = book_search_function(query)
-            self._cache.set(books_current_cache_key, books, timeout=CacheTtlOption.SHORT.value)
+            if books := book_search_function(query):
+                self._cache.set(books_current_cache_key, books, timeout=CacheTtlOption.SHORT.value)
 
         return books
 
