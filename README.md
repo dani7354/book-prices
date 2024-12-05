@@ -1,6 +1,6 @@
 # book-prices
 A Flask web application for comparing book prices from selected Danish webshops. An instance is running at 
-[https://bogpriser.stuhrs.dk](https://bogpriser.stuhrs.dk/) (Unavailable at the moment).
+[https://bogpriser.stuhrs.dk](https://bogpriser.stuhrs.dk/).
 
 ## Setup
 1. Clone the repository
