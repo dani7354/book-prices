@@ -38,9 +38,9 @@ FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", os.urandom(32))
 FLASK_APP_PORT = int(os.environ.get("FLASK_APP_PORT", 3031))
 
 SRI_ATTRIBUTE_VALUES = {
-    "bootstrap_js": ("sha256-nXxM3vVk1ByhwczQW2ZCRZedoIL4U5PuQKMoprvQKzE= "
-                     "sha384-6yr0NH5/NO/eJn8MXILS94sAfqCcf2wpWTTxRwskNor6dIjwbYjw1/PZpr654rQ5 "
-                     "sha512-GTHq28lFyjvEmJ5HcqINJlsDRfYe7v0v6Ru7X8FyOUSngYz+KJs6v3iMiMxGN1z07sbd3zKH0H4WZ3sZMHUPHw=="),
+    "bootstrap_js": ("sha256-mkoRoV24jV+rCPWcHDR5awPx8VuzzJKN0ibhxZ9/WaM= "
+                     "sha384-5xO2n1cyGKAe630nacBqFQxWoXjUIkhoc/FxQrWM07EIZ3TuqkAsusDeyPDOIeid "
+                     "sha512-sSOeacod972lTNk0ePyxrSSI6yoqvGRm7bbqtwqsY1r7TcdYiQn/a+KvaYQ0iacHBYE/MSEVjTNa2dglSz74vA=="),
     "price_history_js": ("sha256-shmTHJ9BtJfMMKSojxCajTFs/toh6W/KYr2viwz7sEU= "
                          "sha384-B6B3ip4QGI0AfD/fYaOJVvMEjZ+IohOe3poOoqTJra07+80LMCiQZTufnDzsqCLG "
                          "sha512-XHjEbzJW5ARlIZjNYO5Mn5tN4i402FElt4SQelsZWb/NZY2jr71ZkIY21nUfAC8T6xO6dwBsegfahINSWNjsbA=="),
@@ -53,9 +53,9 @@ SRI_ATTRIBUTE_VALUES = {
     "book_js": ("sha256-JgxBFm9mLSK3fp3T1m+xKA53BSESdLU539ubqoNU9hM= "
                 "sha384-CFgcxa+ns728v2fZ5BuO8tXDFjUOoXrqzFuQj9OTj/l3hfJRZxWtqEEXkGouaqts "
                 "sha512-h+NIDb7LNRIEAjRpKewcUzRtuh6HgYb2cZAA82w8py4J8fRG0b18kZqAiElv/o/QGhEJaH28QPOhItyHchn2Bw=="),
-    "apexcharts_js": ("sha256-915+5CITY11Fs7oLFzCKxXjBniynVwhIrYRVo/REP7s= "
-                      "sha384-zsHAhvHERmA7hoYJ2S0LrAnuGJuU8AnyAdR/+G1ejaV1ekkMpoL94H41P+UJKRTF " 
-                      "sha512-QbaChpzUJcRVsOFtDhh/VZMuljqvlPRIhIXsvfREDZcdqzIKdNvAhwrgW+flSxtbxK/BFpdX1y5NSO6bSYHlOA=="),
+    "apexcharts_js": ("sha256-VvsSKf53yMxm8x6hJb6p7TejhAyXtmoj5EyFHP9xeys= "
+                      "sha384-KNaFJ+EK516RuHsoycvreec5pD7BkTKJEkjMrVSQWu9KGTl7En4dhIDv7t1DFJ+g "
+                      "sha512-yR5RFcmaHqsGbB9WPG104Fk3+x2s9fMYCgA09VaRT2Lqpay6oNhKldYsZKU/rpYqbsNVhN5+RTbQBSd9+DhL6g=="),
     "user_js": ("sha256-aKEHc3Kf8tAfE6tLYbIuOlYCT2D/9WTU7um9NJKuMcY= "
                 "sha384-ZpmdIt4+irNcJCErXLguTvncm+Y+fbhfwwgYWWfI1b6egMRJwMcl6m2pDVS1Wc67 "
                 "sha512-jnl4HxlOclxy2kNihl24xNf2gfVPXRkZIv2NHc380tDtbhGQgFB936VL+HMYtk7K3K7OLjnjNFBkRmcb+JW18w=="),
