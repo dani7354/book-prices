@@ -169,27 +169,25 @@ class BookDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 phrase_with_wildcards = f"{search_query.search_phrase}%"
-
                 query = ("WITH LatestUpdatedBook AS ( "
                          "SELECT bp.BookId, MAX(bp.Id) AS NewestPriceId "
                          "FROM BookPrice bp "
-                         "GROUP BY bp.BookId "
-                         "ORDER BY NewestPriceId DESC "
-                         "LIMIT %s OFFSET %s) "
+                         "GROUP BY bp.BookId) "
 
                          "SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created "
                          "FROM Book b "
                          "INNER JOIN LatestUpdatedBook lpu ON b.Id = lpu.BookId "
                          "WHERE (b.Title LIKE %s OR b.Author LIKE %s OR b.Isbn = %s) ")
 
-                parameters = [search_query.page_size, (search_query.page - 1) * search_query.page_size,
-                              phrase_with_wildcards, phrase_with_wildcards, search_query.search_phrase]
+                parameters = [phrase_with_wildcards, phrase_with_wildcards, search_query.search_phrase]
 
                 if search_query.author:
                     query += "AND b.Author = %s "
                     parameters.append(search_query.author)
 
-                query += "ORDER BY lpu.NewestPriceId DESC "
+                query += ("ORDER BY lpu.NewestPriceId DESC "
+                          "LIMIT %s OFFSET %s;")
+                parameters.extend([search_query.page_size, (search_query.page - 1) * search_query.page_size])
 
                 cursor.execute(query, parameters)
                 books = []

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from bookprices.shared.model.bookstore import BookStore
 from bookprices.web.viewmodels.book import BookListItemViewModel, BookStoreViewModel
 
 
