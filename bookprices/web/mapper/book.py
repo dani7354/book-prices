@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from flask import url_for
 from bookprices.shared.model.book import Book
-from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore
+from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore, BookStore
 from bookprices.shared.db.book import BookSearchSortOption
 from bookprices.web.settings import (
     SITE_HOSTNAME,
@@ -21,7 +21,7 @@ from bookprices.web.viewmodels.book import (
     BookListItemViewModel,
     BookPriceForStoreViewModel,
     PriceHistoryViewModel,
-    BookDetailsViewModel)
+    BookDetailsViewModel, BookStoreViewModel)
 from bookprices.web.viewmodels.page import IndexViewModel
 
 PRICE_NONE_TEXT = "-"
@@ -274,3 +274,7 @@ def map_price_history(book_in_book_store: BookInBookStore,
                                  book_in_book_store.book_store,
                                  _add_ref_to_bookstore_url(book_in_book_store.get_full_url()),
                                  return_url)
+
+
+def map_bookstores(bookstores: list[BookStore]) -> list[BookStoreViewModel]:
+    return [BookStoreViewModel(bs.name, f"{bs.url}?ref={SITE_HOSTNAME}") for bs in bookstores]

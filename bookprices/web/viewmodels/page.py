@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from bookprices.shared.model.bookstore import BookStore
-from bookprices.web.viewmodels.book import BookListItemViewModel
+from bookprices.web.viewmodels.book import BookListItemViewModel, BookStoreViewModel
 
 
 @dataclass(frozen=True)
@@ -13,4 +13,4 @@ class IndexViewModel:
 
 @dataclass(frozen=True)
 class AboutViewModel:
-    bookstores: list[BookStore]
+    bookstores: list[BookStoreViewModel]

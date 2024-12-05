@@ -136,3 +136,9 @@ class CreateBookViewModel:
     @staticmethod
     def empty() -> "CreateBookViewModel":
         return CreateBookViewModel("", "", "", "")
+
+
+@dataclass(frozen=True)
+class BookStoreViewModel:
+    name: str
+    url: str
