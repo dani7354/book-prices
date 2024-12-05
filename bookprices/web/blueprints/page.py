@@ -63,7 +63,8 @@ def about() -> str:
     if not (bookstores := cache.get(bookstores_cache_key)):
         bookstores = db.bookstore_db.get_bookstores()
         cache.set(bookstores_cache_key, bookstores)
-    view_model = AboutViewModel(bookstores)
+    bookstore_view_models = bookmapper.map_bookstores(bookstores)
+    view_model = AboutViewModel(bookstore_view_models)
 
     return render_template(PageTemplate.ABOUT.value, view_model=view_model)
 

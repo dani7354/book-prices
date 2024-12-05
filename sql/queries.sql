@@ -21,16 +21,13 @@ LIMIT 8;
 WITH LatestPriceUpdate AS (
     SELECT bp.BookId, MAX(bp.Id) AS NewestPriceId
     FROM BookPrice bp
-    GROUP BY bp.BookId
-    ORDER BY NewestPriceId DESC
-    LIMIT 8
-)
+    GROUP BY bp.BookId)
 
 SELECT b.Id, b.Isbn, b.Title, b.Author, b.Format, b.ImageUrl, b.Created
 FROM Book b
 INNER JOIN LatestPriceUpdate lpu ON b.Id = lpu.BookId;
-ORDER BY lpu.NewestPriceId DESC;
-
+ORDER BY lpu.NewestPriceId DESC
+OFFSET 0 LIMIT 100;
 
 -- Get failed update count for bookstores by reason
 SELECT fpu.Reason, bs.Id as BookStoreId, MAX(bs.Name) AS BookStore, COUNT(fpu.Id) AS FailedUpdateCount
