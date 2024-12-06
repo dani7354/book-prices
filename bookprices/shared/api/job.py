@@ -44,13 +44,15 @@ class JobApiClient:
         return self._send_get(endpoint)
 
     def _send_get(self, endpoint: str, is_retry: bool = False) -> dict:
+        url = self.format_url(endpoint)
         try:
             response = requests.get(
-                url=self.format_url(endpoint),
+                url=url,
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
+            logger.error("Failed to send GET request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_get, endpoint)
             raise
@@ -59,14 +61,16 @@ class JobApiClient:
         return self._send_post(endpoint, json)
 
     def _send_post(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+        url = self.format_url(endpoint)
         try:
             response = requests.post(
-                url=self.format_url(endpoint),
+                url=url,
                 data=json,
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
+            logger.error("Failed to send POST request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_post, endpoint, json)
             raise
@@ -75,14 +79,16 @@ class JobApiClient:
         return self._send_put(endpoint, json)
 
     def _send_put(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+        url = self.format_url(endpoint)
         try:
             response = requests.put(
-                url=self.format_url(endpoint),
+                url=url,
                 data=json,
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
+            logger.error("Failed to send PUT request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_put, endpoint, json)
             raise
@@ -91,14 +97,16 @@ class JobApiClient:
         return self._send_patch(endpoint, json)
 
     def _send_patch(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+        url = self.format_url(endpoint)
         try:
             response = requests.patch(
-                url=self.format_url(endpoint),
+                url=url,
                 data=json,
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
+            logger.error("Failed to send PATCH request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_patch, endpoint, json)
             raise
@@ -107,13 +115,15 @@ class JobApiClient:
         return self._send_delete(endpoint)
 
     def _send_delete(self, endpoint: str, is_retry: bool = False) -> dict:
+        url = self.format_url(endpoint)
         try:
             response = requests.delete(
-                url=self.format_url(endpoint),
+                url=url,
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
+            logger.error("Failed to send DELETE request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_delete, endpoint)
             raise
@@ -141,6 +151,7 @@ class JobApiClient:
         return f"{self._base_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
     def _refresh_api_key(self) -> None:
+        logger.info("Refreshing Job API key for user %s...", self._api_username)
         response = requests.post(
             url=f"{self._base_url}{Endpoint.LOGIN.value}",
             json={"username": self._api_username, "password": self._api_password},
@@ -157,9 +168,11 @@ class JobApiClient:
 
     def _add_or_update_api_key_in_db(self, api_key: str) -> None:
         if old_api_key := self._api_key_db.get_api_key(self.api_name):
+            logger.info("Updating Job API key for user %s...", self._api_username)
             old_api_key.api_key = api_key
             self._api_key_db.update_api_key(old_api_key)
         else:
+            logger.info("Adding Job API key for user %s to database...", self._api_username)
             self._api_key_db.add_api_key(ApiKey(
                 id=None,
                 api_name=self.api_name,
