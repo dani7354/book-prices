@@ -17,6 +17,11 @@ CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 GOOGLE_CLIENT_SECRETS_FILE = os.environ["GOOGLE_CLIENT_SECRETS_FILE"]
 GOOGLE_API_SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid"]
 
+# Job API settings
+JOB_API_BASE_URL = os.environ["JOB_API_BASE_URL"]
+JOB_API_USERNAME = os.environ["JOB_API_USERNAME"]
+JOB_API_PASSWORD = os.environ["JOB_API_PASSWORD"]
+
 # App settings
 DEBUG_MODE = os.environ.get("DEBUG", "False") == "True"
 SITE_HOSTNAME = os.environ.get("SITE_HOSTNAME", "localhost")
