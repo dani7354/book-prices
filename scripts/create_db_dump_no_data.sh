@@ -7,7 +7,7 @@ fi
 
 output_file=$1
 
-container_name="mysql:8.0"
+container_name="mysql:8.4"
 container_id=$(docker container ps |grep "$container_name" | awk '{ print $1 }')
 
 if [[ -z "$container_id" ]]; then

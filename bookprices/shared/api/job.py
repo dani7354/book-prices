@@ -31,7 +31,6 @@ class JobApiClient:
         self._api_password = api_password
         self._api_key_db = api_key_db
         self._api_key = None
-        self._request_headers = {"Accept": "application/json"}
         self._set_api_key()
 
     def get(self, endpoint: str) -> dict:
@@ -122,8 +121,14 @@ class JobApiClient:
         return request_func(endpoint, json, True) if json else request_func(endpoint, True)
 
     def get_request_headers(self) -> dict:
-        self._request_headers["Authorization"] = f"Bearer {self._api_key}"
-        return self._request_headers
+        request_headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+        if self._api_key:
+            request_headers["Authorization"] = f"Bearer {self._api_key}"
+
+        return request_headers
 
     def format_url(self, endpoint: str) -> str:
         return f"{self._base_url.rstrip('/')}/{endpoint.lstrip('/')}"
@@ -132,9 +137,9 @@ class JobApiClient:
         response = requests.post(
             url=f"{self._base_url}{Endpoint.LOGIN.value}",
             json={"username": self._api_username, "password": self._api_password},
-            headers=self._request_headers)
+            headers=self.get_request_headers())
         response.raise_for_status()
-        api_key = response.content.decode("utf-8")
+        api_key = response.content.decode(self.response_encoding).strip("\"")
         self._add_or_update_api_key_in_db(api_key)
 
     def _set_api_key(self) -> None:
