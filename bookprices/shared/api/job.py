@@ -20,7 +20,6 @@ class Endpoint(Enum):
     JOB_RUN = "/api/jobruns/{id}"
 
 
-
 class JobApiClient:
     api_name: ClassVar[str] = "JobApi"
     response_encoding: ClassVar[str] = "utf-8"
@@ -139,7 +138,7 @@ class JobApiClient:
             json={"username": self._api_username, "password": self._api_password},
             headers=self.get_request_headers())
         response.raise_for_status()
-        api_key = response.content.decode(self.response_encoding).strip("\"")
+        api_key = response.content.decode(self.response_encoding).strip("\"")  # TODO: fix response format in API instead
         self._add_or_update_api_key_in_db(api_key)
 
     def _set_api_key(self) -> None:
