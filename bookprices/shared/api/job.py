@@ -1,7 +1,7 @@
 import logging
+import requests
 from typing import ClassVar, Callable
 
-import requests
 from requests.exceptions import HTTPError
 from requests.status_codes import codes
 from enum import Enum
@@ -18,6 +18,14 @@ class Endpoint(Enum):
     JOB = "/api/jobs/{id}"
     JOB_RUNS = "/api/jobruns"
     JOB_RUN = "/api/jobruns/{id}"
+
+    @classmethod
+    def get_job_url(cls, job_id: str) -> str:
+        return cls.JOB.value.format(id=job_id)
+
+    @classmethod
+    def get_job_run_url(cls, job_run_id: str) -> str:
+        return cls.JOB_RUN.value.format(id=job_run_id)
 
 
 class JobApiClient:
