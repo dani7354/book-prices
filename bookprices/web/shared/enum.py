@@ -61,3 +61,4 @@ class UserTemplate(Enum):
 
 class JobTemplate(Enum):
     INDEX = "job/index.html"
+    CREATE = "job/create.html"

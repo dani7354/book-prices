@@ -18,7 +18,7 @@ def map_job_list(jobs_json: dict) -> JobListViewModel:
 
     translations = {
         NAME_COLUMN_NAME: "Navn",
-        DESCRIPTION_COLUMN_NAME: "Beskrivelse"
+        DESCRIPTION_COLUMN_NAME: "Beskrivelse",
     }
 
     return JobListViewModel(jobs=job_list_items, columns=list(translations.keys()), translations=translations)
