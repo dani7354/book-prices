@@ -1,3 +1,4 @@
+import json
 import logging
 import requests
 from typing import ClassVar, Callable
@@ -57,58 +58,58 @@ class JobApiClient:
                 return self._refresh_key_and_retry(self._send_get, endpoint)
             raise
 
-    def post(self, endpoint: str, json: dict) -> dict:
-        return self._send_post(endpoint, json)
+    def post(self, endpoint: str, data: dict) -> dict:
+        return self._send_post(endpoint, data)
 
-    def _send_post(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+    def _send_post(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
             response = requests.post(
                 url=url,
-                data=json,
+                data=json.dumps(data),
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
             logger.error("Failed to send POST request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
-                return self._refresh_key_and_retry(self._send_post, endpoint, json)
+                return self._refresh_key_and_retry(self._send_post, endpoint, data)
             raise
 
-    def put(self, endpoint: str, json: dict) -> dict:
-        return self._send_put(endpoint, json)
+    def put(self, endpoint: str, data: dict) -> dict:
+        return self._send_put(endpoint, data)
 
-    def _send_put(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+    def _send_put(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
             response = requests.put(
                 url=url,
-                data=json,
+                data=json.dumps(data),
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
             logger.error("Failed to send PUT request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
-                return self._refresh_key_and_retry(self._send_put, endpoint, json)
+                return self._refresh_key_and_retry(self._send_put, endpoint, data)
             raise
 
-    def patch(self, endpoint: str, json: dict) -> dict:
-        return self._send_patch(endpoint, json)
+    def patch(self, endpoint: str, data: dict) -> dict:
+        return self._send_patch(endpoint, data)
 
-    def _send_patch(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+    def _send_patch(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
             response = requests.patch(
                 url=url,
-                data=json,
+                data=json.dumps(data),
                 headers=self.get_request_headers())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
             logger.error("Failed to send PATCH request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
-                return self._refresh_key_and_retry(self._send_patch, endpoint, json)
+                return self._refresh_key_and_retry(self._send_patch, endpoint, data)
             raise
 
     def delete(self, endpoint: str) -> dict:
@@ -132,10 +133,10 @@ class JobApiClient:
             self,
             request_func: Callable[[str, dict, bool], dict] | Callable[[str, bool], dict],
             endpoint: str,
-            json: dict | None = None) -> dict:
+            data: dict | None = None) -> dict:
         self._refresh_api_key()
         self._set_api_key()
-        return request_func(endpoint, json, True) if json else request_func(endpoint, True)
+        return request_func(endpoint, data, True) if data else request_func(endpoint, True)
 
     def get_request_headers(self) -> dict:
         request_headers = {

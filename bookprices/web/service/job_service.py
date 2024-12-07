@@ -31,4 +31,4 @@ class JobService:
 
         self._job_api_client.post(
             Endpoint.JOBS.value,
-            json={"Name": name, "Description": description, "IsActive": is_active})
+            data={"Name": name, "Description": description, "IsActive": is_active})
