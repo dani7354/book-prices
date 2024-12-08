@@ -12,6 +12,10 @@ class JobAlreadyExistError(Exception):
     pass
 
 
+class DeletionFailedError(Exception):
+    pass
+
+
 class JobService:
 
     def __init__(self, job_api_client: JobApiClient) -> None:
@@ -32,3 +36,11 @@ class JobService:
         self._job_api_client.post(
             Endpoint.JOBS.value,
             data={"Name": name, "Description": description, "IsActive": is_active})
+
+
+    def delete_job(self, job_id: str) -> None:
+        try:
+            self._job_api_client.delete(Endpoint.get_job_url(job_id))
+        except Exception as ex:
+            logger.error(f"Failed to delete job with id {job_id}. Error: {ex}")
+            raise DeletionFailedError(f"Job with id {job_id} could not be deleted.")

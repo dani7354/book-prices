@@ -1,10 +1,11 @@
+from click import Tuple
 from flask import blueprints, render_template, Response, jsonify, request, Blueprint, redirect, url_for
 from flask_login import login_required
 
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db.database import Database
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.service.job_service import JobService, JobAlreadyExistError
+from bookprices.web.service.job_service import JobService, JobAlreadyExistError, DeletionFailedError
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
 from bookprices.web.mapper.job import map_job_list
 from bookprices.web.settings import (
@@ -67,4 +68,15 @@ def create() -> str | Response:
 def job_list() -> tuple[Response, int]:
     jobs = job_service.get_job_list()
     job_list_view_model = map_job_list(jobs)
+
     return jsonify(job_list_view_model), HttpStatusCode.OK
+
+
+@job_blueprint.route("/delete/<job_id>", methods=[HttpMethod.POST.value])
+@login_required
+def delete(job_id: str) -> tuple[Response, int]:
+    try:
+        job_service.delete_job(job_id)
+        return jsonify({"message": "Job deleted"}), HttpStatusCode.OK
+    except DeletionFailedError as ex:
+        return jsonify({"message": str(ex)}), HttpStatusCode.BAD_REQUEST

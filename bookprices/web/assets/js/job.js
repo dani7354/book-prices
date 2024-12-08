@@ -1,6 +1,15 @@
+const msgContainer = $("#msg-container");
 const jobContainer = $("#job-container");
 
 const baseUrl = "/job";
+
+
+function handleClickDeleteJob(e) {
+    let jobId = $(e.target).closest("tr").data("id");
+    deleteJob(jobId);
+    e.preventDefault();
+    e.stopPropagation();
+}
 
 
 function initializeJobTable(columns, rows, translations) {
@@ -38,10 +47,18 @@ function initializeJobTable(columns, rows, translations) {
             .text("Vis");
         actionCell.append(viewButton);
 
-        let deleteButton = $("<a></a>")
+        let deleteButton = $("<button></button>")
             .attr("id", "btn-delete-job")
             .attr("class", "btn btn-link btn-sm")
-            .text("Slet");
+            .text("Slet")
+            .click(function(event) {
+                if (confirm("Er du sikker på at du vil slette jobbet?")) {
+                    console.log("Deleting job...")
+                    handleClickDeleteJob(event);
+                }
+                return false;
+            });
+
         actionCell.append(deleteButton);
         tableRow.append(actionCell);
         table.append(tableRow);
@@ -53,6 +70,40 @@ function initializeJobTable(columns, rows, translations) {
             .attr("id", "btn-create-job")
             .attr("href", `${baseUrl}/create`)
             .attr("class", "btn btn-primary"));
+}
+
+function showAlert(message, alertType) {
+    let alert = $("<div></div>")
+        .attr("class", `alert alert-${alertType} alert-dismissible fade show`)
+        .attr("role", "alert")
+        .text(message);
+    alert.append(
+        $("<button></button>")
+            .attr("class", "btn-close")
+            .attr("data-bs-dismiss", "alert")
+            .attr("aria-label", "Close")
+            .attr("type", "button"));
+    msgContainer.prepend(alert);
+    alert.alert();
+}
+
+function deleteJob(jobId) {
+    let url = `${baseUrl}/delete/${jobId}`;
+    $.ajax(url, {
+        "method": "POST",
+        "dataType": "json",
+        "data": {
+            "csrf_token": $(csrfTokenNodeId).val()
+        },
+        "success": function (data, status, xhr) {
+            console.log("Job deleted.");
+            getJobs();
+        },
+        "error": function (error) {
+            showAlert("Error deleting job.", "danger");
+            console.log(error);
+        }
+    });
 }
 
 function getJobs() {
