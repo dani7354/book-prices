@@ -5,7 +5,7 @@ from flask_login import login_required
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db.database import Database
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.service.job_service import JobService, JobAlreadyExistError, DeletionFailedError
+from bookprices.web.service.job_service import JobService, JobAlreadyExistError, JobDeletionFailedError
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
 from bookprices.web.mapper.job import map_job_list
 from bookprices.web.settings import (
@@ -18,6 +18,8 @@ from bookprices.web.settings import (
     JOB_API_USERNAME,
     JOB_API_PASSWORD)
 from bookprices.web.viewmodels.job import CreateJobViewModel
+
+MESSAGE_FIELD_NAME = "message"
 
 db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 job_service = JobService(JobApiClient(JOB_API_BASE_URL, JOB_API_USERNAME, JOB_API_PASSWORD, db.api_key_db))
@@ -76,7 +78,10 @@ def job_list() -> tuple[Response, int]:
 @login_required
 def delete(job_id: str) -> tuple[Response, int]:
     try:
+        if not job_service.get_job(job_id):
+            return jsonify({MESSAGE_FIELD_NAME: "Job blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
         job_service.delete_job(job_id)
-        return jsonify({"message": "Job deleted"}), HttpStatusCode.OK
-    except DeletionFailedError as ex:
-        return jsonify({"message": str(ex)}), HttpStatusCode.BAD_REQUEST
+
+        return jsonify({MESSAGE_FIELD_NAME: "Job slettet!"}), HttpStatusCode.OK
+    except JobDeletionFailedError as ex:
+        return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST

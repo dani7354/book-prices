@@ -2,15 +2,15 @@ const msgContainer = $("#msg-container");
 const jobContainer = $("#job-container");
 
 const baseUrl = "/job";
+const messageFieldName = "message";
 
 
 function handleClickDeleteJob(e) {
+    e.preventDefault();
+
     let jobId = $(e.target).closest("tr").data("id");
     deleteJob(jobId);
-    e.preventDefault();
-    e.stopPropagation();
 }
-
 
 function initializeJobTable(columns, rows, translations) {
     let headingId = "job-list-heading";
@@ -96,11 +96,12 @@ function deleteJob(jobId) {
             "csrf_token": $(csrfTokenNodeId).val()
         },
         "success": function (data, status, xhr) {
-            console.log("Job deleted.");
+            showAlert(data[messageFieldName], "success");
             getJobs();
         },
         "error": function (error) {
-            showAlert("Error deleting job.", "danger");
+            showAlert(error[messageFieldName], "danger");
+            getJobs();
             console.log(error);
         }
     });
