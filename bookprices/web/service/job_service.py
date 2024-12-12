@@ -49,13 +49,24 @@ class JobService:
             logger.error(f"Failed to get job with id {job_id}. Error: {ex}")
             return None
 
+    def get_job_run_for_jobs(self, job_ids: [str]) -> dict[str, dict]:
+        job_runs_by_job_id = {}
+        for job_id in job_ids:
+            try:
+                url = f"{Endpoint.JOB_RUNS.value}?jobId={job_id}&limit=1"
+                if job_run_response := self._job_api_client.get(url):
+                    job_runs_by_job_id[job_id], = job_run_response
+            except HTTPError as ex:
+                logger.error(f"Failed to get job runs for job with id {job_id}. Error: {ex}")
+
+        return job_runs_by_job_id
+
     def create_job(self, name: str, description: str, is_active: bool) -> None:
         job_list_json = self._job_api_client.get(Endpoint.JOBS.value)
         if any(job["name"] == name for job in job_list_json):
             error_msg = f"Job with name {name} already exist."
             logger.error(error_msg)
             raise JobAlreadyExistError(error_msg)
-
         try:
             self._job_api_client.post(
                 Endpoint.JOBS.value,

@@ -11,7 +11,7 @@ class JobListItem:
     name: str
     description: str
     last_run_at: str
-    last_run_status: str
+    last_run_at_color: str
     url: str
     is_active: bool
 

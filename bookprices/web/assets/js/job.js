@@ -16,7 +16,6 @@ function initializeJobTable(columns, rows, translations) {
     let headingId = "job-list-heading";
     jobContainer.append($("<h3></h3>").text("Job list").attr("id", headingId));
 
-
     let table = $("<table></table>")
         .attr("class", "table table-striped table-bordered")
         .attr("aria-describedby", headingId);
@@ -33,11 +32,18 @@ function initializeJobTable(columns, rows, translations) {
             .text(translations[columnKey]));
     });
 
+    tableHeaderRow.append($("<th></th>").text("Sidste kørsel"));
+
     $.each(rows, (index, row) => {
         let tableRow = $("<tr></tr>").attr("data-id", row["id"]);
         $.each(columns, (index, columnName) => {
             tableRow.append($("<td></td>").text(row[columnName]));
         });
+
+        let lastRunAtCell = $("<td></td>")
+            .attr("class", `text-${row["last_run_at_color"]}`)
+            .text(row["last_run_at"]);
+        tableRow.append(lastRunAtCell);
 
         let actionCell = $("<td></td>");
         let viewButton = $("<a></a>")
@@ -57,7 +63,6 @@ function initializeJobTable(columns, rows, translations) {
                     console.log("Deleting job...")
                     handleClickDeleteJob(event);
                 }
-                return false;
             });
 
         actionCell.append(deleteButton);

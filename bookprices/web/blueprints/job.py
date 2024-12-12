@@ -103,7 +103,8 @@ def edit(job_id: str) -> str | Response:
 @login_required
 def job_list() -> tuple[Response, int]:
     jobs = job_service.get_job_list()
-    job_list_view_model = map_job_list(jobs)
+    last_job_run_for_jobs = job_service.get_job_run_for_jobs([job["id"] for job in jobs])
+    job_list_view_model = map_job_list(jobs, last_job_run_for_jobs)
 
     return jsonify(job_list_view_model), HttpStatusCode.OK
 

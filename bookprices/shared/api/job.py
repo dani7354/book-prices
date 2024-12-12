@@ -32,6 +32,7 @@ class Endpoint(Enum):
 class JobApiClient:
     api_name: ClassVar[str] = "JobApi"
     response_encoding: ClassVar[str] = "utf-8"
+    request_timeout: ClassVar[int] = 10
 
     def __init__(self, base_url: str, api_username: str, api_password: str, api_key_db: ApiKeyDb) -> None:
         self._base_url = base_url
@@ -49,7 +50,8 @@ class JobApiClient:
         try:
             response = requests.get(
                 url=url,
-                headers=self.get_request_headers())
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
@@ -67,7 +69,8 @@ class JobApiClient:
             response = requests.post(
                 url=url,
                 data=json.dumps(data),
-                headers=self.get_request_headers())
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
@@ -85,7 +88,8 @@ class JobApiClient:
             response = requests.put(
                 url=url,
                 data=json.dumps(data),
-                headers=self.get_request_headers())
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
         except HTTPError as e:
@@ -103,7 +107,8 @@ class JobApiClient:
             response = requests.patch(
                 url=url,
                 data=json.dumps(data),
-                headers=self.get_request_headers())
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
@@ -120,7 +125,8 @@ class JobApiClient:
         try:
             response = requests.delete(
                 url=url,
-                headers=self.get_request_headers())
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
         except HTTPError as e:
@@ -156,7 +162,8 @@ class JobApiClient:
         response = requests.post(
             url=f"{self._base_url}{Endpoint.LOGIN.value}",
             json={"username": self._api_username, "password": self._api_password},
-            headers=self.get_request_headers())
+            headers=self.get_request_headers(),
+            timeout=self.request_timeout)
         response.raise_for_status()
         api_key = response.content.decode(self.response_encoding).strip("\"")  # TODO: fix response format in API instead
         self._add_or_update_api_key_in_db(api_key)
