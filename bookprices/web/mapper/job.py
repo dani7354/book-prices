@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, Self
+from typing import Self
 
 from flask import url_for
 
