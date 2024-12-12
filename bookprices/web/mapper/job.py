@@ -38,6 +38,8 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
             last_run_at = datetime.fromisoformat(last_run_at).strftime("%d-%m-%Y %H:%M:%S")
             last_run_at_status = job_run["status"]
 
+        last_run_at_color = status_color.value \
+            if (status_color := JobStatusColor.parse_str(last_run_at_status)) else JobStatusColor.DEFAULT.value
         job_list_items.append(JobListItem(
             id=job["id"],
             name=job["name"],
@@ -45,8 +47,7 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
             is_active=job["isActive"],
             url=url_for("job.edit", job_id=job["id"]),
             last_run_at=last_run_at,
-            last_run_at_color=status_color.value
-                if (status_color := JobStatusColor.parse_str(last_run_at_status)) else JobStatusColor.DEFAULT.value))
+            last_run_at_color=last_run_at_color))
 
     translations = {
         ColumnName.NAME.value: "Navn",

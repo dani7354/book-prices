@@ -4,8 +4,11 @@ from flask_login import login_required
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db.database import Database
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.service.job_service import JobService, JobAlreadyExistError, JobDeletionFailedError, \
-    JobUpdateFailedError
+from bookprices.web.service.job_service import (
+    JobService,
+    JobAlreadyExistError,
+    JobDeletionFailedError,
+    JobUpdateFailedError)
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
 from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model
 from bookprices.web.settings import (

@@ -70,7 +70,7 @@ function initializeJobTable(columns, rows, translations) {
         table.append(tableRow);
     });
 
-     jobContainer.append(
+    jobContainer.append(
         $("<a></a>")
             .text("Opret")
             .attr("id", "btn-create-job")
