@@ -21,6 +21,7 @@ class JobStatusColor(Enum):
         except AttributeError:
             return None
 
+
 class ColumnName(Enum):
     ID = "id"
     NAME = "name"
@@ -62,5 +63,3 @@ def map_job_edit_view_model(job_json: dict) -> CreateJobViewModel:
         description=job_json["description"],
         active=job_json["isActive"],
         form_action_url=f"/job/edit/{job_json['id']}")
-
-
