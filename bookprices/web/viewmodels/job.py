@@ -10,6 +10,9 @@ class JobListItem:
     id: str
     name: str
     description: str
+    last_run_at: str
+    last_run_status: str
+    url: str
     is_active: bool
 
 

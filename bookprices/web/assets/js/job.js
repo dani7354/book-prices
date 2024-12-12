@@ -40,7 +40,8 @@ function initializeJobTable(columns, rows, translations) {
         });
 
         let actionCell = $("<td></td>");
-        let viewButton = $("<button></button>")
+        let viewButton = $("<a></a>")
+            .attr("href", row["url"])
             .attr("id", "btn-view-job")
             .attr("type", "button")
             .attr("class", "btn btn-link btn-sm")

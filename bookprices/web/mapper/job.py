@@ -1,9 +1,16 @@
+from enum import Enum
+
+from flask import url_for
+
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
 
-ID_COLUMN_NAME = "id"
-NAME_COLUMN_NAME = "name"
-DESCRIPTION_COLUMN_NAME = "description"
 
+class ColumnName(Enum):
+    ID = "id"
+    NAME = "name"
+    DESCRIPTION = "description"
+    LAST_RUN_AT = "last_run_at"
+    IS_ACTIVE = "is_active"
 
 
 def map_job_list(jobs_json: dict) -> JobListViewModel:
@@ -12,12 +19,17 @@ def map_job_list(jobs_json: dict) -> JobListViewModel:
             id=job["id"],
             name=job["name"],
             description=job["description"],
-            is_active=job["isActive"])
+            is_active=job["isActive"],
+            url=url_for("job.edit", job_id=job["id"]),
+            last_run_at="XX",
+            last_run_status="XX")
         for job in jobs_json]
 
     translations = {
-        NAME_COLUMN_NAME: "Navn",
-        DESCRIPTION_COLUMN_NAME: "Beskrivelse",
+        ColumnName.NAME.value: "Navn",
+        ColumnName.DESCRIPTION.value: "Beskrivelse",
+        ColumnName.LAST_RUN_AT.value: "Sidste kørsel",
+        ColumnName.IS_ACTIVE.value: "Aktiv"
     }
 
     return JobListViewModel(jobs=job_list_items, columns=list(translations.keys()), translations=translations)
