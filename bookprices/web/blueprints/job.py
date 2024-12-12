@@ -1,5 +1,4 @@
-from click import Tuple
-from flask import blueprints, render_template, Response, jsonify, request, Blueprint, redirect, url_for
+from flask import render_template, Response, jsonify, request, Blueprint, redirect, url_for, abort
 from flask_login import login_required
 
 from bookprices.shared.api.job import JobApiClient
@@ -7,7 +6,7 @@ from bookprices.shared.db.database import Database
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.service.job_service import JobService, JobAlreadyExistError, JobDeletionFailedError
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
-from bookprices.web.mapper.job import map_job_list
+from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -47,7 +46,7 @@ def create() -> str | Response:
         description = request.form.get(CreateJobViewModel.description_field_name) or ""
         active = bool(request.form.get(CreateJobViewModel.active_field_name)) or False
 
-        view_model = CreateJobViewModel(name, description, active)
+        view_model = CreateJobViewModel(name, description, active, form_action_url=url_for("job.create"))
         if not view_model.is_valid():
             return render_template(JobTemplate.CREATE.value, view_model=view_model)
 
@@ -62,7 +61,41 @@ def create() -> str | Response:
 
         return redirect(url_for("job.index"))
 
-    return render_template(JobTemplate.CREATE.value, view_model=CreateJobViewModel.empty())
+    return render_template(JobTemplate.CREATE.value, view_model=CreateJobViewModel.empty(url_for("job.create")))
+
+
+@job_blueprint.route("edit/<job_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@login_required
+def edit(job_id: str) -> str | Response:
+    if not (job := job_service.get_job(job_id)):
+        abort(HttpStatusCode.NOT_FOUND, "Jobbet blev ikke fundet")
+
+    if request.method == HttpMethod.POST.value:
+        name = request.form.get(CreateJobViewModel.name_field_name) or ""
+        description = request.form.get(CreateJobViewModel.description_field_name) or ""
+        active = bool(request.form.get(CreateJobViewModel.active_field_name)) or False
+
+        view_model = CreateJobViewModel(
+            name,
+            description,
+            active,
+            form_action_url=url_for("job.edit", job_id=job_id))
+        if not view_model.is_valid():
+            return render_template(JobTemplate.EDIT.value, view_model=view_model)
+
+        try:
+            job_service.update_job(
+                job_id=job_id,
+                name=view_model.name,
+                description=view_model.description,
+                is_active=view_model.active)
+        except JobAlreadyExistError as ex:
+            view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
+            return render_template(JobTemplate.EDIT.value, view_model=view_model)
+
+        return redirect(url_for("job.index"))
+
+    return render_template(JobTemplate.EDIT.value, view_model=map_job_edit_view_model(job))
 
 
 @job_blueprint.route("/job-list", methods=[HttpMethod.GET.value])

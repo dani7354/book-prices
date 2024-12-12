@@ -34,6 +34,7 @@ class CreateJobViewModel:
     name: str
     description: str
     active: bool
+    form_action_url: str
     errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
 
@@ -59,5 +60,5 @@ class CreateJobViewModel:
                 max_length_exceeded("Beskrivelsen", self.description_max_length))
 
     @staticmethod
-    def empty() -> "CreateJobViewModel":
-        return CreateJobViewModel(name="", description="", active=False)
+    def empty(form_action_url: str) -> "CreateJobViewModel":
+        return CreateJobViewModel(name="", description="", active=False, form_action_url=form_action_url)

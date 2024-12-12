@@ -1,4 +1,5 @@
 import logging
+from enum import Enum
 from urllib.error import HTTPError
 
 from bookprices.shared.api.job import JobApiClient, Endpoint
@@ -17,6 +18,17 @@ class JobDeletionFailedError(Exception):
 
 class JobCreationFailedError(Exception):
     pass
+
+
+class JobUpdateFailedError(Exception):
+    pass
+
+
+class SchemaFields(Enum):
+    ID = "Id"
+    NAME = "Name"
+    DESCRIPTION = "Description"
+    IS_ACTIVE = "IsActive"
 
 
 class JobService:
@@ -47,10 +59,32 @@ class JobService:
         try:
             self._job_api_client.post(
                 Endpoint.JOBS.value,
-                data={"Name": name, "Description": description, "IsActive": is_active})
+                data={
+                    SchemaFields.NAME.value: name,
+                    SchemaFields.DESCRIPTION.value: description,
+                    SchemaFields.IS_ACTIVE.value: is_active})
         except HTTPError as ex:
             logger.error(f"Failed to create job with name {name}. Error: {ex}")
             raise JobCreationFailedError(f"Job with name {name} could not be created.")
+
+    def update_job(self, job_id: str, name: str, description: str, is_active:bool) -> None:
+        try:
+            job_list = self.get_job_list()
+            if any(job["name"] == name and job["id"] != job_id for job in job_list):
+                error_msg = f"Job with name {name} already exist."
+                logger.error(error_msg)
+                raise JobAlreadyExistError(error_msg)
+
+            self._job_api_client.put(
+                Endpoint.get_job_url(job_id),
+                data={
+                    SchemaFields.ID.value: job_id,
+                    SchemaFields.NAME.value: name,
+                    SchemaFields.DESCRIPTION.value: description,
+                    SchemaFields.IS_ACTIVE.value: is_active})
+        except HTTPError as ex:
+            logger.error(f"Failed to update job with id {job_id}. Error: {ex}")
+            raise JobUpdateFailedError(f"Job with id {job_id} could not be updated.")
 
     def delete_job(self, job_id: str) -> None:
         try:

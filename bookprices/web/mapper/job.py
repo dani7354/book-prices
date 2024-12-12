@@ -1,5 +1,4 @@
-from bookprices.web.viewmodels.job import JobListItem, JobListViewModel
-
+from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
 
 ID_COLUMN_NAME = "id"
 NAME_COLUMN_NAME = "name"
@@ -22,5 +21,13 @@ def map_job_list(jobs_json: dict) -> JobListViewModel:
     }
 
     return JobListViewModel(jobs=job_list_items, columns=list(translations.keys()), translations=translations)
+
+
+def map_job_edit_view_model(job_json: dict) -> CreateJobViewModel:
+    return CreateJobViewModel(
+        name=job_json["name"],
+        description=job_json["description"],
+        active=job_json["isActive"],
+        form_action_url=f"/job/edit/{job_json['id']}")
 
 
