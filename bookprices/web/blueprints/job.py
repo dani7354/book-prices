@@ -4,7 +4,8 @@ from flask_login import login_required
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db.database import Database
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.service.job_service import JobService, JobAlreadyExistError, JobDeletionFailedError
+from bookprices.web.service.job_service import JobService, JobAlreadyExistError, JobDeletionFailedError, \
+    JobUpdateFailedError
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
 from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model
 from bookprices.web.settings import (
@@ -89,7 +90,7 @@ def edit(job_id: str) -> str | Response:
                 name=view_model.name,
                 description=view_model.description,
                 is_active=view_model.active)
-        except JobAlreadyExistError as ex:
+        except (JobAlreadyExistError, JobUpdateFailedError) as ex:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.EDIT.value, view_model=view_model)
 
