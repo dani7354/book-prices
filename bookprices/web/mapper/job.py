@@ -8,6 +8,9 @@ from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJ
 from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewModel
 
 
+DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
+
+
 class JobStatusColor(Enum):
     COMPLETED = "success"
     FAILED = "danger"
@@ -40,7 +43,7 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
     for job in jobs_json:
         last_run_at, last_run_at_status = "-", "-"
         if (job_run := job_run_by_job_id.get(job["id"])) and (last_run_at := job_run.get("updated")):
-            last_run_at = datetime.fromisoformat(last_run_at).strftime("%d-%m-%Y %H:%M:%S")
+            last_run_at = datetime.fromisoformat(last_run_at).strftime(DATE_FORMAT)
             last_run_at_status = job_run["status"]
 
         last_run_at_color = status_color.value \
@@ -76,12 +79,14 @@ def map_job_run_list(job_runs: dict) -> JobRunListViewModel:
     job_run_list_items = []
     for job_run in job_runs:
         status_color = status if (status := JobStatusColor.parse_str(job_run["status"])) else JobStatusColor.DEFAULT
+        updated = datetime.fromisoformat(job_run["updated"]).strftime(DATE_FORMAT)
+        created = datetime.fromisoformat(job_run["created"]).strftime(DATE_FORMAT)
         job_run_list_items.append(JobRunListItem(
             id=job_run["id"],
             status=job_run["status"],
             priority=job_run["priority"],
-            updated=job_run["updated"],
-            created=job_run["created"],
+            updated=updated,
+            created=created,
             status_color=str(status_color.value)))
         
     translations = {
