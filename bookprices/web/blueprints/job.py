@@ -128,7 +128,6 @@ def job_run_list() -> tuple[Response, int]:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
 
 
-
 @job_blueprint.route("/delete/<job_id>", methods=[HttpMethod.POST.value])
 @login_required
 def delete(job_id: str) -> tuple[Response, int]:
@@ -138,5 +137,19 @@ def delete(job_id: str) -> tuple[Response, int]:
         job_service.delete_job(job_id)
 
         return jsonify({MESSAGE_FIELD_NAME: "Job slettet!"}), HttpStatusCode.OK
+    except JobDeletionFailedError as ex:
+        return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
+
+
+@job_blueprint.route("/job-run/delete/<job_run_id>", methods=[HttpMethod.POST.value])
+@login_required
+def delete_job_run(job_run_id: str) -> tuple[Response, int]:
+    try:
+        if not job_service.get_job_run(job_run_id):
+            return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}),
+                    HttpStatusCode.BAD_REQUEST)
+        job_service.delete_job_run(job_run_id)
+
+        return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel slettet!"}), HttpStatusCode.OK
     except JobDeletionFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST

@@ -6,23 +6,35 @@ const baseUrl = "/job";
 const messageFieldName = "message";
 
 
+function handleClickDeleteJobRun(e) {
+    e.preventDefault();
+    if (confirm("Er du sikker på at du vil slette denne jobkørsel?")) {
+        let jobId = $(e.target).closest("tr").data("id");
+        deleteJobRun(jobId);
+    }
+}
+
 function deleteJobRun(jobRunId) {
-    let url = `${baseUrl}/job-run/${jobRunId}`;
+    let url = `${baseUrl}/job-run/delete/${jobRunId}`;
     $.ajax(url, {
         "method": "POST",
         "dataType": "json",
+        "data": {
+            "csrf_token": $(csrfTokenNodeId).val()
+        },
         "success": function (data, status, xhr) {
             msgContainer.text(data[messageFieldName]);
-            getJobRuns();
+            refreshJobRuns();
         },
         "error": function (xhr, status, error) {
-            msgContainer.text(xhr["message"]);
+            msgContainer.text(xhr[messageFieldName]);
+            refreshJobRuns();
         }
     });
 }
 
 function initializeJobRunTable(columns, rows, translations) {
-    console.log("Create table...");
+    jobRunContainer.empty();
     let table = $("<table></table>")
         .attr("class", "table table-striped table-bordered")
     jobRunContainer.append(table);
@@ -39,6 +51,7 @@ function initializeJobRunTable(columns, rows, translations) {
     });
 
     tableHeaderRow.append($("<th></th>").text("Status"));
+    tableHeaderRow.append($("<th></th>")); // For buttons
 
     $.each(rows, (index, row) => {
         let tableRow = $("<tr></tr>").attr("data-id", row["id"]);
@@ -50,6 +63,22 @@ function initializeJobRunTable(columns, rows, translations) {
             .attr("class", `text-${row["status_color"]}`)
             .text(row["status"]);
         tableRow.append(statusCell);
+
+        let actionCell = $("<td></td>");
+
+        let showButton = $("<a></a>")
+            .attr("id", "btn-delete-job-run")
+            .attr("class", "btn btn-link btn-sm")
+            .text("Vis");
+        actionCell.append(showButton);
+
+        let deleteButton = $("<a></a>")
+            .attr("id", "btn-delete-job-run")
+            .attr("class", "btn btn-link btn-sm")
+            .click(handleClickDeleteJobRun)
+            .text("Slet");
+        actionCell.append(deleteButton);
+        tableRow.append(actionCell);
 
         table.append(tableRow);
     });
@@ -76,7 +105,7 @@ function getJobRuns(jobId) {
         });
 }
 
-$(document).ready(function () {
+function refreshJobRuns() {
     let jobIdNode = $(`#${jobIdInput}`);
     if (jobIdNode.length > 0) {
         getJobRuns(jobIdNode.val());
@@ -84,4 +113,8 @@ $(document).ready(function () {
     else {
         getJobRuns();
     }
+}
+
+$(document).ready(function () {
+    refreshJobRuns();
 });

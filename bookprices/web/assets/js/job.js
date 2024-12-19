@@ -7,9 +7,11 @@ const messageFieldName = "message";
 
 function handleClickDeleteJob(e) {
     e.preventDefault();
-
-    let jobId = $(e.target).closest("tr").data("id");
-    deleteJob(jobId);
+     if (confirm("Er du sikker på at du vil slette jobbet?")) {
+         console.log("Deleting job...");
+         let jobId = $(e.target).closest("tr").data("id");
+         deleteJob(jobId);
+     }
 }
 
 function initializeJobTable(columns, rows, translations) {
@@ -58,12 +60,7 @@ function initializeJobTable(columns, rows, translations) {
             .attr("id", "btn-delete-job")
             .attr("class", "btn btn-link btn-sm")
             .text("Slet")
-            .click(function(event) {
-                if (confirm("Er du sikker på at du vil slette jobbet?")) {
-                    console.log("Deleting job...")
-                    handleClickDeleteJob(event);
-                }
-            });
+            .click(handleClickDeleteJob);
 
         actionCell.append(deleteButton);
         tableRow.append(actionCell);

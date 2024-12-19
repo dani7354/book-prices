@@ -55,6 +55,14 @@ class JobService:
             logger.error(f"Failed to get job with id {job_id}. Error: {ex}")
             return None
 
+    def get_job_run(self, job_run_id: str) -> dict | None:
+        try:
+            job_run_json = self._job_api_client.get(Endpoint.get_job_run_url(job_run_id))
+            return job_run_json
+        except HTTPError as ex:
+            logger.error(f"Failed to get job run with id {job_run_id}. Error: {ex}")
+            return None
+
     def get_job_run_for_jobs(self, job_ids: [str]) -> dict[str, dict]:
         job_run_count = 1
         job_runs_by_job_id = {}
@@ -125,3 +133,10 @@ class JobService:
         except HTTPError as ex:
             logger.error(f"Failed to delete job with id {job_id}. Error: {ex}")
             raise JobDeletionFailedError(f"Job with id {job_id} could not be deleted.")
+
+    def delete_job_run(self, job_run_id: str) -> None:
+        try:
+            self._job_api_client.delete(Endpoint.get_job_run_url(job_run_id))
+        except HTTPError as ex:
+            logger.error(f"Failed to delete job run with id {job_run_id}. Error: {ex}")
+            raise JobDeletionFailedError(f"Job run with id {job_run_id} could not be deleted.")
