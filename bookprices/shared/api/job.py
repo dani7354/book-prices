@@ -1,3 +1,4 @@
+import json
 import logging
 import requests
 from typing import ClassVar, Callable
@@ -28,9 +29,15 @@ class Endpoint(Enum):
         return cls.JOB_RUN.value.format(id=job_run_id)
 
 
+class UrlParameter(Enum):
+    JOB_ID = "jobId"
+    LIMIT = "limit"
+
+
 class JobApiClient:
     api_name: ClassVar[str] = "JobApi"
     response_encoding: ClassVar[str] = "utf-8"
+    request_timeout: ClassVar[int] = 10
 
     def __init__(self, base_url: str, api_username: str, api_password: str, api_key_db: ApiKeyDb) -> None:
         self._base_url = base_url
@@ -48,7 +55,8 @@ class JobApiClient:
         try:
             response = requests.get(
                 url=url,
-                headers=self.get_request_headers())
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
@@ -57,58 +65,61 @@ class JobApiClient:
                 return self._refresh_key_and_retry(self._send_get, endpoint)
             raise
 
-    def post(self, endpoint: str, json: dict) -> dict:
-        return self._send_post(endpoint, json)
+    def post(self, endpoint: str, data: dict) -> dict:
+        return self._send_post(endpoint, data)
 
-    def _send_post(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+    def _send_post(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
             response = requests.post(
                 url=url,
-                data=json,
-                headers=self.get_request_headers())
+                data=json.dumps(data),
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
             logger.error("Failed to send POST request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
-                return self._refresh_key_and_retry(self._send_post, endpoint, json)
+                return self._refresh_key_and_retry(self._send_post, endpoint, data)
             raise
 
-    def put(self, endpoint: str, json: dict) -> dict:
-        return self._send_put(endpoint, json)
+    def put(self, endpoint: str, data: dict) -> dict:
+        return self._send_put(endpoint, data)
 
-    def _send_put(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+    def _send_put(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
             response = requests.put(
                 url=url,
-                data=json,
-                headers=self.get_request_headers())
+                data=json.dumps(data),
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
-            return response.json()
+            return self._decode_json_response(response)
         except HTTPError as e:
             logger.error("Failed to send PUT request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
-                return self._refresh_key_and_retry(self._send_put, endpoint, json)
+                return self._refresh_key_and_retry(self._send_put, endpoint, data)
             raise
 
-    def patch(self, endpoint: str, json: dict) -> dict:
-        return self._send_patch(endpoint, json)
+    def patch(self, endpoint: str, data: dict) -> dict:
+        return self._send_patch(endpoint, data)
 
-    def _send_patch(self, endpoint: str, json: dict, is_retry: bool = False) -> dict:
+    def _send_patch(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
             response = requests.patch(
                 url=url,
-                data=json,
-                headers=self.get_request_headers())
+                data=json.dumps(data),
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
             logger.error("Failed to send PATCH request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
-                return self._refresh_key_and_retry(self._send_patch, endpoint, json)
+                return self._refresh_key_and_retry(self._send_patch, endpoint, data)
             raise
 
     def delete(self, endpoint: str) -> dict:
@@ -119,9 +130,10 @@ class JobApiClient:
         try:
             response = requests.delete(
                 url=url,
-                headers=self.get_request_headers())
+                headers=self.get_request_headers(),
+                timeout=self.request_timeout)
             response.raise_for_status()
-            return response.json()
+            return self._decode_json_response(response)
         except HTTPError as e:
             logger.error("Failed to send DELETE request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -132,10 +144,10 @@ class JobApiClient:
             self,
             request_func: Callable[[str, dict, bool], dict] | Callable[[str, bool], dict],
             endpoint: str,
-            json: dict | None = None) -> dict:
+            data: dict | None = None) -> dict:
         self._refresh_api_key()
         self._set_api_key()
-        return request_func(endpoint, json, True) if json else request_func(endpoint, True)
+        return request_func(endpoint, data, True) if data else request_func(endpoint, True)
 
     def get_request_headers(self) -> dict:
         request_headers = {
@@ -155,7 +167,8 @@ class JobApiClient:
         response = requests.post(
             url=f"{self._base_url}{Endpoint.LOGIN.value}",
             json={"username": self._api_username, "password": self._api_password},
-            headers=self.get_request_headers())
+            headers=self.get_request_headers(),
+            timeout=self.request_timeout)
         response.raise_for_status()
         api_key = response.content.decode(self.response_encoding).strip("\"")  # TODO: fix response format in API instead
         self._add_or_update_api_key_in_db(api_key)
@@ -178,3 +191,11 @@ class JobApiClient:
                 api_name=self.api_name,
                 api_user=self._api_username,
                 api_key=api_key))
+
+    @staticmethod
+    def _decode_json_response(response: requests.Response) -> dict:
+        try:
+            response.json()
+        except json.JSONDecodeError:
+            logger.error("Failed to decode response from Job API %s. Maybe it's empty", response.request.url)
+            return {}

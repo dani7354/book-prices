@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% set active_page = "job" %}
+{% block content %}
+<h2>{{ view_model.name }}</h2>
+
+{% include "job/_job_form.html" %}
+
+<div class="mt-5">
+    {% include "job/_job_runs.html" %}
+</div>
+
+{% endblock %}
