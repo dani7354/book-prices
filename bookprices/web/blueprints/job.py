@@ -8,9 +8,9 @@ from bookprices.web.service.job_service import (
     JobService,
     JobAlreadyExistError,
     JobDeletionFailedError,
-    JobUpdateFailedError)
+    JobUpdateFailedError, FailedToGetJobRunsError)
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
-from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model
+from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -23,6 +23,7 @@ from bookprices.web.settings import (
 from bookprices.web.viewmodels.job import CreateJobViewModel
 
 MESSAGE_FIELD_NAME = "message"
+JOB_ID_URL_PARAMETER = "jobId"
 
 db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 job_service = JobService(JobApiClient(JOB_API_BASE_URL, JOB_API_USERNAME, JOB_API_PASSWORD, db.api_key_db))
@@ -83,7 +84,8 @@ def edit(job_id: str) -> str | Response:
             name,
             description,
             active,
-            form_action_url=url_for("job.edit", job_id=job_id))
+            form_action_url=url_for("job.edit", job_id=job_id),
+            id=job_id)
         if not view_model.is_valid():
             return render_template(JobTemplate.EDIT.value, view_model=view_model)
 
@@ -110,6 +112,21 @@ def job_list() -> tuple[Response, int]:
     job_list_view_model = map_job_list(jobs, last_job_run_for_jobs)
 
     return jsonify(job_list_view_model), HttpStatusCode.OK
+
+
+@job_blueprint.route("job-run-list", methods=[HttpMethod.GET.value])
+@login_required
+def job_run_list() -> tuple[Response, int]:
+    try:
+        job_id = request.args.get(JOB_ID_URL_PARAMETER)
+        job_runs = job_service.get_job_runs(job_id)
+
+        job_runs_view_model = map_job_run_list(job_runs)
+
+        return jsonify(job_runs_view_model), HttpStatusCode.OK
+    except FailedToGetJobRunsError as ex:
+        return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
+
 
 
 @job_blueprint.route("/delete/<job_id>", methods=[HttpMethod.POST.value])

@@ -29,6 +29,11 @@ class Endpoint(Enum):
         return cls.JOB_RUN.value.format(id=job_run_id)
 
 
+class UrlParameter(Enum):
+    JOB_ID = "jobId"
+    LIMIT = "limit"
+
+
 class JobApiClient:
     api_name: ClassVar[str] = "JobApi"
     response_encoding: ClassVar[str] = "utf-8"

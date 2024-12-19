@@ -5,6 +5,7 @@ from typing import Self
 from flask import url_for
 
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
+from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewModel
 
 
 class JobStatusColor(Enum):
@@ -28,6 +29,10 @@ class ColumnName(Enum):
     DESCRIPTION = "description"
     LAST_RUN_AT = "last_run_at"
     IS_ACTIVE = "is_active"
+    STATUS = "status"
+    PRIORITY = "priority"
+    UPDATED = "updated"
+    CREATED = "created"
 
 
 def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobListViewModel:
@@ -63,4 +68,27 @@ def map_job_edit_view_model(job_json: dict) -> CreateJobViewModel:
         name=job_json["name"],
         description=job_json["description"],
         active=job_json["isActive"],
+        id=job_json["id"],
         form_action_url=f"/job/edit/{job_json['id']}")
+
+
+def map_job_run_list(job_runs: dict) -> JobRunListViewModel:
+    job_run_list_items = []
+    for job_run in job_runs:
+        status_color = status if (status := JobStatusColor.parse_str(job_run["status"])) else JobStatusColor.DEFAULT
+        job_run_list_items.append(JobRunListItem(
+            id=job_run["id"],
+            status=job_run["status"],
+            priority=job_run["priority"],
+            updated=job_run["updated"],
+            created=job_run["created"],
+            status_color=str(status_color.value)))
+        
+    translations = {
+        ColumnName.ID.value: "Id",
+        ColumnName.PRIORITY.value: "Prioritet",
+        ColumnName.UPDATED.value: "Opdateret",
+        ColumnName.CREATED.value: "Oprettet"
+    }
+
+    return JobRunListViewModel(job_runs=job_run_list_items, columns=list(translations.keys()), translations=translations)

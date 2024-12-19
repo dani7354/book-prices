@@ -1,8 +1,10 @@
 import logging
 from enum import Enum
+from symtable import Class
+from typing import ClassVar
 from urllib.error import HTTPError
 
-from bookprices.shared.api.job import JobApiClient, Endpoint
+from bookprices.shared.api.job import JobApiClient, Endpoint, UrlParameter
 
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,9 @@ class JobCreationFailedError(Exception):
 class JobUpdateFailedError(Exception):
     pass
 
+class FailedToGetJobRunsError(Exception):
+    pass
+
 
 class SchemaFields(Enum):
     ID = "Id"
@@ -32,6 +37,7 @@ class SchemaFields(Enum):
 
 
 class JobService:
+
 
     def __init__(self, job_api_client: JobApiClient) -> None:
         self._job_api_client = job_api_client
@@ -50,16 +56,32 @@ class JobService:
             return None
 
     def get_job_run_for_jobs(self, job_ids: [str]) -> dict[str, dict]:
+        job_run_count = 1
         job_runs_by_job_id = {}
         for job_id in job_ids:
             try:
-                url = f"{Endpoint.JOB_RUNS.value}?jobId={job_id}&limit=1"
+                url = (f"{Endpoint.JOB_RUNS.value}?"
+                       f"{UrlParameter.JOB_ID.value}={job_id}&"
+                       f"{UrlParameter.LIMIT.value}={job_run_count}")
                 if job_run_response := self._job_api_client.get(url):
                     job_runs_by_job_id[job_id], = job_run_response
             except HTTPError as ex:
                 logger.error(f"Failed to get job runs for job with id {job_id}. Error: {ex}")
 
         return job_runs_by_job_id
+
+    def get_job_runs(self, job_id: str | None = None) -> dict:
+        try:
+            max_job_runs_to_load = 50
+            url = (f"{Endpoint.JOB_RUNS.value}?"
+                   f"{UrlParameter.LIMIT.value}={max_job_runs_to_load}")
+            if job_id:
+                url += f"&{UrlParameter.JOB_ID.value}={job_id}"
+            job_runs = self._job_api_client.get(url)
+            return job_runs
+        except HTTPError as ex:
+            logger.error(f"Failed to get job runs. Error: {ex}")
+            raise FailedToGetJobRunsError("Failed to get job runs.")
 
     def create_job(self, name: str, description: str, is_active: bool) -> None:
         job_list_json = self._job_api_client.get(Endpoint.JOBS.value)

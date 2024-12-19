@@ -28,6 +28,7 @@ class CreateJobViewModel:
     name_field_name: ClassVar[str] = "name"
     description_field_name: ClassVar[str] = "description"
     active_field_name: ClassVar[str] = "active"
+    id_field_name: ClassVar[str] = "job-id"
 
     name_min_length: ClassVar[int] = 3
     name_max_length: ClassVar[int] = 256
@@ -38,6 +39,7 @@ class CreateJobViewModel:
     description: str
     active: bool
     form_action_url: str
+    id: str | None = None
     errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
 
