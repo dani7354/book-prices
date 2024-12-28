@@ -5,6 +5,8 @@
 <div id="msg-container"></div>
 <div id="job-container" class="mt-4"></div>
 
+{% include "common/_noscript_alert.html" %}
+
 <script src="{{ url_for('static', filename='js/job.js') }}"></script>
 
 {% endblock %}
