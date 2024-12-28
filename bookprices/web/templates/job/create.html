@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% set active_page = "job" %}
 {% block content %}
+
+{% include "job/_return_link_jobs.html" %}
 <h2>Opret job</h2>
+
 
 {% include "job/_job_form.html" %}
 
