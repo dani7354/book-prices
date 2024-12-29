@@ -134,7 +134,19 @@ function loadJobRunModal(event) {
         // TODO: new job run
     }
     else {
-        // TODO: load job run
+        let url = `${baseUrl}/job-run/${jobRunId}`;
+        $.ajax(url, {
+            "method": "GET",
+            "dataType": "json",
+            "success": function (data, status, xhr) {
+                console.log(data);
+            },
+            "error": function (xhr, status, error) {
+                let modalBody = jobRunModal.find(".modal-body");
+                modalBody.empty();
+                modalBody.append($("<p></p>").text(xhr["message"]));
+            }
+        });
     }
 }
 
