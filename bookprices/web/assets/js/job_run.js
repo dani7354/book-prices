@@ -1,10 +1,12 @@
 const msgContainer = $("#msg-container");
 const jobRunContainer = $("#job-run-container");
+const jobRunModal = $("#job-run-modal");
 const jobIdInput = "job-id";
 
 const baseUrl = "/job";
 const messageFieldName = "message";
 const jobRunsFieldName = "job_runs";
+const jobRunIdFieldName = "id";
 
 
 function handleClickDeleteJobRun(e) {
@@ -55,7 +57,7 @@ function initializeJobRunTable(columns, rows, translations) {
     tableHeaderRow.append($("<th></th>")); // For buttons
 
     $.each(rows, (index, row) => {
-        let tableRow = $("<tr></tr>").attr("data-id", row["id"]);
+        let tableRow = $("<tr></tr>").attr("data-id", row[jobRunIdFieldName]);
         $.each(columns, (index, columnName) => {
             tableRow.append($("<td></td>").text(row[columnName]));
         });
@@ -66,10 +68,12 @@ function initializeJobRunTable(columns, rows, translations) {
         tableRow.append(statusCell);
 
         let actionCell = $("<td></td>");
-
         let showButton = $("<a></a>")
             .attr("id", "btn-delete-job-run")
             .attr("class", "btn btn-secondary mb-1")
+            .attr("data-bs-toggle", "modal")
+            .attr("data-bs-target", "#job-run-modal")
+            .attr("data-job-run-id", row[jobRunIdFieldName])
             .text("Vis");
         actionCell.append(showButton);
         actionCell.append(" ");
@@ -123,6 +127,18 @@ function refreshJobRuns() {
     }
 }
 
+function loadJobRunModal(event) {
+    let jobRunId = $(event.relatedTarget).data("job-run-id");
+    console.log(jobRunId);
+    if (jobRunId === undefined) {
+        // TODO: new job run
+    }
+    else {
+        // TODO: load job run
+    }
+}
+
 $(document).ready(function () {
     refreshJobRuns();
+    jobRunModal.on("show.bs.modal", loadJobRunModal);
 });
