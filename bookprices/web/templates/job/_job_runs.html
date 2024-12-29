@@ -4,5 +4,8 @@
 <div id="job-run-container" class="mt-4"></div>
 
 {% include "common/_noscript_alert.html" %}
+{% include "job/_job_run_create_edit_modal.html" %}
+
+<a id="btn-create-job-run" class="btn btn-primary">Opret</a>
 
 <script src="{{ url_for('static', filename='js/job_run.js') }}"></script>
