@@ -19,11 +19,12 @@ function initializeJobTable(columns, rows, translations) {
     jobContainer.append($("<h3></h3>").text("Job list").attr("id", headingId));
 
     let table = $("<table></table>")
-        .attr("class", "table table-striped table-bordered")
+        .attr("class", "table")
         .attr("aria-describedby", headingId);
     jobContainer.append(table);
 
     let tableHeader = $("<thead></thead>");
+    let tableBody = $("<tbody></tbody>");
     let tableHeaderRow = $("<tr></tr>");
     tableHeader.append(tableHeaderRow);
     table.append(tableHeader);
@@ -34,7 +35,12 @@ function initializeJobTable(columns, rows, translations) {
             .text(translations[columnKey]));
     });
 
-    tableHeaderRow.append($("<th></th>").text("Sidste kørsel"));
+    tableHeaderRow.append($("<th></th>")
+        .attr("scope", "col")
+        .text("Sidste kørsel"));
+
+    tableHeaderRow.append($("<th></th>")
+        .attr("scope", "col")); // For buttons
 
     $.each(rows, (index, row) => {
         let tableRow = $("<tr></tr>").attr("data-id", row["id"]);
@@ -52,20 +58,23 @@ function initializeJobTable(columns, rows, translations) {
             .attr("href", row["url"])
             .attr("id", "btn-view-job")
             .attr("type", "button")
-            .attr("class", "btn btn-link btn-sm")
+            .attr("class", "btn btn-secondary mb-1")
             .text("Vis");
         actionCell.append(viewButton);
+        actionCell.append(" ");
 
-        let deleteButton = $("<button></button>")
+        let deleteButton = $("<a></a>")
             .attr("id", "btn-delete-job")
-            .attr("class", "btn btn-link btn-sm")
+            .attr("class", "btn btn-secondary mb-1")
             .text("Slet")
             .click(handleClickDeleteJob);
 
         actionCell.append(deleteButton);
         tableRow.append(actionCell);
-        table.append(tableRow);
+        tableBody.append(tableRow);
     });
+
+    table.append(tableBody);
 
     jobContainer.append(
         $("<a></a>")
@@ -117,8 +126,8 @@ function getJobs() {
         "dataType": "json",
         "success": function (data, status, xhr) {
             jobContainer.empty();
-            if (data.length === 0) {
-                jobContainer.text("No jobs found.");
+            if (data["jobs"].length === 0) {
+                jobContainer.text("Ingen jobs.");
                 return;
             }
             initializeJobTable(data["columns"], data["jobs"], data["translations"]);

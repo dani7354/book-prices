@@ -4,6 +4,7 @@ const jobIdInput = "job-id";
 
 const baseUrl = "/job";
 const messageFieldName = "message";
+const jobRunsFieldName = "job_runs";
 
 
 function handleClickDeleteJobRun(e) {
@@ -34,12 +35,12 @@ function deleteJobRun(jobRunId) {
 }
 
 function initializeJobRunTable(columns, rows, translations) {
-    jobRunContainer.empty();
     let table = $("<table></table>")
-        .attr("class", "table table-striped table-bordered")
+        .attr("class", "table")
     jobRunContainer.append(table);
 
     let tableHeader = $("<thead></thead>");
+    let tableBody = $("<tbody></tbody>")
     let tableHeaderRow = $("<tr></tr>");
     tableHeader.append(tableHeaderRow);
     table.append(tableHeader);
@@ -68,20 +69,22 @@ function initializeJobRunTable(columns, rows, translations) {
 
         let showButton = $("<a></a>")
             .attr("id", "btn-delete-job-run")
-            .attr("class", "btn btn-link btn-sm")
+            .attr("class", "btn btn-secondary mb-1")
             .text("Vis");
         actionCell.append(showButton);
+        actionCell.append(" ");
 
         let deleteButton = $("<a></a>")
             .attr("id", "btn-delete-job-run")
-            .attr("class", "btn btn-link btn-sm")
+            .attr("class", "btn btn-secondary mb-1")
             .click(handleClickDeleteJobRun)
             .text("Slet");
         actionCell.append(deleteButton);
         tableRow.append(actionCell);
-
-        table.append(tableRow);
+        tableBody.append(tableRow);
     });
+
+    table.append(tableBody);
 }
 
 function getJobRuns(jobId) {
@@ -93,9 +96,14 @@ function getJobRuns(jobId) {
             "method" : "GET",
             "dataType": "json",
             "success" : function (data, status, xhr) {
+                jobRunContainer.empty();
+                if (data[jobRunsFieldName].length === 0) {
+                    jobRunContainer.text("Ingen kørsler oprettet for dette job.");
+                    return;
+                }
                 initializeJobRunTable(
                     data["columns"],
-                    data["job_runs"],
+                    data[jobRunsFieldName],
                     data["translations"]
                 );
             },
