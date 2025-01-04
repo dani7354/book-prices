@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from urllib.error import HTTPError
+from requests.exceptions import HTTPError
 
 from bookprices.shared.api.job import JobApiClient, Endpoint, UrlParameter
 
@@ -46,7 +46,6 @@ class JobRunSchemaFields(Enum):
 
 
 class JobService:
-
 
     def __init__(self, job_api_client: JobApiClient) -> None:
         self._job_api_client = job_api_client
