@@ -11,6 +11,24 @@ function handleClickDeleteJob(e) {
      }
 }
 
+function toggleSpinnerInJobContainer(showSpinner) {
+    let spinner = jobContainer.find(".spinner-border");
+    if (showSpinner && spinner.length === 0) {
+        spinner = $("<div></div>")
+            .attr("class", "spinner-border text-secondary")
+            .attr("role", "status");
+        spinner.append($("<span></span>")
+            .attr("class", "visually-hidden")
+            .text("Loading..."));
+
+        jobContainer.prepend(spinner);
+    } else if (!showSpinner && spinner.length > 0) {
+        spinner.remove();
+    } else {
+        console.log("Something is wrong!");
+    }
+}
+
 function initializeJobTable(columns, rows, translations) {
     let headingId = "job-list-heading";
     jobContainer.append($("<h3></h3>").text("Job list").attr("id", headingId));
@@ -112,6 +130,7 @@ function deleteJob(jobId) {
 }
 
 function getJobs() {
+    toggleSpinnerInJobContainer(true);
     let url = `${baseUrl}/job-list`;
     $.ajax(url, {
         "method": "GET",
@@ -120,9 +139,11 @@ function getJobs() {
             jobContainer.empty();
             if (data["jobs"].length === 0) {
                 jobContainer.text("Ingen jobs.");
+                toggleSpinnerInJobContainer(false);
                 return;
             }
             initializeJobTable(data["columns"], data["jobs"], data["translations"]);
+            toggleSpinnerInJobContainer(false);
         }
     });
 }

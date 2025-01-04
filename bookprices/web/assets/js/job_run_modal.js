@@ -11,7 +11,7 @@ function toggleSpinnerInJobRunModal(showSpinner) {
     let spinner = jobRunModalBodyDiv.find(".spinner-border");
     if (showSpinner && spinner.length === 0) {
         spinner = $("<div></div>")
-            .attr("class", "spinner-border text-primary")
+            .attr("class", "spinner-border text-secondary")
             .attr("role", "status");
         spinner.append($("<span></span>")
             .attr("class", "visually-hidden")
