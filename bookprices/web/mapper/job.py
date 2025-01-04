@@ -11,7 +11,7 @@ from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewMode
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 JOB_RUN_PRIORITY_TRANSLATIONS = {
     JobRunPriority.HIGH: "Høj",
-    JobRunPriority.MEDIUM: "Mellem",
+    JobRunPriority.NORMAL: "Normal",
     JobRunPriority.LOW: "Lav"
 }
 
@@ -110,7 +110,7 @@ def map_job_run_list(job_runs: dict) -> JobRunListViewModel:
         job_run_list_items.append(JobRunListItem(
             id=job_run["id"],
             status=job_run["status"],
-            priority=job_run["priority"],
+            priority=JOB_RUN_PRIORITY_TRANSLATIONS[job_run["priority"]],
             updated=updated,
             created=created,
             status_color=str(status_color.value)))

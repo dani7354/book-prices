@@ -27,11 +27,11 @@ function deleteJobRun(jobRunId) {
             "csrf_token": $(csrfTokenNodeId).val()
         },
         "success": function (data, status, xhr) {
-            msgContainer.text(data[messageFieldName]);
+            showAlert(data[messageFieldName], "success", msgContainer);
             refreshJobRuns();
         },
         "error": function (xhr, status, error) {
-            msgContainer.text(xhr[messageFieldName]);
+            showAlert(xhr[messageFieldName], "danger", msgContainer);
             refreshJobRuns();
         }
     });
@@ -113,7 +113,7 @@ function getJobRuns(jobId) {
                 );
             },
             "error" : function (xhr, status, error) {
-                msgContainer.text(xhr["message"]);
+                showAlert(xhr["message"], "danger", msgContainer);
             }
         });
 }
@@ -192,8 +192,8 @@ function loadJobRunModal(event) {
             "success": function (data, status, xhr) {
                 console.log(data);
                 $("#input-status").val(data["status"]);
-                $("#input-priority").val(data["priority"]);
                 loadPriorityOptions(data["priorities"]);
+                $("#input-priority").val(data["priority"]);
                 jobRunModalForm.attr("action", data["form_action_url"]);
                 jobRunModalForm.show();
                 toggleSpinnerInJobRunModal(false);
@@ -230,7 +230,11 @@ function sendJobRunForm(event) {
             refreshJobRuns();
         },
         "error": function (xhr, status, error) {
-            msgContainer.text(xhr[messageFieldName]);
+            jobRunModalBodyDiv.prepend(
+                $("<div></div>")
+                    .attr("class", "text-danger")
+                    .prepend($("<p></p>")
+                        .text(xhr[messageFieldName])));
         }
     });
 }

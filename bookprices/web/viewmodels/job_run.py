@@ -4,7 +4,7 @@ from enum import StrEnum
 
 class JobRunPriority(StrEnum):
     HIGH = "High"
-    MEDIUM = "Medium"
+    NORMAL = "Normal"
     LOW = "Low"
 
     @classmethod
