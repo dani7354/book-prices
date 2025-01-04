@@ -30,12 +30,8 @@ function toggleSpinnerInJobContainer(showSpinner) {
 }
 
 function initializeJobTable(columns, rows, translations) {
-    let headingId = "job-list-heading";
-    jobContainer.append($("<h3></h3>").text("Job list").attr("id", headingId));
-
     let table = $("<table></table>")
-        .attr("class", "table")
-        .attr("aria-describedby", headingId);
+        .attr("class", "table");
     jobContainer.append(table);
 
     let tableHeader = $("<thead></thead>");
