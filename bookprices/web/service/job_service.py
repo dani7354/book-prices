@@ -23,6 +23,7 @@ class CreationFailedError(Exception):
 class UpdateFailedError(Exception):
     pass
 
+
 class FailedToGetJobRunsError(Exception):
     pass
 
