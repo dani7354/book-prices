@@ -148,6 +148,7 @@ function getJobs() {
     });
 }
 
+
 $(document).ready(() => {
     console.log("Loading jobs...");
     getJobs();

@@ -5,6 +5,26 @@ const jobRunsFieldName = "job_runs";
 const jobRunIdFieldName = "id";
 
 
+function toggleSpinnerInJobRunContainer(showSpinner) {
+    let spinner = jobRunContainer.find(".spinner-border");
+    if (showSpinner && spinner.length === 0) {
+        spinner = $("<div></div>")
+            .attr("class", "spinner-border text-secondary")
+            .attr("role", "status");
+        spinner.append($("<span></span>")
+            .attr("class", "visually-hidden")
+            .text("Loading..."));
+
+        jobRunContainer.prepend(spinner);
+    }
+    else if (!showSpinner && spinner.length > 0) {
+        spinner.remove();
+    }
+    else {
+        console.log("Spinner already in modal. Something is wrong!");
+    }
+}
+
 function handleClickDeleteJobRun(e) {
     e.preventDefault();
     if (confirm("Er du sikker på at du vil slette denne jobkørsel?")) {
@@ -88,6 +108,7 @@ function initializeJobRunTable(columns, rows, translations) {
 }
 
 function getJobRuns(jobId) {
+    toggleSpinnerInJobRunContainer(true);
     let url = `${baseUrl}/job-run-list`;
     if (jobId !== undefined) {
         url = `${url}?jobId=${jobId}`;
@@ -106,11 +127,13 @@ function getJobRuns(jobId) {
                     data[jobRunsFieldName],
                     data["translations"]
                 );
+                toggleSpinnerInJobRunContainer(false);
             },
             "error" : function (xhr, status, error) {
                 showAlert(xhr["message"], "danger", msgContainer);
+                toggleSpinnerInJobRunContainer(false);
             }
-        });
+    });
 }
 
 function refreshJobRuns() {
@@ -123,6 +146,8 @@ function refreshJobRuns() {
     }
 }
 
+
 $(document).ready(function () {
     refreshJobRuns();
+    jobRunModal.on("hidden.bs.modal", refreshJobRuns);
 });

@@ -107,9 +107,6 @@ function sendJobRunForm(event) {
         "success": function (data, status, xhr) {
             jobRunModal.modal("hide");
             showAlert(data[messageFieldName], "success", msgContainer);
-            if (typeof refreshJobRuns === "function") { // TODO: move this to other job_run.js, e.g. as an event listender
-                refreshJobRuns();
-            }
         },
         "error": function (xhr, status, error) {
             jobRunModalBodyDiv.prepend(
