@@ -1,7 +1,5 @@
 import logging
 from enum import Enum
-from symtable import Class
-from typing import ClassVar
 from urllib.error import HTTPError
 
 from bookprices.shared.api.job import JobApiClient, Endpoint, UrlParameter

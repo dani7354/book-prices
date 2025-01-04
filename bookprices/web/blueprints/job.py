@@ -8,7 +8,7 @@ from bookprices.web.service.job_service import (
     JobService,
     JobAlreadyExistError,
     JobDeletionFailedError,
-    UpdateFailedError, FailedToGetJobRunsError)
+    UpdateFailedError, FailedToGetJobRunsError, CreationFailedError)
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
 from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list, \
     map_job_run_edit_view_model, map_job_run_create_view_model
@@ -22,6 +22,7 @@ from bookprices.web.settings import (
     JOB_API_USERNAME,
     JOB_API_PASSWORD)
 from bookprices.web.viewmodels.job import CreateJobViewModel
+from bookprices.web.viewmodels.job_run import JobRunPriority
 
 MESSAGE_FIELD_NAME = "message"
 JOB_ID_URL_PARAMETER = "jobId"
@@ -119,11 +120,16 @@ def create_job_run_model() -> tuple[Response, int]:
 def create_job_run() -> tuple[Response, int]:
     job_id = request.form.get("job_id")
     priority = request.form.get("priority")
+    if not priority or priority not in JobRunPriority.get_values():
+        return jsonify({MESSAGE_FIELD_NAME: "Prioritet ikke gyldig!"}), HttpStatusCode.BAD_REQUEST
 
     try:
+        if not job_id or not job_service.get_job(job_id):
+            return jsonify({MESSAGE_FIELD_NAME: "Job blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
+
         job_service.create_job_run(job_id, priority)
         return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel oprettet!"}), HttpStatusCode.OK
-    except FailedToGetJobRunsError as ex:
+    except CreationFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
 
 
@@ -133,10 +139,16 @@ def update_job_run(job_run_id: str) -> tuple[Response, int]:
     job_id = request.form.get("job_id")
     priority = request.form.get("priority")
 
+    if not priority or priority not in JobRunPriority.get_values():
+        return jsonify({MESSAGE_FIELD_NAME: "Prioritet ikke gyldig!"}), HttpStatusCode.BAD_REQUEST
+
     try:
+        if not job_id or not job_service.get_job_run(job_run_id):
+            return jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
+
         job_service.update_job_run(job_id, job_run_id, priority)
         return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel opdateret!"}), HttpStatusCode.OK
-    except FailedToGetJobRunsError as ex:
+    except UpdateFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
 
 
@@ -156,7 +168,6 @@ def job_run_list() -> tuple[Response, int]:
     try:
         job_id = request.args.get(JOB_ID_URL_PARAMETER)
         job_runs = job_service.get_job_runs(job_id)
-
         job_runs_view_model = map_job_run_list(job_runs)
 
         return jsonify(job_runs_view_model), HttpStatusCode.OK
@@ -172,7 +183,6 @@ def job_run(job_run_id: str) -> tuple[Response, int]:
                 HttpStatusCode.NOT_FOUND)
 
     job_run_view_model = map_job_run_edit_view_model(job_run_json)
-
     return jsonify(job_run_view_model), HttpStatusCode.OK
 
 
@@ -182,8 +192,8 @@ def delete(job_id: str) -> tuple[Response, int]:
     try:
         if not job_service.get_job(job_id):
             return jsonify({MESSAGE_FIELD_NAME: "Job blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
-        job_service.delete_job(job_id)
 
+        job_service.delete_job(job_id)
         return jsonify({MESSAGE_FIELD_NAME: "Job slettet!"}), HttpStatusCode.OK
     except JobDeletionFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
@@ -196,8 +206,8 @@ def delete_job_run(job_run_id: str) -> tuple[Response, int]:
         if not job_service.get_job_run(job_run_id):
             return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}),
                     HttpStatusCode.BAD_REQUEST)
-        job_service.delete_job_run(job_run_id)
 
+        job_service.delete_job_run(job_run_id)
         return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel slettet!"}), HttpStatusCode.OK
     except JobDeletionFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST

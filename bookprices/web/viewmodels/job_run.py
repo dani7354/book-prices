@@ -7,6 +7,10 @@ class JobRunPriority(StrEnum):
     MEDIUM = "Medium"
     LOW = "Low"
 
+    @classmethod
+    def get_values(cls) -> list[str]:
+        return [str(x) for x in cls.__members__.values()]
+
 
 @dataclass(frozen=True)
 class JobRunListItem:
