@@ -65,8 +65,15 @@ function initializeJobTable(columns, rows, translations) {
             .attr("class", "btn btn-secondary mb-1")
             .text("Slet")
             .click(handleClickDeleteJob);
-
         actionCell.append(deleteButton);
+        actionCell.append(" ");
+
+        let runButton = $("<a></a>")
+            .attr("id", "btn-run-job")
+            .attr("class", "btn btn-secondary mb-1")
+            .text("Kør");
+        actionCell.append(runButton);
+
         tableRow.append(actionCell);
         tableBody.append(tableRow);
     });
