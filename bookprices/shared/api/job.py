@@ -115,7 +115,7 @@ class JobApiClient:
                 headers=self.get_request_headers(),
                 timeout=self.request_timeout)
             response.raise_for_status()
-            return response.json()
+            return self._decode_json_response(response)
         except HTTPError as e:
             logger.error("Failed to send PATCH request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:

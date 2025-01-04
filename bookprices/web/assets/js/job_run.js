@@ -1,6 +1,9 @@
 const msgContainer = $("#msg-container");
 const jobRunContainer = $("#job-run-container");
+
 const jobRunModal = $("#job-run-modal");
+const jobRunModalForm = $("#form-create-edit-job-run");
+const jobRunModalBodyDiv = $("#div-job-run-modal-body");
 const jobIdInput = "job-id";
 
 const baseUrl = "/job";
@@ -127,19 +130,50 @@ function refreshJobRuns() {
     }
 }
 
+function toggleSpinnerInJobRunModal(showSpinner) {
+    let spinner = jobRunModalBodyDiv.find(".spinner-border");
+    if (showSpinner && spinner.length === 0) {
+        spinner = $("<div></div>")
+            .attr("class", "spinner-border text-primary")
+            .attr("role", "status");
+        spinner.append($("<span></span>")
+            .attr("class", "visually-hidden")
+            .text("Loading..."));
+
+        jobRunModalBodyDiv.prepend(spinner);
+    }
+    else if (!showSpinner && spinner.length > 0) {
+        spinner.remove();
+    }
+    else {
+        console.log("Spinner already in modal. Something is wrong!");
+    }
+}
+
 function loadJobRunModal(event) {
     let jobRunId = $(event.relatedTarget).data("job-run-id");
-    console.log(jobRunId);
+    let jobId = $(`#${jobIdInput}`).val();
+    $("#input-job-id").val(jobId);
+
     if (jobRunId === undefined) {
+        jobRunModalForm.attr("action", `${baseUrl}/job-run/create`);
+        jobRunModalForm.show();
+
         // TODO: new job run
     }
     else {
+        toggleSpinnerInJobRunModal(true);
         let url = `${baseUrl}/job-run/${jobRunId}`;
         $.ajax(url, {
             "method": "GET",
             "dataType": "json",
             "success": function (data, status, xhr) {
                 console.log(data);
+                $("#input-priority").val(data["priority"]);
+                $("#input-status").val(data["status"]);
+                jobRunModalForm.attr("action", `${baseUrl}/job-run/update/${jobRunId}`);
+                jobRunModalForm.show();
+                toggleSpinnerInJobRunModal(false);
             },
             "error": function (xhr, status, error) {
                 let modalBody = jobRunModal.find(".modal-body");
@@ -150,7 +184,36 @@ function loadJobRunModal(event) {
     }
 }
 
+function hideModal(event) {
+    jobRunModalForm.hide();
+    $("#input-priority").val("");
+    $("#input-status").val("");
+}
+
+function sendJobRunForm(event) {
+    event.preventDefault();
+    let form = $(event.target);
+    let url = form.attr("action");
+    let data = form.serialize();
+    data += `&csrf_token=${$(csrfTokenNodeId).val()}`;
+    $.ajax(url, {
+        "method": "POST",
+        "dataType": "json",
+        "data": data,
+        "success": function (data, status, xhr) {
+            msgContainer.text(data[messageFieldName]);
+            jobRunModal.modal("hide");
+            refreshJobRuns();
+        },
+        "error": function (xhr, status, error) {
+            msgContainer.text(xhr[messageFieldName]);
+        }
+    });
+}
+
 $(document).ready(function () {
     refreshJobRuns();
     jobRunModal.on("show.bs.modal", loadJobRunModal);
+    jobRunModal.on("hidden.bs.modal", hideModal);
+    jobRunModalForm.on("submit", sendJobRunForm);
 });

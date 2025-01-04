@@ -28,7 +28,7 @@ class CreateJobViewModel:
     name_field_name: ClassVar[str] = "name"
     description_field_name: ClassVar[str] = "description"
     active_field_name: ClassVar[str] = "active"
-    id_field_name: ClassVar[str] = "job-id"
+    id_field_name: ClassVar[str] = "job_id"
 
     name_min_length: ClassVar[int] = 3
     name_max_length: ClassVar[int] = 256

@@ -8,9 +8,10 @@ from bookprices.web.service.job_service import (
     JobService,
     JobAlreadyExistError,
     JobDeletionFailedError,
-    JobUpdateFailedError, FailedToGetJobRunsError)
+    UpdateFailedError, FailedToGetJobRunsError)
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
-from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list
+from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list, \
+    map_job_run_edit_view_model
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -95,7 +96,7 @@ def edit(job_id: str) -> str | Response:
                 name=view_model.name,
                 description=view_model.description,
                 is_active=view_model.active)
-        except (JobAlreadyExistError, JobUpdateFailedError) as ex:
+        except (JobAlreadyExistError, UpdateFailedError) as ex:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.EDIT.value, view_model=view_model)
 
@@ -104,7 +105,33 @@ def edit(job_id: str) -> str | Response:
     return render_template(JobTemplate.EDIT.value, view_model=map_job_edit_view_model(job))
 
 
-@job_blueprint.route("/job-list", methods=[HttpMethod.GET.value])
+@job_blueprint.route("job-run/create", methods=[HttpMethod.POST.value])
+@login_required
+def create_job_run() -> tuple[Response, int]:
+    job_id = request.form.get("job_id")
+    priority = request.form.get("priority")
+
+    try:
+        job_service.create_job_run(job_id, priority)
+        return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel oprettet!"}), HttpStatusCode.OK
+    except FailedToGetJobRunsError as ex:
+        return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
+
+
+@job_blueprint.route("job-run/update/<job_run_id>", methods=[HttpMethod.POST.value])
+@login_required
+def update_job_run(job_run_id: str) -> tuple[Response, int]:
+    job_id = request.form.get("job_id")
+    priority = request.form.get("priority")
+
+    try:
+        job_service.update_job_run(job_id, job_run_id, priority)
+        return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel opdateret!"}), HttpStatusCode.OK
+    except FailedToGetJobRunsError as ex:
+        return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
+
+
+@job_blueprint.route("job-list", methods=[HttpMethod.GET.value])
 @login_required
 def job_list() -> tuple[Response, int]:
     jobs = job_service.get_job_list()
@@ -135,7 +162,9 @@ def job_run(job_run_id: str) -> tuple[Response, int]:
         return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}),
                 HttpStatusCode.NOT_FOUND)
 
-    return jsonify(job_run_json), HttpStatusCode.OK
+    job_run_view_model = map_job_run_edit_view_model(job_run_json)
+
+    return jsonify(job_run_view_model), HttpStatusCode.OK
 
 
 @job_blueprint.route("/delete/<job_id>", methods=[HttpMethod.POST.value])

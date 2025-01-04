@@ -5,8 +5,7 @@ from typing import Self
 from flask import url_for
 
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
-from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewModel
-
+from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewModel, JobRunEditViewModel, JobRunArgument
 
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
@@ -73,6 +72,18 @@ def map_job_edit_view_model(job_json: dict) -> CreateJobViewModel:
         active=job_json["isActive"],
         id=job_json["id"],
         form_action_url=f"/job/edit/{job_json['id']}")
+
+
+def map_job_run_edit_view_model(job_run_json: dict) -> JobRunEditViewModel:
+    return JobRunEditViewModel(
+        id=job_run_json["id"],
+        job_id=job_run_json["jobId"],
+        status=job_run_json["status"],
+        priority=job_run_json["priority"],
+        created=datetime.fromisoformat(job_run_json["created"]).strftime(DATE_FORMAT),
+        updated=datetime.fromisoformat(job_run_json["updated"]).strftime(DATE_FORMAT),
+        arguments=[JobRunArgument(name=arg["name"], type=arg["type"], values=arg["values"])
+                   for arg in job_run_json["arguments"]])
 
 
 def map_job_run_list(job_runs: dict) -> JobRunListViewModel:
