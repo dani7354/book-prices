@@ -6,8 +6,6 @@ const jobRunModalForm = $("#form-create-edit-job-run");
 const jobRunModalBodyDiv = $("#div-job-run-modal-body");
 const jobIdInput = "job-id";
 
-const baseUrl = "/job";
-const messageFieldName = "message";
 const jobRunsFieldName = "job_runs";
 const jobRunIdFieldName = "id";
 
@@ -150,16 +148,40 @@ function toggleSpinnerInJobRunModal(showSpinner) {
     }
 }
 
+function loadPriorityOptions(priorities) {
+    let priorityInput = $("#input-priority");
+    $.each(priorities, (value, translation) => {
+        priorityInput.append(
+            $("<option></option>")
+                .attr("value", value)
+                .text(translation)
+        );
+    });
+}
+
 function loadJobRunModal(event) {
     let jobRunId = $(event.relatedTarget).data("job-run-id");
     let jobId = $(`#${jobIdInput}`).val();
     $("#input-job-id").val(jobId);
 
     if (jobRunId === undefined) {
-        jobRunModalForm.attr("action", `${baseUrl}/job-run/create`);
-        jobRunModalForm.show();
-
-        // TODO: new job run
+        toggleSpinnerInJobRunModal(true);
+        let url = `${baseUrl}/job-run/create-model?jobId=${jobId}`;
+        $.ajax(url, {
+            "method": "GET",
+            "dataType": "json",
+            "success": function (data, status, xhr) {
+                loadPriorityOptions(data["priorities"]);
+                toggleSpinnerInJobRunModal(false);
+                jobRunModalForm.attr("action", data["form_action_url"]);
+                jobRunModalForm.show();
+            },
+            "error": function (xhr, status, error) {
+                let modalBody = jobRunModal.find(".modal-body");
+                modalBody.empty();
+                modalBody.append($("<p></p>").text(xhr["message"]));
+            }
+        });
     }
     else {
         toggleSpinnerInJobRunModal(true);
@@ -169,9 +191,10 @@ function loadJobRunModal(event) {
             "dataType": "json",
             "success": function (data, status, xhr) {
                 console.log(data);
-                $("#input-priority").val(data["priority"]);
                 $("#input-status").val(data["status"]);
-                jobRunModalForm.attr("action", `${baseUrl}/job-run/update/${jobRunId}`);
+                $("#input-priority").val(data["priority"]);
+                loadPriorityOptions(data["priorities"]);
+                jobRunModalForm.attr("action", data["form_action_url"]);
                 jobRunModalForm.show();
                 toggleSpinnerInJobRunModal(false);
             },
@@ -188,6 +211,7 @@ function hideModal(event) {
     jobRunModalForm.hide();
     $("#input-priority").val("");
     $("#input-status").val("");
+    $("#input-priority").empty();
 }
 
 function sendJobRunForm(event) {
@@ -201,8 +225,8 @@ function sendJobRunForm(event) {
         "dataType": "json",
         "data": data,
         "success": function (data, status, xhr) {
-            msgContainer.text(data[messageFieldName]);
             jobRunModal.modal("hide");
+            showAlert(data[messageFieldName], "success", msgContainer);
             refreshJobRuns();
         },
         "error": function (xhr, status, error) {

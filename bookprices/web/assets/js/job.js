@@ -1,9 +1,6 @@
 const msgContainer = $("#msg-container");
 const jobContainer = $("#job-container");
 
-const baseUrl = "/job";
-const messageFieldName = "message";
-
 
 function handleClickDeleteJob(e) {
     e.preventDefault();
@@ -84,21 +81,6 @@ function initializeJobTable(columns, rows, translations) {
             .attr("class", "btn btn-primary"));
 }
 
-function showAlert(message, alertType) {
-    let alert = $("<div></div>")
-        .attr("class", `alert alert-${alertType} alert-dismissible fade show`)
-        .attr("role", "alert")
-        .text(message);
-    alert.append(
-        $("<button></button>")
-            .attr("class", "btn-close")
-            .attr("data-bs-dismiss", "alert")
-            .attr("aria-label", "Close")
-            .attr("type", "button"));
-    msgContainer.prepend(alert);
-    alert.alert();
-}
-
 function deleteJob(jobId) {
     let url = `${baseUrl}/delete/${jobId}`;
     $.ajax(url, {
@@ -108,11 +90,11 @@ function deleteJob(jobId) {
             "csrf_token": $(csrfTokenNodeId).val()
         },
         "success": function (data, status, xhr) {
-            showAlert(data[messageFieldName], "success");
+            showAlert(data[messageFieldName], "success", msgContainer);
             getJobs();
         },
         "error": function (error) {
-            showAlert(error[messageFieldName], "danger");
+            showAlert(error[messageFieldName], "danger", msgContainer);
             getJobs();
             console.log(error);
         }

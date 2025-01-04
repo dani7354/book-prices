@@ -1,4 +1,11 @@
 from dataclasses import dataclass, field
+from enum import StrEnum
+
+
+class JobRunPriority(StrEnum):
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
 
 
 @dataclass(frozen=True)
@@ -26,6 +33,13 @@ class JobRunArgument:
 
 
 @dataclass(frozen=True)
+class JobRunCreateViewModel:
+    form_action_url: str
+    job_id: str
+    priorities: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class JobRunEditViewModel:
     id: str
     job_id: str
@@ -33,4 +47,6 @@ class JobRunEditViewModel:
     priority: str
     created: str
     updated: str
+    form_action_url: str
+    priorities: dict[str, str] = field(default_factory=dict)
     arguments: list[JobRunArgument] = field(default_factory=list)

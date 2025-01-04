@@ -5,9 +5,15 @@ from typing import Self
 from flask import url_for
 
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
-from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewModel, JobRunEditViewModel, JobRunArgument
+from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewModel, JobRunEditViewModel, JobRunArgument, \
+    JobRunPriority, JobRunCreateViewModel
 
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
+JOB_RUN_PRIORITY_TRANSLATIONS = {
+    JobRunPriority.HIGH: "Høj",
+    JobRunPriority.MEDIUM: "Mellem",
+    JobRunPriority.LOW: "Lav"
+}
 
 
 class JobStatusColor(Enum):
@@ -74,6 +80,13 @@ def map_job_edit_view_model(job_json: dict) -> CreateJobViewModel:
         form_action_url=f"/job/edit/{job_json['id']}")
 
 
+def map_job_run_create_view_model(job_id: str) -> JobRunCreateViewModel:
+    return JobRunCreateViewModel(
+        job_id=job_id,
+        form_action_url="/job/job-run/create",
+        priorities=JOB_RUN_PRIORITY_TRANSLATIONS)
+
+
 def map_job_run_edit_view_model(job_run_json: dict) -> JobRunEditViewModel:
     return JobRunEditViewModel(
         id=job_run_json["id"],
@@ -82,6 +95,8 @@ def map_job_run_edit_view_model(job_run_json: dict) -> JobRunEditViewModel:
         priority=job_run_json["priority"],
         created=datetime.fromisoformat(job_run_json["created"]).strftime(DATE_FORMAT),
         updated=datetime.fromisoformat(job_run_json["updated"]).strftime(DATE_FORMAT),
+        form_action_url=f"/job/job-run/update/{job_run_json['id']}",
+        priorities=JOB_RUN_PRIORITY_TRANSLATIONS,
         arguments=[JobRunArgument(name=arg["name"], type=arg["type"], values=arg["values"])
                    for arg in job_run_json["arguments"]])
 

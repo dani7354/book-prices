@@ -11,7 +11,7 @@ from bookprices.web.service.job_service import (
     UpdateFailedError, FailedToGetJobRunsError)
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
 from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list, \
-    map_job_run_edit_view_model
+    map_job_run_edit_view_model, map_job_run_create_view_model
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -103,6 +103,15 @@ def edit(job_id: str) -> str | Response:
         return redirect(url_for("job.index"))
 
     return render_template(JobTemplate.EDIT.value, view_model=map_job_edit_view_model(job))
+
+
+@job_blueprint.route("job-run/create-model", methods=[HttpMethod.GET.value])
+@login_required
+def create_job_run_model() -> tuple[Response, int]:
+    if not (job_id := request.args.get(JOB_ID_URL_PARAMETER)):
+        return jsonify({MESSAGE_FIELD_NAME: "Job-id påkrævet!"}), HttpStatusCode.BAD_REQUEST
+
+    return jsonify(map_job_run_create_view_model(job_id)), HttpStatusCode.OK
 
 
 @job_blueprint.route("job-run/create", methods=[HttpMethod.POST.value])
