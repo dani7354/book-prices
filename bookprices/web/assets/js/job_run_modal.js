@@ -3,6 +3,7 @@ const jobRunModalForm = $("#form-create-edit-job-run");
 const jobRunModalBodyDiv = $("#div-job-run-modal-body");
 const inputPriority = $("#input-priority");
 const inputJobId = $("#input-job-id");
+
 const jobIdInput = "job-id";
 
 
@@ -45,6 +46,9 @@ function hideModal(event) {
 function loadJobRunModal(event) {
     let jobRunId = $(event.relatedTarget).data("job-run-id");
     let jobId = $(`#${jobIdInput}`).val();
+    if (jobId === undefined) {
+        jobId = $(event.relatedTarget).data("job-id");
+    }
     inputPriority.val(jobId);
 
     if (jobRunId === undefined) {
@@ -103,7 +107,9 @@ function sendJobRunForm(event) {
         "success": function (data, status, xhr) {
             jobRunModal.modal("hide");
             showAlert(data[messageFieldName], "success", msgContainer);
-            refreshJobRuns();
+            if (typeof refreshJobRuns === "function") { // TODO: move this to other job_run.js, e.g. as an event listender
+                refreshJobRuns();
+            }
         },
         "error": function (xhr, status, error) {
             jobRunModalBodyDiv.prepend(

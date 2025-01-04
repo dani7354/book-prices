@@ -71,6 +71,9 @@ function initializeJobTable(columns, rows, translations) {
         let runButton = $("<a></a>")
             .attr("id", "btn-run-job")
             .attr("class", "btn btn-secondary mb-1")
+            .attr("data-bs-toggle", "modal")
+            .attr("data-bs-target", "#job-run-modal")
+            .attr("data-job-id", row["id"])
             .text("Kør");
         actionCell.append(runButton);
 
