@@ -218,7 +218,7 @@ def map_book_details(book: Book,
         price_str = bp.price if is_price_available else PRICE_NONE_TEXT
         created_str = bp.created if is_price_available else PRICE_CREATED_NONE_TEXT
         price_history_url = _create_url(page,
-                                        endpoint=Endpoint.PRICE_HISTORY.value,
+                                        endpoint=Endpoint.BOOK_PRICE_HISTORY.value,
                                         book_id=book.id,
                                         store_id=bp.book_store_id,
                                         **{SEARCH_URL_PARAMETER: search_phrase,

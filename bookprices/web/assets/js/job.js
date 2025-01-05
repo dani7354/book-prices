@@ -5,7 +5,6 @@ const jobContainer = $("#job-container");
 function handleClickDeleteJob(e) {
     e.preventDefault();
      if (confirm("Er du sikker på at du vil slette jobbet?")) {
-         console.log("Deleting job...");
          let jobId = $(e.target).closest("tr").data("id");
          deleteJob(jobId);
      }
@@ -113,7 +112,7 @@ function deleteJob(jobId) {
         "data": {
             "csrf_token": $(csrfTokenNodeId).val()
         },
-        "success": function (data, status, xhr) {
+        "success": function (data) {
             showAlert(data[messageFieldName], "success", msgContainer);
             getJobs();
         },
@@ -131,7 +130,7 @@ function getJobs() {
     $.ajax(url, {
         "method": "GET",
         "dataType": "json",
-        "success": function (data, status, xhr) {
+        "success": function (data) {
             jobContainer.empty();
             if (data["jobs"].length === 0) {
                 jobContainer.text("Ingen jobs.");

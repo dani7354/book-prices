@@ -9,7 +9,7 @@ from bookprices.web.service.job_service import (
     JobAlreadyExistError,
     JobDeletionFailedError,
     UpdateFailedError, FailedToGetJobRunsError, CreationFailedError)
-from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode
+from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode, Endpoint
 from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list, \
     map_job_run_edit_view_model, map_job_run_create_view_model
 from bookprices.web.settings import (
@@ -66,7 +66,7 @@ def create() -> str | Response:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.CREATE.value, view_model=view_model)
 
-        return redirect(url_for("job.index"))
+        return redirect(url_for(Endpoint.JOB_INDEX.value))
 
     return render_template(JobTemplate.CREATE.value, view_model=CreateJobViewModel.empty(url_for("job.create")))
 
@@ -86,7 +86,7 @@ def edit(job_id: str) -> str | Response:
             name,
             description,
             active,
-            form_action_url=url_for("job.edit", job_id=job_id),
+            form_action_url=url_for(Endpoint.JOB_EDIT.value, job_id=job_id),
             id=job_id)
         if not view_model.is_valid():
             return render_template(JobTemplate.EDIT.value, view_model=view_model)
@@ -101,7 +101,7 @@ def edit(job_id: str) -> str | Response:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.EDIT.value, view_model=view_model)
 
-        return redirect(url_for("job.index"))
+        return redirect(url_for(Endpoint.JOB_INDEX.value))
 
     return render_template(JobTemplate.EDIT.value, view_model=map_job_edit_view_model(job))
 

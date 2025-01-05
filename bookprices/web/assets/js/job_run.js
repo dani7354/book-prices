@@ -1,9 +1,6 @@
 const msgContainer = $("#msg-container");
 const jobRunContainer = $("#job-run-container");
 
-const jobRunsFieldName = "job_runs";
-const jobRunIdFieldName = "id";
-
 
 function toggleSpinnerInJobRunContainer(showSpinner) {
     let spinner = jobRunContainer.find(".spinner-border");
@@ -41,12 +38,12 @@ function deleteJobRun(jobRunId) {
         "data": {
             "csrf_token": $(csrfTokenNodeId).val()
         },
-        "success": function (data, status, xhr) {
+        "success": function (data) {
             showAlert(data[messageFieldName], "success", msgContainer);
             refreshJobRuns();
         },
-        "error": function (xhr, status, error) {
-            showAlert(xhr[messageFieldName], "danger", msgContainer);
+        "error": function (xhr) {
+            showAlert(xhr.responseJSON[messageFieldName], "danger", msgContainer);
             refreshJobRuns();
         }
     });
@@ -116,7 +113,7 @@ function getJobRuns(jobId) {
     $.ajax(url, {
             "method" : "GET",
             "dataType": "json",
-            "success" : function (data, status, xhr) {
+            "success" : function (data) {
                 jobRunContainer.empty();
                 if (data[jobRunsFieldName].length === 0) {
                     jobRunContainer.text("Ingen kørsler oprettet for dette job.");
@@ -129,8 +126,8 @@ function getJobRuns(jobId) {
                 );
                 toggleSpinnerInJobRunContainer(false);
             },
-            "error" : function (xhr, status, error) {
-                showAlert(xhr["message"], "danger", msgContainer);
+            "error" : function (xhr) {
+                showAlert(xhr.responseJSON[messageFieldName], "danger", msgContainer);
                 toggleSpinnerInJobRunContainer(false);
             }
     });

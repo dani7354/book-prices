@@ -1,6 +1,12 @@
 const baseUrl = "/job";
 
 const messageFieldName = "message";
+const jobRunsFieldName = "job_runs";
+const jobRunIdFieldName = "id";
+const formActionUrlFieldName = "form_action_url";
+const priorityFieldName = "priority";
+const prioritiesFieldName = "priorities";
+
 
 function showAlert(message, alertType, container) {
     let alert = $("<div></div>")

@@ -27,6 +27,10 @@ services:
     env_file: ./docker/web/.web.env
     volumes:
       - ./google_client_secrets.json:/usr/local/bookprices_web/google_client_secrets.json:ro
+    depends_on:
+      - db
+      - redis
+      - job_api
     networks:
       - localnetwork
   nginx:

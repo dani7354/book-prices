@@ -57,17 +57,17 @@ function loadJobRunModal(event) {
         $.ajax(url, {
             "method": "GET",
             "dataType": "json",
-            "success": function (data, status, xhr) {
-                loadPriorityOptions(data["priorities"]);
+            "success": function (data) {
+                loadPriorityOptions(data[prioritiesFieldName]);
                 inputJobId.val(jobId);
                 toggleSpinnerInJobRunModal(false);
-                jobRunModalForm.attr("action", data["form_action_url"]);
+                jobRunModalForm.attr("action", data[formActionUrlFieldName]);
                 jobRunModalForm.show();
             },
-            "error": function (xhr, status, error) {
+            "error": function (xhr) {
                 let modalBody = jobRunModal.find(".modal-body");
                 modalBody.empty();
-                modalBody.append($("<p></p>").text(xhr["message"]));
+                showAlert(xhr.responseJSON[messageFieldName], "danger", modalBody);
             }
         });
     }
@@ -77,18 +77,17 @@ function loadJobRunModal(event) {
         $.ajax(url, {
             "method": "GET",
             "dataType": "json",
-            "success": function (data, status, xhr) {
-                console.log(data);
-                loadPriorityOptions(data["priorities"]);
-                inputPriority.val(data["priority"]);
-                jobRunModalForm.attr("action", data["form_action_url"]);
+            "success": function (data) {
+                loadPriorityOptions(data[prioritiesFieldName]);
+                inputPriority.val(data[priorityFieldName]);
+                jobRunModalForm.attr("action", data[formActionUrlFieldName]);
                 jobRunModalForm.show();
                 toggleSpinnerInJobRunModal(false);
             },
-            "error": function (xhr, status, error) {
+            "error": function (xhr) {
                 let modalBody = jobRunModal.find(".modal-body");
                 modalBody.empty();
-                modalBody.append($("<p></p>").text(xhr["message"]));
+                showAlert(xhr.responseJSON[messageFieldName], "danger", modalBody);
             }
         });
     }
@@ -104,16 +103,12 @@ function sendJobRunForm(event) {
         "method": "POST",
         "dataType": "json",
         "data": data,
-        "success": function (data, status, xhr) {
+        "success": function (data) {
             jobRunModal.modal("hide");
             showAlert(data[messageFieldName], "success", msgContainer);
         },
-        "error": function (xhr, status, error) {
-            jobRunModalBodyDiv.prepend(
-                $("<div></div>")
-                    .attr("class", "text-danger")
-                    .prepend($("<p></p>")
-                        .text(xhr[messageFieldName])));
+        "error": function (xhr) {
+            showAlert(xhr.responseJSON[messageFieldName], "danger", jobRunModalBodyDiv);
         }
     });
 }

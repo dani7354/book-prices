@@ -45,7 +45,6 @@ class JobApiClient:
         self._api_password = api_password
         self._api_key_db = api_key_db
         self._api_key = None
-        self._set_api_key()
 
     def get(self, endpoint: str) -> dict:
         return self._send_get(endpoint)
@@ -146,7 +145,7 @@ class JobApiClient:
             endpoint: str,
             data: dict | None = None) -> dict:
         self._refresh_api_key()
-        self._set_api_key()
+        self._ensure_api_is_set()
         return request_func(endpoint, data, True) if data else request_func(endpoint, True)
 
     def get_request_headers(self) -> dict:
@@ -173,7 +172,9 @@ class JobApiClient:
         api_key = response.content.decode(self.response_encoding).strip("\"")  # TODO: fix response format in API instead
         self._add_or_update_api_key_in_db(api_key)
 
-    def _set_api_key(self) -> None:
+    def _ensure_api_is_set(self) -> None:
+        if self._api_key:
+            return
         if not (api_key := self._api_key_db.get_api_key(self.api_name)):
             self._refresh_api_key()
             api_key = self._api_key_db.get_api_key(self.api_name)

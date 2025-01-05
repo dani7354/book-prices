@@ -23,12 +23,16 @@ class CacheTtlOption(IntEnum):  # In seconds
 
 class Endpoint(Enum):
     PAGE_INDEX = "page.index"
-    ABOUT = "page.about"
-    LOGIN = "page.login"
+    PAGE_ABOUT = "page.about"
+    PAGE_LOGIN = "page.login"
     BOOK = "book.book"
-    CREATE = "book.create"
-    PRICE_HISTORY = "book.price_history"
+    BOOK_CREATE = "book.create"
+    BOOK_PRICE_HISTORY = "book.price_history"
     BOOK_SEARCH = "book.search"
+    JOB_INDEX = "job.index"
+    JOB_EDIT = "job.edit"
+    JOB_CREATE_JOB_RUN = "job.create_job_run"
+    JOB_UPDATE_JOB_RUN = "job.update_job_run"
 
 
 class SessionKey(Enum):

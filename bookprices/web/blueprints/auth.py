@@ -22,6 +22,8 @@ from bookprices.web.settings import (
     GOOGLE_API_SCOPES)
 
 
+REDIRECT_URL_PARAMETER = "redirect_url"
+
 logger = LocalProxy(lambda: current_app.logger)
 
 auth_blueprint = Blueprint("auth", __name__)
@@ -88,7 +90,7 @@ def oauth2callback() -> Response | tuple[Response, int]:
 
 @auth_blueprint.route("/logout", methods=[HttpMethod.POST.value])
 def logout() -> tuple[Response, int]:
-    redirect_url_from_request = request.args.get("redirect_url", url_for(Endpoint.PAGE_INDEX.value))
+    redirect_url_from_request = request.args.get(REDIRECT_URL_PARAMETER, url_for(Endpoint.PAGE_INDEX.value))
     logout_user()
 
-    return jsonify({"redirect_url":  format_url_for_redirection(redirect_url_from_request)}), HttpStatusCode.OK
+    return jsonify({REDIRECT_URL_PARAMETER:  format_url_for_redirection(redirect_url_from_request)}), HttpStatusCode.OK
