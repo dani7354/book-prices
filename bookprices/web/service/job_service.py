@@ -8,11 +8,11 @@ from bookprices.shared.api.job import JobApiClient, Endpoint, UrlParameter
 logger = logging.getLogger(__name__)
 
 
-class JobAlreadyExistError(Exception):
+class AlreadyExistError(Exception):
     pass
 
 
-class JobDeletionFailedError(Exception):
+class DeletionFailedError(Exception):
     pass
 
 
@@ -104,7 +104,7 @@ class JobService:
         if any(job["name"] == name for job in job_list_json):
             error_msg = f"Job with name {name} already exist."
             logger.error(error_msg)
-            raise JobAlreadyExistError(error_msg)
+            raise AlreadyExistError(error_msg)
         try:
             self._job_api_client.post(
                 Endpoint.JOBS.value,
@@ -133,7 +133,7 @@ class JobService:
             if any(job["name"] == name and job["id"] != job_id for job in job_list):
                 error_msg = f"Job with name {name} already exist."
                 logger.error(error_msg)
-                raise JobAlreadyExistError(error_msg)
+                raise AlreadyExistError(error_msg)
 
             self._job_api_client.put(
                 Endpoint.get_job_url(job_id),
@@ -163,11 +163,11 @@ class JobService:
             self._job_api_client.delete(Endpoint.get_job_url(job_id))
         except HTTPError as ex:
             logger.error(f"Failed to delete job with id {job_id}. Error: {ex}")
-            raise JobDeletionFailedError(f"Job with id {job_id} could not be deleted.")
+            raise DeletionFailedError(f"Job with id {job_id} could not be deleted.")
 
     def delete_job_run(self, job_run_id: str) -> None:
         try:
             self._job_api_client.delete(Endpoint.get_job_run_url(job_run_id))
         except HTTPError as ex:
             logger.error(f"Failed to delete job run with id {job_run_id}. Error: {ex}")
-            raise JobDeletionFailedError(f"Job run with id {job_run_id} could not be deleted.")
+            raise DeletionFailedError(f"Job run with id {job_run_id} could not be deleted.")

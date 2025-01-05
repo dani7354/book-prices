@@ -6,8 +6,8 @@ from bookprices.shared.db.database import Database
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.service.job_service import (
     JobService,
-    JobAlreadyExistError,
-    JobDeletionFailedError,
+    AlreadyExistError,
+    DeletionFailedError,
     UpdateFailedError, FailedToGetJobRunsError, CreationFailedError)
 from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode, Endpoint
 from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list, \
@@ -62,7 +62,7 @@ def create() -> str | Response:
                 name=view_model.name,
                 description=view_model.description,
                 is_active=view_model.active)
-        except JobAlreadyExistError as ex:
+        except AlreadyExistError as ex:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.CREATE.value, view_model=view_model)
 
@@ -97,7 +97,7 @@ def edit(job_id: str) -> str | Response:
                 name=view_model.name,
                 description=view_model.description,
                 is_active=view_model.active)
-        except (JobAlreadyExistError, UpdateFailedError) as ex:
+        except (AlreadyExistError, UpdateFailedError) as ex:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.EDIT.value, view_model=view_model)
 
@@ -195,7 +195,7 @@ def delete(job_id: str) -> tuple[Response, int]:
 
         job_service.delete_job(job_id)
         return jsonify({MESSAGE_FIELD_NAME: "Job slettet!"}), HttpStatusCode.OK
-    except JobDeletionFailedError as ex:
+    except DeletionFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
 
 
@@ -209,5 +209,5 @@ def delete_job_run(job_run_id: str) -> tuple[Response, int]:
 
         job_service.delete_job_run(job_run_id)
         return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel slettet!"}), HttpStatusCode.OK
-    except JobDeletionFailedError as ex:
+    except DeletionFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
