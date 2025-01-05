@@ -22,7 +22,7 @@ from bookprices.web.settings import (
     JOB_API_USERNAME,
     JOB_API_PASSWORD)
 from bookprices.web.viewmodels.job import CreateJobViewModel
-from bookprices.web.viewmodels.job_run import JobRunPriority
+from bookprices.web.viewmodels.job_run import JobRunPriority, JobRunCreateViewModel, JobRunEditViewModel
 
 MESSAGE_FIELD_NAME = "message"
 JOB_ID_URL_PARAMETER = "jobId"
@@ -118,8 +118,8 @@ def create_job_run_model() -> tuple[Response, int]:
 @job_blueprint.route("job-run/create", methods=[HttpMethod.POST.value])
 @login_required
 def create_job_run() -> tuple[Response, int]:
-    job_id = request.form.get("job_id")
-    priority = request.form.get("priority")
+    job_id = request.form.get(JobRunCreateViewModel.job_id_field_name)
+    priority = request.form.get(JobRunCreateViewModel.priority_field_name)
     if not priority or priority not in JobRunPriority.get_values():
         return jsonify({MESSAGE_FIELD_NAME: "Prioritet ikke gyldig!"}), HttpStatusCode.BAD_REQUEST
 
@@ -136,8 +136,8 @@ def create_job_run() -> tuple[Response, int]:
 @job_blueprint.route("job-run/update/<job_run_id>", methods=[HttpMethod.POST.value])
 @login_required
 def update_job_run(job_run_id: str) -> tuple[Response, int]:
-    job_id = request.form.get("job_id")
-    priority = request.form.get("priority")
+    job_id = request.form.get(JobRunEditViewModel.job_id_field_name)
+    priority = request.form.get(JobRunEditViewModel.priority_field_name)
 
     if not priority or priority not in JobRunPriority.get_values():
         return jsonify({MESSAGE_FIELD_NAME: "Prioritet ikke gyldig!"}), HttpStatusCode.BAD_REQUEST
