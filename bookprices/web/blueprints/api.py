@@ -14,7 +14,7 @@ from bookprices.web.settings import (
     MYSQL_DATABASE,
     AUTHOR_URL_PARAMETER,
     SEARCH_URL_PARAMETER)
-from bookprices.web.shared.enum import HttpStatusCode
+from bookprices.web.shared.enum import HttpStatusCode, HttpMethod
 
 RESPONSE_CACHE_TIMEOUT = 600
 
@@ -27,7 +27,7 @@ db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 book_service = BookService(db, cache)
 
 
-@api_blueprint.route("/book/<int:book_id>")
+@api_blueprint.route("/book/<int:book_id>", methods=[HttpMethod.GET.value])
 def book(book_id: int) -> tuple[Response, int]:
     if not (book_result := book_service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen blev ikke fundet")
@@ -38,7 +38,7 @@ def book(book_id: int) -> tuple[Response, int]:
     return jsonify(price_history_response), HttpStatusCode.OK
 
 
-@api_blueprint.route("/book/<int:book_id>/store/<int:store_id>")
+@api_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
 def prices(book_id: int, store_id: int) -> tuple[Response, int]:
     if not (book_result := book_service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen blev ikke fundet")
@@ -52,7 +52,7 @@ def prices(book_id: int, store_id: int) -> tuple[Response, int]:
     return jsonify(price_history_response), HttpStatusCode.OK
 
 
-@api_blueprint.route("/book/search_suggestions")
+@api_blueprint.route("/book/search_suggestions", methods=[HttpMethod.GET.value])
 def search_suggestions() -> tuple[Response, int]:
     args = parse_args_for_search(request.args)
     search_phrase = args.get(SEARCH_URL_PARAMETER)

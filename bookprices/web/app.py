@@ -10,6 +10,7 @@ from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.auth import auth_blueprint
 from bookprices.web.blueprints.book import book_blueprint
 from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
+from bookprices.web.blueprints.job import job_blueprint
 from bookprices.web.blueprints.logging_configuration import RequestFormatter
 from bookprices.web.blueprints.status import status_blueprint
 from bookprices.web.blueprints.user import user_blueprint
@@ -70,6 +71,7 @@ app.register_blueprint(api_blueprint, url_prefix="/api")
 app.register_blueprint(auth_blueprint, url_prefix="/auth")
 app.register_blueprint(user_blueprint, url_prefix="/user")
 app.register_blueprint(status_blueprint, url_prefix="/status")
+app.register_blueprint(job_blueprint, url_prefix="/job")
 app.register_error_handler(HttpStatusCode.NOT_FOUND, not_found_html)
 app.register_error_handler(HttpStatusCode.INTERNAL_SERVER_ERROR, internal_server_error_html)
 

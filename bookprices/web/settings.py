@@ -17,6 +17,11 @@ CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "300"))
 GOOGLE_CLIENT_SECRETS_FILE = os.environ["GOOGLE_CLIENT_SECRETS_FILE"]
 GOOGLE_API_SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid"]
 
+# Job API settings
+JOB_API_BASE_URL = os.environ["JOB_API_BASE_URL"]
+JOB_API_USERNAME = os.environ["JOB_API_USERNAME"]
+JOB_API_PASSWORD = os.environ["JOB_API_PASSWORD"]
+
 # App settings
 DEBUG_MODE = os.environ.get("DEBUG", "False") == "True"
 SITE_HOSTNAME = os.environ.get("SITE_HOSTNAME", "localhost")
@@ -65,4 +70,16 @@ SRI_ATTRIBUTE_VALUES = {
     "price_chart_js": ("sha256-nplyvECabg1ucrGD67kLnowW4omKElWJh4XdHmWEThU= "
                        "sha384-wHjoO1W6m3By/6IG0EDWFgSBvAA3bNfM2qZytT83CBoz7o7FtPlFU5VVBFCsrrZD "
                        "sha512-DnLignW8sRBNHfGw7u4jZHvDjewlfa2R0vly+JJWiS0SJxHQVmDd8aEVLc0D3tCvuQJn4oBsfjv7lhDoZ450Ig=="),
+    "job_js": ("sha256-oNMlSnpnF6VvB4LeWrC0jqZzpzqsJWx4+Abkyh32PI0= "
+               "sha384-A0/HOGoDL/AQpnbJC+lSYvHTgdotPlix7gcrk94fESCRPAaFa5JwvLkSXXEBXn6G "
+               "sha512-ntAbJQLlqaQ4Lm/OHfulgg2kcc5gz17SA1DFQsLor2lkKxwTjQVP09miUnBBxMe26bowkb35REdiyJFRfma+cA=="),
+    "job_run_js": ("sha256-dzHGVg7PDzfXt3E5CbkEoBKonNm138IQzQG7CNbBWXE= "
+                   "sha384-U8UteYjyRxY1qQpBKnQyP7XsPHaREbD9LD1qPlMnMjUKifYtXQwUsPrldTY7UF8l "
+                   "sha512-JjWA5y98IUQjyPbryCz7oEBv+lYCMcjoVJPnG4o1fsRYb9CO2ppGWnSaCnmmjXP//yS0XqO2aF8Eqby4BE9oYA=="),
+    "job_common_js": ("sha256-fZP402wLh5rrHqIVxnlEZKzwe+u9ADZKnbkaSqJ6hFE= "
+                      "sha384-F/RqKp2/axGZI2fJJ/oCiN2BBXBAH+G3QE2+o4kN7i9OnycQw0k9SLYc62AUsJ6s "
+                      "sha512-7MRvCKF0JDfcu0RHyUiPjgBRoXgTNdrI+m8mJqfySEcFtsbcOY8dxoC1qFXQZZM4AD/S4J5KB6HRU5gLzr2zSA=="),
+    "job_run_modal_js": ("sha256-CS0I/HNxfkMNLVogi89EIj/FYHzAvXCWJA1aap/FQOc= "
+                         "sha384-00CqRQwYUDPp/T/cC11KJ0dNtMFR7a/GOUe1DQB7+pb72rKLmLsvfclzAPVwjDNc "
+                         "sha512-FdaUmNyL6Vgb7dJlD8Q5JuLyiVdz6I22zRhyhoNixHxElFuUqB1WMDC4zEPwud9XdlrArCR2BXJ6TXInMi9Ldg=="),
 }

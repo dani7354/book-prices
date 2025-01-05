@@ -1,0 +1,32 @@
+<div class="modal fade" id="job-run-modal" tabindex="-1" aria-labelledby="job-run-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="job-run-modal-label">Jobkørsel</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="div-job-run-modal-body" class="modal-body">
+        <form id="form-create-edit-job-run" style="display:none">
+           <div class="mb-3">
+            <input id="input-job-id" name="job_id" type="hidden" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="input-priority" class="col-form-label">Prioritet:</label>
+            <select id="input-priority" name="priority" type="text" class="form-control">
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="message-text" class="col-form-label">Argumenter:</label>
+            <textarea class="form-control" id="message-text" disabled></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+            <button type="submit" class="btn btn-primary">Gem</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/job_run_modal.js') }}"
+        integrity="{{ sri_attribute_values['job_run_modal_js'] }}"></script>
