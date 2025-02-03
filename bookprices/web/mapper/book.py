@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 from typing import Optional
 from flask import url_for
 from bookprices.shared.model.book import Book
@@ -48,6 +49,10 @@ def _get_image_url(book: Book) -> str:
         book_image_path = os.path.join(BOOK_IMAGES_PATH, book.image_url)
         return book_image_path
     return str(os.path.join(BOOK_IMAGES_PATH, BOOK_FALLBACK_IMAGE_NAME))
+
+
+def _was_book_recently_added(book: Book) -> bool:
+    return book.created >= datetime.now() - timedelta(days=2)
 
 
 def _map_sorting_options(search_phrase: str,
@@ -196,12 +201,13 @@ def map_book_item(book: Book,
                   url_parameters: dict) -> BookListItemViewModel:
 
     image_url = _get_image_url(book)
+    was_added_recently = _was_book_recently_added(book)
     url = _create_url(page,
                       endpoint=Endpoint.BOOK.value,
                       book_id=book.id,
                       **url_parameters)
 
-    return BookListItemViewModel(book.id, book.isbn, book.title, book.author, url, image_url)
+    return BookListItemViewModel(book.id, book.isbn, book.title, book.author, url, image_url, was_added_recently)
 
 
 def map_book_details(book: Book,

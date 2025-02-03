@@ -45,20 +45,8 @@
     {% endif %}
 
     {% for b in view_model.book_list %}
-    <div class="col">
-        <div class="card">
-            {% if b.image_url %}
-            <a href="{{ b.url }}">
-                <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
-            </a>
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">
-                    <a class="link-secondary" href="{{ b.url }}">{{ b.title }}</a>
-                </h5>
-                <p class="card-text">{{ b.author }}</p>
-            </div>
-        </div>
+    <div class="col d-flex align-items-stretch">
+        {% include "book/_book_card.html" %}
     </div>
     {% endfor %}
 </div>

@@ -67,6 +67,7 @@ class BookService:
             if latest_prices := self._db.bookprice_db.get_latest_prices(book_id):
                 self._cache.set(
                     get_book_latest_prices_key(book_id), latest_prices, timeout=CacheTtlOption.MEDIUM.value)
+
         return latest_prices
 
     def get_book_in_bookstore(self, book: Book, bookstore_id: int) -> BookInBookStore | None:
