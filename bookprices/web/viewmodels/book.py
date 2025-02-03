@@ -29,6 +29,7 @@ class BookListItemViewModel:
     author: str
     url: str
     image_url: str
+    was_added_recently: bool
 
 
 @dataclass(frozen=True)
