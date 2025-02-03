@@ -45,7 +45,7 @@
     {% endif %}
 
     {% for b in view_model.book_list %}
-    <div class="col">
+    <div class="col d-flex align-items-stretch">
         <div class="card">
             {% if b.image_url %}
             <a href="{{ b.url }}">
