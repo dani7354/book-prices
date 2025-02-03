@@ -46,13 +46,13 @@
 
     {% for b in view_model.book_list %}
     <div class="col d-flex align-items-stretch">
-        <div class="card">
+        <div class="card d-flex flex-column">
             {% if b.image_url %}
             <a href="{{ b.url }}">
                 <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
             </a>
             {% endif %}
-            <div class="card-body">
+            <div class="card-footer book-card-footer mt-auto">
                 <h5 class="card-title">
                     <a class="link-secondary" href="{{ b.url }}">{{ b.title }}</a>
                 </h5>

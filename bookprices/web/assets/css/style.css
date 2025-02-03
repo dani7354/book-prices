@@ -59,6 +59,11 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.book-card-footer {
+  background: transparent;
+  border-top: 0;
+}
+
 .google-icon {
   height: 48px;
   width: 48px;
