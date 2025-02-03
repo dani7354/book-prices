@@ -16,7 +16,7 @@ COPY ./bookprices bookprices
 COPY ./docker/web/bookprices_web.ini bookprices/web/bookprices_web.ini
 
 COPY ./docker/web/requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 ENV PYTHONPATH "${PYTHONPATH}:/usr/local/bookprices_web/"
 
 WORKDIR /usr/local/bookprices_web/bookprices/web

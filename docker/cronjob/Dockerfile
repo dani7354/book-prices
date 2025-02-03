@@ -7,7 +7,7 @@ ENV PATH="$VENV_PATH/bin:$PATH"
 WORKDIR /usr/local/bookprices_job
 COPY ./bookprices bookprices
 COPY ./docker/cronjob/requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 ENV PYTHONPATH "${PYTHONPATH}:/usr/local/bookprices_job"
 RUN crontab ./bookprices/cronjob/crontab
