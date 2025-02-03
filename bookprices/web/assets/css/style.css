@@ -64,6 +64,12 @@
   border-top: 0;
 }
 
+.card-img-top {
+    width: 100%;
+    height: 25vw;
+    object-fit: cover;
+}
+
 .google-icon {
   height: 48px;
   width: 48px;
