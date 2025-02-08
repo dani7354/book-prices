@@ -127,7 +127,7 @@ class JobService:
             logger.error(f"Failed to create job run for job with id {job_id}. Error: {ex}")
             raise CreationFailedError(f"Job run for job with id {job_id} could not be created.")
 
-    def update_job(self, job_id: str, name: str, description: str, is_active:bool) -> None:
+    def update_job(self, job_id: str, name: str, description: str, is_active: bool) -> None:
         try:
             job_list = self.get_job_list()
             if any(job["name"] == name and job["id"] != job_id for job in job_list):

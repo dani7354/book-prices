@@ -1,8 +1,7 @@
 from typing import ClassVar, Sequence
 from logging import getLogger, Logger
 
-from bookprices.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.shared.cache.client import RedisClient
+from bookprices.jobrunner.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
@@ -13,16 +12,17 @@ class TrimPricesJob(JobBase):
     book_ids_batch_size: ClassVar[int] = 500
     min_prices_to_keep: ClassVar[int] = 10
 
+    name: ClassVar[str] = "TrimPricesJob"
+
     def __init__(
             self,
             config: Config,
             cache_key_remover: BookPriceKeyRemover,
-            bookprice_db: Database,
-            logger: Logger) -> None:
+            bookprice_db: Database) -> None:
         super().__init__(config)
         self._cache_key_remover = cache_key_remover
         self._db = bookprice_db
-        self._logger = logger
+        self._logger = getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
         book_ids_offset, book_id_page = 0, 1
@@ -67,18 +67,3 @@ class TrimPricesJob(JobBase):
         return prices_to_delete
 
 
-def start_job(config: Config) -> JobResult:
-    cache_key_remover = BookPriceKeyRemover(
-        RedisClient(config.cache.host, config.cache.database, config.cache.port))
-
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
-
-    logger = getLogger(__name__)
-    job = TrimPricesJob(config, cache_key_remover, db, logger)
-
-    return job.start()
