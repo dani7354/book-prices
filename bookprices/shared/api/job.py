@@ -32,6 +32,7 @@ class Endpoint(Enum):
 class UrlParameter(Enum):
     JOB_ID = "jobId"
     LIMIT = "limit"
+    STATUS = "status"
 
 
 class JobApiClient:

@@ -37,12 +37,35 @@ class JobSchemaFields(Enum):
 
 
 class JobRunSchemaFields(Enum):
+    ID = "Id"
+    JOB_NAME = "JobName"
     JOB_RUN_ID = "JobRunId"
     JOB_ID = "JobId"
     PRIORITY = "Priority"
     STATUS = "Status"
     UPDATED = "Updated"
     CREATED = "Created"
+    ERROR_MESSAGE = "ErrorMessage"
+    ARGUMENTS = "Arguments"
+
+
+class JobRunArgumentSchemaFields(Enum):
+    NAME = "Name"
+    TYPE = "Type"
+    VALUES = "Values"
+
+
+class JobRunArgumentType(Enum):
+    STRING = "str"
+    INTEGER = "int"
+    BOOLEAN = "bool"
+
+
+class JobRunStatus(Enum):
+    COMPLETED = "Completed"
+    FAILED = "Failed"
+    PENDING = "Pending"
+    RUNNING = "Running"
 
 
 class JobService:
