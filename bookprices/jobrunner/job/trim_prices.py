@@ -39,12 +39,11 @@ class TrimPricesJob(JobBase):
         book = self._db.book_db.get_book_by_id(book_id)
         book_prices_by_book_store = self._db.bookprice_db.get_all_book_prices(book)
         for book_store, prices in book_prices_by_book_store.items():
-            self._logger.info(f"Trimming prices for book %s and store %s...", book_id, book_store.id)
+            self._logger.info(f"Trimming prices for book {book_id} and store {book_store.id}...")
             prices_to_delete = self.get_prices_to_remove(prices)
 
             self._logger.info(
-                "Deleting {len(prices_to_delete)} prices for book %s and store %s...",
-                book_id, book_store.id)
+                f"Deleting {len(prices_to_delete)} prices for book {book_id} and store {book_store.id}...")
             self._db.bookprice_db.delete_prices([price.id for price in prices_to_delete])
 
     def get_prices_to_remove(self, prices: Sequence[BookPrice]) -> list[BookPrice]:
