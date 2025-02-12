@@ -26,21 +26,21 @@ def job() -> TrimPricesJob:
     return TrimPricesJob(Mock(Config), Mock(BookPriceKeyRemover), Mock(BookPriceDb))
 
 
-def test_get_prices_to_delete_no_prices_deleted(job: TrimPricesJob) -> None:
+def test_get_prices_to_remove_no_prices_deleted(job: TrimPricesJob) -> None:
     prices = list(_generate_prices(job.min_prices_to_keep))
 
     prices_to_delete = job.get_prices_to_remove(prices)
     assert {x.id for x in prices_to_delete} == set()
 
 
-def test_get_prices_to_delete_one_deleted(job: TrimPricesJob) -> None:
+def test_get_prices_to_remove_one_deleted(job: TrimPricesJob) -> None:
     prices = list(_generate_prices(job.min_prices_to_keep + 1))
 
     prices_to_delete = job.get_prices_to_remove(prices)
     assert {x.id for x in prices_to_delete} == {1}
 
 
-def test_get_prices_to_delete_three_deleted(job: TrimPricesJob) -> None:
+def test_get_prices_to_remove_three_deleted(job: TrimPricesJob) -> None:
     prices = list(_generate_prices(job.min_prices_to_keep + 3))
 
     price = prices[1]
