@@ -35,6 +35,15 @@ def test_get_prices_to_remove_no_prices_deleted(job: TrimPricesJob) -> None:
     assert len(prices) - len(prices_to_delete) == job.min_prices_to_keep
 
 
+def test_get_prices_to_remove_no_prices_deleted_if_empty(job: TrimPricesJob) -> None:
+    prices = list(_generate_prices(0))
+
+    prices_to_delete = job.get_prices_to_remove(prices)
+
+    assert {x.id for x in prices_to_delete} == set()
+    assert not prices_to_delete
+
+
 def test_get_prices_to_remove_one_deleted(job: TrimPricesJob) -> None:
     prices = list(_generate_prices(job.min_prices_to_keep + 1))
 
