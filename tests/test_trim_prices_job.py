@@ -1,4 +1,3 @@
-from typing import Sequence, Generator
 from unittest.mock import Mock
 
 import pytest
