@@ -41,10 +41,10 @@ class JobApiClient:
 
     def __init__(
             self, base_url: str, api_username: str, api_password: str, client_name: str, api_key_db: ApiKeyDb) -> None:
-        self._client_name = client_name
         self._base_url = base_url
         self._api_username = api_username
         self._api_password = api_password
+        self._client_name = client_name
         self._api_key_db = api_key_db
         self._api_key = None
 

@@ -21,6 +21,7 @@ GOOGLE_API_SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid"]
 JOB_API_BASE_URL = os.environ["JOB_API_BASE_URL"]
 JOB_API_USERNAME = os.environ["JOB_API_USERNAME"]
 JOB_API_PASSWORD = os.environ["JOB_API_PASSWORD"]
+JOB_API_CLIENT_ID = "JobApiWeb"
 
 # App settings
 DEBUG_MODE = os.environ.get("DEBUG", "False") == "True"
