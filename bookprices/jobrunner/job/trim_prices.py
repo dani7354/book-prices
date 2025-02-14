@@ -45,6 +45,8 @@ class TrimPricesJob(JobBase):
             self._logger.info(
                 f"Deleting {len(prices_to_delete)} prices for book {book_id} and store {book_store.id}...")
             self._db.bookprice_db.delete_prices([price.id for price in prices_to_delete])
+            self._cache_key_remover.remove_keys_for_book(book_id)
+            self._cache_key_remover.remove_keys_for_book_and_bookstore(book_id, book_store.id)
 
     def get_prices_to_remove(self, prices: Sequence[BookPrice]) -> list[BookPrice]:
         prices_to_delete = []
@@ -64,5 +66,3 @@ class TrimPricesJob(JobBase):
             index += 1
 
         return prices_to_delete
-
-
