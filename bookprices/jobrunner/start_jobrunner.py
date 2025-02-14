@@ -12,6 +12,9 @@ from bookprices.shared.db.api import ApiKeyDb
 from bookprices.shared.db.database import Database
 
 
+JOB_API_CLIENT_ID = "JobApiJobRunner"
+
+
 def create_trim_prices_job(config: Config) -> TrimPricesJob:
     cache_key_remover = BookPriceKeyRemover(
         RedisClient(
@@ -43,6 +46,7 @@ def main() -> None:
         config.job_api.base_url,
         config.job_api.api_username,
         config.job_api.api_password,
+        JOB_API_CLIENT_ID,
         api_key_db)
 
     service = RunnerJobService(job_api_client)

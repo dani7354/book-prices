@@ -36,11 +36,12 @@ class UrlParameter(Enum):
 
 
 class JobApiClient:
-    api_name: ClassVar[str] = "JobApi"
     response_encoding: ClassVar[str] = "utf-8"
     request_timeout: ClassVar[int] = 10
 
-    def __init__(self, base_url: str, api_username: str, api_password: str, api_key_db: ApiKeyDb) -> None:
+    def __init__(
+            self, base_url: str, api_username: str, api_password: str, client_name: str, api_key_db: ApiKeyDb) -> None:
+        self._client_name = client_name
         self._base_url = base_url
         self._api_username = api_username
         self._api_password = api_password
@@ -176,13 +177,13 @@ class JobApiClient:
     def _ensure_api_is_set(self) -> None:
         if self._api_key:
             return
-        if not (api_key := self._api_key_db.get_api_key(self.api_name)):
+        if not (api_key := self._api_key_db.get_api_key(self._client_name)):
             self._refresh_api_key()
-            api_key = self._api_key_db.get_api_key(self.api_name)
+            api_key = self._api_key_db.get_api_key(self._client_name)
         self._api_key = api_key.api_key
 
     def _add_or_update_api_key_in_db(self, api_key: str) -> None:
-        if old_api_key := self._api_key_db.get_api_key(self.api_name):
+        if old_api_key := self._api_key_db.get_api_key(self._client_name):
             logger.info("Updating Job API key for user %s...", self._api_username)
             old_api_key.api_key = api_key
             self._api_key_db.update_api_key(old_api_key)
@@ -190,7 +191,7 @@ class JobApiClient:
             logger.info("Adding Job API key for user %s to database...", self._api_username)
             self._api_key_db.add_api_key(ApiKey(
                 id=None,
-                api_name=self.api_name,
+                api_name=self._client_name,
                 api_user=self._api_username,
                 api_key=api_key))
 
