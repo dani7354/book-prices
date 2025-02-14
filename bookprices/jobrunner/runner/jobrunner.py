@@ -1,26 +1,21 @@
 import time
 from logging import getLogger
-from typing import ClassVar
+from typing import ClassVar, Sequence
 
-from bookprices.jobrunner.job.base import JobResult, JobExitStatus
-from bookprices.jobrunner.job.trim_prices import TrimPricesJob
+from bookprices.jobrunner.job.base import JobExitStatus, JobBase
 from bookprices.jobrunner.runner.service import RunnerJobService, JobRun
-from bookprices.shared.cache.client import RedisClient
-from bookprices.shared.cache.key_remover import BookPriceKeyRemover
-from bookprices.shared.config.config import Config, Database
+from bookprices.shared.config.config import Config
 from bookprices.shared.service.job_service import UpdateFailedError, JobRunStatus
 
 
 class JobRunner:
     sleep_time_seconds: ClassVar[int] = 10
 
-    def __init__(self, config: Config, job_service: RunnerJobService) -> None:
+    def __init__(self, config: Config, job: Sequence[JobBase], job_service: RunnerJobService) -> None:
         self._config = config
         self._job_service = job_service
         self._logger = getLogger(__name__)
-        self._jobs = {
-            TrimPricesJob.name: self._run_trim_prices_job
-        }
+        self._jobs = {job.name: job for job in job}
 
     def start(self) -> None:
         self._logger.info("Starting job runner...")
@@ -38,13 +33,13 @@ class JobRunner:
                 self._logger.error(f"Failed to run job and update job status. Maybe the API is down? {e}")
 
     def run_job(self, job_run: JobRun) -> None:
-        job_func = self._jobs.get(job_run.job_name)
-        if not job_func:
+        job = self._jobs.get(job_run.job_name)
+        if not job:
             self._logger.warning(f"Job {job_run.job_name} not found!")
             return
         try:
             self._try_set_job_run_status(job_run.id, job_run.job_id, status=JobRunStatus.RUNNING.value)
-            result = job_func(**{arg.name: arg.values for arg in job_run.arguments})
+            result = job.start(**{arg.name: arg.values for arg in job_run.arguments})
             if result.exit_status == JobExitStatus.SUCCESS:
                 self._try_set_job_run_status(job_run.id, job_run.job_id, status=JobRunStatus.COMPLETED.value)
             else:
@@ -68,21 +63,3 @@ class JobRunner:
         except UpdateFailedError as e:
             self._logger.error(f"Failed to update job run status. Maybe it was grabbed by another instance: {e}")
             return False
-
-    def _run_trim_prices_job(self, **kwargs) -> JobResult:
-        cache_key_remover = BookPriceKeyRemover(
-            RedisClient(
-                self._config.cache.host,
-                self._config.cache.database,
-                self._config.cache.port))
-
-        db = Database(
-            self._config.database.db_host,
-            self._config.database.db_port,
-            self._config.database.db_user,
-            self._config.database.db_password,
-            self._config.database.db_name)
-
-        job = TrimPricesJob(self._config, cache_key_remover, db)
-
-        return job.start(**kwargs)
