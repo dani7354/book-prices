@@ -67,7 +67,7 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
-    configuration = loader.load(args.configuration)
+    configuration = loader.load_from_file(args.configuration)
     database = Database(configuration.database.db_host,
                         configuration.database.db_port,
                         configuration.database.db_user,

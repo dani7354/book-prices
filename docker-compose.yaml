@@ -7,13 +7,12 @@ services:
       - default
     build:
       context: ./
-      dockerfile: docker/cronjob/Dockerfile
-    image: dsp8ef9/bookprices_cronjob:latest
-    env_file: ./docker/cronjob/.cronjob.env
+      dockerfile: docker/jobrunner/Dockerfile
+    image: dsp8ef9/bookprices_jobrunner:latest
+    env_file: ./docker/jobrunner/.jobrunner.env
     volumes:
-      - ./docker/cronjob/log:/usr/local/bookprices_job/log
-      - ./docker/cronjob/config:/usr/local/bookprices_job/config:ro
-      - ./docker/cronjob/images:/usr/local/bookprices_job/images
+      - ./docker/jobrunner/logs:/app/logs
+      - ./docker/jobrunner/images:/app/images
     networks:
       - localnetwork
   web:

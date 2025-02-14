@@ -1,4 +1,6 @@
+import logging
 import os
+from datetime import date
 
 from bookprices.jobrunner.job.trim_prices import TrimPricesJob
 from bookprices.jobrunner.runner.jobrunner import JobRunner
@@ -15,13 +17,25 @@ from bookprices.shared.db.database import Database
 JOB_API_CLIENT_ID = "JobApiJobRunner"
 
 
+def _setup_logging(config: Config) -> None:
+    loglevel = logging.getLevelNamesMapping()[config.loglevel]
+    directory = config.logdir
+    filename_base = f"JobRunner_{date.today().month:02d}-{date.today().year}.log"
+    logfile = os.path.join(directory, filename_base)
+    logging.basicConfig(
+        filename=logfile,
+        filemode="a",
+        format="%(asctime)s - %(levelname)s: %(message)s",
+        level=loglevel)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+
 def create_trim_prices_job(config: Config) -> TrimPricesJob:
     cache_key_remover = BookPriceKeyRemover(
         RedisClient(
             config.cache.host,
             config.cache.database,
             config.cache.port))
-
     db = Database(
         config.database.db_host,
         config.database.db_port,
@@ -32,10 +46,9 @@ def create_trim_prices_job(config: Config) -> TrimPricesJob:
     return TrimPricesJob(config, cache_key_remover, db)
 
 
-
 def main() -> None:
-    config_path = os.environ["CONFIG_PATH"]
-    config = loader.load(config_path)
+    config = loader.load_from_env()
+    _setup_logging(config)
     api_key_db = ApiKeyDb(
         config.database.db_host,
         config.database.db_port,

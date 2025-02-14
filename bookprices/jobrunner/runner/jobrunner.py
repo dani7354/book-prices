@@ -5,7 +5,7 @@ from typing import ClassVar, Sequence
 from bookprices.jobrunner.job.base import JobExitStatus, JobBase
 from bookprices.jobrunner.runner.service import RunnerJobService, JobRun
 from bookprices.shared.config.config import Config
-from bookprices.shared.service.job_service import UpdateFailedError, JobRunStatus
+from bookprices.shared.service.job_service import UpdateFailedError, JobRunStatus, FailedToGetJobRunsError
 
 
 class JobRunner:
@@ -24,12 +24,12 @@ class JobRunner:
             try:
                 if next_job := self._job_service.get_next_job_run():
                     self.run_job(next_job)
-                else:
-                    time.sleep(self.sleep_time_seconds)
+                self._logger.info(f"Sleeping for {self.sleep_time_seconds} seconds...")
+                time.sleep(self.sleep_time_seconds)
             except KeyboardInterrupt:
                 self._logger.info("Received keyboard interrupt. Exiting...")
                 running = False
-            except Exception as e:
+            except FailedToGetJobRunsError as e:
                 self._logger.error(f"Failed to run job and update job status. Maybe the API is down? {e}")
 
     def run_job(self, job_run: JobRun) -> None:
@@ -49,7 +49,7 @@ class JobRunner:
             self._logger.error(f"Failed to run job {job_run.job_name}: {e}")
             if not self._try_set_job_run_status(
                     job_run.id, job_run.job_id, status=JobRunStatus.FAILED.value, error_message=str(e)):
-                raise from e
+                raise
 
     def _try_set_job_run_status(
             self,

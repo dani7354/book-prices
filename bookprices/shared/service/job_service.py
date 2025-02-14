@@ -29,30 +29,30 @@ class FailedToGetJobRunsError(Exception):
 
 
 class JobSchemaFields(Enum):
-    ID = "Id"
-    JOB_ID = "JobId"
-    NAME = "Name"
-    DESCRIPTION = "Description"
-    IS_ACTIVE = "IsActive"
+    ID = "id"
+    JOB_ID = "jobId"
+    NAME = "name"
+    DESCRIPTION = "description"
+    IS_ACTIVE = "isActive"
 
 
 class JobRunSchemaFields(Enum):
-    ID = "Id"
-    JOB_NAME = "JobName"
-    JOB_RUN_ID = "JobRunId"
-    JOB_ID = "JobId"
-    PRIORITY = "Priority"
-    STATUS = "Status"
-    UPDATED = "Updated"
-    CREATED = "Created"
-    ERROR_MESSAGE = "ErrorMessage"
-    ARGUMENTS = "Arguments"
+    ID = "id"
+    JOB_NAME = "jobName"
+    JOB_RUN_ID = "jobRunId"
+    JOB_ID = "jobId"
+    PRIORITY = "priority"
+    STATUS = "status"
+    UPDATED = "updated"
+    CREATED = "created"
+    ERROR_MESSAGE = "errorMessage"
+    ARGUMENTS = "arguments"
 
 
 class JobRunArgumentSchemaFields(Enum):
-    NAME = "Name"
-    TYPE = "Type"
-    VALUES = "Values"
+    NAME = "name"
+    TYPE = "type"
+    VALUES = "values"
 
 
 class JobRunArgumentType(Enum):

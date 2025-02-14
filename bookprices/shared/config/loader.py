@@ -1,4 +1,6 @@
 import json
+import os
+
 from bookprices.shared.config.config import Config, Database, Cache, JobApi
 
 
@@ -7,7 +9,28 @@ def _load_from_json(file) -> dict:
         return json.load(json_file)
 
 
-def load(file) -> Config:
+def load_from_env() -> Config:
+    return Config(
+        Database(
+            os.environ["MYSQL_SERVER"],
+            os.environ["MYSQL_SERVER_PORT"],
+            os.environ["MYSQL_USER"],
+            os.environ["MYSQL_PASSWORD"],
+            os.environ["MYSQL_DATABASE"]),
+                  Cache(
+                      os.environ["REDIS_SERVER"],
+                      int(os.environ["REDIS_SERVER_PORT"]),
+                      int(os.environ["CACHE_REDIS_DB"])),
+                  JobApi(
+                      os.environ["JOB_API_BASE_URL"],
+                      os.environ["JOB_API_USERNAME"],
+                      os.environ["JOB_API_PASSWORD"]),
+                  os.environ["LOG_DIR"],
+                  os.environ["IMAGE_DIR"],
+                  os.environ["LOG_LEVEL"])
+
+
+def load_from_file(file: str) -> Config:
     json_content = _load_from_json(file)
     database_section = json_content["database"]
     cache_section = json_content["cache"]

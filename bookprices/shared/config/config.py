@@ -31,4 +31,4 @@ class Config:
     job_api: JobApi
     logdir: str
     imgdir: str
-    loglevel: int
+    loglevel: str

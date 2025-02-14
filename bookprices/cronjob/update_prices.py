@@ -122,7 +122,7 @@ class PriceUpdateJob:
 def main():
     try:
         args = shared.parse_arguments()
-        configuration = loader.load(args.configuration)
+        configuration = loader.load_from_file(args.configuration)
         shared.setup_logging(configuration.logdir, LOG_FILE_NAME, configuration.loglevel)
         logging.info("Config loaded!")
 

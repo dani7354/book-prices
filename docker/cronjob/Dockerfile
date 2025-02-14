@@ -9,7 +9,7 @@ COPY ./bookprices bookprices
 COPY ./docker/cronjob/requirements.txt requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-ENV PYTHONPATH "${PYTHONPATH}:/usr/local/bookprices_job"
+ENV PYTHONPATH="${PYTHONPATH}:/usr/local/bookprices_job"
 RUN crontab ./bookprices/cronjob/crontab
 
 CMD ["crond", "-f"]

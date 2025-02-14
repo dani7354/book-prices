@@ -68,13 +68,14 @@ class RunnerJobService(JobService):
             raise UpdateFailedError
 
     def _map_json_to_dto(self, job_run_json: dict) -> JobRun:
+        self._logger.info(job_run_json)
         return JobRun(
             id=job_run_json[JobRunSchemaFields.ID.value],
             job_id=job_run_json[JobRunSchemaFields.JOB_ID.value],
             job_name=job_run_json[JobRunSchemaFields.JOB_NAME.value],
             priority=job_run_json[JobRunSchemaFields.PRIORITY.value],
             status=job_run_json[JobRunSchemaFields.STATUS.value],
-            arguments=self._map_job_run_arguments_to_dto(job_run_json[JobRunSchemaFields.ARGUMENTS.value]),
+            arguments=[],  # self._map_job_run_arguments_to_dto(job_run_json[JobRunSchemaFields.ARGUMENTS.value]),
             updated=job_run_json[JobRunSchemaFields.UPDATED.value],
             created=job_run_json[JobRunSchemaFields.CREATED.value],
             error_message=job_run_json.get(JobRunSchemaFields.ERROR_MESSAGE.value))

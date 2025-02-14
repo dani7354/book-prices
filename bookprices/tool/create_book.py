@@ -55,7 +55,7 @@ def main():
         print(f"{args.isbn} not valid")
         sys.exit(1)
 
-    configuration = loader.load(args.configuration)
+    configuration = loader.load_from_file(args.configuration)
     db = Database(configuration.database.db_host,
                   configuration.database.db_port,
                   configuration.database.db_user,
