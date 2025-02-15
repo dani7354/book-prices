@@ -25,8 +25,8 @@ def main() -> None:
         JOB_API_CLIENT_ID,
         api_key_db)
     job_service = JobService(job_api_client)
-    job_scheduler = JobScheduler(job_service, config.scheduler.jobs)
-
+    job_scheduler = JobScheduler(job_service)
+    job_scheduler.start()
 
 
 if __name__ == "__main__":
