@@ -18,16 +18,16 @@ def load_from_env() -> Config:
             os.environ["MYSQL_PASSWORD"],
             os.environ["MYSQL_DATABASE"]),
                   Cache(
-                      os.environ["REDIS_SERVER"],
-                      int(os.environ["REDIS_SERVER_PORT"]),
-                      int(os.environ["CACHE_REDIS_DB"])),
+                      os.getenv("REDIS_SERVER", "localhost"),
+                      int(os.getenv("REDIS_SERVER_PORT", 6379)),
+                      int(os.getenv("CACHE_REDIS_DB", 0))),
                   JobApi(
                       os.environ["JOB_API_BASE_URL"],
                       os.environ["JOB_API_USERNAME"],
                       os.environ["JOB_API_PASSWORD"]),
                   os.environ["LOG_DIR"],
-                  os.environ["IMAGE_DIR"],
-                  os.environ["LOG_LEVEL"])
+                  os.getenv("IMAGE_DIR"),
+                  os.getenv("LOG_LEVEL", "INFO"))
 
 
 def load_from_file(file: str) -> Config:

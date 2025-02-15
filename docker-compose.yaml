@@ -1,8 +1,8 @@
 networks:
   localnetwork:
 services:
-  job:
-    container_name: job
+  jobrunner:
+    container_name: jobrunner
     profiles:
       - default
     build:
@@ -13,6 +13,19 @@ services:
     volumes:
       - ./docker/jobrunner/logs:/app/logs
       - ./docker/jobrunner/images:/app/images
+    networks:
+      - localnetwork
+  scheduler:
+    container_name: scheduler
+    profiles:
+      - default
+    build:
+      context: ./
+      dockerfile: docker/jobscheduler/Dockerfile
+    image: dsp8ef9/bookprices_jobscheduler:latest
+    env_file: ./docker/jobscheduler/.jobscheduler.env
+    volumes:
+      - ./docker/jobscheduler/logs:/app/logs
     networks:
       - localnetwork
   web:

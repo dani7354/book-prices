@@ -22,6 +22,9 @@ docker/cronjob/images/*
 docker/jobrunner/log/*
 !docker/jobrunner/log/.empty
 
+docker/jobscheduler/log/*
+!docker/jobscheduler/log/.empty
+
 docker/cronjob/log/*
 !docker/cronjob/log/.empty
 
