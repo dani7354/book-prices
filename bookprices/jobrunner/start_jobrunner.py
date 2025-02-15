@@ -1,7 +1,3 @@
-import logging
-import os
-from datetime import date
-
 from bookprices.jobrunner.job.trim_prices import TrimPricesJob
 from bookprices.jobrunner.runner.jobrunner import JobRunner
 from bookprices.jobrunner.runner.service import RunnerJobService
@@ -12,22 +8,9 @@ from bookprices.shared.config import loader
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.api import ApiKeyDb
 from bookprices.shared.db.database import Database
-
+from bookprices.shared.log import setup_logging
 
 JOB_API_CLIENT_ID = "JobApiJobRunner"
-
-
-def _setup_logging(config: Config) -> None:
-    loglevel = logging.getLevelNamesMapping()[config.loglevel]
-    directory = config.logdir
-    filename_base = f"JobRunner_{date.today().month:02d}-{date.today().year}.log"
-    logfile = os.path.join(directory, filename_base)
-    logging.basicConfig(
-        filename=logfile,
-        filemode="a",
-        format="%(asctime)s - %(levelname)s: %(message)s",
-        level=loglevel)
-    logging.getLogger().addHandler(logging.StreamHandler())
 
 
 def create_trim_prices_job(config: Config) -> TrimPricesJob:
@@ -48,7 +31,7 @@ def create_trim_prices_job(config: Config) -> TrimPricesJob:
 
 def main() -> None:
     config = loader.load_from_env()
-    _setup_logging(config)
+    setup_logging(config)
     api_key_db = ApiKeyDb(
         config.database.db_host,
         config.database.db_port,
