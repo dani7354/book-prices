@@ -38,9 +38,11 @@ class RunnerJobService(JobService):
     def get_next_job_run(self) -> JobRun | None:
         try:
             url = (f"{Endpoint.JOB_RUNS.value}?"
-                   f"{UrlParameter.STATUS}={JobRunStatus.PENDING.value}&"
+                   f"{UrlParameter.STATUS.value}={JobRunStatus.PENDING.value}&"
                    f"{UrlParameter.LIMIT.value}=1")
+            self._logger.debug(f"Getting next job: {url}")
             if job_run_json := self._job_api_client.get(url):
+                self._logger.debug(f"Got next job run: {job_run_json[0]}")
                 return self._map_json_to_dto(job_run_json[0])
 
             return None
@@ -61,7 +63,7 @@ class RunnerJobService(JobService):
                 JobRunSchemaFields.STATUS.value: status}
             if error_message:
                 data[JobRunSchemaFields.ERROR_MESSAGE.value] = error_message
-
+            self._logger.debug(f"Updating job run status with id {job_run_id} to {status}")
             self._job_api_client.patch(Endpoint.get_job_run_url(job_run_id), data=data)
         except HTTPError as e:
             self._logger.error(f"Failed to update job run status: {e}")

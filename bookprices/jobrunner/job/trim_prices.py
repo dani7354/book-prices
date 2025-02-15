@@ -1,5 +1,5 @@
 from typing import ClassVar, Sequence
-from logging import getLogger, Logger
+from logging import getLogger
 
 from bookprices.jobrunner.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
@@ -36,11 +36,14 @@ class TrimPricesJob(JobBase):
         return JobResult(JobExitStatus.SUCCESS)
 
     def trim_prices_for_book(self, book_id: int) -> None:
-        book = self._db.book_db.get_book_by_id(book_id)
+        book = self._db.book_db.get_book(book_id)
         book_prices_by_book_store = self._db.bookprice_db.get_all_book_prices(book)
         for book_store, prices in book_prices_by_book_store.items():
             self._logger.info(f"Trimming prices for book {book_id} and store {book_store.id}...")
             prices_to_delete = self.get_prices_to_remove(prices)
+            if not prices_to_delete:
+                self._logger.debug(f"No prices to delete for book {book_id} and store {book_store.id}")
+                continue
 
             self._logger.info(
                 f"Deleting {len(prices_to_delete)} prices for book {book_id} and store {book_store.id}...")

@@ -39,7 +39,14 @@ class JobRunner:
             return
         try:
             self._try_set_job_run_status(job_run.id, job_run.job_id, status=JobRunStatus.RUNNING.value)
+
+            start_time = time.time()
+            self._logger.info(f"Running job {job_run.job_name}...")
             result = job.start(**{arg.name: arg.values for arg in job_run.arguments})
+            execution_time = (time.time() - start_time) / 60
+            self._logger.info(
+                f"Job {job_run.job_name} finished with status {result.exit_status}. Took {execution_time:2f} mins.")
+
             if result.exit_status == JobExitStatus.SUCCESS:
                 self._try_set_job_run_status(job_run.id, job_run.job_id, status=JobRunStatus.COMPLETED.value)
             else:
