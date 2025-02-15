@@ -1,0 +1,41 @@
+networks:
+  localnetwork:
+    name: bookprices_local
+    driver: bridge
+    attachable: true
+services:
+  jobrunner:
+    profiles:
+      - default
+    build:
+      context: ./
+      dockerfile: docker/jobrunner/Dockerfile
+  scheduler:
+    profiles:
+      - default
+    build:
+      context: ./
+      dockerfile: docker/jobscheduler/Dockerfile
+  web:
+    profiles:
+      - default
+    build:
+      context: ./
+      dockerfile: docker/web/Dockerfile
+  nginx:
+    profiles:
+      - default
+    build:
+      context: ./
+      dockerfile: docker/nginx/Dockerfile
+  job_api:
+    profiles:
+      - default
+  redis:
+    profiles:
+      - default
+      - db_only
+  db:
+    profiles:
+      - default
+      - db_only

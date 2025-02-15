@@ -1,13 +1,8 @@
 networks:
   localnetwork:
+    name: bookprices_local
 services:
   jobrunner:
-    container_name: jobrunner
-    profiles:
-      - default
-    build:
-      context: ./
-      dockerfile: docker/jobrunner/Dockerfile
     image: dsp8ef9/bookprices_jobrunner:latest
     env_file: ./docker/jobrunner/.jobrunner.env
     volumes:
@@ -16,12 +11,6 @@ services:
     networks:
       - localnetwork
   scheduler:
-    container_name: scheduler
-    profiles:
-      - default
-    build:
-      context: ./
-      dockerfile: docker/jobscheduler/Dockerfile
     image: dsp8ef9/bookprices_jobscheduler:latest
     env_file: ./docker/jobscheduler/.jobscheduler.env
     volumes:
@@ -29,12 +18,6 @@ services:
     networks:
       - localnetwork
   web:
-    container_name: web
-    profiles:
-      - default
-    build: 
-      context: ./
-      dockerfile: docker/web/Dockerfile
     image: dsp8ef9/bookprices_web:latest
     env_file: ./docker/web/.web.env
     volumes:
@@ -42,13 +25,7 @@ services:
     networks:
       - localnetwork
   nginx:
-    container_name: nginx
-    profiles:
-      - default
     restart: always
-    build:
-      context: ./
-      dockerfile: docker/nginx/Dockerfile
     image: dsp8ef9/bookprices_nginx:latest
     env_file: ./docker/nginx/.nginx.env
     ports:
@@ -64,9 +41,6 @@ services:
     networks:
       - localnetwork
   job_api:
-    container_name: job_api
-    profiles:
-      - default
     image: dsp8ef9/bookprices_jobapi:latest
     env_file: docker/job_api/.job_api.env
     ports:
@@ -74,10 +48,6 @@ services:
     networks:
       - localnetwork
   db:
-    container_name: db
-    profiles:
-      - default
-      - db_only
     image: mysql:8.4.0
     command: --mysql-native-password=ON
     restart: always
@@ -91,10 +61,6 @@ services:
     networks:
       - localnetwork
   redis:
-    container_name: redis
-    profiles:
-      - default
-      - db_only
     image: redis:7.4.1-alpine
     ports:
       - "6379:6379"
