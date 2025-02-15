@@ -14,7 +14,7 @@ jobs:
   Analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
@@ -28,4 +28,4 @@ jobs:
             -Dsonar.projectKey=dani7354_book-prices
             -Dsonar.organization=dani7354
             -Dsonar.sources=.
-            -Dsonar.python.version=3.12
+            -Dsonar.python.version=3.13
