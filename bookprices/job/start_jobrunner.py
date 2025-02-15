@@ -1,6 +1,6 @@
-from bookprices.jobrunner.job.trim_prices import TrimPricesJob
-from bookprices.jobrunner.runner.jobrunner import JobRunner
-from bookprices.jobrunner.runner.service import RunnerJobService
+from bookprices.job.job.trim_prices import TrimPricesJob
+from bookprices.job.runner.jobrunner import JobRunner
+from bookprices.job.runner.service import RunnerJobService
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
@@ -11,6 +11,7 @@ from bookprices.shared.db.database import Database
 from bookprices.shared.log import setup_logging
 
 JOB_API_CLIENT_ID = "JobApiJobRunner"
+PROGRAM_NAME = "JobRunner"
 
 
 def create_trim_prices_job(config: Config) -> TrimPricesJob:
@@ -31,7 +32,7 @@ def create_trim_prices_job(config: Config) -> TrimPricesJob:
 
 def main() -> None:
     config = loader.load_from_env()
-    setup_logging(config)
+    setup_logging(config, PROGRAM_NAME)
     api_key_db = ApiKeyDb(
         config.database.db_host,
         config.database.db_port,

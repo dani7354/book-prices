@@ -68,6 +68,12 @@ class JobRunStatus(Enum):
     RUNNING = "Running"
 
 
+class JobRunPriority(Enum):
+    HIGH = "High"
+    NORMAL = "Normal"
+    LOW = "Low"
+
+
 class JobService:
 
     def __init__(self, job_api_client: JobApiClient) -> None:

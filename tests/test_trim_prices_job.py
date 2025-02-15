@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from datetime import datetime, timedelta
-from bookprices.jobrunner.job.trim_prices import TrimPricesJob
+from bookprices.job.job.trim_prices import TrimPricesJob
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.bookprice import BookPriceDb

@@ -7,10 +7,11 @@ ENV PATH="$VENV_PATH/bin:$PATH"
 RUN mkdir -p /app/logs
 WORKDIR /app
 COPY ./bookprices/shared bookprices/shared
-COPY ./bookprices/job bookprices/job
-COPY ./docker/jobrunner/requirements.txt requirements.txt
+COPY ./bookprices/jobrunner bookprices/jobrunner
+COPY ./bookprices/jobscheduler bookprices/jobscheduler
+COPY ./docker/jobscheduler/requirements.txt requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 ENV PYTHONPATH="/app"
 
-CMD ["python3", "bookprices/job/start_jobrunner.py"]
+CMD ["python3", "bookprices/jobrunner/start_jobscheduler.py"]

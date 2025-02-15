@@ -1,7 +1,7 @@
 from typing import ClassVar, Sequence
 from logging import getLogger
 
-from bookprices.jobrunner.job.base import JobBase, JobResult, JobExitStatus
+from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database

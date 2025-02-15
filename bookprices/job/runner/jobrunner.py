@@ -3,8 +3,8 @@ from logging import getLogger
 from typing import ClassVar, Sequence
 from collections import Counter
 
-from bookprices.jobrunner.job.base import JobExitStatus, JobBase
-from bookprices.jobrunner.runner.service import RunnerJobService, JobRun
+from bookprices.job.job.base import JobExitStatus, JobBase
+from bookprices.job.runner.service import RunnerJobService, JobRun
 from bookprices.shared.config.config import Config
 from bookprices.shared.service.job_service import UpdateFailedError, JobRunStatus, FailedToGetJobRunsError
 
