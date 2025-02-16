@@ -21,7 +21,7 @@ class JobScheduler:
     def start(self) -> None:
         self._logger.info("Starting job scheduler...")
         self._set_available_jobs()
-        self._schedule_jobs()
+        self.schedule_jobs()
         running = True
         while running:
             try:
@@ -35,14 +35,14 @@ class JobScheduler:
 
         self._logger.info("Job scheduler stopped.")
 
+    def schedule_jobs(self) -> None:
+        schedule.every().day.at("01:00", self.time_zone).do(self._set_available_jobs)
+        schedule.every().monday.at("10:00", self.time_zone).do(self._send_start_job_request_in_thread, TrimPricesJob.name)
+
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")
         jobs = self._job_service.get_job_list()
         self._available_jobs = {job[JobSchemaFields.NAME.value]: job[JobSchemaFields.ID.value] for job in jobs}
-
-    def _schedule_jobs(self) -> None:
-        schedule.every().day.at("01:00", self.time_zone).do(self._set_available_jobs)
-        schedule.every().monday.at("10:00", self.time_zone).do(self._send_start_job_request_in_thread, TrimPricesJob.name)
 
     def _send_start_job_request_in_thread(self, job_name: str) -> None:
         self._logger.info(f"Starting job {job_name} in a new thread...")
