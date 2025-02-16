@@ -1,9 +1,8 @@
-FROM python:3.13.1-slim-bullseye
+FROM python:3.13.2-bookworm
 EXPOSE 3031
 
 RUN apt update \
     && apt upgrade -y \
-    && apt install -y build-essential  \
     && apt clean  \
     && adduser --no-create-home bookprices
 
