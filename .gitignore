@@ -13,8 +13,17 @@ docker/db/init/*
 docker/db/config/*.cnf
 !docker/db/config/.empty
 
+docker/jobrunner/images/*
+!docker/jobrunner/images/.empty
+
 docker/cronjob/images/*
 !docker/cronjob/images/.empty
+
+docker/jobrunner/log/*
+!docker/jobrunner/log/.empty
+
+docker/jobscheduler/log/*
+!docker/jobscheduler/log/.empty
 
 docker/cronjob/log/*
 !docker/cronjob/log/.empty

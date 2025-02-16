@@ -9,18 +9,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           logout: true
 
       - name: Build and push nginx
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           file: docker/nginx/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
@@ -28,20 +28,28 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.NGINX_DOCKER_IMAGE_NAME }}:latest
 
       - name: Build and push web
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           file: docker/web/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.WEB_DOCKER_IMAGE_NAME }}:latest
 
-      - name: Build and push cron
-        uses: docker/build-push-action@v3
+      - name: Build and push jobrunner
+        uses: docker/build-push-action@v6
         with:
-          file: docker/cronjob/Dockerfile
+          file: docker/jobrunner/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.CRONJOB_DOCKER_IMAGE_NAME }}:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.JOBRUNNER_DOCKER_IMAGE_NAME }}:latest
+
+      - name: Build and push jobscheduler
+        uses: docker/build-push-action@v6
+        with:
+          file: docker/jobscheduler/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.JOBSCHEDULER_DOCKER_IMAGE_NAME }}:latest
 
   deploy_to_production:
     runs-on: ubuntu-latest

@@ -29,20 +29,49 @@ class FailedToGetJobRunsError(Exception):
 
 
 class JobSchemaFields(Enum):
-    ID = "Id"
-    JOB_ID = "JobId"
-    NAME = "Name"
-    DESCRIPTION = "Description"
-    IS_ACTIVE = "IsActive"
+    ID = "id"
+    JOB_ID = "jobId"
+    NAME = "name"
+    DESCRIPTION = "description"
+    IS_ACTIVE = "isActive"
 
 
 class JobRunSchemaFields(Enum):
-    JOB_RUN_ID = "JobRunId"
-    JOB_ID = "JobId"
-    PRIORITY = "Priority"
-    STATUS = "Status"
-    UPDATED = "Updated"
-    CREATED = "Created"
+    ID = "id"
+    JOB_NAME = "jobName"
+    JOB_RUN_ID = "jobRunId"
+    JOB_ID = "jobId"
+    PRIORITY = "priority"
+    STATUS = "status"
+    UPDATED = "updated"
+    CREATED = "created"
+    ERROR_MESSAGE = "errorMessage"
+    ARGUMENTS = "arguments"
+
+
+class JobRunArgumentSchemaFields(Enum):
+    NAME = "name"
+    TYPE = "type"
+    VALUES = "values"
+
+
+class JobRunArgumentType(Enum):
+    STRING = "str"
+    INTEGER = "int"
+    BOOLEAN = "bool"
+
+
+class JobRunStatus(Enum):
+    COMPLETED = "Completed"
+    FAILED = "Failed"
+    PENDING = "Pending"
+    RUNNING = "Running"
+
+
+class JobRunPriority(Enum):
+    HIGH = "High"
+    NORMAL = "Normal"
+    LOW = "Low"
 
 
 class JobService:
@@ -127,7 +156,7 @@ class JobService:
             logger.error(f"Failed to create job run for job with id {job_id}. Error: {ex}")
             raise CreationFailedError(f"Job run for job with id {job_id} could not be created.")
 
-    def update_job(self, job_id: str, name: str, description: str, is_active:bool) -> None:
+    def update_job(self, job_id: str, name: str, description: str, is_active: bool) -> None:
         try:
             job_list = self.get_job_list()
             if any(job["name"] == name and job["id"] != job_id for job in job_list):

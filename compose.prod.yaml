@@ -1,0 +1,4 @@
+networks:
+  localnetwork:
+    driver: overlay
+    attachable: true

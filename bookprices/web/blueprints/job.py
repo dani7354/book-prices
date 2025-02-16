@@ -4,7 +4,7 @@ from flask_login import login_required
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db.database import Database
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.service.job_service import (
+from bookprices.shared.service.job_service import (
     JobService,
     AlreadyExistError,
     DeletionFailedError,
@@ -20,7 +20,8 @@ from bookprices.web.settings import (
     MYSQL_DATABASE,
     JOB_API_BASE_URL,
     JOB_API_USERNAME,
-    JOB_API_PASSWORD)
+    JOB_API_PASSWORD,
+    JOB_API_CLIENT_ID)
 from bookprices.web.viewmodels.job import CreateJobViewModel
 from bookprices.web.viewmodels.job_run import JobRunPriority, JobRunCreateViewModel, JobRunEditViewModel
 
@@ -28,7 +29,7 @@ MESSAGE_FIELD_NAME = "message"
 JOB_ID_URL_PARAMETER = "jobId"
 
 db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
-job_service = JobService(JobApiClient(JOB_API_BASE_URL, JOB_API_USERNAME, JOB_API_PASSWORD, db.api_key_db))
+job_service = JobService(JobApiClient(JOB_API_BASE_URL, JOB_API_USERNAME, JOB_API_PASSWORD, JOB_API_CLIENT_ID, db.api_key_db))
 
 
 job_blueprint = Blueprint("job", __name__)

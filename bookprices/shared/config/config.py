@@ -18,9 +18,17 @@ class Cache:
 
 
 @dataclass(frozen=True)
+class JobApi:
+    base_url: str
+    api_username: str
+    api_password: str
+
+
+@dataclass(frozen=True)
 class Config:
     database: Database
     cache: Cache
+    job_api: JobApi
     logdir: str
     imgdir: str
-    loglevel: int
+    loglevel: str
