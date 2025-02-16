@@ -10,7 +10,7 @@ services:
       - ./docker/jobrunner/images:/app/images
     networks:
       - localnetwork
-  scheduler:
+  jobscheduler:
     image: dsp8ef9/bookprices_jobscheduler:latest
     env_file: ./docker/jobscheduler/.jobscheduler.env
     volumes:
