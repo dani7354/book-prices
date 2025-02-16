@@ -1,9 +1,10 @@
 FROM python:3.13.1-slim-bullseye
 EXPOSE 3031
 
-RUN apt-get update  \
-    && apt-get install -y build-essential  \
-    && apt-get clean  \
+RUN apt update \
+    && apt upgrade -y \
+    && apt install -y build-essential  \
+    && apt clean  \
     && adduser --no-create-home bookprices
 
 ENV VENV_PATH=/opt/venv
@@ -17,7 +18,7 @@ COPY ./docker/web/bookprices_web.ini bookprices/web/bookprices_web.ini
 
 COPY ./docker/web/requirements.txt requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
-ENV PYTHONPATH "${PYTHONPATH}:/usr/local/bookprices_web/"
+ENV PYTHONPATH="/usr/local/bookprices_web/"
 
 WORKDIR /usr/local/bookprices_web/bookprices/web
 
