@@ -62,7 +62,7 @@ DROP TABLE IF EXISTS `BookPrice`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `BookPrice` (
-  `Id` mediumint unsigned NOT NULL AUTO_INCREMENT,
+  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `BookId` mediumint unsigned DEFAULT NULL,
   `BookStoreId` mediumint unsigned DEFAULT NULL,
   `Price` float(10,2) NOT NULL,
