@@ -196,9 +196,9 @@ class JobApiClient:
                 api_key=api_key))
 
     @staticmethod
-    def _decode_json_response(response: requests.Response) -> dict:
+    def _decode_json_response(response: requests.Response) -> dict | None:
         try:
             response.json()
         except json.JSONDecodeError:
             logger.error("Failed to decode response from Job API %s. Maybe it's empty", response.request.url)
-            return {}
+            return None

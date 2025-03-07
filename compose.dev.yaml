@@ -10,7 +10,7 @@ services:
     build:
       context: ./
       dockerfile: docker/jobrunner/Dockerfile
-  scheduler:
+  jobscheduler:
     profiles:
       - default
     build:
