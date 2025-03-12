@@ -26,6 +26,7 @@ class JobRun:
     arguments: list[JobRunArgument]
     updated: str
     created: str
+    version: str
     error_message: str | None = None
 
 
@@ -37,39 +38,53 @@ class RunnerJobService(JobService):
 
     def get_next_job_run(self) -> JobRun | None:
         try:
-            url = (f"{Endpoint.JOB_RUNS.value}?"
-                   f"{UrlParameter.STATUS.value}={JobRunStatus.PENDING.value}&"
-                   f"{UrlParameter.LIMIT.value}=1")
-            self._logger.debug(f"Getting next job: {url}")
-            if job_run_json := self._job_api_client.get(url):
-                self._logger.debug(f"Got next job run: {job_run_json[0]}")
-                return self._map_json_to_dto(job_run_json[0])
+            if not (next_job_id := self._get_next_job_run_id_from_list()):
+                return None
+            self._logger.debug(f"Got next job run with id {next_job_id}")
+            job_run_json = self.get_job_run(next_job_id)
+            job_run_dto = self._map_job_run_json_to_dto(job_run_json)
 
-            return None
+            return job_run_dto
         except HTTPError as e:
             self._logger.error(f"Failed to get job runs: {e}")
             raise FailedToGetJobRunsError
 
     def update_job_run_status(
             self,
-            job_run_id: str,
-            job_id: str,
+            job_run_dto: JobRun,
             status: str,
             error_message: str | None = None) -> None:
         try:
             data = {
-                JobRunSchemaFields.JOB_RUN_ID.value: job_run_id,
-                JobRunSchemaFields.JOB_ID.value: job_id,
+                JobRunSchemaFields.JOB_RUN_ID.value: job_run_dto.id,
+                JobRunSchemaFields.JOB_ID.value: job_run_dto.job_id,
+                JobRunSchemaFields.VERSION.value: job_run_dto.version,
                 JobRunSchemaFields.STATUS.value: status}
             if error_message:
                 data[JobRunSchemaFields.ERROR_MESSAGE.value] = error_message
-            self._logger.debug(f"Updating job run status with id {job_run_id} to {status}")
-            self._job_api_client.patch(Endpoint.get_job_run_url(job_run_id), data=data)
+            self._logger.debug(f"Updating job run with id {job_run_dto.id} to status {status}")
+            self._job_api_client.patch(Endpoint.get_job_run_url(job_run_dto.id), data=data)
         except HTTPError as e:
             self._logger.error(f"Failed to update job run status: {e}")
             raise UpdateFailedError
 
-    def _map_json_to_dto(self, job_run_json: dict) -> JobRun:
+    def _get_next_job_run_id_from_list(self) -> str | None:
+        try:
+            url = (f"{Endpoint.JOB_RUNS.value}?"
+                   f"{UrlParameter.STATUS.value}={JobRunStatus.PENDING.value}&"
+                   f"{UrlParameter.SORT_BY.value}=Priority&"
+                   f"{UrlParameter.SORT_DIRECTION.value}=Descending&"
+                   f"{UrlParameter.LIMIT.value}=1")
+
+            job_run_json = self._job_api_client.get(url)
+            if job_run_json:
+                return job_run_json[0][JobRunSchemaFields.ID.value]
+            return None
+        except HTTPError as e:
+            self._logger.error(f"Failed to get job runs: {e}")
+            raise FailedToGetJobRunsError
+
+    def _map_job_run_json_to_dto(self, job_run_json: dict) -> JobRun:
         self._logger.info(job_run_json)
         return JobRun(
             id=job_run_json[JobRunSchemaFields.ID.value],
@@ -80,6 +95,7 @@ class RunnerJobService(JobService):
             arguments=[],  # self._map_job_run_arguments_to_dto(job_run_json[JobRunSchemaFields.ARGUMENTS.value]),
             updated=job_run_json[JobRunSchemaFields.UPDATED.value],
             created=job_run_json[JobRunSchemaFields.CREATED.value],
+            version=job_run_json[JobRunSchemaFields.VERSION.value],
             error_message=job_run_json.get(JobRunSchemaFields.ERROR_MESSAGE.value))
 
     def _map_job_run_arguments_to_dto(self, arguments_response: list[dict]) -> list[JobRunArgument]:
@@ -102,6 +118,3 @@ class RunnerJobService(JobService):
                 self._logger.error(f"Failed to map job run arguments {name} with type {arg_type}: {e}")
                 continue
         return arguments
-
-
-

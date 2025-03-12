@@ -51,6 +51,7 @@ class JobRunCreateViewModel:
 class JobRunEditViewModel:
     job_id_field_name: ClassVar[str] = "job_id"
     priority_field_name: ClassVar[str] = "priority"
+    version_field_name: ClassVar[str] = "version"
 
     id: str
     job_id: str
@@ -58,6 +59,7 @@ class JobRunEditViewModel:
     priority: str
     created: str
     updated: str
+    version: str
     form_action_url: str
     priorities: dict[str, str] = field(default_factory=dict)
     arguments: list[JobRunArgument] = field(default_factory=list)

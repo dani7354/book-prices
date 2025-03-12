@@ -33,6 +33,8 @@ class UrlParameter(Enum):
     JOB_ID = "jobId"
     LIMIT = "limit"
     STATUS = "status"
+    SORT_BY = "sortBy"
+    SORT_DIRECTION = "sortDirection"
 
 
 class JobApiClient:

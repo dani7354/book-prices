@@ -3,6 +3,9 @@
     {% if view_model.id %}
         <input name="{{ view_model.id_field_name }}" type="hidden" value="{{ view_model.id }}">
     {% endif %}
+    {% if view_model.version %}
+        <input name="{{ view_model.version_field_name }}" type="hidden" value="{{ view_model.version }}">
+    {% endif %}
     <div class="mb-3">
         <label for="{{ view_model.name_field_name }}" class="form-label">Navn</label>
         <input name="{{ view_model.name_field_name }}" type="text" class="form-control"

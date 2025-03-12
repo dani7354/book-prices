@@ -54,7 +54,8 @@ def create() -> str | Response:
         description = request.form.get(CreateJobViewModel.description_field_name) or ""
         active = bool(request.form.get(CreateJobViewModel.active_field_name)) or False
 
-        view_model = CreateJobViewModel(name, description, active, form_action_url=url_for("job.create"))
+        view_model = CreateJobViewModel(
+            name=name, description=description, version="", active=active, form_action_url=url_for("job.create"))
         if not view_model.is_valid():
             return render_template(JobTemplate.CREATE.value, view_model=view_model)
 
@@ -81,11 +82,13 @@ def edit(job_id: str) -> str | Response:
     if request.method == HttpMethod.POST.value:
         name = request.form.get(CreateJobViewModel.name_field_name) or ""
         description = request.form.get(CreateJobViewModel.description_field_name) or ""
+        version = request.form.get(CreateJobViewModel.version_field_name) or ""
         active = bool(request.form.get(CreateJobViewModel.active_field_name)) or False
 
         view_model = CreateJobViewModel(
             name,
             description,
+            version,
             active,
             form_action_url=url_for(Endpoint.JOB_EDIT.value, job_id=job_id),
             id=job_id)
@@ -97,6 +100,7 @@ def edit(job_id: str) -> str | Response:
                 job_id=job_id,
                 name=view_model.name,
                 description=view_model.description,
+                version=view_model.version,
                 is_active=view_model.active)
         except (AlreadyExistError, UpdateFailedError) as ex:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
@@ -139,6 +143,7 @@ def create_job_run() -> tuple[Response, int]:
 def update_job_run(job_run_id: str) -> tuple[Response, int]:
     job_id = request.form.get(JobRunEditViewModel.job_id_field_name)
     priority = request.form.get(JobRunEditViewModel.priority_field_name)
+    version = request.form.get(JobRunEditViewModel.version_field_name)
 
     if not priority or priority not in JobRunPriority.get_values():
         return jsonify({MESSAGE_FIELD_NAME: "Prioritet ikke gyldig!"}), HttpStatusCode.BAD_REQUEST
@@ -147,7 +152,7 @@ def update_job_run(job_run_id: str) -> tuple[Response, int]:
         if not job_id or not job_service.get_job_run(job_run_id):
             return jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
 
-        job_service.update_job_run(job_id, job_run_id, priority)
+        job_service.update_job_run(job_id, job_run_id, priority, version)
         return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel opdateret!"}), HttpStatusCode.OK
     except UpdateFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST

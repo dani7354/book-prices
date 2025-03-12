@@ -29,6 +29,7 @@ class CreateJobViewModel:
     description_field_name: ClassVar[str] = "description"
     active_field_name: ClassVar[str] = "active"
     id_field_name: ClassVar[str] = "job_id"
+    version_field_name: ClassVar[str] = "version"
 
     name_min_length: ClassVar[int] = 3
     name_max_length: ClassVar[int] = 256
@@ -37,6 +38,7 @@ class CreateJobViewModel:
 
     name: str
     description: str
+    version: str
     active: bool
     form_action_url: str
     id: str | None = None
@@ -66,4 +68,4 @@ class CreateJobViewModel:
 
     @staticmethod
     def empty(form_action_url: str) -> "CreateJobViewModel":
-        return CreateJobViewModel(name="", description="", active=False, form_action_url=form_action_url)
+        return CreateJobViewModel(name="", description="", version="", active=False, form_action_url=form_action_url)
