@@ -41,8 +41,7 @@ class RunnerJobService(JobService):
             if not (next_job_id := self._get_next_job_run_id_from_list()):
                 return None
             self._logger.debug(f"Got next job run with id {next_job_id}")
-            job_run_json = self.get_job_run(next_job_id)
-            job_run_dto = self._map_job_run_json_to_dto(job_run_json)
+            job_run_dto = self.get_job_run_dto(next_job_id)
 
             return job_run_dto
         except HTTPError as e:

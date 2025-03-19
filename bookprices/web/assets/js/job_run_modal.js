@@ -26,9 +26,6 @@ function toggleSpinnerInJobRunModal(showSpinner) {
     else if (!showSpinner && spinner.length > 0) {
         spinner.remove();
     }
-    else {
-        console.log("Spinner already in modal. Something is wrong!");
-    }
 }
 
 function loadPriorityOptions(priorities) {
@@ -48,7 +45,6 @@ function hideModal(event) {
     inputVersion.val("");
     inputJobId.val("");
     divErrorMessage.hide();
-    console.log('HIDE!');
     textErrorMessage.text("");
 }
 
@@ -92,8 +88,7 @@ function loadJobRunModal(event) {
                 inputJobId.val(jobId);
                 inputVersion.val(data[versionFieldName]);
 
-                if (data[errorMessageFieldName] != null) {
-                    console.log('error message');
+                if (data[errorMessageFieldName] !== null) {
                     divErrorMessage.show();
                     textErrorMessage.text(data[errorMessageFieldName]);
                 }
