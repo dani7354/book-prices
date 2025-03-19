@@ -25,8 +25,8 @@ class JobRunner:
         running = True
         while running:
             try:
-                if next_job := self._job_service.get_next_job_run():
-                    self.run_job(next_job)
+                if next_job_run := self._job_service.get_next_job_run_dto():
+                    self.run_job(next_job_run)
                 self._logger.info(f"Sleeping for {self.sleep_time_seconds} seconds...")
                 time.sleep(self.sleep_time_seconds)
             except KeyboardInterrupt:
@@ -44,7 +44,14 @@ class JobRunner:
             self._increment_error_counter_and_update_status(job_run)
             return
         try:
-            self._try_set_job_run_status(job_run.id, job_run.job_id, status=JobRunStatus.RUNNING.value)
+            if not self._try_set_job_run_status(job_run, status=JobRunStatus.RUNNING.value):
+                self._logger.warning(
+                    f"Failed to start job run {job_run.id}. Another process may already be running running it.")
+                return
+            if not (job_run := self._job_service.get_job_run_dto(job_run.id)):
+                self._logger.error(f"Failed to get started job run {job_run.id}. It must have been deleted.")
+                return
+
             start_time = time.time()
             self._logger.info(f"Running job {job_run.job_name}...")
             result = job.start(**{arg.name: arg.values for arg in job_run.arguments})
@@ -53,14 +60,13 @@ class JobRunner:
                 f"Job {job_run.job_name} finished with status {result.exit_status}. Took {execution_time:2f} mins.")
 
             if result.exit_status == JobExitStatus.SUCCESS:
-                self._try_set_job_run_status(job_run.id, job_run.job_id, status=JobRunStatus.COMPLETED.value)
+                self._try_set_job_run_status(job_run, status=JobRunStatus.COMPLETED.value)
             else:
                 self._try_set_job_run_status(
-                    job_run.id, job_run.job_id, status=JobRunStatus.FAILED.value, error_message=result.error_message)
+                    job_run, status=JobRunStatus.FAILED.value, error_message=result.error_message)
         except Exception as e:
             self._logger.error(f"Failed to run job {job_run.job_name}: {e}")
-            if not self._try_set_job_run_status(
-                    job_run.id, job_run.job_id, status=JobRunStatus.FAILED.value, error_message=str(e)):
+            if not self._try_set_job_run_status(job_run, status=JobRunStatus.FAILED.value, error_message=str(e)):
                 raise
 
     def _increment_error_counter_and_update_status(self, job_run: JobRun) -> None:
@@ -69,7 +75,7 @@ class JobRunner:
             self._logger.error(
                 f"Job run {job_run.job_name} failed to start {self.job_run_lookup_max_retries} times. Aborting...")
             self._try_set_job_run_status(
-                job_run.id, job_run.job_id, status=JobRunStatus.FAILED.value, error_message="Failed to start job.")
+                job_run, status=JobRunStatus.FAILED.value, error_message="Failed to start job.")
             self._job_lookup_errors.pop(job_run.id)
         else:
             self._logger.warning(
@@ -78,12 +84,11 @@ class JobRunner:
 
     def _try_set_job_run_status(
             self,
-            job_run_id: str,
-            job_id: str,
+            job_run_dto: JobRun,
             status: str,
             error_message: str | None = None) -> bool:
         try:
-            self._job_service.update_job_run_status(job_run_id, job_id, status=status, error_message=error_message)
+            self._job_service.update_job_run_status(job_run_dto=job_run_dto, status=status, error_message=error_message)
             return True
         except UpdateFailedError as e:
             self._logger.error(f"Failed to update job run status. Maybe it was grabbed by another instance: {e}")

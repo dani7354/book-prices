@@ -9,6 +9,7 @@
         <form id="form-create-edit-job-run" style="display:none">
            <div class="mb-3">
             <input id="input-job-id" name="job_id" type="hidden" class="form-control">
+            <input id="input-version" name="version" type="hidden" class="form-control">
           </div>
           <div class="mb-3">
             <label for="input-priority" class="col-form-label">Prioritet:</label>
@@ -18,6 +19,10 @@
           <div class="mb-3">
             <label for="message-text" class="col-form-label">Argumenter:</label>
             <textarea class="form-control" id="message-text" disabled></textarea>
+          </div>
+          <div id="div-error-message" class="mb-3" style="display: none;">
+            <label for="text-error-message" class="col-form-label">Fejlbesked:</label>
+            <p class="text-danger" id="text-error-message"></p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>

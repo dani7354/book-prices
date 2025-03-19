@@ -81,13 +81,17 @@ function initializeJobTable(columns, rows, translations) {
         actionCell.append(deleteButton);
         actionCell.append(" ");
 
+        let runButtonClass = "btn btn-secondary mb-1";
+        runButtonClass += row["is_active"] === false ? " disabled" : "";
+
         let runButton = $("<a></a>")
             .attr("id", "btn-run-job")
-            .attr("class", "btn btn-secondary mb-1")
+            .attr("class", runButtonClass)
             .attr("data-bs-toggle", "modal")
             .attr("data-bs-target", "#job-run-modal")
             .attr("data-job-id", row["id"])
             .text("Kør");
+
         actionCell.append(runButton);
 
         tableRow.append(actionCell);

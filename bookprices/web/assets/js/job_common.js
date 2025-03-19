@@ -6,6 +6,8 @@ const jobRunIdFieldName = "id";
 const formActionUrlFieldName = "form_action_url";
 const priorityFieldName = "priority";
 const prioritiesFieldName = "priorities";
+const versionFieldName = "version";
+const errorMessageFieldName = "error_message";
 
 
 function showAlert(message, alertType, container) {

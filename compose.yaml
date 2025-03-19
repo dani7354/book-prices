@@ -8,6 +8,10 @@ services:
     volumes:
       - ./docker/jobrunner/logs:/app/logs
       - ./docker/jobrunner/images:/app/images
+    depends_on:
+      - job_api
+      - db
+      - redis
     networks:
       - localnetwork
   jobscheduler:
@@ -15,6 +19,8 @@ services:
     env_file: ./docker/jobscheduler/.jobscheduler.env
     volumes:
       - ./docker/jobscheduler/logs:/app/logs
+    depends_on:
+      - job_api
     networks:
       - localnetwork
   web:
@@ -22,6 +28,10 @@ services:
     env_file: ./docker/web/.web.env
     volumes:
       - ./google_client_secrets.json:/usr/local/bookprices_web/google_client_secrets.json:ro
+    depends_on:
+      - job_api
+      - db
+      - redis
     networks:
       - localnetwork
   nginx:
@@ -45,6 +55,8 @@ services:
     env_file: docker/job_api/.job_api.env
     ports:
       - "8080:8080"
+    depends_on:
+      - db
     networks:
       - localnetwork
   db:

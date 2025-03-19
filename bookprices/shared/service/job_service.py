@@ -34,6 +34,7 @@ class JobSchemaFields(Enum):
     NAME = "name"
     DESCRIPTION = "description"
     IS_ACTIVE = "isActive"
+    VERSION = "version"
 
 
 class JobRunSchemaFields(Enum):
@@ -47,6 +48,7 @@ class JobRunSchemaFields(Enum):
     CREATED = "created"
     ERROR_MESSAGE = "errorMessage"
     ARGUMENTS = "arguments"
+    VERSION = "version"
 
 
 class JobRunArgumentSchemaFields(Enum):
@@ -105,9 +107,11 @@ class JobService:
         job_runs_by_job_id = {}
         for job_id in job_ids:
             try:
-                url = (f"{Endpoint.JOB_RUNS.value}?"
-                       f"{UrlParameter.JOB_ID.value}={job_id}&"
-                       f"{UrlParameter.LIMIT.value}={job_run_count}")
+                url = (f"{Endpoint.JOB_RUNS.value}"
+                       f"?{UrlParameter.JOB_ID.value}={job_id}"
+                       f"&{UrlParameter.LIMIT.value}={job_run_count}"
+                       f"&{UrlParameter.SORT_BY.value}={JobRunSchemaFields.UPDATED.value}"
+                       f"&{UrlParameter.SORT_DIRECTION.value}=Descending")
                 if job_run_response := self._job_api_client.get(url):
                     job_runs_by_job_id[job_id], = job_run_response
             except HTTPError as ex:
@@ -118,8 +122,10 @@ class JobService:
     def get_job_runs(self, job_id: str | None = None) -> dict:
         try:
             max_job_runs_to_load = 50
-            url = (f"{Endpoint.JOB_RUNS.value}?"
-                   f"{UrlParameter.LIMIT.value}={max_job_runs_to_load}")
+            url = (f"{Endpoint.JOB_RUNS.value}"
+                   f"?{UrlParameter.LIMIT.value}={max_job_runs_to_load}"
+                   f"&{UrlParameter.SORT_BY.value}={JobRunSchemaFields.UPDATED.value}"
+                   f"&{UrlParameter.SORT_DIRECTION.value}=Descending")
             if job_id:
                 url += f"&{UrlParameter.JOB_ID.value}={job_id}"
             job_runs = self._job_api_client.get(url)
@@ -156,7 +162,7 @@ class JobService:
             logger.error(f"Failed to create job run for job with id {job_id}. Error: {ex}")
             raise CreationFailedError(f"Job run for job with id {job_id} could not be created.")
 
-    def update_job(self, job_id: str, name: str, description: str, is_active: bool) -> None:
+    def update_job(self, job_id: str, name: str, description: str, version: str, is_active: bool) -> None:
         try:
             job_list = self.get_job_list()
             if any(job["name"] == name and job["id"] != job_id for job in job_list):
@@ -170,19 +176,21 @@ class JobService:
                     JobSchemaFields.ID.value: job_id,
                     JobSchemaFields.NAME.value: name,
                     JobSchemaFields.DESCRIPTION.value: description,
+                    JobSchemaFields.VERSION.value: version,
                     JobSchemaFields.IS_ACTIVE.value: is_active})
         except HTTPError as ex:
             logger.error(f"Failed to update job with id {job_id}. Error: {ex}")
             raise UpdateFailedError(f"Job with id {job_id} could not be updated.")
 
-    def update_job_run(self, job_id: str, job_run_id: str, priority: str) -> None:
+    def update_job_run(self, job_id: str, job_run_id: str, priority: str, version: str) -> None:
         try:
             self._job_api_client.patch(
                 Endpoint.get_job_run_url(job_run_id),
                 data={
                     JobRunSchemaFields.JOB_RUN_ID.value: job_run_id,
                     JobRunSchemaFields.JOB_ID.value: job_id,
-                    JobRunSchemaFields.PRIORITY.value: priority})
+                    JobRunSchemaFields.PRIORITY.value: priority,
+                    JobRunSchemaFields.VERSION.value: version})
         except HTTPError as ex:
             logger.error(f"Failed to update job run with id {job_run_id}. Error: {ex}")
             raise CreationFailedError(f"Job run with id {job_run_id} could not be updated.")
