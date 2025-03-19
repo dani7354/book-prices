@@ -107,9 +107,11 @@ class JobService:
         job_runs_by_job_id = {}
         for job_id in job_ids:
             try:
-                url = (f"{Endpoint.JOB_RUNS.value}?"
-                       f"{UrlParameter.JOB_ID.value}={job_id}&"
-                       f"{UrlParameter.LIMIT.value}={job_run_count}")
+                url = (f"{Endpoint.JOB_RUNS.value}"
+                       f"?{UrlParameter.JOB_ID.value}={job_id}"
+                       f"&{UrlParameter.LIMIT.value}={job_run_count}"
+                       f"&{UrlParameter.SORT_BY.value}={JobRunSchemaFields.UPDATED.value}"
+                       f"&{UrlParameter.SORT_DIRECTION.value}=Descending")
                 if job_run_response := self._job_api_client.get(url):
                     job_runs_by_job_id[job_id], = job_run_response
             except HTTPError as ex:
@@ -120,8 +122,10 @@ class JobService:
     def get_job_runs(self, job_id: str | None = None) -> dict:
         try:
             max_job_runs_to_load = 50
-            url = (f"{Endpoint.JOB_RUNS.value}?"
-                   f"{UrlParameter.LIMIT.value}={max_job_runs_to_load}")
+            url = (f"{Endpoint.JOB_RUNS.value}"
+                   f"?{UrlParameter.LIMIT.value}={max_job_runs_to_load}"
+                   f"&{UrlParameter.SORT_BY.value}={JobRunSchemaFields.UPDATED.value}"
+                   f"&{UrlParameter.SORT_DIRECTION.value}=Descending")
             if job_id:
                 url += f"&{UrlParameter.JOB_ID.value}={job_id}"
             job_runs = self._job_api_client.get(url)

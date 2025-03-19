@@ -61,5 +61,6 @@ class JobRunEditViewModel:
     updated: str
     version: str
     form_action_url: str
+    error_message: str | None = None
     priorities: dict[str, str] = field(default_factory=dict)
     arguments: list[JobRunArgument] = field(default_factory=list)

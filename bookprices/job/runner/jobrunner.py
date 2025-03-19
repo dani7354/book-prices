@@ -25,8 +25,8 @@ class JobRunner:
         running = True
         while running:
             try:
-                if next_job := self._job_service.get_next_job_run():
-                    self.run_job(next_job)
+                if next_job_run := self._job_service.get_next_job_run_dto():
+                    self.run_job(next_job_run)
                 self._logger.info(f"Sleeping for {self.sleep_time_seconds} seconds...")
                 time.sleep(self.sleep_time_seconds)
             except KeyboardInterrupt:
@@ -44,7 +44,14 @@ class JobRunner:
             self._increment_error_counter_and_update_status(job_run)
             return
         try:
-            self._try_set_job_run_status(job_run, status=JobRunStatus.RUNNING.value)
+            if not self._try_set_job_run_status(job_run, status=JobRunStatus.RUNNING.value):
+                self._logger.warning(
+                    f"Failed to start job run {job_run.id}. Another process may already be running running it.")
+                return
+            if not (job_run := self._job_service.get_job_run_dto(job_run.id)):
+                self._logger.error(f"Failed to get started job run {job_run.id}. It must have been deleted.")
+                return
+
             start_time = time.time()
             self._logger.info(f"Running job {job_run.job_name}...")
             result = job.start(**{arg.name: arg.values for arg in job_run.arguments})

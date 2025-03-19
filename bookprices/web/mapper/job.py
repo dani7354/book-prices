@@ -99,6 +99,7 @@ def map_job_run_edit_view_model(job_run_json: dict) -> JobRunEditViewModel:
         updated=datetime.fromisoformat(job_run_json["updated"]).strftime(DATE_FORMAT),
         version=job_run_json["version"],
         form_action_url=url_for(Endpoint.JOB_UPDATE_JOB_RUN.value, job_run_id=job_run_json["id"]),
+        error_message=job_run_json["errorMessage"],
         priorities=JOB_RUN_PRIORITY_TRANSLATIONS,
         arguments=[JobRunArgument(name=arg["name"], type=arg["type"], values=arg["values"])
                    for arg in job_run_json["arguments"]])

@@ -36,7 +36,7 @@ class RunnerJobService(JobService):
         super().__init__(api_client)
         self._logger = logging.getLogger(__name__)
 
-    def get_next_job_run(self) -> JobRun | None:
+    def get_next_job_run_dto(self) -> JobRun | None:
         try:
             if not (next_job_id := self._get_next_job_run_id_from_list()):
                 return None
@@ -48,6 +48,17 @@ class RunnerJobService(JobService):
         except HTTPError as e:
             self._logger.error(f"Failed to get job runs: {e}")
             raise FailedToGetJobRunsError
+
+    def get_job_run_dto(self, job_run_id: str) -> JobRun | None:
+        try:
+            if not (job_run_json := self.get_job_run(job_run_id)):
+                return None
+            job_run_dto = self._map_job_run_json_to_dto(job_run_json)
+
+            return job_run_dto
+        except HTTPError as e:
+            self._logger.error(f"Failed to get job run with id {job_run_id}: {e}")
+            return None
 
     def update_job_run_status(
             self,

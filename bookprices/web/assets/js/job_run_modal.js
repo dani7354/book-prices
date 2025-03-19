@@ -2,7 +2,11 @@ const jobRunModal = $("#job-run-modal");
 const jobRunModalForm = $("#form-create-edit-job-run");
 const jobRunModalBodyDiv = $("#div-job-run-modal-body");
 const inputPriority = $("#input-priority");
+const inputVersion = $("#input-version");
 const inputJobId = $("#input-job-id");
+const divErrorMessage = $("#div-error-message");
+const textErrorMessage = $("#text-error-message");
+
 
 const jobIdInput = "job-id";
 
@@ -41,6 +45,11 @@ function hideModal(event) {
     jobRunModalForm.hide();
     inputPriority.val("");
     inputPriority.empty();
+    inputVersion.val("");
+    inputJobId.val("");
+    divErrorMessage.hide();
+    console.log('HIDE!');
+    textErrorMessage.text("");
 }
 
 function loadJobRunModal(event) {
@@ -80,6 +89,15 @@ function loadJobRunModal(event) {
             "success": function (data) {
                 loadPriorityOptions(data[prioritiesFieldName]);
                 inputPriority.val(data[priorityFieldName]);
+                inputJobId.val(jobId);
+                inputVersion.val(data[versionFieldName]);
+
+                if (data[errorMessageFieldName] != null) {
+                    console.log('error message');
+                    divErrorMessage.show();
+                    textErrorMessage.text(data[errorMessageFieldName]);
+                }
+
                 jobRunModalForm.attr("action", data[formActionUrlFieldName]);
                 jobRunModalForm.show();
                 toggleSpinnerInJobRunModal(false);
