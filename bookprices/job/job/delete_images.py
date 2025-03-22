@@ -1,6 +1,6 @@
 import logging
 import os
-from bookprices.job.job.base import JobBase
+from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 
@@ -16,21 +16,23 @@ class DeleteImagesJob(JobBase):
         self.image_folder = config.imgdir
         self._logger = logging.getLogger(self.name)
 
-    def start(self, *args, **kwargs) -> None:
+    def start(self, *args, **kwargs) -> JobResult:
         if not (images_from_db := self._get_image_filenames_from_db()):
             self._logger.info("No book images to check!")
-            return
+            return JobResult(JobExitStatus.SUCCESS)
 
         if not (images_from_folder := self._get_image_filenames_from_folder()):
             self._logger.info("No image files in folder!")
-            return
+            return JobResult(JobExitStatus.SUCCESS)
 
         if not (images_to_delete := images_from_folder.difference(images_from_db)):
             self._logger.info("No image files to delete!")
-            return
+            return JobResult(JobExitStatus.SUCCESS)
 
         logging.info(f"{len(images_to_delete)} image files will be deleted.")
         self._delete_files(images_to_delete)
+
+        return JobResult(JobExitStatus.SUCCESS)
 
     def _get_image_filenames_from_db(self) -> set[str]:
         self._logger.info("Getting image filenames from database...")
