@@ -177,8 +177,7 @@ class BookPriceDb(BaseDb):
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT BookId, BookStoreId, COUNT(*) AS Count "
                          "FROM FailedPriceUpdate "
-                         "GROUP BY BookId, BookStoreId "
-                         "WHERE Count >= %s;")
+                         "GROUP BY BookId, BookStoreId HAVING Count >= %s;")
 
                 cursor.execute(query, (min_count,))
                 failed_price_update_counts = [
