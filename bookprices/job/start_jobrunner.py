@@ -1,3 +1,4 @@
+from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.trim_prices import TrimPricesJob
 from bookprices.job.runner.jobrunner import JobRunner
@@ -87,6 +88,20 @@ def create_download_images_job(config: Config) -> DownloadImagesJob:
 
     return DownloadImagesJob(config, db, image_downloader)
 
+def create_delete_unavailable_books_job(config: Config) -> DeleteUnavailableBooksJob:
+    db = Database(
+        config.database.db_host,
+        config.database.db_port,
+        config.database.db_user,
+        config.database.db_password,
+        config.database.db_name)
+    cache_key_remover = BookPriceKeyRemover(
+        RedisClient(
+            config.cache.host,
+            config.cache.database,
+            config.cache.port))
+
+    return DeleteUnavailableBooksJob(config, db, cache_key_remover)
 
 def main() -> None:
     config = loader.load_from_env()
@@ -107,7 +122,8 @@ def main() -> None:
     service = RunnerJobService(job_api_client)
     jobs = [
         create_trim_prices_job(config),
-        create_download_images_job(config)
+        create_download_images_job(config),
+        create_delete_unavailable_books_job(config)
     ]
     job_runner = JobRunner(config, jobs, service)
     job_runner.start()

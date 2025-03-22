@@ -5,6 +5,8 @@ from typing import ClassVar
 
 import schedule
 
+from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
+from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.shared.service.job_service import JobService, JobSchemaFields, JobRunPriority, CreationFailedError
 from bookprices.job.job.trim_prices import TrimPricesJob
 
@@ -37,7 +39,12 @@ class JobScheduler:
 
     def schedule_jobs(self) -> None:
         schedule.every().day.at("01:00", self.time_zone).do(self._set_available_jobs)
-        schedule.every().monday.at("10:00", self.time_zone).do(self._send_start_job_request_in_thread, TrimPricesJob.name)
+        schedule.every().monday.at("10:00", self.time_zone).do(
+            self._send_start_job_request_in_thread, TrimPricesJob.name)
+        schedule.every().day.at("02:00", self.time_zone).do(
+            self._send_start_job_request_in_thread, DeleteUnavailableBooksJob.name)
+        schedule.every().day.at("08:00", self.time_zone).do(
+            self._send_start_job_request_in_thread, DownloadImagesJob.name)
 
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")
