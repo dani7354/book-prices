@@ -94,6 +94,28 @@ class BookDb(BaseDb):
 
                 return books
 
+    def get_books_with_no_image(self, offset: int, limit: int) -> list[Book]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
+                         "FROM Book "
+                         "WHERE ImageUrl IS NULL "
+                         "ORDER BY Id ASC "
+                         "LIMIT %s OFFSET %s;")
+                cursor.execute(query, (limit, offset))
+                books = []
+                for row in cursor:
+                    book = Book(row["Id"],
+                                row["Isbn"],
+                                row["Title"],
+                                row["Author"],
+                                row["Format"],
+                                row["ImageUrl"],
+                                row["Created"])
+                    books.append(book)
+
+                return books
+
     def get_books_by_ids(self, ids: set[int]) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:

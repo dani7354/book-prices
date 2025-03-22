@@ -81,11 +81,11 @@ class ImageDownloader:
             page_response.raise_for_status()
             page_content_bs = BeautifulSoup(page_response.content.decode(), options.BS_HTML_PARSER)
             img_element = page_content_bs.select_one(image_source.image_css_selector)
-            url = img_element[HTML_SRC]
+            image_url = img_element[HTML_SRC]
         except HTTPError as ex:
             raise ImageNotDownloadedException(f"Failed to connect to {image_source.page_url}: {ex}")
         except KeyError as ex:
             raise ImageNotDownloadedException(f"Failed to parse url from HTML element {image_source.image_css_selector}: "
                                               f"{ex}")
 
-        return url
+        return image_url

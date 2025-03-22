@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Optional
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookstore import BookStore, BookInBookStore
@@ -109,8 +110,38 @@ class BookStoreDb(BaseDb):
 
         return books_in_bookstore
 
+    def get_bookstores_with_image_source_for_books(self, books: list[Book]) -> dict[int, list[BookInBookStore]]:
+        book_dict = {b.id: b for b in books}
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                ids_format_string = ",".join(["%s"] * len(book_dict.keys()))
+                query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
+                         "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
+                         "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
+                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector " 
+                         "FROM BookStoreBook bsb " 
+                         "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
+                         f"WHERE bsb.BookId IN ({ids_format_string}) AND bs.ImageCssSelector IS NOT NULL;")
+
+                cursor.execute(query, tuple(book_dict.keys()))
+
+                books_in_bookstore = defaultdict(list)
+                bookstores = {}
+                for row in cursor:
+                    bookstore_id = row["BookStoreId"]
+                    if bookstore_id not in bookstores:
+                        self._add_bookstore_from_row(row, bookstores)
+
+                    book_id = row["BookId"]
+                    books_in_bookstore[book_id].append(BookInBookStore(book_dict[book_id],
+                                                                       bookstores[bookstore_id],
+                                                                       row["BookUrl"]))
+
+        return books_in_bookstore
+
+
     @staticmethod
-    def _add_bookstore_from_row(row: dict, bookstore_dict: dict):
+    def _add_bookstore_from_row(row: dict, bookstore_dict: dict[int, BookStore]):
         bookstore_id = row["BookStoreId"]
         bookstore_dict[bookstore_id] = BookStore(bookstore_id,
                                                  row["BookStoreName"],

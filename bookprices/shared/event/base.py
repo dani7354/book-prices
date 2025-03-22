@@ -8,7 +8,17 @@ class Listener:
         raise NotImplementedError
 
 
-class Event:
+class EventBase:
+    @abstractmethod
+    def add_listener(self, listener: Listener) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def trigger(self, *args, **kwargs) -> None:
+        raise NotImplementedError
+
+
+class Event(EventBase):
     def __init__(self, name) -> None:
         self.name = name
         self._listeners = []
@@ -24,7 +34,7 @@ class Event:
 class EventManager:
     _event_does_not_exist_error_message: ClassVar[str] = "Event {event_name} does not exist"
 
-    def __init__(self, events: Mapping[str, Event]) -> None:
+    def __init__(self, events: Mapping[str, EventBase]) -> None:
         self._events = events
 
     def add_listener_to_event(self, event_name: str, listener: Listener) -> None:
