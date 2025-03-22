@@ -1,3 +1,4 @@
+from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.trim_prices import TrimPricesJob
@@ -103,6 +104,18 @@ def create_delete_unavailable_books_job(config: Config) -> DeleteUnavailableBook
 
     return DeleteUnavailableBooksJob(config, db, cache_key_remover)
 
+
+def create_delete_images_job(config: Config) -> DeleteImagesJob:
+    db = Database(
+        config.database.db_host,
+        config.database.db_port,
+        config.database.db_user,
+        config.database.db_password,
+        config.database.db_name)
+
+    return DeleteImagesJob(config, db)
+
+
 def main() -> None:
     config = loader.load_from_env()
     setup_logging(config, PROGRAM_NAME)
@@ -123,7 +136,8 @@ def main() -> None:
     jobs = [
         create_trim_prices_job(config),
         create_download_images_job(config),
-        create_delete_unavailable_books_job(config)
+        create_delete_unavailable_books_job(config),
+        create_delete_images_job(config),
     ]
     job_runner = JobRunner(config, jobs, service)
     job_runner.start()

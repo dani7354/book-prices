@@ -94,6 +94,17 @@ class BookDb(BaseDb):
 
                 return books
 
+    def get_book_image_urls(self) -> list[str]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT ImageUrl "
+                         "FROM Book "
+                         "WHERE ImageUrl IS NOT NULL;")
+                cursor.execute(query)
+                image_urls = [row["ImageUrl"] for row in cursor]
+
+                return image_urls
+
     def get_books_with_no_image(self, offset: int, limit: int) -> list[Book]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
