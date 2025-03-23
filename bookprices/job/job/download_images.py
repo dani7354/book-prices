@@ -12,6 +12,8 @@ from bookprices.shared.webscraping.image import ImageDownloader, ImageSource, Im
 
 
 class DownloadImagesJob(JobBase):
+    """ Downloads images for new books. """
+
     books_batch_size: ClassVar[int] = 300
     thread_count: ClassVar[int] = 8
     min_image_sources_per_thread: ClassVar[int] = 5
