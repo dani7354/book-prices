@@ -63,7 +63,7 @@ class JobRunner:
                 self._try_set_job_run_status(job_run, status=JobRunStatus.COMPLETED.value)
             else:
                 self._try_set_job_run_status(
-                    job_run, status=JobRunStatus.FAILED.value, error_message=result.error_message)
+                    job_run, status=JobRunStatus.FAILED.value, error_message=str(result.error_message))
         except Exception as e:
             self._logger.error(f"Failed to run job {job_run.job_name}: {e}")
             if not self._try_set_job_run_status(job_run, status=JobRunStatus.FAILED.value, error_message=str(e)):

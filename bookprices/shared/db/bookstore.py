@@ -58,11 +58,11 @@ class BookStoreDb(BaseDb):
     def get_book_isbn_and_missing_bookstores(self, offset: int, limit: int) -> list[dict[str, Any]]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, bs.IsbnCssSelector "
+                query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, bs.IsbnCssSelector, bs.Url "
                          "FROM Book b "
                          "CROSS JOIN BookStore bs "
                          "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
-                         "WHERE sb.BookId IS NULL AND bsb.BookStoreId IS NULL "
+                         "WHERE bsb.BookId IS NULL AND bsb.BookStoreId IS NULL "
                          "AND SearchResultCssSelector IS NOT NULL AND IsbnCssSelector IS NOT NULL AND SearchUrl IS NOT NULL "
                          "ORDER BY b.Id ASC "
                          "LIMIT %s OFFSET %s;")

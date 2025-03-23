@@ -55,14 +55,14 @@ class BookStoreSearchJob(JobBase):
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
-            return JobResult(JobExitStatus.FAILURE)
+            return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
 
     def _get_and_enqueue_next_searches(self, offset: int) -> bool:
         for row in self._db.bookstore_db.get_book_isbn_and_missing_bookstores(offset, self.book_bookstore_batch_size):
             self._search_queue.put(
                 IsbnSearch(
                     book_id=row["BookId"],
-                    bookstore_id=row["BookstoreId"],
+                    bookstore_id=row["BookStoreId"],
                     search_url=row["SearchUrl"],
                     match_css_selector=row["SearchResultCssSelector"],
                     isbn=row["Isbn"],
@@ -91,8 +91,9 @@ class BookStoreSearchJob(JobBase):
         logging.info("Finished search!")
 
     def _search_books(self):
-        while isbn_search := self._search_queue.get():
+        while not self._search_queue.empty():
             try:
+                isbn_search = self._search_queue.get()
                 match_url = BookFinder.search_book_isbn(isbn_search)
                 # Should return none if no book found instead of raising exceptions.
                 logging.info(f"Found book with id {isbn_search.book_id} at {match_url} (bookstore {isbn_search.bookstore_id})")

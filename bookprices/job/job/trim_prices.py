@@ -25,15 +25,19 @@ class TrimPricesJob(JobBase):
         self._logger = getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        book_ids_offset, book_id_page = 0, 1
-        while book_ids := self._db.book_db.get_next_book_ids(book_ids_offset, self.book_ids_batch_size):
-            for book_id in book_ids:
-                self.trim_prices_for_book(book_id)
+        try:
+            book_ids_offset, book_id_page = 0, 1
+            while book_ids := self._db.book_db.get_next_book_ids(book_ids_offset, self.book_ids_batch_size):
+                for book_id in book_ids:
+                    self.trim_prices_for_book(book_id)
 
-            book_id_page += 1
-            book_ids_offset = (book_id_page - 1) * self.book_ids_batch_size
+                book_id_page += 1
+                book_ids_offset = (book_id_page - 1) * self.book_ids_batch_size
 
-        return JobResult(JobExitStatus.SUCCESS)
+            return JobResult(JobExitStatus.SUCCESS)
+        except Exception as ex:
+            self._logger.error(f"Unexpected error: {ex}")
+            return JobResult(JobExitStatus.FAILURE, error_message=ex)
 
     def trim_prices_for_book(self, book_id: int) -> None:
         book = self._db.book_db.get_book(book_id)

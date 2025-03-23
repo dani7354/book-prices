@@ -29,16 +29,19 @@ class DownloadImagesJob(JobBase):
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        book_ids_offset, book_id_page = 0, 1
-        while books := self.bookprices_db.book_db.get_books_with_no_image(book_ids_offset, self.books_batch_size):
-            self._logger.info(f"Found {len(books)} books with no image")
-            self._download_images_for_books(books)
-            book_id_page += 1
-            book_ids_offset = (book_id_page - 1) * self.books_batch_size
+        try:
+            book_ids_offset, book_id_page = 0, 1
+            while books := self.bookprices_db.book_db.get_books_with_no_image(book_ids_offset, self.books_batch_size):
+                self._logger.info(f"Found {len(books)} books with no image")
+                self._download_images_for_books(books)
+                book_id_page += 1
+                book_ids_offset = (book_id_page - 1) * self.books_batch_size
 
-        self._logger.info("Done!")
-
-        return JobResult(JobExitStatus.SUCCESS)
+            self._logger.info("Done!")
+            return JobResult(JobExitStatus.SUCCESS)
+        except Exception as ex:
+            self._logger.error(f"Unexpected error: {ex}")
+            return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
 
     def _download_images_for_books(self, books: list[Book]) -> None:
         self._logger.info(f"Loading image sources for {len(books)} books...")
