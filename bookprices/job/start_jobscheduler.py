@@ -18,12 +18,14 @@ def main() -> None:
         config.database.db_user,
         config.database.db_password,
         config.database.db_name)
+
     job_api_client = JobApiClient(
         config.job_api.base_url,
         config.job_api.api_username,
         config.job_api.api_password,
         JOB_API_CLIENT_ID,
         api_key_db)
+
     job_service = JobService(job_api_client)
     job_scheduler = JobScheduler(job_service)
     job_scheduler.start()

@@ -14,6 +14,8 @@ class BookNotFoundError(Exception):
 
 @dataclass(frozen=True)
 class IsbnSearch:
+    book_id: int
+    bookstore_id: int
     search_url: str
     match_css_selector: str
     isbn: str

@@ -5,6 +5,7 @@ from typing import ClassVar
 
 import schedule
 
+from bookprices.job.job.bookstore_search import BookStoreSearchJob
 from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
@@ -48,6 +49,8 @@ class JobScheduler:
             self._send_start_job_request_in_thread, DownloadImagesJob.name)
         schedule.every().day.at("07:00", self.time_zone).do(
             self._send_start_job_request_in_thread, DeleteImagesJob.name)
+        schedule.every().day.at("06:00", self.time_zone).do(
+            self._send_start_job_request_in_thread, BookStoreSearchJob.name)
 
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")

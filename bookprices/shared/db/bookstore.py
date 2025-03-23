@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, Any
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookstore import BookStore, BookInBookStore
 from bookprices.shared.model.book import Book
@@ -55,12 +55,28 @@ class BookStoreDb(BaseDb):
 
                 return bookstores
 
-    def create_bookstore_for_book(self, book_id: int, bookstore_id: int, url: str):
+    def get_book_isbn_and_missing_bookstores(self, offset: int, limit: int) -> list[dict[str, Any]]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, bs.IsbnCssSelector "
+                         "FROM Book b "
+                         "CROSS JOIN BookStore bs "
+                         "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
+                         "WHERE sb.BookId IS NULL AND bsb.BookStoreId IS NULL "
+                         "AND SearchResultCssSelector IS NOT NULL AND IsbnCssSelector IS NOT NULL AND SearchUrl IS NOT NULL "
+                         "ORDER BY b.Id ASC "
+                         "LIMIT %s OFFSET %s;")
+
+                cursor.execute(query, (limit, offset))
+
+                return cursor.fetchall()
+
+    def create_bookstores_for_books(self, bookstores_for_books: list[tuple[int, int, str]]) -> None:
         with self.get_connection() as con:
             with con.cursor() as cursor:
                 query = ("INSERT INTO BookStoreBook (BookId, BookStoreId, Url) "
                          "VALUES (%s, %s, %s)")
-                cursor.execute(query, (book_id, bookstore_id, url))
+                cursor.executemany(query, bookstores_for_books)
                 con.commit()
 
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int):
