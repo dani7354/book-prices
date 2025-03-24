@@ -202,5 +202,4 @@ class JobApiClient:
         try:
             response.json()
         except json.JSONDecodeError:
-            logger.error("Failed to decode response from Job API %s. Maybe it's empty", response.request.url)
             return None
