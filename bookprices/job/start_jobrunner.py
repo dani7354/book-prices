@@ -4,9 +4,10 @@ from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.trim_prices import TrimPricesJob
-from bookprices.job.job.update_prices import AllPricesUpdateJob
+from bookprices.job.job.update_prices import AllBookPricesUpdateJob, BookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
+from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
@@ -24,7 +25,24 @@ JOB_API_CLIENT_ID = "JobApiJobRunner"
 PROGRAM_NAME = "JobRunner"
 
 
-def create_api_client(config: Config) -> JobApiClient:
+def create_database_container(config: Config) -> Database:
+    return Database(
+        config.database.db_host,
+        config.database.db_port,
+        config.database.db_user,
+        config.database.db_password,
+        config.database.db_name)
+
+
+def create_cache_key_remover(config: Config) -> BookPriceKeyRemover:
+    return BookPriceKeyRemover(
+        RedisClient(
+            config.cache.host,
+            config.cache.database,
+            config.cache.port))
+
+
+def create_job_api_client(config: Config) -> JobApiClient:
     api_key_db = ApiKeyDb(
         config.database.db_host,
         config.database.db_port,
@@ -43,7 +61,7 @@ def create_api_client(config: Config) -> JobApiClient:
 
 
 def create_job_service(config: Config) -> RunnerJobService:
-    api_client = create_api_client(config)
+    api_client = create_job_api_client(config)
     return RunnerJobService(api_client)
 
 
@@ -67,130 +85,67 @@ def get_event_manager(config: Config) -> EventManager:
 
 
 def create_trim_prices_job(config: Config) -> TrimPricesJob:
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
-
-    cache_key_remover = BookPriceKeyRemover(
-        RedisClient(
-            config.cache.host,
-            config.cache.database,
-            config.cache.port))
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
 
     return TrimPricesJob(config, cache_key_remover, db)
 
 
 def create_download_images_job(config: Config) -> DownloadImagesJob:
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
-
+    db = create_database_container(config)
     image_downloader = ImageDownloader(config.imgdir)
 
     return DownloadImagesJob(config, db, image_downloader)
 
-def create_delete_unavailable_books_job(config: Config) -> DeleteUnavailableBooksJob:
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
 
-    cache_key_remover = BookPriceKeyRemover(
-        RedisClient(
-            config.cache.host,
-            config.cache.database,
-            config.cache.port))
+def create_delete_unavailable_books_job(config: Config) -> DeleteUnavailableBooksJob:
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
 
     return DeleteUnavailableBooksJob(config, db, cache_key_remover)
 
 
 def create_delete_images_job(config: Config) -> DeleteImagesJob:
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
+    db = create_database_container(config)
 
     return DeleteImagesJob(config, db)
 
 
 def create_bookstore_search_job(config: Config) -> BookStoreSearchJob:
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
-
-    cache_key_remover = BookPriceKeyRemover(
-        RedisClient(
-            config.cache.host,
-            config.cache.database,
-            config.cache.port))
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
 
     return BookStoreSearchJob(config, db, cache_key_remover)
 
 
 def create_delete_prices_job(config: Config) -> DeletePricesJob:
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
-
-    cache_key_remover = BookPriceKeyRemover(
-        RedisClient(
-            config.cache.host,
-            config.cache.database,
-            config.cache.port))
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
 
     return DeletePricesJob(config, db, cache_key_remover)
 
 
-def create_all_prices_update_job(config: Config) -> AllPricesUpdateJob:
-    db = Database(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
+def create_all_book_prices_update_job(config: Config) -> AllBookPricesUpdateJob:
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
+    price_update_service = PriceUpdateService(db, cache_key_remover)
 
-    cache_key_remover = BookPriceKeyRemover(
-        RedisClient(
-            config.cache.host,
-            config.cache.database,
-            config.cache.port))
+    return AllBookPricesUpdateJob(config, db, price_update_service)
 
-    return AllPricesUpdateJob(config, db, cache_key_remover)
+
+def create_book_price_update_job(config: Config) -> BookPricesUpdateJob:
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
+    price_update_service = PriceUpdateService(db, cache_key_remover)
+
+    return BookPricesUpdateJob(config, price_update_service)
 
 
 def main() -> None:
     config = loader.load_from_env()
     setup_logging(config, PROGRAM_NAME)
-    api_key_db = ApiKeyDb(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
 
-    job_api_client = JobApiClient(
-        config.job_api.base_url,
-        config.job_api.api_username,
-        config.job_api.api_password,
-        JOB_API_CLIENT_ID,
-        api_key_db)
-
+    job_api_client = create_job_api_client(config)
     service = RunnerJobService(job_api_client)
     jobs = [
         create_trim_prices_job(config),
@@ -199,7 +154,8 @@ def main() -> None:
         create_delete_images_job(config),
         create_bookstore_search_job(config),
         create_delete_prices_job(config),
-        create_all_prices_update_job(config)
+        create_book_price_update_job(config),
+        create_all_book_prices_update_job(config),
     ]
     job_runner = JobRunner(config, jobs, service)
     job_runner.start()
