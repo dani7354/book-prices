@@ -4,6 +4,7 @@ from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.trim_prices import TrimPricesJob
+from bookprices.job.job.update_prices import AllPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.shared.api.job import JobApiClient
@@ -156,6 +157,23 @@ def create_delete_prices_job(config: Config) -> DeletePricesJob:
     return DeletePricesJob(config, db, cache_key_remover)
 
 
+def create_all_prices_update_job(config: Config) -> AllPricesUpdateJob:
+    db = Database(
+        config.database.db_host,
+        config.database.db_port,
+        config.database.db_user,
+        config.database.db_password,
+        config.database.db_name)
+
+    cache_key_remover = BookPriceKeyRemover(
+        RedisClient(
+            config.cache.host,
+            config.cache.database,
+            config.cache.port))
+
+    return AllPricesUpdateJob(config, db, cache_key_remover)
+
+
 def main() -> None:
     config = loader.load_from_env()
     setup_logging(config, PROGRAM_NAME)
@@ -181,6 +199,7 @@ def main() -> None:
         create_delete_images_job(config),
         create_bookstore_search_job(config),
         create_delete_prices_job(config),
+        create_all_prices_update_job(config)
     ]
     job_runner = JobRunner(config, jobs, service)
     job_runner.start()
