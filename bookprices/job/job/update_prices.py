@@ -37,28 +37,32 @@ class AllPricesUpdateJob(JobBase):
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        page, offset = 1, 0
-        while book_ids := self._db.book_db.get_next_book_ids(offset, self.batch_size):
-            book_id_count = len(book_ids)
-            self._logger.info(f"Updating prices for {book_id_count} books (page {page})...")
-            books = self._db.book_db.get_books_by_ids(book_ids)
+        try:
+            page, offset = 1, 0
+            while book_ids := self._db.book_db.get_next_book_ids(offset, self.batch_size):
+                book_id_count = len(book_ids)
+                self._logger.info(f"Updating prices for {book_id_count} books (page {page})...")
+                books = self._db.book_db.get_books_by_ids(book_ids)
 
-            if not (book_stores_by_book_id := self._db.bookstore_db.get_bookstores_for_books(books)):
-                self._logger.warning("No book stores found for books!")
-                return JobResult(JobExitStatus.SUCCESS)
+                if not (book_stores_by_book_id := self._db.bookstore_db.get_bookstores_for_books(books)):
+                    self._logger.warning("No book stores found for books!")
+                    return JobResult(JobExitStatus.SUCCESS)
 
-            self._fill_queue(book_stores_by_book_id)
+                self._fill_queue(book_stores_by_book_id)
 
-            self._start_price_update()
+                self._start_price_update()
 
-            self._save_new_prices_and_clear_cache()
-            self._logger.info(f"Finished updating prices for {book_id_count} books (page {page})!")
+                self._save_new_prices_and_clear_cache()
+                self._logger.info(f"Finished updating prices for {book_id_count} books (page {page})!")
 
 
-            page += 1
-            offset = (page - 1) * self.batch_size
+                page += 1
+                offset = (page - 1) * self.batch_size
 
-        return JobResult(JobExitStatus.SUCCESS)
+            return JobResult(JobExitStatus.SUCCESS)
+        except Exception as ex:
+            self._logger.error(f"Unexpected error: {ex}")
+            return JobResult(JobExitStatus.FAILURE, error_message=ex)
 
     def _fill_queue(self, book_stores_by_book_id: dict[int, list[BookInBookStore]]) -> None:
         self._logger.debug("Filling book stores for book into queue...")
@@ -154,11 +158,14 @@ class BookPricesUpdateJob(JobBase):
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        if not (book_ids := {int(book_id) for book_id in kwargs.get("book_ids", [])}):
-            self._logger.error("No valid book ids provided!")
-            return JobResult(JobExitStatus.FAILURE)
+        try:
+            if not (book_ids := {int(book_id) for book_id in kwargs.get("book_ids", [])}):
+                self._logger.error("No valid book ids provided!")
+                return JobResult(JobExitStatus.FAILURE)
 
-        # TODO...
+            # TODO...
 
-        return JobResult(JobExitStatus.SUCCESS)
-
+            return JobResult(JobExitStatus.SUCCESS)
+        except Exception as ex:
+            self._logger.error(f"Unexpected error: {ex}")
+            return JobResult(JobExitStatus.FAILURE, error_message=ex)
