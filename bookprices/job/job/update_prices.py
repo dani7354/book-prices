@@ -50,9 +50,10 @@ class AllPricesUpdateJob(JobBase):
             self._fill_queue(book_stores_by_book_id)
 
             self._start_price_update()
-            self._logger.info(f"Finished updating prices for {book_id_count} books (page {page})!")
 
             self._save_new_prices_and_clear_cache()
+            self._logger.info(f"Finished updating prices for {book_id_count} books (page {page})!")
+
 
             page += 1
             offset = (page - 1) * self.batch_size
@@ -67,7 +68,6 @@ class AllPricesUpdateJob(JobBase):
     def _start_price_update(self) -> None:
         if self._book_stores_queue.empty():
             self._logger.info("Price update queue is empty!")
-            return
         elif self._book_stores_queue.qsize() / self.thread_count < self.min_updates_per_thread:
             self._logger.debug("Updating prices using single thread...")
             self._get_updated_prices_for_books()
@@ -87,7 +87,6 @@ class AllPricesUpdateJob(JobBase):
             self._get_prices_for_book(book_stores_for_book)
 
     def _get_prices_for_book(self, book_stores: list) -> None:
-        new_prices = []
         for book_in_store in book_stores:
             try:
                 full_url = book_in_store.get_full_url()
@@ -122,10 +121,6 @@ class AllPricesUpdateJob(JobBase):
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
                     book_in_store.book.id, book_in_store.book_store.id, FailedUpdateReason.CONNECTION_ERROR)
-
-        if not new_prices:
-            self._logger.warning("No new prices found for book!")
-            return
 
     def _log_failed_price_update_to_db(self, book_id: int, bookstore_id: int, reason: FailedUpdateReason):
         self._db.bookprice_db.create_failed_price_update(
