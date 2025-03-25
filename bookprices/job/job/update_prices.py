@@ -141,3 +141,24 @@ class AllPricesUpdateJob(JobBase):
             self._cache_key_remover.remove_keys_for_book_and_bookstore(book_price.book.id, book_price.book_store.id)
 
         self._updated_book_prices.clear()
+
+
+class BookPricesUpdateJob(JobBase):
+    """ Updates prices for specific books. """
+
+    name: ClassVar[str] = "BookPricesUpdateJob"
+
+    def __init__(self, config: Config, db: Database) -> None:
+        super().__init__(config)
+        self._db = db
+        self._logger = logging.getLogger(self.name)
+
+    def start(self, **kwargs) -> JobResult:
+        if not (book_ids := {int(book_id) for book_id in kwargs.get("book_ids", [])}):
+            self._logger.error("No valid book ids provided!")
+            return JobResult(JobExitStatus.FAILURE)
+
+        # TODO...
+
+        return JobResult(JobExitStatus.SUCCESS)
+
