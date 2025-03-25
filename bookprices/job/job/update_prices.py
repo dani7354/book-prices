@@ -14,7 +14,7 @@ class AllBookPricesUpdateJob(JobBase):
     thread_count: ClassVar[int] = 8
     min_updates_per_thread: ClassVar[int] = 5
 
-    name: ClassVar[str] = "AllPricesUpdateJob"
+    name: ClassVar[str] = "AllBookPricesUpdateJob"
 
     def __init__(
             self,
