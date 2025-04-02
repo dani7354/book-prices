@@ -2,19 +2,23 @@ import logging
 from datetime import datetime
 from queue import Queue
 from threading import Thread
-from typing import Sequence
+from typing import Sequence, ClassVar
 
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.bookprice import BookPrice
 from bookprices.shared.model.bookstore import BookInBookStore
 from bookprices.shared.model.error import FailedPriceUpdate, FailedUpdateReason
-from bookprices.shared.webscraping.price import PriceSelectorError, PriceFormatError, PriceNotFoundException, \
-    PriceFinderConnectionError, get_price
+from bookprices.shared.webscraping.price import (
+    PriceSelectorError, PriceFormatError, PriceNotFoundException, PriceFinderConnectionError, get_price)
 
 
 class PriceUpdateService:
     """ Service for updating book prices from all available book stores (Book to BookStore relations) """
+
+    thread_count: ClassVar[int] = 10
+    min_updates_per_thread: ClassVar[int] = 5
+
 
     def __init__(self, db: Database, cache_key_remover: BookPriceKeyRemover) -> None:
         self._db = db

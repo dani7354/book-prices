@@ -3,6 +3,7 @@ from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
+from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob, BookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
@@ -141,6 +142,14 @@ def create_book_price_update_job(config: Config) -> BookPricesUpdateJob:
     return BookPricesUpdateJob(config, price_update_service)
 
 
+def create_william_dam_book_import_job(config: Config) -> WilliamDamBookImportJob:
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
+    event_manager = get_event_manager(config)
+
+    return WilliamDamBookImportJob(config, db, cache_key_remover, event_manager)
+
+
 def main() -> None:
     config = loader.load_from_env()
     setup_logging(config, PROGRAM_NAME)
@@ -156,6 +165,7 @@ def main() -> None:
         create_delete_prices_job(config),
         create_book_price_update_job(config),
         create_all_book_prices_update_job(config),
+        create_william_dam_book_import_job(config)
     ]
     job_runner = JobRunner(config, jobs, service)
     job_runner.start()
