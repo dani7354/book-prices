@@ -1,5 +1,7 @@
 import logging
 import os
+from typing import ClassVar
+
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
@@ -8,6 +10,7 @@ from bookprices.shared.db.database import Database
 class DeleteImagesJob(JobBase):
     """ Deletes image files that are no longer used by books on the site. """
 
+    name: ClassVar[str] = "DeleteImagesJob"
     default_image_name: str = "default.png"
 
     def __init__(self, config: Config, db: Database) -> None:
