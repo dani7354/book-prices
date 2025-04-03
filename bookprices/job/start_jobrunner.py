@@ -23,6 +23,7 @@ from bookprices.shared.event.base import EventManager, Event
 from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.event.listener import StartJobListener
 from bookprices.shared.log import setup_logging
+from bookprices.shared.service.job_service import JobService
 from bookprices.shared.webscraping.image import ImageDownloader
 
 
@@ -66,7 +67,12 @@ def create_job_api_client(config: Config) -> JobApiClient:
     return api_client
 
 
-def create_job_service(config: Config) -> RunnerJobService:
+def create_job_service(config: Config) -> JobService:
+    job_api_client = create_job_api_client(config)
+    return JobService(job_api_client)
+
+
+def create_runner_job_service(config: Config) -> RunnerJobService:
     api_client = create_job_api_client(config)
     return RunnerJobService(api_client)
 
