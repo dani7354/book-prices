@@ -80,6 +80,7 @@ def setup_event_manager(config: Config) -> EventManager:
     book_created_event = Event(BookPricesEvents.BOOK_CREATED.value)
     book_created_event.add_listener(StartJobListener(job_service, DownloadImagesJob.name))
     book_created_event.add_listener(StartJobListener(job_service, BookStoreSearchJob.name))
+    book_created_event.add_listener(StartJobListener(job_service, BookPricesUpdateJob.name))
 
     events = {
         prices_updated_event.name: prices_updated_event,
