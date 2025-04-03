@@ -5,6 +5,8 @@ from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
+from bookprices.shared.event.base import EventManager
+from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.model.error import FailedUpdateReason, FailedPriceUpdateCount
 
 
@@ -15,10 +17,16 @@ class DeleteUnavailableBooksJob(JobBase):
 
     name: ClassVar[str] = "DeleteBooksJob"
 
-    def __init__(self, config: Config, db: Database, cache_key_remover: BookPriceKeyRemover):
+    def __init__(
+            self,
+            config: Config,
+            db: Database,
+            cache_key_remover: BookPriceKeyRemover,
+            event_manager: EventManager) -> None:
         super().__init__(config)
         self._db = db
         self._cache_key_remover = cache_key_remover
+        self._event_manager = event_manager
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
@@ -45,6 +53,7 @@ class DeleteUnavailableBooksJob(JobBase):
                     self._cache_key_remover.remove_key_for_authors()
 
             self._logger.info(f"Deleted {delete_count} unavailable books from bookstores!")
+            self._event_manager.trigger_event(BookPricesEvents.BOOK_DELETED)
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")

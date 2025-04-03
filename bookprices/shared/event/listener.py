@@ -16,6 +16,6 @@ class StartJobListener(Listener):
             if not (job :=  next((j for j in job_list if j["name"] == self._job_name), None)):
                 return
             self._logger.info(f"Creating job run for {self._job_name}...")
-            self._job_service.create_job_run(job, JobRunPriority.HIGH.value)
+            self._job_service.create_job_run(job_id=job["id"], priority=JobRunPriority.HIGH.value)
         except CreationFailedError as ex:
             self._logger.error(f"Error while creating job run for {self._job_name}: {ex}")

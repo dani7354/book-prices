@@ -109,11 +109,11 @@ def create_download_images_job(config: Config) -> DownloadImagesJob:
     return DownloadImagesJob(config, db, image_downloader)
 
 
-def create_delete_unavailable_books_job(config: Config) -> DeleteUnavailableBooksJob:
+def create_delete_unavailable_books_job(config: Config, event_manager: EventManager) -> DeleteUnavailableBooksJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
 
-    return DeleteUnavailableBooksJob(config, db, cache_key_remover)
+    return DeleteUnavailableBooksJob(config, db, cache_key_remover, event_manager)
 
 
 def create_delete_images_job(config: Config) -> DeleteImagesJob:
@@ -173,7 +173,7 @@ def main() -> None:
     jobs = [
         create_trim_prices_job(config),
         create_download_images_job(config),
-        create_delete_unavailable_books_job(config),
+        create_delete_unavailable_books_job(config, event_manager),
         create_delete_images_job(config),
         create_bookstore_search_job(config),
         create_delete_prices_job(config),
