@@ -16,13 +16,12 @@ from bookprices.shared.webscraping.price import (
 class PriceUpdateService:
     """ Service for updating book prices from all available book stores (Book to BookStore relations) """
 
-    thread_count: ClassVar[int] = 10
     min_updates_per_thread: ClassVar[int] = 5
 
-
-    def __init__(self, db: Database, cache_key_remover: BookPriceKeyRemover) -> None:
+    def __init__(self, db: Database, cache_key_remover: BookPriceKeyRemover, thread_count: int) -> None:
         self._db = db
         self._cache_key_remover = cache_key_remover
+        self._thread_count = thread_count
         self._book_stores_queue = Queue()
         self._updated_book_prices = []
 
@@ -47,13 +46,13 @@ class PriceUpdateService:
     def _start_price_update(self) -> None:
         if self._book_stores_queue.empty():
             self._logger.info("Price update queue is empty!")
-        elif self._book_stores_queue.qsize() / self.thread_count < self.min_updates_per_thread:
+        elif self._book_stores_queue.qsize() / self._thread_count < self.min_updates_per_thread:
             self._logger.debug("Updating prices using single thread...")
             self._get_updated_prices_for_books()
         else:
-            self._logger.debug("Updating prices using %s threads...", self.thread_count)
+            self._logger.debug("Updating prices using %s threads...", self._thread_count)
             threads = []
-            for _ in range(self.thread_count):
+            for _ in range(self._thread_count):
                 t = Thread(target=self._get_updated_prices_for_books)
                 threads.append(t)
                 t.start()
@@ -120,4 +119,3 @@ class PriceUpdateService:
             self._cache_key_remover.remove_keys_for_book_and_bookstore(book_price.book.id, book_price.book_store.id)
 
         self._updated_book_prices.clear()
-

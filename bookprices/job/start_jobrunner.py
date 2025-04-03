@@ -1,3 +1,6 @@
+import logging
+
+from bookprices.job.job.base import DEFAULT_THREAD_COUNT
 from bookprices.job.job.bookstore_search import BookStoreSearchJob
 from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_prices import DeletePricesJob
@@ -22,6 +25,8 @@ from bookprices.shared.event.listener import StartJobListener
 from bookprices.shared.log import setup_logging
 from bookprices.shared.webscraping.image import ImageDownloader
 
+
+THREAD_COUNT = 8
 JOB_API_CLIENT_ID = "JobApiJobRunner"
 PROGRAM_NAME = "JobRunner"
 
@@ -66,7 +71,7 @@ def create_job_service(config: Config) -> RunnerJobService:
     return RunnerJobService(api_client)
 
 
-def get_event_manager(config: Config) -> EventManager:
+def setup_event_manager(config: Config) -> EventManager:
     job_service = create_job_service(config)
 
     prices_updated_event = Event(BookPricesEvents.BOOK_PRICE_UPDATED.value)
@@ -129,7 +134,8 @@ def create_delete_prices_job(config: Config) -> DeletePricesJob:
 def create_all_book_prices_update_job(config: Config) -> AllBookPricesUpdateJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
-    price_update_service = PriceUpdateService(db, cache_key_remover)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
+    price_update_service = PriceUpdateService(db, cache_key_remover, thread_count)
 
     return AllBookPricesUpdateJob(config, db, price_update_service)
 
@@ -137,15 +143,15 @@ def create_all_book_prices_update_job(config: Config) -> AllBookPricesUpdateJob:
 def create_book_price_update_job(config: Config) -> BookPricesUpdateJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
-    price_update_service = PriceUpdateService(db, cache_key_remover)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
+    price_update_service = PriceUpdateService(db, cache_key_remover,  thread_count)
 
     return BookPricesUpdateJob(config, price_update_service)
 
 
-def create_william_dam_book_import_job(config: Config) -> WilliamDamBookImportJob:
+def create_william_dam_book_import_job(config: Config, event_manager: EventManager) -> WilliamDamBookImportJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
-    event_manager = get_event_manager(config)
 
     return WilliamDamBookImportJob(config, db, cache_key_remover, event_manager)
 
@@ -153,7 +159,10 @@ def create_william_dam_book_import_job(config: Config) -> WilliamDamBookImportJo
 def main() -> None:
     config = loader.load_from_env()
     setup_logging(config, PROGRAM_NAME)
+    logging.info("Config loaded successfully. Logging setup.")
 
+    logging.info("Setting up required services and job instances...")
+    event_manager = setup_event_manager(config)
     job_api_client = create_job_api_client(config)
     service = RunnerJobService(job_api_client)
     jobs = [
@@ -165,7 +174,7 @@ def main() -> None:
         create_delete_prices_job(config),
         create_book_price_update_job(config),
         create_all_book_prices_update_job(config),
-        create_william_dam_book_import_job(config)
+        create_william_dam_book_import_job(config, event_manager)
     ]
     job_runner = JobRunner(config, jobs, service)
     job_runner.start()

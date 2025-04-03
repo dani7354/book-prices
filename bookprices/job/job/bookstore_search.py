@@ -21,7 +21,6 @@ class BookStoreSearchJob(JobBase):
     """ Searches for new books in known bookstores."""
 
     book_bookstore_batch_size: ClassVar[int] = 500
-    thread_count: ClassVar[int] = 8
     min_searches_per_thread: ClassVar[int] = 5
 
     name: ClassVar[str] = "BookStoreSearchJob"
@@ -75,13 +74,13 @@ class BookStoreSearchJob(JobBase):
         if self._search_queue.empty():
             self._logger.info("No searches to process!")
             return
-        elif self._search_queue.qsize() / self.thread_count < self.min_searches_per_thread:
+        elif self._search_queue.qsize() / self._thread_count < self.min_searches_per_thread:
             self._logger.info("Starting search using single thread...")
             self._search_books()
         else:
-            self._logger.info(f"Starting search using {self.thread_count} threads...")
+            self._logger.info(f"Starting search using {self._thread_count} threads...")
             threads = []
-            for _ in range(self.thread_count):
+            for _ in range(self._thread_count):
                 thread = Thread(target=self._search_books())
                 threads.append(thread)
                 thread.start()

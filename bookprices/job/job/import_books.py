@@ -20,8 +20,6 @@ from bookprices.shared.validation import isbn as isbn_validator
 class WilliamDamBookImportJob(JobBase):
     """ Imports books from WilliamDam.dk """
 
-    thread_count: ClassVar[int] = 8
-
     name: ClassVar[str] = "WilliamDamBookImportJob"
     _book_url_css: ClassVar[str] = "a.product-name"
     _book_details_list_css: ClassVar[str] = "ul.list li"
@@ -79,9 +77,9 @@ class WilliamDamBookImportJob(JobBase):
 
     def _get_book_urls(self) -> None:
         self._logger.info(
-            f"Getting book urls from {self._book_list_url_queue.qsize()} pages using {self.thread_count} threads...")
+            f"Getting book urls from {self._book_list_url_queue.qsize()} pages using {self._thread_count} threads...")
         threads = []
-        for _ in range(self.thread_count):
+        for _ in range(self._thread_count):
             t = Thread(target=self._get_next_book_urls_from_list)
             threads.append(t)
             t.start()
@@ -95,7 +93,7 @@ class WilliamDamBookImportJob(JobBase):
 
     def _get_new_books(self) -> None:
         threads = []
-        for _ in range(self.thread_count):
+        for _ in range(self._thread_count):
             t = Thread(target=self._get_next_book)
             threads.append(t)
             t.start()

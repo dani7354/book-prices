@@ -9,6 +9,10 @@ from bookprices.shared.model.bookprice import BookPrice
 
 
 class TrimPricesJob(JobBase):
+    """
+    Trims prices for books in the database. It removes duplicate prices for saving disk space and improving performance.
+    """
+
     book_ids_batch_size: ClassVar[int] = 500
     min_prices_to_keep: ClassVar[int] = 10
 

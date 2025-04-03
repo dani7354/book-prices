@@ -11,7 +11,6 @@ class AllBookPricesUpdateJob(JobBase):
     """ Updates prices for all books in the database. """
 
     batch_size: ClassVar[int] = 500
-    thread_count: ClassVar[int] = 8
     min_updates_per_thread: ClassVar[int] = 5
 
     name: ClassVar[str] = "AllBookPricesUpdateJob"

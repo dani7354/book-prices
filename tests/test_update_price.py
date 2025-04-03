@@ -1,7 +1,7 @@
 import pytest
 import requests
 from unittest.mock import MagicMock
-from bookprices.cronjob.update_prices import PriceUpdateJob
+from bookprices.job.job.update_prices import BookPricesUpdateJob
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.model.bookstore import BookInBookStore, BookStore
 from bookprices.shared.db.database import Database
