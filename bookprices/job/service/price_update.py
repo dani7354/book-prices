@@ -118,4 +118,4 @@ class PriceUpdateService:
             self._cache_key_remover.remove_keys_for_book(book_price.book.id)
             self._cache_key_remover.remove_keys_for_book_and_bookstore(book_price.book.id, book_price.book_store.id)
 
-        self._updated_book_prices.clear()
+        self._updated_book_prices = []
