@@ -110,7 +110,7 @@ class WilliamDamBookImportJob(JobBase):
                 book_list_content_bs = BeautifulSoup(book_list_response.content.decode(), "html.parser")
                 for url_tag in book_list_content_bs.select(self._book_url_css):
                     self._book_url_queue.put(url_tag["href"])
-            except (RequestException, UnicodeDecodeError) as ex:
+            except RequestException as ex:
                 self._logger.error(ex)
 
     def _get_next_book(self) -> None:
@@ -123,7 +123,7 @@ class WilliamDamBookImportJob(JobBase):
                 if self._is_book_valid(book):
                     logging.debug(f"Found valid book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})")
                     self._new_books.append(book)
-            except (RequestException, UnicodeDecodeError, ValueError, KeyError) as ex:
+            except (RequestException, ValueError, KeyError) as ex:
                 self._logger.error(ex)
 
     def _create_or_update_books(self):
