@@ -87,7 +87,7 @@ class BookStoreSearchJob(JobBase):
 
             [t.join() for t in threads]
 
-        logging.info("Finished search!")
+        self._logger.info("Finished search!")
 
     def _search_books(self) -> None:
         while not self._search_queue.empty():
@@ -95,7 +95,7 @@ class BookStoreSearchJob(JobBase):
                 isbn_search = self._search_queue.get()
                 match_url = BookFinder.search_book_isbn(isbn_search)
                 # Should return none if no book found instead of raising exceptions.
-                logging.info(f"Found book with id {isbn_search.book_id} at {match_url} (bookstore {isbn_search.bookstore_id})")
+                self._logger.info(f"Found book with id {isbn_search.book_id} at {match_url} (bookstore {isbn_search.bookstore_id})")
                 self._results.append(
                     BookStoreBookUrl(
                         book_id=isbn_search.book_id,
@@ -120,7 +120,7 @@ class BookStoreSearchJob(JobBase):
         self._remove_cache_for_affected_books_and_bookstores()
 
         self._logger.debug("Removing results from list...")
-        self._results.clear()
+        self._results = []
 
     def _remove_cache_for_affected_books_and_bookstores(self) -> None:
         for result in self._results:
