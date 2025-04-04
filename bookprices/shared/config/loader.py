@@ -27,7 +27,8 @@ def load_from_env() -> Config:
                       os.environ["JOB_API_PASSWORD"]),
                   os.environ["LOG_DIR"],
                   os.getenv("IMAGE_DIR"),
-                  os.getenv("LOG_LEVEL", "INFO"))
+                  os.getenv("LOG_LEVEL", "INFO"),
+                  int(thread_count) if (thread_count := os.getenv("JOB_THREAD_COUNT")) else None)
 
 
 def load_from_file(file: str) -> Config:

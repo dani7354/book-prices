@@ -172,21 +172,16 @@ class BookPriceDb(BaseDb):
 
                 return book_ids
 
-    def get_failed_price_update_counts(self) -> list[FailedPriceUpdateCount]:
+    def get_failed_price_update_counts(self, min_count: int) -> list[FailedPriceUpdateCount]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT BookId, BookStoreId, COUNT(*) AS Count "
                          "FROM FailedPriceUpdate "
-                         "GROUP BY BookId, BookStoreId;")
+                         "GROUP BY BookId, BookStoreId HAVING Count >= %s;")
 
-                cursor.execute(query)
-                failed_price_update_counts = []
-                for row in cursor:
-                    book_id = row["BookId"]
-                    bookstore_id = row["BookStoreId"]
-                    count = row["Count"]
-
-                    failed_price_update_counts.append(FailedPriceUpdateCount(book_id, bookstore_id, count))
+                cursor.execute(query, (min_count,))
+                failed_price_update_counts = [
+                    FailedPriceUpdateCount(row["BookId"], row["BookStoreId"], row["Count"]) for row in cursor]
 
                 return failed_price_update_counts
 

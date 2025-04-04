@@ -2,7 +2,7 @@ import re
 import requests
 from requests import RequestException
 from urllib.parse import urljoin, urlparse
-from typing import Optional
+from typing import Optional, ClassVar
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from bookprices.shared.webscraping import options
@@ -14,6 +14,8 @@ class BookNotFoundError(Exception):
 
 @dataclass(frozen=True)
 class IsbnSearch:
+    book_id: int
+    bookstore_id: int
     search_url: str
     match_css_selector: str
     isbn: str
@@ -25,7 +27,8 @@ class IsbnSearch:
 
 
 class BookFinder:
-    html_href = "href"
+    request_timeout_seconds: ClassVar[int] = 5
+    html_href: ClassVar[str] = "href"
 
     @classmethod
     def search_book_isbn(cls, search_request:  IsbnSearch) -> str:
@@ -43,7 +46,7 @@ class BookFinder:
 
     @classmethod
     def _get_match_url(cls, url: str, match_url_css: Optional[str]) -> str:
-        response = requests.get(url)
+        response = requests.get(url, timeout=cls.request_timeout_seconds)
         response.raise_for_status()
 
         if not match_url_css:
@@ -64,7 +67,7 @@ class BookFinder:
             return True
 
         full_match_url = urljoin(search_request.store_url, urlparse(match_url).path)
-        response = requests.get(full_match_url)
+        response = requests.get(full_match_url, timeout=BookFinder.request_timeout_seconds)
         response.raise_for_status()
 
         response_body = response.content.decode("utf-8")

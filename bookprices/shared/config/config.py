@@ -32,3 +32,4 @@ class Config:
     logdir: str
     imgdir: str
     loglevel: str
+    job_thread_count: int | None = None

@@ -5,6 +5,11 @@ from typing import ClassVar
 
 import schedule
 
+from bookprices.job.job.bookstore_search import BookStoreSearchJob
+from bookprices.job.job.delete_images import DeleteImagesJob
+from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
+from bookprices.job.job.download_images import DownloadImagesJob
+from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.shared.service.job_service import JobService, JobSchemaFields, JobRunPriority, CreationFailedError
 from bookprices.job.job.trim_prices import TrimPricesJob
 
@@ -37,14 +42,25 @@ class JobScheduler:
 
     def schedule_jobs(self) -> None:
         schedule.every().day.at("01:00", self.time_zone).do(self._set_available_jobs)
-        schedule.every().monday.at("10:00", self.time_zone).do(self._send_start_job_request_in_thread, TrimPricesJob.name)
+        schedule.every().monday.at("10:00", self.time_zone).do(
+            self._send_start_job_request, TrimPricesJob.name)
+        schedule.every().day.at("02:00", self.time_zone).do(
+            self._send_start_job_request, DeleteUnavailableBooksJob.name)
+        schedule.every().day.at("08:00", self.time_zone).do(
+            self._send_start_job_request, DownloadImagesJob.name)
+        schedule.every().day.at("07:00", self.time_zone).do(
+            self._send_start_job_request, DeleteImagesJob.name)
+        schedule.every().day.at("06:00", self.time_zone).do(
+            self._send_start_job_request, BookStoreSearchJob.name)
+        schedule.every().day.at("05:00", self.time_zone).do(
+            self._send_start_job_request, WilliamDamBookImportJob.name)
 
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")
         jobs = self._job_service.get_job_list()
         self._available_jobs = {job[JobSchemaFields.NAME.value]: job[JobSchemaFields.ID.value] for job in jobs}
 
-    def _send_start_job_request_in_thread(self, job_name: str) -> None:
+    def _send_start_job_request(self, job_name: str) -> None:
         self._logger.info(f"Starting job {job_name} in a new thread...")
         thread = Thread(target=self._create_job_run_for_job, args=(job_name,))
         thread.start()

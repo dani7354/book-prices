@@ -1,4 +1,5 @@
-from typing import Optional
+from collections import defaultdict
+from typing import Optional, Any
 from bookprices.shared.db.base import BaseDb
 from bookprices.shared.model.bookstore import BookStore, BookInBookStore
 from bookprices.shared.model.book import Book
@@ -54,12 +55,28 @@ class BookStoreDb(BaseDb):
 
                 return bookstores
 
-    def create_bookstore_for_book(self, book_id: int, bookstore_id: int, url: str):
+    def get_book_isbn_and_missing_bookstores(self, offset: int, limit: int) -> list[dict[str, Any]]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, bs.IsbnCssSelector, bs.Url "
+                         "FROM Book b "
+                         "CROSS JOIN BookStore bs "
+                         "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
+                         "WHERE bsb.BookId IS NULL AND bsb.BookStoreId IS NULL "
+                         "AND SearchResultCssSelector IS NOT NULL AND IsbnCssSelector IS NOT NULL AND SearchUrl IS NOT NULL "
+                         "ORDER BY b.Id ASC "
+                         "LIMIT %s OFFSET %s;")
+
+                cursor.execute(query, (limit, offset))
+
+                return cursor.fetchall()
+
+    def create_bookstores_for_books(self, bookstores_for_books: list[tuple[int, int, str]]) -> None:
         with self.get_connection() as con:
             with con.cursor() as cursor:
                 query = ("INSERT INTO BookStoreBook (BookId, BookStoreId, Url) "
                          "VALUES (%s, %s, %s)")
-                cursor.execute(query, (book_id, bookstore_id, url))
+                cursor.executemany(query, bookstores_for_books)
                 con.commit()
 
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int):
@@ -109,8 +126,38 @@ class BookStoreDb(BaseDb):
 
         return books_in_bookstore
 
+    def get_bookstores_with_image_source_for_books(self, books: list[Book]) -> dict[int, list[BookInBookStore]]:
+        book_dict = {b.id: b for b in books}
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                ids_format_string = ",".join(["%s"] * len(book_dict.keys()))
+                query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
+                         "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
+                         "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
+                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector " 
+                         "FROM BookStoreBook bsb " 
+                         "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
+                         f"WHERE bsb.BookId IN ({ids_format_string}) AND bs.ImageCssSelector IS NOT NULL;")
+
+                cursor.execute(query, tuple(book_dict.keys()))
+
+                books_in_bookstore = defaultdict(list)
+                bookstores = {}
+                for row in cursor:
+                    bookstore_id = row["BookStoreId"]
+                    if bookstore_id not in bookstores:
+                        self._add_bookstore_from_row(row, bookstores)
+
+                    book_id = row["BookId"]
+                    books_in_bookstore[book_id].append(BookInBookStore(book_dict[book_id],
+                                                                       bookstores[bookstore_id],
+                                                                       row["BookUrl"]))
+
+        return books_in_bookstore
+
+
     @staticmethod
-    def _add_bookstore_from_row(row: dict, bookstore_dict: dict):
+    def _add_bookstore_from_row(row: dict, bookstore_dict: dict[int, BookStore]):
         bookstore_id = row["BookStoreId"]
         bookstore_dict[bookstore_id] = BookStore(bookstore_id,
                                                  row["BookStoreName"],

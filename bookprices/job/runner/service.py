@@ -5,8 +5,8 @@ from requests import HTTPError
 
 from bookprices.shared.api.job import JobApiClient, Endpoint, UrlParameter
 from bookprices.shared.service.job_service import (
-    JobService, FailedToGetJobRunsError, JobRunSchemaFields, JobRunArgumentSchemaFields, JobRunArgumentType,
-    UpdateFailedError, JobRunStatus)
+    FailedToGetJobRunsError, JobRunSchemaFields, JobRunArgumentSchemaFields, JobRunArgumentType,UpdateFailedError,
+    JobRunStatus)
 
 
 @dataclass(frozen=True)
@@ -30,10 +30,11 @@ class JobRun:
     error_message: str | None = None
 
 
-class RunnerJobService(JobService):
+class RunnerJobService:
+    """ Job service for the job runner """
 
-    def __init__(self, api_client: JobApiClient):
-        super().__init__(api_client)
+    def __init__(self, job_api_client: JobApiClient) -> None:
+        self._job_api_client = job_api_client
         self._logger = logging.getLogger(__name__)
 
     def get_next_job_run_dto(self) -> JobRun | None:
@@ -50,7 +51,7 @@ class RunnerJobService(JobService):
 
     def get_job_run_dto(self, job_run_id: str) -> JobRun | None:
         try:
-            if not (job_run_json := self.get_job_run(job_run_id)):
+            if not (job_run_json := self._job_api_client.get(Endpoint.get_job_run_url(job_run_id))):
                 return None
             job_run_dto = self._map_job_run_json_to_dto(job_run_json)
 

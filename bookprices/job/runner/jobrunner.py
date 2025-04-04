@@ -13,11 +13,11 @@ class JobRunner:
     sleep_time_seconds: ClassVar[int] = 10
     job_run_lookup_max_retries: ClassVar[int] = 3
 
-    def __init__(self, config: Config, job: Sequence[JobBase], job_service: RunnerJobService) -> None:
+    def __init__(self, config: Config, jobs: Sequence[JobBase], job_service: RunnerJobService) -> None:
         self._config = config
         self._job_service = job_service
         self._logger = getLogger(__name__)
-        self._jobs = {job.name: job for job in job}
+        self._jobs = {job.name: job for job in jobs}
         self._job_lookup_errors = Counter()
 
     def start(self) -> None:
@@ -63,7 +63,7 @@ class JobRunner:
                 self._try_set_job_run_status(job_run, status=JobRunStatus.COMPLETED.value)
             else:
                 self._try_set_job_run_status(
-                    job_run, status=JobRunStatus.FAILED.value, error_message=result.error_message)
+                    job_run, status=JobRunStatus.FAILED.value, error_message=str(result.error_message))
         except Exception as e:
             self._logger.error(f"Failed to run job {job_run.job_name}: {e}")
             if not self._try_set_job_run_status(job_run, status=JobRunStatus.FAILED.value, error_message=str(e)):
