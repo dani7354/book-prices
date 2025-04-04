@@ -80,7 +80,7 @@ class DownloadImagesJob(JobBase):
             image_source = ImageSource(book_id, bsb.get_full_url(), bsb.book_store.image_css_selector, str(book_id))
             self._image_source_queue.put(image_source)
 
-    def _download_images(self):
+    def _download_images(self) -> None:
         while not self._image_source_queue.empty():
             image_source = self._image_source_queue.get()
             try:

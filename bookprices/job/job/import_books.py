@@ -126,7 +126,7 @@ class WilliamDamBookImportJob(JobBase):
             except (RequestException, ValueError, KeyError) as ex:
                 self._logger.error(ex)
 
-    def _create_or_update_books(self):
+    def _create_or_update_books(self) -> None:
         created_count, updated_count = 0, 0
         existing_books_isbn = {b.isbn: b for b in self._db.book_db.get_books()}
         for book in self._new_books:

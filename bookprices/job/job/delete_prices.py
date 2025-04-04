@@ -15,7 +15,7 @@ class DeletePricesJob(JobBase):
 
     name: ClassVar[str] = "DeletePricesJob"
 
-    def __init__(self, config: Config, db: Database, cache_key_remover: BookPriceKeyRemover):
+    def __init__(self, config: Config, db: Database, cache_key_remover: BookPriceKeyRemover) -> None:
         super().__init__(config)
         self._db = db
         self._cache_key_remover = cache_key_remover

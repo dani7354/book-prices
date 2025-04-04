@@ -52,7 +52,7 @@ class DeleteImagesJob(JobBase):
         self._logger.info(f"Listing image filenames from folder {self.image_folder}...")
         return set(os.listdir(self.image_folder))
 
-    def _delete_files(self, files: set[str]):
+    def _delete_files(self, files: set[str]) -> None:
         for file in files:
             try:
                 if file.startswith('.'):

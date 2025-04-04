@@ -19,7 +19,7 @@ class AllBookPricesUpdateJob(JobBase):
             self,
             config: Config,
             db: Database,
-            price_update_service: PriceUpdateService):
+            price_update_service: PriceUpdateService) -> None:
         super().__init__(config)
         self._db = db
         self._price_update_service = price_update_service

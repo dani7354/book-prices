@@ -70,7 +70,7 @@ class BookStoreSearchJob(JobBase):
 
         return not self._search_queue.empty()
 
-    def _start_search(self):
+    def _start_search(self) -> None:
         if self._search_queue.empty():
             self._logger.info("No searches to process!")
             return
@@ -89,7 +89,7 @@ class BookStoreSearchJob(JobBase):
 
         logging.info("Finished search!")
 
-    def _search_books(self):
+    def _search_books(self) -> None:
         while not self._search_queue.empty():
             try:
                 isbn_search = self._search_queue.get()
