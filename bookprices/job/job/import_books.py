@@ -88,8 +88,8 @@ class WilliamDamBookImportJob(JobBase):
         self._logger.debug(f"{self._book_url_queue.qsize()} URLs found!")
 
     def _enqueue_urls_for_book_list_pages(self, book_list_base_url: str, page_count: int) -> None:
-        for page in range(1, page_count + 1):
-            self._book_list_url_queue.put(book_list_base_url.format("page", page))
+        for page_number in range(1, page_count + 1):
+            self._book_list_url_queue.put(book_list_base_url.format(page=page_number))
 
     def _get_new_books(self) -> None:
         threads = []
