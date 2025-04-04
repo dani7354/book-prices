@@ -52,9 +52,12 @@ class DeleteImagesJob(JobBase):
         self._logger.info(f"Listing image filenames from folder {self.image_folder}...")
         return set(os.listdir(self.image_folder))
 
-    def _delete_files(self, files: set):
+    def _delete_files(self, files: set[str]):
         for file in files:
             try:
+                if file.startswith('.'):
+                    self._logger.info(f"Skipping hidden file {file}")
+                    continue
                 os.remove(os.path.join(self.image_folder, file))
             except FileNotFoundError as ex:
                 logging.error(f"{file} blev ikke fundet i {self.image_folder}")
