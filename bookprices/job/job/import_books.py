@@ -70,6 +70,8 @@ class WilliamDamBookImportJob(JobBase):
             self._create_or_update_books()
             logging.info("Done!")
 
+            self._event_manager.trigger_event(BookPricesEvents.BOOKS_IMPORTED)
+
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
@@ -149,9 +151,6 @@ class WilliamDamBookImportJob(JobBase):
                 else:
                     self._logger.debug(f"Saving book with ISBN {book.isbn}")
                     self._db.book_db.create_book(book)
-                    self._event_manager.trigger_event(
-                        BookPricesEvents.BOOK_CREATED,
-                        **{BookPricesEventsArgName.BOOK_ID: book.id})
                     self._cache_key_remover.remove_key_for_authors()
                     created_count += 1
             except Exception as ex:

@@ -89,3 +89,27 @@ class DownloadImagesJob(JobBase):
                 self._image_filenames[image_source.book_id] = image
             except ImageNotDownloadedException as ex:
                 self._logger.error(ex)
+
+
+class DownloadImagesForBookJob(JobBase):
+    """ Downloads image for single book. """
+
+    name: ClassVar[str] = "DownloadImagesForBookJob"
+
+    def __init__(self, config: Config, db: Database, download_image_service) -> None:
+        super().__init__(config)
+        self._db = db
+        self._download_image_service = download_image_service
+        self._logger = logging.getLogger(self.name)
+
+
+    def start(self, **kwargs) -> JobResult:
+        book_id = kwargs.get("book_id")
+        if not book_id:
+            self._logger.error("Book ID not provided!")
+            return JobResult(JobExitStatus.FAILURE)
+
+
+
+
+        return JobResult(JobExitStatus.SUCCESS)

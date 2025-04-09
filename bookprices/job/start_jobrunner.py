@@ -84,9 +84,10 @@ def setup_event_manager(config: Config) -> EventManager:
     prices_updated_event.add_listener(StartJobListener(job_service, TrimPricesJob.name))
 
     book_created_event = Event(BookPricesEvents.BOOK_CREATED.value)
-    book_created_event.add_listener(StartJobListener(job_service, DownloadImagesJob.name))
+
+    books_imported_event = Event(BookPricesEvents.BOOKS_IMPORTED.value)
+    books_imported_event.add_listener(StartJobListener(job_service, DownloadImagesJob.name))
     book_created_event.add_listener(StartJobListener(job_service, BookStoreSearchJob.name))
-    book_created_event.add_listener(StartJobListener(job_service, BookPricesUpdateJob.name))
 
     book_deleted_event = Event(BookPricesEvents.BOOK_DELETED.value)
     book_deleted_event.add_listener(StartJobListener(job_service, DeleteImagesJob.name))
