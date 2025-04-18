@@ -90,7 +90,7 @@ def setup_event_manager(config: Config) -> EventManager:
     books_imported_event.add_listener(StartJobListener(job_service, DownloadImagesJob.name))
     book_created_event.add_listener(StartJobListener(job_service, BookStoreSearchJob.name))
 
-    book_deleted_event = Event(str(BookPricesEvents.BOOK_DELETED))
+    book_deleted_event = Event(str(BookPricesEvents.BOOKS_DELETED))
     book_deleted_event.add_listener(StartJobListener(job_service, DeleteImagesJob.name))
 
     books_found_in_stores = Event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
@@ -100,7 +100,8 @@ def setup_event_manager(config: Config) -> EventManager:
     events = {
         prices_updated_event.name: prices_updated_event,
         book_created_event.name: book_created_event,
-        book_deleted_event.name: book_deleted_event
+        book_deleted_event.name: book_deleted_event,
+        books_found_in_stores.name: books_found_in_stores,
     }
     event_manager = EventManager(events)
 
@@ -145,11 +146,11 @@ def create_delete_images_job(config: Config) -> DeleteImagesJob:
     return DeleteImagesJob(config, db)
 
 
-def create_bookstore_search_job(config: Config) -> BookStoreSearchJob:
+def create_bookstore_search_job(config: Config, event_manager: EventManager) -> BookStoreSearchJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
 
-    return BookStoreSearchJob(config, db, cache_key_remover)
+    return BookStoreSearchJob(config, db, cache_key_remover, event_manager)
 
 
 def create_delete_prices_job(config: Config) -> DeletePricesJob:
@@ -198,7 +199,7 @@ def main() -> None:
         create_download_images_job(config),
         create_delete_unavailable_books_job(config, event_manager),
         create_delete_images_job(config),
-        create_bookstore_search_job(config),
+        create_bookstore_search_job(config, event_manager),
         create_delete_prices_job(config),
         create_book_price_update_job(config),
         create_all_book_prices_update_job(config),
