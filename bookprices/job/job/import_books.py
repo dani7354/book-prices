@@ -12,7 +12,7 @@ from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager
-from bookprices.shared.event.enum import BookPricesEvents, BookPricesEventsArgName
+from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.model.book import Book
 from bookprices.shared.validation import isbn as isbn_validator
 
@@ -70,7 +70,7 @@ class WilliamDamBookImportJob(JobBase):
             self._create_or_update_books()
             logging.info("Done!")
 
-            self._event_manager.trigger_event(BookPricesEvents.BOOKS_IMPORTED)
+            self._event_manager.trigger_event(str(BookPricesEvents.BOOKS_IMPORTED))
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
