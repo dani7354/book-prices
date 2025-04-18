@@ -5,12 +5,13 @@ from bookprices.job.job.bookstore_search import BookStoreSearchJob
 from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
-from bookprices.job.job.download_images import DownloadImagesJob
+from bookprices.job.job.download_images import DownloadImagesJob, DownloadImagesForBooksJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob, BookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
+from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
@@ -80,16 +81,16 @@ def create_runner_job_service(config: Config) -> RunnerJobService:
 def setup_event_manager(config: Config) -> EventManager:
     job_service = create_job_service(config)
 
-    prices_updated_event = Event(BookPricesEvents.BOOK_PRICE_UPDATED.value)
+    prices_updated_event = Event(BookPricesEvents.BOOK_PRICE_UPDATED)
     prices_updated_event.add_listener(StartJobListener(job_service, TrimPricesJob.name))
 
-    book_created_event = Event(BookPricesEvents.BOOK_CREATED.value)
+    book_created_event = Event(BookPricesEvents.BOOK_CREATED)
 
-    books_imported_event = Event(BookPricesEvents.BOOKS_IMPORTED.value)
+    books_imported_event = Event(BookPricesEvents.BOOKS_IMPORTED)
     books_imported_event.add_listener(StartJobListener(job_service, DownloadImagesJob.name))
     book_created_event.add_listener(StartJobListener(job_service, BookStoreSearchJob.name))
 
-    book_deleted_event = Event(BookPricesEvents.BOOK_DELETED.value)
+    book_deleted_event = Event(BookPricesEvents.BOOK_DELETED)
     book_deleted_event.add_listener(StartJobListener(job_service, DeleteImagesJob.name))
 
     events = {
@@ -112,8 +113,19 @@ def create_trim_prices_job(config: Config) -> TrimPricesJob:
 def create_download_images_job(config: Config) -> DownloadImagesJob:
     db = create_database_container(config)
     image_downloader = ImageDownloader(config.imgdir)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
+    image_download_service = ImageDownloadService(db, image_downloader, thread_count)
 
-    return DownloadImagesJob(config, db, image_downloader)
+    return DownloadImagesJob(config, db, image_download_service)
+
+
+def create_download_images_for_books_job(config: Config) -> DownloadImagesForBooksJob:
+    db = create_database_container(config)
+    image_downloader = ImageDownloader(config.imgdir)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
+    image_download_service = ImageDownloadService(db, image_downloader, thread_count)
+
+    return DownloadImagesForBooksJob(config, db, image_download_service)
 
 
 def create_delete_unavailable_books_job(config: Config, event_manager: EventManager) -> DeleteUnavailableBooksJob:

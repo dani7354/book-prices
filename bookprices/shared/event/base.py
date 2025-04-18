@@ -20,7 +20,7 @@ class EventBase:
 
 
 class Event(EventBase):
-    def __init__(self, name) -> None:
+    def __init__(self, name: str) -> None:
         self.name = name
         self._listeners = []
 
