@@ -42,7 +42,7 @@ class AllBookPricesUpdateJob(JobBase):
                 page += 1
                 offset = (page - 1) * self.batch_size
 
-            self._event_manager.trigger_event(str(BookPricesEvents.BOOK_PRICE_UPDATED), book_ids=book_ids)
+            self._event_manager.trigger_event(str(BookPricesEvents.BOOK_PRICES_UPDATED), book_ids=book_ids)
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
@@ -71,7 +71,7 @@ class BookPricesUpdateJob(JobBase):
             self._price_update_service.update_prices_for_books(book_ids)
             self._logger.info(f"Finished updating prices for books {book_ids}!")
 
-            self._event_manager.trigger_event(str(BookPricesEvents.BOOK_PRICE_UPDATED), book_ids=book_ids)
+            self._event_manager.trigger_event(str(BookPricesEvents.BOOK_PRICES_UPDATED), book_ids=book_ids)
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:

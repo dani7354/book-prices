@@ -81,7 +81,7 @@ def create_runner_job_service(config: Config) -> RunnerJobService:
 def setup_event_manager(config: Config) -> EventManager:
     job_service = create_job_service(config)
 
-    prices_updated_event = Event(str(BookPricesEvents.BOOK_PRICE_UPDATED))
+    prices_updated_event = Event(str(BookPricesEvents.BOOK_PRICES_UPDATED))
     prices_updated_event.add_listener(StartJobListener(job_service, TrimPricesJob.name))
 
     book_created_event = Event(str(BookPricesEvents.BOOK_CREATED))
@@ -160,22 +160,22 @@ def create_delete_prices_job(config: Config) -> DeletePricesJob:
     return DeletePricesJob(config, db, cache_key_remover)
 
 
-def create_all_book_prices_update_job(config: Config) -> AllBookPricesUpdateJob:
+def create_all_book_prices_update_job(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
     price_update_service = PriceUpdateService(db, cache_key_remover, thread_count)
 
-    return AllBookPricesUpdateJob(config, db, price_update_service)
+    return AllBookPricesUpdateJob(config, db, price_update_service, event_manager)
 
 
-def create_book_price_update_job(config: Config) -> BookPricesUpdateJob:
+def create_book_price_update_job(config: Config, event_manager: EventManager) -> BookPricesUpdateJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
     price_update_service = PriceUpdateService(db, cache_key_remover,  thread_count)
 
-    return BookPricesUpdateJob(config, price_update_service)
+    return BookPricesUpdateJob(config, price_update_service, event_manager)
 
 
 def create_william_dam_book_import_job(config: Config, event_manager: EventManager) -> WilliamDamBookImportJob:
@@ -201,8 +201,8 @@ def main() -> None:
         create_delete_images_job(config),
         create_bookstore_search_job(config, event_manager),
         create_delete_prices_job(config),
-        create_book_price_update_job(config),
-        create_all_book_prices_update_job(config),
+        create_book_price_update_job(config, event_manager),
+        create_all_book_prices_update_job(config, event_manager),
         create_william_dam_book_import_job(config, event_manager)
     ]
     job_runner = JobRunner(config, jobs, service)
