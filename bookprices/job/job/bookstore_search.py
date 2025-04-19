@@ -7,6 +7,8 @@ from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
+from bookprices.shared.event.base import EventManager
+from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.webscraping.book import BookFinder, IsbnSearch, BookNotFoundError
 
 
@@ -25,10 +27,16 @@ class BookStoreSearchJob(JobBase):
 
     name: ClassVar[str] = "BookStoreSearchJob"
 
-    def __init__(self, config: Config, db: Database, cache_key_remover: BookPriceKeyRemover) -> None:
+    def __init__(
+            self,
+            config: Config,
+            db: Database,
+            cache_key_remover: BookPriceKeyRemover,
+            event_manager: EventManager) -> None:
         super().__init__(config)
         self._db = db
         self._cache_key_remover = cache_key_remover
+        self._event_manager = event_manager
         self._search_queue = Queue()
         self._results = []
         self._logger = logging.getLogger(self.name)
@@ -51,6 +59,7 @@ class BookStoreSearchJob(JobBase):
 
 
             self._logger.info(f"Total searches_processed: {total_searches_count}")
+            self._event_manager.trigger_event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
@@ -87,7 +96,7 @@ class BookStoreSearchJob(JobBase):
 
             [t.join() for t in threads]
 
-        logging.info("Finished search!")
+        self._logger.info("Finished search!")
 
     def _search_books(self) -> None:
         while not self._search_queue.empty():
@@ -95,7 +104,7 @@ class BookStoreSearchJob(JobBase):
                 isbn_search = self._search_queue.get()
                 match_url = BookFinder.search_book_isbn(isbn_search)
                 # Should return none if no book found instead of raising exceptions.
-                logging.info(f"Found book with id {isbn_search.book_id} at {match_url} (bookstore {isbn_search.bookstore_id})")
+                self._logger.info(f"Found book with id {isbn_search.book_id} at {match_url} (bookstore {isbn_search.bookstore_id})")
                 self._results.append(
                     BookStoreBookUrl(
                         book_id=isbn_search.book_id,
@@ -120,7 +129,7 @@ class BookStoreSearchJob(JobBase):
         self._remove_cache_for_affected_books_and_bookstores()
 
         self._logger.debug("Removing results from list...")
-        self._results.clear()
+        self._results = []
 
     def _remove_cache_for_affected_books_and_bookstores(self) -> None:
         for result in self._results:

@@ -53,7 +53,7 @@ class DeleteUnavailableBooksJob(JobBase):
                     self._cache_key_remover.remove_key_for_authors()
 
             self._logger.info(f"Deleted {delete_count} unavailable books from bookstores!")
-            self._event_manager.trigger_event(BookPricesEvents.BOOK_DELETED)
+            self._event_manager.trigger_event(str(BookPricesEvents.BOOKS_DELETED))
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")

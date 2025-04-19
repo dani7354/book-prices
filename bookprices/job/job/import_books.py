@@ -12,7 +12,7 @@ from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager
-from bookprices.shared.event.enum import BookPricesEvents, BookPricesEventsArgName
+from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.model.book import Book
 from bookprices.shared.validation import isbn as isbn_validator
 
@@ -69,6 +69,8 @@ class WilliamDamBookImportJob(JobBase):
             logging.info("Saving books...")
             self._create_or_update_books()
             logging.info("Done!")
+
+            self._event_manager.trigger_event(str(BookPricesEvents.BOOKS_IMPORTED))
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
@@ -149,9 +151,6 @@ class WilliamDamBookImportJob(JobBase):
                 else:
                     self._logger.debug(f"Saving book with ISBN {book.isbn}")
                     self._db.book_db.create_book(book)
-                    self._event_manager.trigger_event(
-                        BookPricesEvents.BOOK_CREATED,
-                        **{BookPricesEventsArgName.BOOK_ID: book.id})
                     self._cache_key_remover.remove_key_for_authors()
                     created_count += 1
             except Exception as ex:
