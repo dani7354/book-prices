@@ -1,7 +1,7 @@
 import flask_login
 from werkzeug.local import LocalProxy
 import bookprices.web.mapper.book as bookmapper
-from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app
+from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app, jsonify
 from bookprices.shared.db import database
 from bookprices.shared.model.book import Book
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
@@ -143,15 +143,17 @@ def edit(book_id: int) -> str | Response:
             service.update_book(map_from_create_view_model(view_model))
         except Exception as ex:
             logger.error(f"Fejl under opdatering af bogen: {ex}")
-            view_model.add_error(view_model.title_field_name, "Der opstod en fejl under opdatering af bogen")
+            view_model.add_error(view_model.isbn_field_name, "Der opstod en fejl under opdatering af bogen")
             return render_template(BookTemplate.EDIT.value, view_model=view_model)
 
-        return redirect(url_for(Endpoint.BOOK_EDIT.value, book_id=book_.id))
+        return redirect(url_for(Endpoint.BOOK.value, book_id=book_.id))
 
     form_action_url = url_for(Endpoint.BOOK_EDIT.value, book_id=book_.id)
     view_model = bookmapper.map_to_create_view_model(book_, form_action_url)
 
     return render_template(BookTemplate.EDIT.value, view_model=view_model)
+
+
 
 
 @book_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
@@ -177,3 +179,18 @@ def price_history(book_id: int, store_id: int) -> str:
                                                             descending)
 
     return render_template(BookTemplate.PRICE_HISTORY.value, view_model=price_history_view_model)
+
+
+@book_blueprint.route("/book/delete/<int:book_id>", methods=[HttpMethod.POST.value])
+@flask_login.login_required
+def delete(book_id: int) -> tuple[Response, int]:
+    if not service.get_book(book_id):
+        return abort(HttpStatusCode.NOT_FOUND, f"Bog med id {book_id} findes ikke")
+
+    try:
+        service.delete_book(book_id)
+    except Exception as ex:
+        logger.error(f"Fejl under sletning af bogen: {ex}")
+        return jsonify({"error": "Der opstod en fejl under sletning af bogen"}), HttpStatusCode.INTERNAL_SERVER_ERROR
+
+    return jsonify([]), HttpStatusCode.OK
