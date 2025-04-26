@@ -69,9 +69,9 @@ class BookDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor() as cursor:
                 query = ("UPDATE Book "
-                         "SET Title = %s, Author = %s, Format = %s, ImageUrl = %s "
+                         "SET Title = %s, Author = %s, Format = %s, ImageUrl = %s, Isbn = %s "
                          "WHERE Id = %s;")
-                cursor.execute(query, (book.title, book.author, book.format, book.image_url, book.id))
+                cursor.execute(query, (book.title, book.author, book.format, book.image_url, book.isbn, book.id))
                 con.commit()
 
     def get_books(self) -> list[Book]:
@@ -254,13 +254,13 @@ class BookDb(BaseDb):
                 for row in cursor:
                     return row["BookCount"]
 
-    def get_book_by_isbn(self, book_id: str) -> Book:
+    def get_book_by_isbn(self, book_isbn: str) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Isbn, Title, Author, Format, ImageUrl, Created "
                          "FROM Book "
                          "WHERE Isbn = %s;")
-                cursor.execute(query, (book_id,))
+                cursor.execute(query, (book_isbn,))
                 books = []
                 for row in cursor:
                     book = Book(row["Id"],

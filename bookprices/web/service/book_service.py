@@ -99,3 +99,8 @@ class BookService:
         self._cache.delete(get_authors_key())
 
         return book_id
+
+    def update_book(self, book: Book) -> None:
+        self._db.book_db.update_book(book)
+        self._cache.delete(get_authors_key())
+        self._cache.delete(get_book_key(book.id))

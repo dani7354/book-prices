@@ -27,6 +27,7 @@ class Endpoint(Enum):
     PAGE_LOGIN = "page.login"
     BOOK = "book.book"
     BOOK_CREATE = "book.create"
+    BOOK_EDIT = "book.edit"
     BOOK_PRICE_HISTORY = "book.price_history"
     BOOK_SEARCH = "book.search"
     JOB_INDEX = "job.index"
@@ -44,6 +45,7 @@ class BookTemplate(Enum):
     SEARCH = "book/search.html"
     BOOK = "book/book.html"
     CREATE = "book/create.html"
+    EDIT = "book/edit.html"
     PRICE_HISTORY = "book/price_history.html"
 
 

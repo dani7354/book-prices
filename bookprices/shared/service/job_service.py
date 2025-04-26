@@ -102,7 +102,7 @@ class JobService:
             logger.error(f"Failed to get job run with id {job_run_id}. Error: {ex}")
             return None
 
-    def get_job_run_for_jobs(self, job_ids: [str]) -> dict[str, dict]:
+    def get_job_run_for_jobs(self, job_ids: list[str]) -> dict[str, dict]:
         job_run_count = 1
         job_runs_by_job_id = {}
         for job_id in job_ids:
