@@ -142,7 +142,7 @@ def edit(book_id: int) -> str | Response:
         try:
             service.update_book(map_from_create_view_model(view_model))
         except Exception as ex:
-            logger.error(f"Fejl under opdatering af bogen: {ex}")
+            logger.error(f"An error occurred while updating book: {ex}")
             view_model.add_error(view_model.isbn_field_name, "Der opstod en fejl under opdatering af bogen")
             return render_template(BookTemplate.EDIT.value, view_model=view_model)
 
@@ -152,8 +152,6 @@ def edit(book_id: int) -> str | Response:
     view_model = bookmapper.map_to_create_view_model(book_, form_action_url)
 
     return render_template(BookTemplate.EDIT.value, view_model=view_model)
-
-
 
 
 @book_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
@@ -190,7 +188,7 @@ def delete(book_id: int) -> tuple[Response, int]:
     try:
         service.delete_book(book_id)
     except Exception as ex:
-        logger.error(f"Fejl under sletning af bogen: {ex}")
+        logger.error(f"An error occurred while deleting the book: {ex}")
         return jsonify({"error": "Der opstod en fejl under sletning af bogen"}), HttpStatusCode.INTERNAL_SERVER_ERROR
 
-    return jsonify([]), HttpStatusCode.OK
+    return jsonify({}), HttpStatusCode.OK
