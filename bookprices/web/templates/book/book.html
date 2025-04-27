@@ -21,7 +21,6 @@
     {% endif %}
 </div>
 
-
 <h3 class="pb-4">
     {{ view_model.book.title }}
     <small class="text-muted">af <a class="link-secondary" href="{{ view_model.author_search_url }}">{{ view_model.book.author }}</a></small>
@@ -83,12 +82,14 @@
 {% if view_model.book_prices %}
 <h4>Prisudvikling</h4>
 <div id="chart" data-book="{{ view_model.book.id }}"></div>
-<script src="{{ url_for('static', filename='js/price_chart.js') }}" integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/price_chart.js') }}"
+        integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
 <script src="{{ url_for('static', filename='js/book.js') }}" integrity="{{ sri_attribute_values['book_js'] }}"></script>
 {% endif %}
 
 {% if current_user.is_authenticated %}
-<script src="{{ url_for('static', filename='js/delete_book.js') }}"></script>
+<script src="{{ url_for('static', filename='js/delete_book.js') }}"
+        integrity="{{ sri_attribute_values['delete_book_js'] }}"></script>
 {% endif %}
 
 <noscript>Venligst aktivér JavaScript i din browser</noscript>

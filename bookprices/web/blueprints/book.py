@@ -185,7 +185,7 @@ def price_history(book_id: int, store_id: int) -> str:
 @flask_login.login_required
 def delete(book_id: int) -> tuple[Response, int]:
     if not service.get_book(book_id):
-        return abort(HttpStatusCode.NOT_FOUND, f"Bog med id {book_id} findes ikke")
+        return jsonify({"error": f"Bog med id {book_id} findes ikke"}), HttpStatusCode.NOT_FOUND
 
     try:
         service.delete_book(book_id)

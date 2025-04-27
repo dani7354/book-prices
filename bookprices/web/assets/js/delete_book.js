@@ -21,7 +21,7 @@ function deleteBook(bookId) {
         "data": {
             "csrf_token": $(csrfTokenNodeId).val()
         },
-        "success": function (data) {
+        "success": function () {
             window.location.href  = redirectUrl;
         },
         "error": function (error) {

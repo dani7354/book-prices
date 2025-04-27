@@ -59,6 +59,9 @@ SRI_ATTRIBUTE_VALUES = {
     "book_js": ("sha256-JgxBFm9mLSK3fp3T1m+xKA53BSESdLU539ubqoNU9hM= "
                 "sha384-CFgcxa+ns728v2fZ5BuO8tXDFjUOoXrqzFuQj9OTj/l3hfJRZxWtqEEXkGouaqts "
                 "sha512-h+NIDb7LNRIEAjRpKewcUzRtuh6HgYb2cZAA82w8py4J8fRG0b18kZqAiElv/o/QGhEJaH28QPOhItyHchn2Bw=="),
+    "delete_book_js": ("sha256-knHOmJRmYU18UaPxEt8HVMrIQerCB3tzE9fFrGrKj30= "
+                       "sha384-M9WgAADQj0COhNKYfd8NzdRj5HZRrM03FbTxvJ6YkrAK6JLzXq5kN3OYmRQ5Dvl6 "
+                       "sha512-Q+kTMShDdLq3noCJb74M1NdqfqtNAT5yX83PuvZvixRfg8wDc7l+g+74YctyvwRU+i7wvAs0sFBtW5emtW7tGg=="),
     "apexcharts_js": ("sha256-VvsSKf53yMxm8x6hJb6p7TejhAyXtmoj5EyFHP9xeys= "
                       "sha384-KNaFJ+EK516RuHsoycvreec5pD7BkTKJEkjMrVSQWu9KGTl7En4dhIDv7t1DFJ+g "
                       "sha512-yR5RFcmaHqsGbB9WPG104Fk3+x2s9fMYCgA09VaRT2Lqpay6oNhKldYsZKU/rpYqbsNVhN5+RTbQBSd9+DhL6g=="),
