@@ -11,7 +11,7 @@ from bookprices.web.shared.enum import CacheTtlOption
 
 
 class BookService:
-    def __init__(self, db: Database, cache: Cache):
+    def __init__(self, db: Database, cache: Cache) -> None:
         self._db = db
         self._cache = cache
 
@@ -99,3 +99,13 @@ class BookService:
         self._cache.delete(get_authors_key())
 
         return book_id
+
+    def update_book(self, book: Book) -> None:
+        self._db.book_db.update_book(book)
+        self._cache.delete(get_authors_key())
+        self._cache.delete(get_book_key(book.id))
+
+    def delete_book(self, book_id: int) -> None:
+        self._db.book_db.delete_book(book_id)
+        self._cache.delete(get_authors_key())
+        self._cache.delete(get_book_key(book_id))

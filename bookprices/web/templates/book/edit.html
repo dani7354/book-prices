@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% set active_page = "create_book" %}
+{% set active_page = "edit_book" %}
 {% set errors = view_model.errors %}
 {% block content %}
-<h2>Tilføj bog</h2>
+<h2>Opdatér "{{ view_model.title }}"</h2>
 
 {% include "book/_book_form.html" %}
 

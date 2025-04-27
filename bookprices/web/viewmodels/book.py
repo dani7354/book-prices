@@ -95,6 +95,8 @@ class CreateBookViewModel:
     title: str
     author: str
     format: str
+    form_action_url: str
+    id: int | None = None
     errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
     def is_valid(self) -> bool:
@@ -135,8 +137,8 @@ class CreateBookViewModel:
         self.errors[field_name].append(message)
 
     @staticmethod
-    def empty() -> "CreateBookViewModel":
-        return CreateBookViewModel("", "", "", "")
+    def empty(form_action_url: str) -> "CreateBookViewModel":
+        return CreateBookViewModel(title="", author="", isbn="", format="", form_action_url=form_action_url)
 
 
 @dataclass(frozen=True)

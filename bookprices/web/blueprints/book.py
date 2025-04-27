@@ -1,17 +1,18 @@
 import flask_login
 from werkzeug.local import LocalProxy
 import bookprices.web.mapper.book as bookmapper
-from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app
+from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app, jsonify
 from bookprices.shared.db import database
 from bookprices.shared.model.book import Book
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
+from bookprices.web.mapper.book import map_from_create_view_model
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE)
 from bookprices.web.cache.redis import cache
-from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate
+from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate, Endpoint
 from bookprices.web.viewmodels.book import CreateBookViewModel
 
 
@@ -82,7 +83,7 @@ def book(book_id: int) -> str:
 @book_blueprint.route("/book/create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @flask_login.login_required
 def create() -> str | Response:
-    if request.method == "POST":
+    if request.method == HttpMethod.POST.value:
         isbn = request.form.get(CreateBookViewModel.isbn_field_name) or ""
         title = request.form.get(CreateBookViewModel.title_field_name) or ""
         author = request.form.get(CreateBookViewModel.author_field_name) or ""
@@ -92,7 +93,8 @@ def create() -> str | Response:
             isbn=isbn.strip(),
             title=title.strip(),
             author=author.strip(),
-            format=book_format.strip())
+            format=book_format.strip(),
+            form_action_url=url_for(Endpoint.BOOK_CREATE.value))
 
         if not view_model.is_valid():
             return render_template(BookTemplate.CREATE.value, view_model=view_model)
@@ -107,9 +109,49 @@ def create() -> str | Response:
                  author=view_model.author,
                  format=view_model.format))
 
-        return redirect(url_for("book.book", book_id=book_id))
+        return redirect(url_for(Endpoint.BOOK.value, book_id=book_id))
 
-    return render_template(BookTemplate.CREATE.value, view_model=CreateBookViewModel.empty())
+    form_action_url = url_for(Endpoint.BOOK_CREATE.value)
+    empty_view_model = CreateBookViewModel.empty(form_action_url=form_action_url)
+
+    return render_template(BookTemplate.CREATE.value, view_model=empty_view_model)
+
+
+@book_blueprint.route("/book/edit/<int:book_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@flask_login.login_required
+def edit(book_id: int) -> str | Response:
+    if not (book_ := service.get_book(book_id)):
+        return abort(HttpStatusCode.NOT_FOUND, f"Bog med id {book_id} findes ikke")
+
+    if request.method == HttpMethod.POST.value:
+        title = request.form.get(CreateBookViewModel.title_field_name) or ""
+        author = request.form.get(CreateBookViewModel.author_field_name) or ""
+        isbn = request.form.get(CreateBookViewModel.isbn_field_name) or ""
+        book_format = request.form.get(CreateBookViewModel.format_field_name) or ""
+
+        view_model = CreateBookViewModel(
+            id=book_.id,
+            isbn=isbn.strip(),
+            title=title.strip(),
+            author=author.strip(),
+            format=book_format.strip(),
+            form_action_url=url_for(Endpoint.BOOK_EDIT.value, book_id=book_.id))
+
+        if not view_model.is_valid():
+            return render_template(BookTemplate.EDIT.value, view_model=view_model)
+        try:
+            service.update_book(map_from_create_view_model(view_model))
+        except Exception as ex:
+            logger.error(f"An error occurred while updating book: {ex}")
+            view_model.add_error(view_model.isbn_field_name, "Der opstod en fejl under opdatering af bogen")
+            return render_template(BookTemplate.EDIT.value, view_model=view_model)
+
+        return redirect(url_for(Endpoint.BOOK.value, book_id=book_.id))
+
+    form_action_url = url_for(Endpoint.BOOK_EDIT.value, book_id=book_.id)
+    view_model = bookmapper.map_to_create_view_model(book_, form_action_url)
+
+    return render_template(BookTemplate.EDIT.value, view_model=view_model)
 
 
 @book_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
@@ -135,3 +177,18 @@ def price_history(book_id: int, store_id: int) -> str:
                                                             descending)
 
     return render_template(BookTemplate.PRICE_HISTORY.value, view_model=price_history_view_model)
+
+
+@book_blueprint.route("/book/delete/<int:book_id>", methods=[HttpMethod.POST.value])
+@flask_login.login_required
+def delete(book_id: int) -> tuple[Response, int]:
+    if not service.get_book(book_id):
+        return jsonify({"error": f"Bog med id {book_id} findes ikke"}), HttpStatusCode.NOT_FOUND
+
+    try:
+        service.delete_book(book_id)
+    except Exception as ex:
+        logger.error(f"An error occurred while deleting the book: {ex}")
+        return jsonify({"error": "Der opstod en fejl under sletning af bogen"}), HttpStatusCode.INTERNAL_SERVER_ERROR
+
+    return jsonify({}), HttpStatusCode.OK

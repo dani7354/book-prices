@@ -22,7 +22,7 @@ from bookprices.web.viewmodels.book import (
     BookListItemViewModel,
     BookPriceForStoreViewModel,
     PriceHistoryViewModel,
-    BookDetailsViewModel, BookStoreViewModel)
+    BookDetailsViewModel, BookStoreViewModel, CreateBookViewModel)
 from bookprices.web.viewmodels.page import IndexViewModel
 
 PRICE_NONE_TEXT = "-"
@@ -284,3 +284,22 @@ def map_price_history(book_in_book_store: BookInBookStore,
 
 def map_bookstores(bookstores: list[BookStore]) -> list[BookStoreViewModel]:
     return [BookStoreViewModel(bs.name, f"{bs.url}?ref={SITE_HOSTNAME}") for bs in bookstores]
+
+
+def map_to_create_view_model(book: Book, form_action_url: str) -> CreateBookViewModel:
+    return CreateBookViewModel(
+        id=book.id,
+        isbn=book.isbn,
+        title=book.title,
+        author=book.author,
+        format=book.format,
+        form_action_url=form_action_url)
+
+
+def map_from_create_view_model(view_model: CreateBookViewModel) -> Book:
+    return Book(
+        id=view_model.id,
+        title=view_model.title,
+        author=view_model.author,
+        format=view_model.format,
+        isbn=view_model.isbn)
