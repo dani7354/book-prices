@@ -109,7 +109,7 @@ def create() -> str | Response:
                  author=view_model.author,
                  format=view_model.format))
 
-        return redirect(url_for("book.book", book_id=book_id))
+        return redirect(url_for(Endpoint.BOOK.value, book_id=book_id))
 
     form_action_url = url_for(Endpoint.BOOK_CREATE.value)
     empty_view_model = CreateBookViewModel.empty(form_action_url=form_action_url)
