@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-sm-8">
+    <div class="col-sm-8 mb-4">
         <a class="link-secondary text-decoration-none" href="{{ view_model.return_url }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up"
                  viewBox="0 0 16 16">
@@ -15,8 +15,8 @@
     </div>
     {% if current_user.is_authenticated %}
     <div class="col-sm-4 text-end">
-        <a class="btn btn-primary mb-3" href="{{ url_for('book.edit', book_id=view_model.book.id) }}">Rediger</a>
-        <a id="btn-delete-book" class="btn btn-danger mb-3" data-book-id="{{ view_model.book.id }}" href="">Slet</a>
+        <a class="btn btn-primary" href="{{ url_for('book.edit', book_id=view_model.book.id) }}">Rediger</a>
+        <a id="btn-delete-book" class="btn btn-danger" data-book-id="{{ view_model.book.id }}" href="">Slet</a>
     </div>
     {% endif %}
 </div>
