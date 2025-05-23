@@ -302,4 +302,5 @@ def map_from_create_view_model(view_model: CreateBookViewModel) -> Book:
         title=view_model.title,
         author=view_model.author,
         format=view_model.format,
-        isbn=view_model.isbn)
+        isbn=view_model.isbn,
+        image_url=view_model.image_url)
