@@ -135,6 +135,7 @@ def edit(book_id: int) -> str | Response:
             title=title.strip(),
             author=author.strip(),
             format=book_format.strip(),
+            image_url=book_.image_url,
             form_action_url=url_for(Endpoint.BOOK_EDIT.value, book_id=book_.id))
 
         if not view_model.is_valid():

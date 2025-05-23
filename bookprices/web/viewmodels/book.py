@@ -96,6 +96,7 @@ class CreateBookViewModel:
     author: str
     format: str
     form_action_url: str
+    image_url: str | None = None
     id: int | None = None
     errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
