@@ -64,9 +64,9 @@ def map_price_history_for_stores(
         bookprices_by_bookstore: dict[BookStore, list[BookPrice]]) -> PriceHistoryForDatesResponse:
     all_dates = sorted({price.created.strftime(DATE_FORMAT) for prices in bookprices_by_bookstore.values()
                         for price in prices})
-    price_history_for_stores = []
-    for bookstore, prices in bookprices_by_bookstore.items():
-        price_history = _get_price_history_for_all_dates(all_dates, prices)
-        price_history_for_stores.append(PriceHistoryForBookStoreResponse(bookstore.name, price_history))
+    price_history_for_stores = [
+        PriceHistoryForBookStoreResponse(bookstore.name, _get_price_history_for_all_dates(all_dates, prices))
+        for bookstore, prices in bookprices_by_bookstore.items()
+    ]
 
     return PriceHistoryForDatesResponse(all_dates, price_history_for_stores)
