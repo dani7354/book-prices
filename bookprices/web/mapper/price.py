@@ -44,15 +44,29 @@ def map_prices_history(bookprices: list[BookPrice]) -> PriceHistoryResponse:
     return PriceHistoryResponse(dates, prices, row_css_classes)
 
 
+def _get_price_history_for_all_dates(all_dates: list[str], prices_for_bookstore: list[BookPrice]) -> list[str]:
+    prices_decimal_by_date = {price.created.strftime(DATE_FORMAT): price.price for price in prices_for_bookstore}
+    prices_history = []
+    last_price = None
+    for date in all_dates:
+        if price := prices_decimal_by_date.get(date):
+            last_price = price
+        else:
+            price = last_price
+
+        formatted_price = f"{price:{PRICE_DECIMAL_FORMAT}}" if price else None
+        prices_history.append(formatted_price)
+
+    return prices_history
+
+
 def map_price_history_for_stores(
         bookprices_by_bookstore: dict[BookStore, list[BookPrice]]) -> PriceHistoryForDatesResponse:
     all_dates = sorted({price.created.strftime(DATE_FORMAT) for prices in bookprices_by_bookstore.values()
                         for price in prices})
     price_history_for_stores = []
     for bookstore, prices in bookprices_by_bookstore.items():
-        prices_decimal_by_date = {price.created.strftime(DATE_FORMAT): price.price for price in prices}
-        price_history = [f"{price:{PRICE_DECIMAL_FORMAT}}" if (price := prices_decimal_by_date.get(date)) else None
-                         for date in all_dates]
+        price_history = _get_price_history_for_all_dates(all_dates, prices)
         price_history_for_stores.append(PriceHistoryForBookStoreResponse(bookstore.name, price_history))
 
     return PriceHistoryForDatesResponse(all_dates, price_history_for_stores)
