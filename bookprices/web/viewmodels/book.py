@@ -4,7 +4,7 @@ from collections import defaultdict
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
 from bookprices.shared.validation.isbn import check_isbn13
-from bookprices.web.settings import BOOK_IMAGES_PATH
+from bookprices.web.settings import BOOK_IMAGES_BASE_URL
 from bookprices.web.shared.input_validation_message import min_length_not_met, max_length_exceeded
 
 
@@ -157,7 +157,7 @@ class CreateBookViewModel:
             isbn="",
             format="",
             form_action_url=form_action_url,
-            image_base_url=BOOK_IMAGES_PATH)
+            image_base_url=BOOK_IMAGES_BASE_URL)
 
 
 @dataclass(frozen=True)

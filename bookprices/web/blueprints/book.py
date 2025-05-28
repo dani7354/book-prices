@@ -12,7 +12,7 @@ from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE, BOOK_IMAGE_FILE_PATH,
-    BOOK_IMAGES_PATH)
+    BOOK_IMAGES_BASE_URL)
 from bookprices.web.cache.redis import cache
 from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate, Endpoint
 from bookprices.web.viewmodels.book import CreateBookViewModel
@@ -143,7 +143,7 @@ def edit(book_id: int) -> str | Response:
             format=book_format.strip(),
             image_url=image_url.strip(),
             form_action_url=url_for(Endpoint.BOOK_EDIT.value, book_id=book_.id),
-            image_base_url=BOOK_IMAGES_PATH,
+            image_base_url=BOOK_IMAGES_BASE_URL,
             available_images=available_book_images)
 
         if not view_model.is_valid():

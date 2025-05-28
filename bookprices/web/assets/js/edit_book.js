@@ -4,9 +4,9 @@ const imageSelectInput = $("#select-image");
 const imgSelected = $("#img-selected");
 
 
-function updateImagePreview(bookImageBaseUrl, selectedImage) {
-    if (selectedImage) {
-            imgSelected.attr("src", `${bookImageBaseUrl}${selectedImage}`);
+function updateImagePreview(bookImageBaseUrl, selectedBookImage) {
+    if (selectedBookImage) {
+            imgSelected.attr("src", `${bookImageBaseUrl}${selectedBookImage}`);
     } else {
             imgSelected.attr("src", `${bookImageBaseUrl}${defaultImage}`);
     }
@@ -23,7 +23,7 @@ function updateImagePreview(bookImageBaseUrl, selectedImage) {
      updateImagePreview(bookImageBaseUrl, selectedImage);
 
      imageSelectInput.on("change", function (e) {
-        let selectedImage = $(e.target).val();
+        selectedImage = $(e.target).val();
         updateImagePreview(bookImageBaseUrl, selectedImage);
     });
  });

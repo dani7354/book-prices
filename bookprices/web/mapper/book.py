@@ -12,7 +12,7 @@ from bookprices.web.settings import (
     AUTHOR_URL_PARAMETER,
     ORDER_BY_URL_PARAMETER,
     DESCENDING_URL_PARAMETER,
-    BOOK_IMAGES_PATH,
+    BOOK_IMAGES_BASE_URL,
     BOOK_FALLBACK_IMAGE_NAME)
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.book import (
@@ -46,9 +46,9 @@ def _create_url(page_number: int,
 
 def _get_image_url(book: Book) -> str:
     if book.image_url:
-        book_image_path = os.path.join(BOOK_IMAGES_PATH, book.image_url)
+        book_image_path = os.path.join(BOOK_IMAGES_BASE_URL, book.image_url)
         return book_image_path
-    return str(os.path.join(BOOK_IMAGES_PATH, BOOK_FALLBACK_IMAGE_NAME))
+    return str(os.path.join(BOOK_IMAGES_BASE_URL, BOOK_FALLBACK_IMAGE_NAME))
 
 
 def _was_book_recently_added(book: Book) -> bool:
@@ -241,7 +241,7 @@ def map_book_details(book: Book,
                                                                  is_price_available))
 
     image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
-    book.image_url = os.path.join(BOOK_IMAGES_PATH, image)
+    book.image_url = os.path.join(BOOK_IMAGES_BASE_URL, image)
     index_url = _create_url(page,
                             endpoint=Endpoint.BOOK_SEARCH.value,
                             **{SEARCH_URL_PARAMETER: search_phrase,
@@ -298,7 +298,7 @@ def map_to_create_view_model(
         format=book.format,
         image_url=book.image_url,
         form_action_url=form_action_url,
-        image_base_url=BOOK_IMAGES_PATH,
+        image_base_url=BOOK_IMAGES_BASE_URL,
         available_images=available_book_images)
 
 
