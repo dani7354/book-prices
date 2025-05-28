@@ -5,6 +5,7 @@ from typing import ClassVar
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
+from bookprices.shared.service.book_image_file_service import BookImageFileService
 
 
 class DeleteImagesJob(JobBase):
@@ -13,11 +14,12 @@ class DeleteImagesJob(JobBase):
     name: ClassVar[str] = "DeleteImagesJob"
     default_image_name: str = "default.png"
 
-    def __init__(self, config: Config, db: Database) -> None:
+    def __init__(self, config: Config, db: Database, book_image_file_service: BookImageFileService) -> None:
         super().__init__(config)
         self.db = db
         self.image_folder = config.imgdir
-        self._logger = logging.getLogger(self.name)
+        self._book_image_file_service = book_image_file_service
+        self._logger = logging.getLogger(self.__class__.name)
 
     def start(self, *args, **kwargs) -> JobResult:
         try:
@@ -33,7 +35,7 @@ class DeleteImagesJob(JobBase):
                 self._logger.info("No image files to delete!")
                 return JobResult(JobExitStatus.SUCCESS)
 
-            logging.info(f"{len(images_to_delete)} image files will be deleted.")
+            self._logger.info(f"{len(images_to_delete)} image files will be deleted.")
             self._delete_files(images_to_delete)
 
             return JobResult(JobExitStatus.SUCCESS)
@@ -50,7 +52,7 @@ class DeleteImagesJob(JobBase):
 
     def _get_image_filenames_from_folder(self) -> set[str]:
         self._logger.info(f"Listing image filenames from folder {self.image_folder}...")
-        return set(os.listdir(self.image_folder))
+        return set(self._book_image_file_service.get_images_available())
 
     def _delete_files(self, files: set[str]) -> None:
         for file in files:
@@ -58,7 +60,7 @@ class DeleteImagesJob(JobBase):
                 if file.startswith('.'):
                     self._logger.info(f"Skipping hidden file {file}")
                     continue
-                os.remove(os.path.join(self.image_folder, file))
+                self._book_image_file_service.delete_image(file)
             except FileNotFoundError as ex:
-                logging.error(f"{file} blev ikke fundet i {self.image_folder}")
-                logging.error(ex)
+                self._logger.error(f"{file} blev ikke fundet i {self.image_folder}")
+                self._logger.error(ex)

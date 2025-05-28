@@ -28,8 +28,9 @@ DEBUG_MODE = os.environ.get("DEBUG", "False") == "True"
 SITE_HOSTNAME = os.environ.get("SITE_HOSTNAME", "localhost")
 
 BOOK_PAGESIZE = 20
-BOOK_IMAGES_PATH = "/static/assets/images/books/" if DEBUG_MODE else "/static/images/books/"
+BOOK_IMAGES_BASE_URL = "/static/assets/images/books/" if DEBUG_MODE else "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
+BOOK_IMAGE_FILE_PATH = os.environ["BOOK_IMAGE_FILE_PATH"]
 
 AUTHOR_URL_PARAMETER = "author"
 SEARCH_URL_PARAMETER = "search"
@@ -62,6 +63,9 @@ SRI_ATTRIBUTE_VALUES = {
     "delete_book_js": ("sha256-knHOmJRmYU18UaPxEt8HVMrIQerCB3tzE9fFrGrKj30= "
                        "sha384-M9WgAADQj0COhNKYfd8NzdRj5HZRrM03FbTxvJ6YkrAK6JLzXq5kN3OYmRQ5Dvl6 "
                        "sha512-Q+kTMShDdLq3noCJb74M1NdqfqtNAT5yX83PuvZvixRfg8wDc7l+g+74YctyvwRU+i7wvAs0sFBtW5emtW7tGg=="),
+    "edit_book_js": ("sha256-jMZ9rYmqFeNXDIO3IofnMmq8jx0wlqif1l6FwHJfT0Y= "
+                     "sha384-a1D9decWOBd2taUpa4o0X1pTkjDIO8houWhltI/CKds5dOZv+0zQ+pKuxzvmD57d "
+                     "sha512-l3MTEvUs1vKHQ8NVWaZhUZaugmWx/+IFaPvxdFuUvNdhy0VLJLBuAltHehLaXuKMH210AxgnfEwGpm9De7D17A=="),
     "apexcharts_js": ("sha256-VvsSKf53yMxm8x6hJb6p7TejhAyXtmoj5EyFHP9xeys= "
                       "sha384-KNaFJ+EK516RuHsoycvreec5pD7BkTKJEkjMrVSQWu9KGTl7En4dhIDv7t1DFJ+g "
                       "sha512-yR5RFcmaHqsGbB9WPG104Fk3+x2s9fMYCgA09VaRT2Lqpay6oNhKldYsZKU/rpYqbsNVhN5+RTbQBSd9+DhL6g=="),

@@ -4,6 +4,7 @@ from collections import defaultdict
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
 from bookprices.shared.validation.isbn import check_isbn13
+from bookprices.web.settings import BOOK_IMAGES_BASE_URL
 from bookprices.web.shared.input_validation_message import min_length_not_met, max_length_exceeded
 
 
@@ -81,6 +82,7 @@ class CreateBookViewModel:
     author_field_name: ClassVar[str] = "author"
     isbn_field_name: ClassVar[str] = "isbn"
     format_field_name: ClassVar[str] = "format"
+    image_url_field_name: ClassVar[str] = "image-url"
 
     title_min_length: ClassVar[int] = 1
     title_max_length: ClassVar[int] = 255
@@ -90,14 +92,18 @@ class CreateBookViewModel:
     isbn_max_length: ClassVar[int] = 13
     format_min_length: ClassVar[int] = 3
     format_max_length: ClassVar[int] = 255
+    image_min_length: ClassVar[int] = 1
+    image_max_length: ClassVar[int] = 255
 
     isbn: str
     title: str
     author: str
     format: str
     form_action_url: str
+    image_base_url: str
     image_url: str | None = None
     id: int | None = None
+    available_images: list[str] = field(default_factory=list)
     errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
     def is_valid(self) -> bool:
@@ -133,13 +139,25 @@ class CreateBookViewModel:
         if len(self.format.strip()) > self.format_max_length:
             self.errors[self.format_field_name].append(
                 max_length_exceeded("Format", self.format_max_length))
+        if self.image_url and len(self.image_url.strip()) < self.image_min_length:
+            self.errors[self.image_url_field_name].append(
+                min_length_not_met("Billede", self.image_min_length))
+        if self.image_url and len(self.image_url.strip()) > self.image_max_length:
+            self.errors[self.image_url_field_name].append(
+                max_length_exceeded("Billede", self.image_max_length))
 
     def add_error(self, field_name: str, message: str) -> None:
         self.errors[field_name].append(message)
 
     @staticmethod
     def empty(form_action_url: str) -> "CreateBookViewModel":
-        return CreateBookViewModel(title="", author="", isbn="", format="", form_action_url=form_action_url)
+        return CreateBookViewModel(
+            title="",
+            author="",
+            isbn="",
+            format="",
+            form_action_url=form_action_url,
+            image_base_url=BOOK_IMAGES_BASE_URL)
 
 
 @dataclass(frozen=True)
