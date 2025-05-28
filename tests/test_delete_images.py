@@ -6,10 +6,11 @@ from unittest.mock import MagicMock
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 from bookprices.job.job.delete_images import DeleteImagesJob
+from bookprices.shared.service.book_image_file_service import BookImageFileService
 
 
 @pytest.fixture
-def config(tmpdir):
+def config(tmpdir) -> Config:
     """ Provides a config object with a temporary directory. """
     log_dir = os.path.join(tmpdir.strpath, "logs")
     os.makedirs(log_dir, exist_ok=True)
@@ -23,6 +24,12 @@ def config(tmpdir):
         loglevel="DEBUG",
         imgdir=image_dir,
         logdir=tmpdir.strpath)
+
+
+@pytest.fixture
+def book_image_file_service(config) -> BookImageFileService:
+    """ Provides a BookImageFileService instance """
+    return BookImageFileService(config.imgdir)
 
 
 @pytest.fixture
@@ -46,12 +53,12 @@ def images(config):
 
 
 @pytest.mark.parametrize("images_deleted", [0, 1, 2, 3])
-def test_deletes_multiple_images(config, images, images_deleted):
+def test_deletes_multiple_images(config, images, images_deleted, book_image_file_service) -> None:
     mock_db = Database("", "", "", "", "")
     book_image_urls_from_db = [os.path.basename(images[i]) for i in range(0, len(images) - images_deleted)]
     mock_db.book_db.get_book_image_urls = MagicMock(return_value=book_image_urls_from_db)
 
-    job = DeleteImagesJob(config, mock_db)
+    job = DeleteImagesJob(config, mock_db, book_image_file_service)
     job.start()
 
     images_left = len(os.listdir(config.imgdir))
@@ -59,12 +66,12 @@ def test_deletes_multiple_images(config, images, images_deleted):
     assert expected_images_left == images_left
 
 
-def test_deletes_only_unused_images(config, images):
+def test_deletes_only_unused_images(config, images, book_image_file_service) -> None:
     mock_db = Database("", "", "", "", "")
     books_from_db = [os.path.basename(images[0]), os.path.basename(images[2])]
     mock_db.book_db.get_book_image_urls = MagicMock(return_value=books_from_db)
 
-    job = DeleteImagesJob(config, mock_db)
+    job = DeleteImagesJob(config, mock_db, book_image_file_service)
     job.start()
 
     images_left = os.listdir(config.imgdir)
@@ -73,13 +80,13 @@ def test_deletes_only_unused_images(config, images):
     assert os.path.basename(images[1]) not in images_left
 
 
-def test_excludes_default_image_from_deletion(config):
+def test_excludes_default_image_from_deletion(config, book_image_file_service) -> None:
     mock_db = Database("", "", "", "", "")
     mock_db.book_db.get_book_image_urls = MagicMock(return_value=[])
     with open(os.path.join(config.imgdir, DeleteImagesJob.default_image_name), "wb") as default_image_file:
         default_image_file.write(b"\x00" * 1000)
 
-    job = DeleteImagesJob(config, mock_db)
+    job = DeleteImagesJob(config, mock_db, book_image_file_service)
     job.start()
 
     images_left = os.listdir(config.imgdir)

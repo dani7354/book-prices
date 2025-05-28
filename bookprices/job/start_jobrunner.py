@@ -26,6 +26,7 @@ from bookprices.shared.event.listener import StartJobListener
 from bookprices.shared.log import setup_logging
 from bookprices.shared.service.job_service import JobService
 from bookprices.shared.webscraping.image import ImageDownloader
+from bookprices.shared.service.book_image_file_service import BookImageFileService
 
 
 THREAD_COUNT = 8
@@ -117,7 +118,8 @@ def create_trim_prices_job(config: Config) -> TrimPricesJob:
 
 def create_download_images_job(config: Config) -> DownloadImagesJob:
     db = create_database_container(config)
-    image_downloader = ImageDownloader(config.imgdir)
+    book_image_file_service = BookImageFileService(config.imgdir)
+    image_downloader = ImageDownloader(book_image_file_service, config.imgdir)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
     image_download_service = ImageDownloadService(db, image_downloader, thread_count)
 
@@ -126,7 +128,8 @@ def create_download_images_job(config: Config) -> DownloadImagesJob:
 
 def create_download_images_for_books_job(config: Config) -> DownloadImagesForBooksJob:
     db = create_database_container(config)
-    image_downloader = ImageDownloader(config.imgdir)
+    book_image_file_service = BookImageFileService(config.imgdir)
+    image_downloader = ImageDownloader(book_image_file_service, config.imgdir)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
     image_download_service = ImageDownloadService(db, image_downloader, thread_count)
 
@@ -142,8 +145,9 @@ def create_delete_unavailable_books_job(config: Config, event_manager: EventMana
 
 def create_delete_images_job(config: Config) -> DeleteImagesJob:
     db = create_database_container(config)
+    book_image_file_service = BookImageFileService(config.imgdir)
 
-    return DeleteImagesJob(config, db)
+    return DeleteImagesJob(config, db, book_image_file_service)
 
 
 def create_bookstore_search_job(config: Config, event_manager: EventManager) -> BookStoreSearchJob:
