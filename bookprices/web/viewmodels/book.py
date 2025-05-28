@@ -81,7 +81,7 @@ class CreateBookViewModel:
     author_field_name: ClassVar[str] = "author"
     isbn_field_name: ClassVar[str] = "isbn"
     format_field_name: ClassVar[str] = "format"
-    image_url_field_name: ClassVar[str] = "image"
+    image_url_field_name: ClassVar[str] = "image-url"
 
     title_min_length: ClassVar[int] = 1
     title_max_length: ClassVar[int] = 255
@@ -91,6 +91,8 @@ class CreateBookViewModel:
     isbn_max_length: ClassVar[int] = 13
     format_min_length: ClassVar[int] = 3
     format_max_length: ClassVar[int] = 255
+    image_min_length: ClassVar[int] = 1
+    image_max_length: ClassVar[int] = 255
 
 
     isbn: str
@@ -98,6 +100,7 @@ class CreateBookViewModel:
     author: str
     format: str
     form_action_url: str
+    image_base_url: str
     image_url: str | None = None
     id: int | None = None
     available_images: list[str] = field(default_factory=list)
@@ -136,6 +139,12 @@ class CreateBookViewModel:
         if len(self.format.strip()) > self.format_max_length:
             self.errors[self.format_field_name].append(
                 max_length_exceeded("Format", self.format_max_length))
+        if len(self.image_url.strip()) < self.image_min_length:
+            self.errors[self.image_url_field_name].append(
+                min_length_not_met("Billede", self.image_min_length))
+        if len(self.image_url.strip()) > self.image_max_length:
+            self.errors[self.image_url_field_name].append(
+                max_length_exceeded("Billede", self.image_max_length))
 
     def add_error(self, field_name: str, message: str) -> None:
         self.errors[field_name].append(message)

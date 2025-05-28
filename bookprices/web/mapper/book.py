@@ -296,7 +296,9 @@ def map_to_create_view_model(
         title=book.title,
         author=book.author,
         format=book.format,
+        image_url=book.image_url,
         form_action_url=form_action_url,
+        image_base_url=BOOK_IMAGES_PATH,
         available_images=available_book_images)
 
 

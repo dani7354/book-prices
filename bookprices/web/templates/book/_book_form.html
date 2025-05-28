@@ -2,9 +2,14 @@
     {% if active_page == "edit_book" %}
     <div class="mb-3">
         <label for="select-image" class="form-label">Billede</label>
-        <select id="select-image" class="form-control" name="{{ view_model.image_url_field_name }}">
+        <select id="select-image" class="form-control"
+                name="{{ view_model.image_url_field_name }}" data-image-base-url="{{ view_model.image_base_url }}">
             {% for image in view_model.available_images %}
-                <option value="{{ image }}" >{{image}}</option>
+                {% if view_model.image_url == image %}
+                    <option value="{{ image }}" selected>{{ image }}</option>
+                {% else %}
+                    <option value="{{ image }}">{{ image }}</option>
+                {% endif %}
             {% endfor %}
         </select>
         {% if view_model.image_url_field_name in errors %}

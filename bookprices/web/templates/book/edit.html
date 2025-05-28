@@ -4,12 +4,12 @@
 {% block content %}
 <h2>Opdatér "{{ view_model.title }}"</h2>
 
-<div class="container pb-4">
-    <img id="img-selected" src="/static/assets/images/books/2156.jpg" class="img-fluid rounded" alt="">
+<div id="div-img-selected" class="container pb-4">
+    <img id="img-selected" src="" class="img-fluid rounded" alt="">
 </div>
 
 {% include "book/_book_form.html" %}
 
-<script src="{{ {{ url_for('static', filename='js/edit_book.js') }}"></script>
+<script src="{{ url_for('static', filename='js/edit_book.js') }}"></script>
 
 {% endblock %}
