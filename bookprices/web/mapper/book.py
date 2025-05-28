@@ -286,14 +286,18 @@ def map_bookstores(bookstores: list[BookStore]) -> list[BookStoreViewModel]:
     return [BookStoreViewModel(bs.name, f"{bs.url}?ref={SITE_HOSTNAME}") for bs in bookstores]
 
 
-def map_to_create_view_model(book: Book, form_action_url: str) -> CreateBookViewModel:
+def map_to_create_view_model(
+        book: Book,
+        form_action_url: str,
+        available_book_images: list[str]) -> CreateBookViewModel:
     return CreateBookViewModel(
         id=book.id,
         isbn=book.isbn,
         title=book.title,
         author=book.author,
         format=book.format,
-        form_action_url=form_action_url)
+        form_action_url=form_action_url,
+        available_images=available_book_images)
 
 
 def map_from_create_view_model(view_model: CreateBookViewModel) -> Book:

@@ -81,6 +81,7 @@ class CreateBookViewModel:
     author_field_name: ClassVar[str] = "author"
     isbn_field_name: ClassVar[str] = "isbn"
     format_field_name: ClassVar[str] = "format"
+    image_url_field_name: ClassVar[str] = "image"
 
     title_min_length: ClassVar[int] = 1
     title_max_length: ClassVar[int] = 255
@@ -91,6 +92,7 @@ class CreateBookViewModel:
     format_min_length: ClassVar[int] = 3
     format_max_length: ClassVar[int] = 255
 
+
     isbn: str
     title: str
     author: str
@@ -98,6 +100,7 @@ class CreateBookViewModel:
     form_action_url: str
     image_url: str | None = None
     id: int | None = None
+    available_images: list[str] = field(default_factory=list)
     errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
 
     def is_valid(self) -> bool:

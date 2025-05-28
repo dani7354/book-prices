@@ -21,7 +21,8 @@ ENV PYTHONPATH="/usr/local/bookprices_web/"
 
 WORKDIR /usr/local/bookprices_web/bookprices/web
 
+RUN mkdir -p /usr/local/bookprices_web/bookprices/images/book
 RUN mkdir -p ./log/uwsgi  \
-    && chown -R bookprices:bookprices ./log
+    && chown -R bookprices:bookprices ./log \
 
 CMD ["uwsgi", "/usr/local/bookprices_web/bookprices/web/bookprices_web.ini"]

@@ -30,6 +30,7 @@ SITE_HOSTNAME = os.environ.get("SITE_HOSTNAME", "localhost")
 BOOK_PAGESIZE = 20
 BOOK_IMAGES_PATH = "/static/assets/images/books/" if DEBUG_MODE else "/static/images/books/"
 BOOK_FALLBACK_IMAGE_NAME = "default.png"
+BOOK_IMAGE_FILE_PATH = os.environ["BOOK_IMAGE_FILE_PATH"]
 
 AUTHOR_URL_PARAMETER = "author"
 SEARCH_URL_PARAMETER = "search"
