@@ -139,10 +139,10 @@ class CreateBookViewModel:
         if len(self.format.strip()) > self.format_max_length:
             self.errors[self.format_field_name].append(
                 max_length_exceeded("Format", self.format_max_length))
-        if len(self.image_url.strip()) < self.image_min_length:
+        if self.image_url and len(self.image_url.strip()) < self.image_min_length:
             self.errors[self.image_url_field_name].append(
                 min_length_not_met("Billede", self.image_min_length))
-        if len(self.image_url.strip()) > self.image_max_length:
+        if self.image_url and len(self.image_url.strip()) > self.image_max_length:
             self.errors[self.image_url_field_name].append(
                 max_length_exceeded("Billede", self.image_max_length))
 

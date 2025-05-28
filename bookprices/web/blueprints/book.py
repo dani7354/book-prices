@@ -96,7 +96,8 @@ def create() -> str | Response:
             title=title.strip(),
             author=author.strip(),
             format=book_format.strip(),
-            form_action_url=url_for(Endpoint.BOOK_CREATE.value))
+            form_action_url=url_for(Endpoint.BOOK_CREATE.value),
+            image_base_url=BOOK_IMAGES_BASE_URL)
 
         if not view_model.is_valid():
             return render_template(BookTemplate.CREATE.value, view_model=view_model)
