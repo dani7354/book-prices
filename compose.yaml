@@ -28,7 +28,7 @@ services:
     env_file: ./docker/web/.web.env
     volumes:
       - ./google_client_secrets.json:/usr/local/bookprices_web/google_client_secrets.json:ro
-      - ./docker/jobrunner/images:/usr/local/bookprices_web/images/books:ro
+      - ./docker/jobrunner/images:/usr/local/bookprices_web/images/book:ro
     depends_on:
       - job_api
       - db
