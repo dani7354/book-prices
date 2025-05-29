@@ -13,6 +13,7 @@ class UserEditViewModel:
     firstname_field_name: ClassVar[str] = "firstname"
     lastname_field_name: ClassVar[str] = "lastname"
     is_active_field_name: ClassVar[str] = "is_active"
+    access_level_field_name: ClassVar[str] = "access_level"
 
     email_min_length: ClassVar[int] = 1
     email_max_length: ClassVar[int] = 255
@@ -26,6 +27,7 @@ class UserEditViewModel:
     firstname: str
     lastname: str
     is_active: bool
+    access_level: str
     created: Optional[str] = None
     updated: Optional[str] = None
     image_url: Optional[str] = None

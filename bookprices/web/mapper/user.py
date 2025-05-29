@@ -11,4 +11,5 @@ def map_user_view_model(user: WebUser) -> UserEditViewModel:
         firstname=user.firstname,
         lastname=user.lastname,
         is_active=user.is_active,
-        image_url=user.image_url)
+        image_url=user.image_url,
+        access_level=user.access_level.name)

@@ -9,7 +9,8 @@ from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.auth import auth_blueprint
 from bookprices.web.blueprints.book import book_blueprint
-from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
+from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html, forbidden_html, \
+    unauthorized_html
 from bookprices.web.blueprints.job import job_blueprint
 from bookprices.web.blueprints.logging_configuration import RequestFormatter
 from bookprices.web.blueprints.status import status_blueprint
@@ -74,6 +75,8 @@ app.register_blueprint(status_blueprint, url_prefix="/status")
 app.register_blueprint(job_blueprint, url_prefix="/job")
 app.register_error_handler(HttpStatusCode.NOT_FOUND, not_found_html)
 app.register_error_handler(HttpStatusCode.INTERNAL_SERVER_ERROR, internal_server_error_html)
+app.register_error_handler(HttpStatusCode.FORBIDDEN, forbidden_html)
+app.register_error_handler(HttpStatusCode.UNAUTHORIZED, unauthorized_html)
 
 cache.init_app(app)
 
