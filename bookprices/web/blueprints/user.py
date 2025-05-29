@@ -37,7 +37,8 @@ def index() -> str | Response:
             email=email.strip(),
             firstname=firstname.strip(),
             lastname=lastname.strip(),
-            is_active=is_active)
+            is_active=is_active,
+            access_level=flask_login.current_user.access_level)
 
         if not view_model.is_valid():
             return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)
@@ -47,7 +48,9 @@ def index() -> str | Response:
             view_model.email,
             view_model.firstname,
             view_model.lastname,
+            flask_login.current_user.access_level,
             view_model.is_active)
+
         return redirect(url_for("user.index"))
 
     view_model = usermapper.map_user_view_model(flask_login.current_user)

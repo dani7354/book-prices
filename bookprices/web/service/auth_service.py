@@ -71,11 +71,13 @@ class AuthService:
         self._db.user_db.update_user_token_and_image_url(user_id, token, image_url)
         self._cache.delete(get_user_key(user_id))
 
-    def update_user_info(self, user_id: str, email: str, firstname: str, lastname: str, is_active: bool) -> None:
+    def update_user_info(
+            self, user_id: str, email: str, firstname: str, lastname: str, access_level: UserAccessLevel, is_active: bool) -> None:
         self._db.user_db.update_user_info(
             user_id=user_id,
             email=email,
             firstname=firstname,
             lastname=lastname,
-            is_active=is_active)
+            is_active=is_active,
+            access_level=access_level.value)
         self._cache.delete(get_user_key(user_id))
