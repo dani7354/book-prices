@@ -3,7 +3,7 @@ from datetime import datetime
 from flask_caching import Cache
 from typing import Optional
 from bookprices.shared.db. database import Database
-from bookprices.shared.model.user import User
+from bookprices.shared.model.user import User, UserAccessLevel
 from bookprices.shared.cache.key_generator import get_user_key
 
 
@@ -46,6 +46,10 @@ class WebUser(flask_login.UserMixin):
     @property
     def image_url(self) -> str:
         return self._user_model.image_url
+
+    @property
+    def access_level(self) -> UserAccessLevel:
+        return self._user_model.access_level
 
     def get_id(self) -> str:
         return self.id

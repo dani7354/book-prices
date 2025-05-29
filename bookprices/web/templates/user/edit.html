@@ -59,6 +59,11 @@
         {% endif %}
     </div>
     <div class="mb-3">
+        <label for="{{ view_model.access_level_field_name }}" class="form-label">Adgangsniveau</label>
+        <input type="text" id="{{ view_model.access_level_field_name }}" class="form-control"
+               name="{{ view_model.lastname_field_name }}" value="{{ view_model.access_level }}" disabled="disabled">
+    </div>
+    <div class="mb-3">
         <label for="{{ view_model.is_active_field_name }}" class="form-label">Aktiv</label>
         {% if view_model.is_active %}
         <input type="checkbox" class="form-check-input" id="{{ view_model.is_active_field_name }}"

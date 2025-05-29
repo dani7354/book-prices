@@ -1,6 +1,6 @@
 from typing import Optional
 from bookprices.shared.db.base import BaseDb
-from bookprices.shared.model.user import User
+from bookprices.shared.model.user import User, UserAccessLevel
 
 
 class UserDb(BaseDb):
@@ -8,7 +8,8 @@ class UserDb(BaseDb):
     def get_user_by_id(self, user_id: str) -> Optional[User]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Email, FirstName, LastName, IsActive, GoogleApiToken, ImageUrl, Created, Updated "
+                query = ("SELECT Id, Email, FirstName, LastName, IsActive, GoogleApiToken, ImageUrl, Created, "
+                         "Updated, AccessLevel "
                          "FROM User "
                          "WHERE Id = %s")
                 cursor.execute(query, (user_id,))
@@ -23,6 +24,7 @@ class UserDb(BaseDb):
                             user_dict["IsActive"],
                             user_dict["GoogleApiToken"],
                             user_dict["ImageUrl"],
+                            UserAccessLevel(user_dict["AccessLevel"]),
                             user_dict["Created"],
                             user_dict["Updated"])
 
@@ -35,11 +37,12 @@ class UserDb(BaseDb):
                 cursor.execute(query, (token, image_url, user_id))
                 con.commit()
 
-    def update_user_info(self, user_id: str, email: str, firstname: str, lastname: str, is_active: bool):
+    def update_user_info(
+            self, user_id: str, email: str, firstname: str, lastname: str, access_level: int, is_active: bool):
         with self.get_connection() as con:
             with con.cursor() as cursor:
                 query = ("UPDATE User "
-                         "SET Email = %s, FirstName = %s, LastName = %s, IsActive = %s "
+                         "SET Email = %s, FirstName = %s, LastName = %s, IsActive = %s, AccessLevel = %s "
                          "WHERE Id = %s")
-                cursor.execute(query, (email, firstname, lastname, is_active, user_id))
+                cursor.execute(query, (email, firstname, lastname, is_active, user_id, access_level))
                 con.commit()
