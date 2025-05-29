@@ -1,10 +1,41 @@
+from functools import wraps
+
 import flask_login
 from datetime import datetime
+
+from flask import abort
 from flask_caching import Cache
 from typing import Optional
 from bookprices.shared.db. database import Database
 from bookprices.shared.model.user import User, UserAccessLevel
 from bookprices.shared.cache.key_generator import get_user_key
+from bookprices.web.shared.enum import HttpStatusCode
+
+
+def _current_user_authenticated_and_has_access_level(access_level: UserAccessLevel) -> bool:
+    current_user = flask_login.current_user
+    return (current_user and
+            current_user.is_authenticated and
+            current_user.access_level.value >= access_level.value)
+
+
+def require_admin(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not _current_user_authenticated_and_has_access_level(UserAccessLevel.ADMIN):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated
+
+def require_member(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not _current_user_authenticated_and_has_access_level(UserAccessLevel.MEMBER):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated
 
 
 class WebUser(flask_login.UserMixin):

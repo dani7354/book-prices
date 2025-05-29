@@ -15,6 +15,16 @@ def internal_server_error_html(error) -> tuple[str, int]:
     return render_template("500.html"), HttpStatusCode.INTERNAL_SERVER_ERROR
 
 
+def unauthorized_html(error) -> tuple[str, int]:
+    logger.error(error)
+    return render_template("401.html"), HttpStatusCode.UNAUTHORIZED
+
+
+def forbidden_html(error) -> tuple[str, int]:
+    logger.error(error)
+    return render_template("403.html"), HttpStatusCode.FORBIDDEN
+
+
 def unauthorized_api(error) -> tuple[Response, int]:
     logger.error(error)
     return jsonify({"error_message": str(error)}), HttpStatusCode.UNAUTHORIZED

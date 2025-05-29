@@ -5,6 +5,7 @@ from enum import Enum
 
 
 class UserAccessLevel(Enum):
+    UBER_ADMIN = 0xfff
     ADMIN = 0xff
     MEMBER = 0x1
 

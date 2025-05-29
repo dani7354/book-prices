@@ -3,7 +3,7 @@ import bookprices.web.mapper.user as usermapper
 from flask import Blueprint, request, render_template, Response, redirect, url_for
 from bookprices.shared.db import database
 from bookprices.web.cache.redis import cache
-from bookprices.web.service.auth_service import AuthService
+from bookprices.web.service.auth_service import AuthService, require_admin, require_uber_admin
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT
 from bookprices.web.shared.enum import HttpMethod, UserTemplate
@@ -22,6 +22,7 @@ def include_csrf_token() -> dict[str, str]:
 
 @user_blueprint.route("/", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @flask_login.login_required
+@require_uber_admin
 def index() -> str | Response:
     if request.method == "POST":
         email = request.form.get(UserEditViewModel.email_field_name)
@@ -51,7 +52,7 @@ def index() -> str | Response:
             flask_login.current_user.access_level,
             view_model.is_active)
 
-        return redirect(url_for("user.index"))
+        return redirect(url_for("index"))
 
     view_model = usermapper.map_user_view_model(flask_login.current_user)
     return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)
