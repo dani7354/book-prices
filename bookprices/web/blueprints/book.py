@@ -83,9 +83,9 @@ def book(book_id: int) -> str:
     return render_template(BookTemplate.BOOK.value, view_model=book_details)
 
 
-@require_admin
-@flask_login.login_required
 @book_blueprint.route("/book/create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@flask_login.login_required
+@require_admin
 def create() -> str | Response:
     if request.method == HttpMethod.POST.value:
         isbn = request.form.get(CreateBookViewModel.isbn_field_name) or ""
@@ -122,9 +122,9 @@ def create() -> str | Response:
     return render_template(BookTemplate.CREATE.value, view_model=empty_view_model)
 
 
-@require_admin
-@flask_login.login_required
 @book_blueprint.route("/book/edit/<int:book_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@flask_login.login_required
+@require_admin
 def edit(book_id: int) -> str | Response:
     if not (book_ := service.get_book(book_id)):
         return abort(HttpStatusCode.NOT_FOUND, f"Bog med id {book_id} findes ikke")
@@ -195,9 +195,9 @@ def price_history(book_id: int, store_id: int) -> str:
     return render_template(BookTemplate.PRICE_HISTORY.value, view_model=price_history_view_model)
 
 
-@require_admin
-@flask_login.login_required
 @book_blueprint.route("/book/delete/<int:book_id>", methods=[HttpMethod.POST.value])
+@flask_login.login_required
+@require_admin
 def delete(book_id: int) -> tuple[Response, int]:
     if not service.get_book(book_id):
         return jsonify({"error": f"Bog med id {book_id} findes ikke"}), HttpStatusCode.NOT_FOUND

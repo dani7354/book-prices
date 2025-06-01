@@ -23,18 +23,18 @@ def include_csrf_token() -> dict[str, str]:
     return get_csrf_token()
 
 
-@require_admin
-@login_required
 @status_blueprint.route("/", methods=[HttpMethod.GET.value])
+@login_required
+@require_admin
 def index() -> str:
     view_model = IndexViewModel(timeperiod_options=status_service.get_timeperiod_options())
 
     return render_template(StatusTemplate.INDEX.value, view_model=view_model)
 
 
-@require_admin
-@login_required
 @status_blueprint.route("/failed-price-updates", methods=[HttpMethod.GET.value])
+@login_required
+@require_admin
 def failed_price_updates() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)
@@ -45,9 +45,9 @@ def failed_price_updates() -> tuple[Response, int]:
     return jsonify(response), HttpStatusCode.OK
 
 
-@require_admin
-@login_required
 @status_blueprint.route("/book-import-counts", methods=[HttpMethod.GET.value])
+@login_required
+@require_admin
 def book_import_counts() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)
@@ -58,9 +58,9 @@ def book_import_counts() -> tuple[Response, int]:
     return jsonify(response), HttpStatusCode.OK
 
 
-@require_admin
-@login_required
 @status_blueprint.route("/price-counts", methods=[HttpMethod.GET.value])
+@login_required
+@require_admin
 def book_price_counts() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)

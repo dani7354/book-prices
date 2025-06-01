@@ -12,43 +12,6 @@ from bookprices.shared.cache.key_generator import get_user_key
 from bookprices.web.shared.enum import HttpStatusCode
 
 
-def _current_user_authenticated_and_has_access_level(access_level: UserAccessLevel) -> bool:
-    current_user = flask_login.current_user
-    return (current_user and
-            current_user.is_authenticated and
-            current_user.access_level.value >= access_level.value)
-
-
-def require_admin(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        if not _current_user_authenticated_and_has_access_level(UserAccessLevel.ADMIN):
-            return abort(HttpStatusCode.FORBIDDEN)
-        return func(*args, **kwargs)
-
-    return decorated
-
-
-def require_job_manager(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        if not _current_user_authenticated_and_has_access_level(UserAccessLevel.JOB_MANAGER):
-            return abort(HttpStatusCode.FORBIDDEN)
-        return func(*args, **kwargs)
-
-    return decorated
-
-
-def require_member(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        if not _current_user_authenticated_and_has_access_level(UserAccessLevel.MEMBER):
-            return abort(HttpStatusCode.FORBIDDEN)
-        return func(*args, **kwargs)
-
-    return decorated
-
-
 class WebUser(flask_login.UserMixin):
     def __init__(self, user_model: User):
         self._user_model = user_model
@@ -123,3 +86,40 @@ class AuthService:
             is_active=is_active,
             access_level=access_level.value)
         self._cache.delete(get_user_key(user_id))
+
+    @staticmethod
+    def user_can_access(access_level: UserAccessLevel) -> bool:
+        current_user = flask_login.current_user
+        return (current_user and
+                current_user.is_authenticated and
+                current_user.access_level.value >= access_level.value)
+
+
+def require_admin(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not AuthService.user_can_access(UserAccessLevel.ADMIN):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated
+
+
+def require_job_manager(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not AuthService.user_can_access(UserAccessLevel.JOB_MANAGER):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated
+
+
+def require_member(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not AuthService.user_can_access(UserAccessLevel.MEMBER):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated

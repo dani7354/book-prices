@@ -19,6 +19,7 @@ from bookprices.web.blueprints.page import page_blueprint
 from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import CSRFService
+from bookprices.web.service.menu_service import SiteMenuService
 from bookprices.web.service.sri import get_sri_attribute_values
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,
@@ -99,6 +100,15 @@ def validate_csrf_token() -> None | tuple[Response, int]:
 @app.context_processor
 def include_sri_attribute_values() -> dict[str, str]:
     return get_sri_attribute_values()
+
+
+@app.context_processor
+def include_menu_items() -> dict[str, list]:
+    db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+    auth_service = AuthService(db, cache)
+    menu_items_service = SiteMenuService(auth_service)
+
+    return {"menu_items": menu_items_service.get_menu_items()}
 
 
 @login_manager.user_loader

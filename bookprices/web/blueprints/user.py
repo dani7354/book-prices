@@ -20,9 +20,9 @@ def include_csrf_token() -> dict[str, str]:
     return get_csrf_token()
 
 
-@require_member
-@flask_login.login_required
 @user_blueprint.route("/", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@flask_login.login_required
+@require_member
 def index() -> str | Response:
     if request.method == "POST":
         email = request.form.get(UserEditViewModel.email_field_name)
