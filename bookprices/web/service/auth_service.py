@@ -28,6 +28,17 @@ def require_admin(func):
 
     return decorated
 
+
+def require_job_manager(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not _current_user_authenticated_and_has_access_level(UserAccessLevel.JOB_MANAGER):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated
+
+
 def require_member(func):
     @wraps(func)
     def decorated(*args, **kwargs):

@@ -7,6 +7,7 @@ from bookprices.shared.model.book import Book
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.mapper.book import map_from_create_view_model
+from bookprices.web.service.auth_service import require_admin
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
@@ -82,8 +83,9 @@ def book(book_id: int) -> str:
     return render_template(BookTemplate.BOOK.value, view_model=book_details)
 
 
-@book_blueprint.route("/book/create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@require_admin
 @flask_login.login_required
+@book_blueprint.route("/book/create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 def create() -> str | Response:
     if request.method == HttpMethod.POST.value:
         isbn = request.form.get(CreateBookViewModel.isbn_field_name) or ""
@@ -120,8 +122,9 @@ def create() -> str | Response:
     return render_template(BookTemplate.CREATE.value, view_model=empty_view_model)
 
 
-@book_blueprint.route("/book/edit/<int:book_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@require_admin
 @flask_login.login_required
+@book_blueprint.route("/book/edit/<int:book_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 def edit(book_id: int) -> str | Response:
     if not (book_ := service.get_book(book_id)):
         return abort(HttpStatusCode.NOT_FOUND, f"Bog med id {book_id} findes ikke")
@@ -192,8 +195,9 @@ def price_history(book_id: int, store_id: int) -> str:
     return render_template(BookTemplate.PRICE_HISTORY.value, view_model=price_history_view_model)
 
 
-@book_blueprint.route("/book/delete/<int:book_id>", methods=[HttpMethod.POST.value])
+@require_admin
 @flask_login.login_required
+@book_blueprint.route("/book/delete/<int:book_id>", methods=[HttpMethod.POST.value])
 def delete(book_id: int) -> tuple[Response, int]:
     if not service.get_book(book_id):
         return jsonify({"error": f"Bog med id {book_id} findes ikke"}), HttpStatusCode.NOT_FOUND
