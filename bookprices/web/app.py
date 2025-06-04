@@ -19,7 +19,7 @@ from bookprices.web.blueprints.page import page_blueprint
 from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import CSRFService
-from bookprices.web.service.menu_service import SiteMenuService
+from bookprices.web.service.site_menu_service import SiteMenuService
 from bookprices.web.service.sri import get_sri_attribute_values
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,

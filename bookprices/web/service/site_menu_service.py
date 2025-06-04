@@ -1,10 +1,9 @@
 import dataclasses
 
-import flask_login
 from flask import url_for, request
 
 from bookprices.shared.model.user import UserAccessLevel
-from bookprices.web.service.auth_service import WebUser, AuthService
+from bookprices.web.service.auth_service import AuthService
 from bookprices.web.shared.enum import Endpoint
 
 
@@ -13,6 +12,7 @@ class MenuItem:
     url: str
     title: str
     is_active: bool
+    order_number: int
 
 
 class SiteMenuService:
@@ -30,28 +30,32 @@ class SiteMenuService:
                 MenuItem(
                     url=url_for(Endpoint.USER_INDEX.value),
                     title="Rediger bruger",
-                    is_active=current_url.startswith(url_for(Endpoint.USER_INDEX.value)))
+                    is_active=current_url.startswith(url_for(Endpoint.USER_INDEX.value)),
+                    order_number=10)
             )
         if self._auth_service.user_can_access(UserAccessLevel.JOB_MANAGER):
             items.append(
                 MenuItem(
                     url=url_for(Endpoint.JOB_INDEX.value),
                     title="Job",
-                    is_active=current_url.startswith(url_for(Endpoint.JOB_INDEX.value)))
+                    is_active=current_url.startswith(url_for(Endpoint.JOB_INDEX.value)),
+                    order_number=15)
             )
         if self._auth_service.user_can_access(UserAccessLevel.ADMIN):
             items.extend([
                 MenuItem(
                     url=url_for(Endpoint.BOOK_CREATE.value),
                     title="Tilføj bog",
-                    is_active=current_url.startswith(url_for(Endpoint.BOOK_CREATE.value))),
+                    is_active=current_url.startswith(url_for(Endpoint.BOOK_CREATE.value)),
+                    order_number=12),
                 MenuItem(
                     url=url_for(Endpoint.STATUS_INDEX.value),
                     title="Status",
-                    is_active=current_url.startswith(url_for(Endpoint.STATUS_INDEX.value)))
+                    is_active=current_url.startswith(url_for(Endpoint.STATUS_INDEX.value)),
+                    order_number=20)
             ])
 
-        return items
+        return sorted(items, key=lambda item: item.order_number)
 
 
 
