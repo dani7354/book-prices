@@ -134,6 +134,16 @@ def create_job_run() -> tuple[Response, int]:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
 
 
+@job_blueprint.route("job-run/create-model", methods=[HttpMethod.GET.value])
+@login_required
+@require_job_manager
+def create_job_run_model() -> tuple[Response, int]:
+    if not (job_id := request.args.get(JOB_ID_URL_PARAMETER)):
+        return jsonify({MESSAGE_FIELD_NAME: "Job-id påkrævet!"}), HttpStatusCode.BAD_REQUEST
+
+    return jsonify(map_job_run_create_view_model(job_id)), HttpStatusCode.OK
+
+
 @job_blueprint.route("job-run/update/<job_run_id>", methods=[HttpMethod.POST.value])
 @login_required
 @require_job_manager
