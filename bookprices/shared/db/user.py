@@ -44,5 +44,5 @@ class UserDb(BaseDb):
                 query = ("UPDATE User "
                          "SET Email = %s, FirstName = %s, LastName = %s, IsActive = %s, AccessLevel = %s "
                          "WHERE Id = %s")
-                cursor.execute(query, (email, firstname, lastname, is_active, user_id, access_level))
+                cursor.execute(query, (email, firstname, lastname, is_active, access_level, user_id))
                 con.commit()
