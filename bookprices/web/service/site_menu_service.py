@@ -28,7 +28,7 @@ class SiteMenuService:
         if self._auth_service.user_can_access(UserAccessLevel.MEMBER):
             items.append(
                 MenuItem(
-                    url=self.get_url(Endpoint.USER_INDEX.value),
+                    url=self.get_url(Endpoint.USER_INDEX),
                     title="Rediger bruger",
                     is_active=current_url.startswith(self.get_url(Endpoint.USER_INDEX)),
                     order_number=10)

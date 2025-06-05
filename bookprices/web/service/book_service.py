@@ -80,10 +80,7 @@ class BookService:
         return book_in_bookstore
 
     def is_book_from_bookstore(self, book_id: int, bookstore_id: int) -> bool:
-        if (book := self.get_book(book_id)) and self.get_book_in_bookstore(book, bookstore_id):
-            return True
-
-        return False
+        return bool((book := self.get_book(book_id)) and self.get_book_in_bookstore(book, bookstore_id))
 
     def get_prices_for_book_in_bookstore(self, book: Book, bookstore: BookStore) -> list[BookPrice]:
         cache_key = get_prices_for_book_in_bookstore_key(book.id, bookstore.id)
