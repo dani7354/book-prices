@@ -6,7 +6,7 @@ from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService, require_member
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT
-from bookprices.web.shared.enum import HttpMethod, UserTemplate
+from bookprices.web.shared.enum import HttpMethod, UserTemplate, Endpoint
 from bookprices.web.viewmodels.user import UserEditViewModel
 
 user_blueprint = Blueprint("user", __name__)
@@ -52,7 +52,7 @@ def index() -> str | Response:
             flask_login.current_user.access_level,
             view_model.is_active)
 
-        return redirect(url_for("index"))
+        return redirect(url_for(Endpoint.USER_INDEX.value))
 
     view_model = usermapper.map_user_view_model(flask_login.current_user)
     return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)
