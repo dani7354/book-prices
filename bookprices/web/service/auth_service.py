@@ -87,12 +87,19 @@ class AuthService:
             access_level=access_level.value)
         self._cache.delete(get_user_key(user_id))
 
-    @staticmethod
-    def user_can_access(access_level: UserAccessLevel) -> bool:
-        current_user = flask_login.current_user
+    @classmethod
+    def user_can_access(cls, access_level: UserAccessLevel) -> bool:
+        current_user = cls.get_current_user()
         return (current_user and
                 current_user.is_authenticated and
                 current_user.access_level.value >= access_level.value)
+
+    @staticmethod
+    def get_current_user() -> Optional[WebUser]:
+        if current_user := flask_login.current_user:
+            return WebUser(current_user)
+
+        return None
 
 
 def require_admin(func):
