@@ -64,6 +64,7 @@ class StatusTemplate(Enum):
 
 
 class UserTemplate(Enum):
+    INDEX = "user/index.html"
     EDIT_USER = "user/edit.html"
 
 

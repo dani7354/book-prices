@@ -57,3 +57,28 @@ class UserEditViewModel:
     def is_valid(self) -> bool:
         self.validate_input()
         return not self.input_errors
+
+
+@dataclass(frozen=True)
+class UserListItemViewModel:
+    id: str
+    email: str
+    firstname: str
+    lastname: str
+    is_active: bool
+    access_level: str
+    edit_url: str
+    created: Optional[str] = None
+    updated: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class UserListViewModel:
+    can_edit: bool
+    can_delete: bool
+    current_page: int
+    next_page_url: str
+    previous_page_url: str
+    users: list[UserListItemViewModel]
+
+

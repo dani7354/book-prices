@@ -28,6 +28,31 @@ class UserDb(BaseDb):
                             user_dict["Created"],
                             user_dict["Updated"])
 
+    def get_users(self, limit: int, offset: int) -> list[User]:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Email, FirstName, LastName, IsActive, GoogleApiToken, ImageUrl, Created, "
+                         "Updated, AccessLevel "
+                         "FROM User "
+                         "ORDER BY Id "
+                         "LIMIT %s "
+                         "OFFSET %s")
+
+                cursor.execute(query, (limit, offset))
+                users = []
+                for row in cursor:
+                    users.append(User(row["Id"],
+                                      row["Email"],
+                                      row["FirstName"],
+                                      row["LastName"],
+                                      row["IsActive"],
+                                      row["GoogleApiToken"],
+                                      row["ImageUrl"],
+                                      UserAccessLevel(row["AccessLevel"]),
+                                      row["Created"],
+                                      row["Updated"]))
+                return users
+
     def update_user_token_and_image_url(self, user_id: str, token: str, image_url: str):
         with self.get_connection() as con:
             with con.cursor() as cursor:

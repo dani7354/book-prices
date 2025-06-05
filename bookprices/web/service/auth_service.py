@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask import abort
 from flask_caching import Cache
-from typing import Optional
+from typing import Optional, ClassVar
 from bookprices.shared.db. database import Database
 from bookprices.shared.model.user import User, UserAccessLevel
 from bookprices.shared.cache.key_generator import get_user_key
@@ -61,6 +61,8 @@ class WebUser(flask_login.UserMixin):
 
 
 class AuthService:
+    max_users_per_page: ClassVar[int] = 20
+
     def __init__(self, db: Database, cache: Cache):
         self._db = db
         self._cache = cache
@@ -71,6 +73,12 @@ class AuthService:
             if user:
                 self._cache.set(get_user_key(user_id), user)
         return WebUser(user) if user else None
+
+    def get_users(self, page: int) -> list[WebUser]:
+        offset = (page - 1) * self.max_users_per_page
+        users = self._db.user_db.get_users(self.max_users_per_page, offset)
+
+        return [WebUser(user) for user in users] if users else []
 
     def update_user_token_and_image_url(self, user_id: str, token: str, image_url: str) -> None:
         self._db.user_db.update_user_token_and_image_url(user_id, token, image_url)
