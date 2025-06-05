@@ -50,9 +50,9 @@ def test_site_menu_service_gives_correct_number_of_items_for_user(
         auth_service_mock: AuthService,
         user_access_level: UserAccessLevel,
         number_of_items: int) -> None:
-    AuthService.get_current_user = lambda: _get_user_with_access_level(UserAccessLevel.ADMIN)
+    AuthService.get_current_user = lambda: _get_user_with_access_level(user_access_level)
     service = _get_service_with_patched_methods(auth_service_mock)
 
     items = service.get_menu_items()
 
-    assert len(items) == 4
+    assert len(items) == number_of_items
