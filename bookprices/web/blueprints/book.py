@@ -4,9 +4,11 @@ import bookprices.web.mapper.book as bookmapper
 from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app, jsonify
 from bookprices.shared.db import database
 from bookprices.shared.model.book import Book
+from bookprices.shared.model.user import UserAccessLevel
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.mapper.book import map_from_create_view_model
+from bookprices.web.service.auth_service import require_admin, AuthService
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
@@ -70,9 +72,13 @@ def book(book_id: int) -> str:
     order_by = args.get(ORDER_BY_URL_PARAMETER)
     descending = args.get(DESCENDING_URL_PARAMETER)
 
+    auth_service = AuthService(db, cache)
+    user_can_edit_and_delete = auth_service.user_can_access(UserAccessLevel.ADMIN)
+
     latest_prices = service.get_latest_prices(book_id)
     book_details = bookmapper.map_book_details(book_result,
                                                latest_prices,
+                                               user_can_edit_and_delete,
                                                page,
                                                author,
                                                search_phrase,
@@ -84,6 +90,7 @@ def book(book_id: int) -> str:
 
 @book_blueprint.route("/book/create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @flask_login.login_required
+@require_admin
 def create() -> str | Response:
     if request.method == HttpMethod.POST.value:
         isbn = request.form.get(CreateBookViewModel.isbn_field_name) or ""
@@ -122,6 +129,7 @@ def create() -> str | Response:
 
 @book_blueprint.route("/book/edit/<int:book_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @flask_login.login_required
+@require_admin
 def edit(book_id: int) -> str | Response:
     if not (book_ := service.get_book(book_id)):
         return abort(HttpStatusCode.NOT_FOUND, f"Bog med id {book_id} findes ikke")
@@ -194,6 +202,7 @@ def price_history(book_id: int, store_id: int) -> str:
 
 @book_blueprint.route("/book/delete/<int:book_id>", methods=[HttpMethod.POST.value])
 @flask_login.login_required
+@require_admin
 def delete(book_id: int) -> tuple[Response, int]:
     if not service.get_book(book_id):
         return jsonify({"error": f"Bog med id {book_id} findes ikke"}), HttpStatusCode.NOT_FOUND
@@ -203,5 +212,24 @@ def delete(book_id: int) -> tuple[Response, int]:
     except Exception as ex:
         logger.error(f"An error occurred while deleting the book: {ex}")
         return jsonify({"error": "Der opstod en fejl under sletning af bogen"}), HttpStatusCode.INTERNAL_SERVER_ERROR
+
+    return jsonify({}), HttpStatusCode.OK
+
+
+@book_blueprint.route("/book/delete/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.POST.value])
+@flask_login.login_required
+@require_admin
+def delete_book_from_bookstore(book_id: int, store_id: int) -> tuple[Response, int]:
+    try:
+        if not service.is_book_from_bookstore(book_id, store_id):
+            return (jsonify(
+                {"error": f"Bog med id {book_id} eller boghandler med id {store_id} findes ikke"}),
+                HttpStatusCode.NOT_FOUND)
+
+        service.delete_book_in_bookstore(book_id, store_id)
+    except Exception as ex:
+        logger.error(f"An error occurred while deleting book fin bookstore: {ex}")
+        return (jsonify({"error": "Der opstod en fejl under sletning af bogen fra boghandlen"}),
+                HttpStatusCode.INTERNAL_SERVER_ERROR)
 
     return jsonify({}), HttpStatusCode.OK

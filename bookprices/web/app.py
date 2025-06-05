@@ -9,7 +9,8 @@ from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.auth import auth_blueprint
 from bookprices.web.blueprints.book import book_blueprint
-from bookprices.web.blueprints.error_handler import not_found_html, internal_server_error_html
+from bookprices.web.blueprints.error_handler import (
+    not_found_html, internal_server_error_html, forbidden_html, unauthorized_html)
 from bookprices.web.blueprints.job import job_blueprint
 from bookprices.web.blueprints.logging_configuration import RequestFormatter
 from bookprices.web.blueprints.status import status_blueprint
@@ -18,6 +19,7 @@ from bookprices.web.blueprints.page import page_blueprint
 from bookprices.web.service.auth_service import AuthService, WebUser
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import CSRFService
+from bookprices.web.service.site_menu_service import SiteMenuService
 from bookprices.web.service.sri import get_sri_attribute_values
 from bookprices.web.settings import (
     DEBUG_MODE, FLASK_APP_PORT, FLASK_SECRET_KEY, SITE_HOSTNAME, MYSQL_HOST, MYSQL_PORT,
@@ -74,6 +76,8 @@ app.register_blueprint(status_blueprint, url_prefix="/status")
 app.register_blueprint(job_blueprint, url_prefix="/job")
 app.register_error_handler(HttpStatusCode.NOT_FOUND, not_found_html)
 app.register_error_handler(HttpStatusCode.INTERNAL_SERVER_ERROR, internal_server_error_html)
+app.register_error_handler(HttpStatusCode.FORBIDDEN, forbidden_html)
+app.register_error_handler(HttpStatusCode.UNAUTHORIZED, unauthorized_html)
 
 cache.init_app(app)
 
@@ -96,6 +100,15 @@ def validate_csrf_token() -> None | tuple[Response, int]:
 @app.context_processor
 def include_sri_attribute_values() -> dict[str, str]:
     return get_sri_attribute_values()
+
+
+@app.context_processor
+def include_menu_items() -> dict[str, list]:
+    db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+    auth_service = AuthService(db, cache)
+    menu_items_service = SiteMenuService(auth_service)
+
+    return {"menu_items": menu_items_service.get_menu_items()}
 
 
 @login_manager.user_loader

@@ -1,10 +1,15 @@
+from functools import wraps
+
 import flask_login
 from datetime import datetime
+
+from flask import abort
 from flask_caching import Cache
 from typing import Optional
 from bookprices.shared.db. database import Database
-from bookprices.shared.model.user import User
+from bookprices.shared.model.user import User, UserAccessLevel
 from bookprices.shared.cache.key_generator import get_user_key
+from bookprices.web.shared.enum import HttpStatusCode
 
 
 class WebUser(flask_login.UserMixin):
@@ -47,6 +52,10 @@ class WebUser(flask_login.UserMixin):
     def image_url(self) -> str:
         return self._user_model.image_url
 
+    @property
+    def access_level(self) -> UserAccessLevel:
+        return self._user_model.access_level
+
     def get_id(self) -> str:
         return self.id
 
@@ -67,11 +76,57 @@ class AuthService:
         self._db.user_db.update_user_token_and_image_url(user_id, token, image_url)
         self._cache.delete(get_user_key(user_id))
 
-    def update_user_info(self, user_id: str, email: str, firstname: str, lastname: str, is_active: bool) -> None:
+    def update_user_info(
+            self, user_id: str, email: str, firstname: str, lastname: str, access_level: UserAccessLevel, is_active: bool) -> None:
         self._db.user_db.update_user_info(
             user_id=user_id,
             email=email,
             firstname=firstname,
             lastname=lastname,
-            is_active=is_active)
+            is_active=is_active,
+            access_level=access_level.value)
         self._cache.delete(get_user_key(user_id))
+
+    @classmethod
+    def user_can_access(cls, access_level: UserAccessLevel) -> bool:
+        current_user = cls.get_current_user()
+        return (current_user and
+                current_user.is_authenticated and
+                current_user.access_level.value >= access_level.value)
+
+    @staticmethod
+    def get_current_user() -> Optional[WebUser]:
+        if current_user := flask_login.current_user:
+            return WebUser(current_user)
+
+        return None
+
+
+def require_admin(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not AuthService.user_can_access(UserAccessLevel.ADMIN):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated
+
+
+def require_job_manager(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not AuthService.user_can_access(UserAccessLevel.JOB_MANAGER):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated
+
+
+def require_member(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not AuthService.user_can_access(UserAccessLevel.MEMBER):
+            return abort(HttpStatusCode.FORBIDDEN)
+        return func(*args, **kwargs)
+
+    return decorated

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, Response, jsonify, request
 from flask_login import login_required
 from bookprices.shared.db import database
 from bookprices.web.cache.redis import cache
+from bookprices.web.service.auth_service import require_admin
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.service.status_service import StatusService
 from bookprices.web.mapper.status import map_failed_price_update_counts, map_book_import_counts, map_price_counts
@@ -24,6 +25,7 @@ def include_csrf_token() -> dict[str, str]:
 
 @status_blueprint.route("/", methods=[HttpMethod.GET.value])
 @login_required
+@require_admin
 def index() -> str:
     view_model = IndexViewModel(timeperiod_options=status_service.get_timeperiod_options())
 
@@ -32,6 +34,7 @@ def index() -> str:
 
 @status_blueprint.route("/failed-price-updates", methods=[HttpMethod.GET.value])
 @login_required
+@require_admin
 def failed_price_updates() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)
@@ -44,6 +47,7 @@ def failed_price_updates() -> tuple[Response, int]:
 
 @status_blueprint.route("/book-import-counts", methods=[HttpMethod.GET.value])
 @login_required
+@require_admin
 def book_import_counts() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)
@@ -56,6 +60,7 @@ def book_import_counts() -> tuple[Response, int]:
 
 @status_blueprint.route("/price-counts", methods=[HttpMethod.GET.value])
 @login_required
+@require_admin
 def book_price_counts() -> tuple[Response, int]:
     timeperiod_options = status_service.get_timeperiod_options()
     args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)

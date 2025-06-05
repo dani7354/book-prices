@@ -56,10 +56,9 @@
                         {{ current_user.email }}
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
-                      <li><a class="{{ 'dropdown-item disabled' if active_page == 'user' else 'dropdown-item' }}" href="{{ url_for('user.index' )}}">Redigér bruger</a></li>
-                      <li><a class="{{ 'dropdown-item disabled' if active_page == 'create_book' else 'dropdown-item' }}" href="{{ url_for('book.create' )}}">Tilføj bog</a></li>
-                      <li><a class="{{ 'dropdown-item disabled' if active_page == 'status' else 'dropdown-item' }}" href="{{ url_for('status.index' )}}">Status</a></li>
-                      <li><a class="{{ 'dropdown-item disabled' if active_page == 'job' else 'dropdown-item' }}" href="{{ url_for('job.index' )}}">Job</a></li>
+                      {% for item in menu_items %}
+                        <li><a class="{{ 'dropdown-item disabled' if item.is_active else 'dropdown-item' }}" href="{{ item.url }}">{{ item.title }}</a></li>
+                      {% endfor %}
                       <li><hr class="dropdown-divider"></li>
                       <li><a id="logout-link" class="dropdown-item">Log ud</a></li>
                     </ul>

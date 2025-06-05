@@ -3,6 +3,7 @@ from flask_login import login_required
 
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db.database import Database
+from bookprices.web.service.auth_service import require_admin, require_job_manager
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.shared.service.job_service import (
     JobService,
@@ -42,12 +43,14 @@ def include_csrf_token() -> dict[str, str]:
 
 @job_blueprint.route("/", methods=[HttpMethod.GET.value])
 @login_required
+@require_job_manager
 def  index() -> str:
     return render_template(JobTemplate.INDEX.value)
 
 
 @job_blueprint.route("/create", methods=[HttpMethod.POST.value, HttpMethod.GET.value])
 @login_required
+@require_job_manager
 def create() -> str | Response:
     if request.method == HttpMethod.POST.value:
         name = request.form.get(CreateJobViewModel.name_field_name) or ""
@@ -75,6 +78,7 @@ def create() -> str | Response:
 
 @job_blueprint.route("edit/<job_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @login_required
+@require_job_manager
 def edit(job_id: str) -> str | Response:
     if not (job := job_service.get_job(job_id)):
         abort(HttpStatusCode.NOT_FOUND, "Jobbet blev ikke fundet")
@@ -111,17 +115,9 @@ def edit(job_id: str) -> str | Response:
     return render_template(JobTemplate.EDIT.value, view_model=map_job_edit_view_model(job))
 
 
-@job_blueprint.route("job-run/create-model", methods=[HttpMethod.GET.value])
-@login_required
-def create_job_run_model() -> tuple[Response, int]:
-    if not (job_id := request.args.get(JOB_ID_URL_PARAMETER)):
-        return jsonify({MESSAGE_FIELD_NAME: "Job-id påkrævet!"}), HttpStatusCode.BAD_REQUEST
-
-    return jsonify(map_job_run_create_view_model(job_id)), HttpStatusCode.OK
-
-
 @job_blueprint.route("job-run/create", methods=[HttpMethod.POST.value])
 @login_required
+@require_job_manager
 def create_job_run() -> tuple[Response, int]:
     job_id = request.form.get(JobRunCreateViewModel.job_id_field_name)
     priority = request.form.get(JobRunCreateViewModel.priority_field_name)
@@ -140,6 +136,7 @@ def create_job_run() -> tuple[Response, int]:
 
 @job_blueprint.route("job-run/update/<job_run_id>", methods=[HttpMethod.POST.value])
 @login_required
+@require_job_manager
 def update_job_run(job_run_id: str) -> tuple[Response, int]:
     job_id = request.form.get(JobRunEditViewModel.job_id_field_name)
     priority = request.form.get(JobRunEditViewModel.priority_field_name)
@@ -160,6 +157,7 @@ def update_job_run(job_run_id: str) -> tuple[Response, int]:
 
 @job_blueprint.route("job-list", methods=[HttpMethod.GET.value])
 @login_required
+@require_job_manager
 def job_list() -> tuple[Response, int]:
     jobs = job_service.get_job_list()
     last_job_run_for_jobs = job_service.get_job_run_for_jobs([job["id"] for job in jobs])
@@ -170,6 +168,7 @@ def job_list() -> tuple[Response, int]:
 
 @job_blueprint.route("job-run-list", methods=[HttpMethod.GET.value])
 @login_required
+@require_job_manager
 def job_run_list() -> tuple[Response, int]:
     try:
         job_id = request.args.get(JOB_ID_URL_PARAMETER)
@@ -183,6 +182,7 @@ def job_run_list() -> tuple[Response, int]:
 
 @job_blueprint.route("job-run/<job_run_id>", methods=[HttpMethod.GET.value])
 @login_required
+@require_job_manager
 def job_run(job_run_id: str) -> tuple[Response, int]:
     if not (job_run_json := job_service.get_job_run(job_run_id)):
         return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}),
@@ -194,6 +194,7 @@ def job_run(job_run_id: str) -> tuple[Response, int]:
 
 @job_blueprint.route("/delete/<job_id>", methods=[HttpMethod.POST.value])
 @login_required
+@require_job_manager
 def delete(job_id: str) -> tuple[Response, int]:
     try:
         if not job_service.get_job(job_id):
@@ -207,6 +208,7 @@ def delete(job_id: str) -> tuple[Response, int]:
 
 @job_blueprint.route("/job-run/delete/<job_run_id>", methods=[HttpMethod.POST.value])
 @login_required
+@require_job_manager
 def delete_job_run(job_run_id: str) -> tuple[Response, int]:
     try:
         if not job_service.get_job_run(job_run_id):

@@ -63,10 +63,11 @@ class BookService:
         return authors
 
     def get_latest_prices(self, book_id: int) -> list[BookStoreBookPrice]:
-        if not (latest_prices := self._cache.get(get_book_latest_prices_key(book_id))):
+        latest_prices_key = get_book_latest_prices_key(book_id)
+        if not (latest_prices := self._cache.get(latest_prices_key)):
             if latest_prices := self._db.bookprice_db.get_latest_prices(book_id):
                 self._cache.set(
-                    get_book_latest_prices_key(book_id), latest_prices, timeout=CacheTtlOption.MEDIUM.value)
+                    latest_prices_key, latest_prices, timeout=CacheTtlOption.MEDIUM.value)
 
         return latest_prices
 
@@ -77,6 +78,9 @@ class BookService:
                 self._cache.set(cache_key, book_in_bookstore, timeout=CacheTtlOption.MEDIUM.value)
 
         return book_in_bookstore
+
+    def is_book_from_bookstore(self, book_id: int, bookstore_id: int) -> bool:
+        return bool((book := self.get_book(book_id)) and self.get_book_in_bookstore(book, bookstore_id))
 
     def get_prices_for_book_in_bookstore(self, book: Book, bookstore: BookStore) -> list[BookPrice]:
         cache_key = get_prices_for_book_in_bookstore_key(book.id, bookstore.id)
@@ -109,3 +113,9 @@ class BookService:
         self._db.book_db.delete_book(book_id)
         self._cache.delete(get_authors_key())
         self._cache.delete(get_book_key(book_id))
+
+    def delete_book_in_bookstore(self, book_id: int, bookstore_id: int) -> None:
+        self._db.bookstore_db.delete_book_from_bookstore(book_id, bookstore_id)
+        self._cache.delete(get_book_key(book_id))
+        self._cache.delete(get_book_in_book_store_key(book_id, bookstore_id))
+        self._cache.delete(get_book_latest_prices_key(book_id))

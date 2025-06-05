@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 from bookprices.shared.webscraping.image import ImageDownloader, ImageSource
-from tests.test_delete_images import book_image_file_service
 
 
 @pytest.mark.parametrize("css_selector,expected_url_found",

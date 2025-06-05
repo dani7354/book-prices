@@ -13,7 +13,7 @@
             <span>Tilbage til oversigt</span>
         </a>
     </div>
-    {% if current_user.is_authenticated %}
+    {% if view_model.show_edit_and_delete_buttons %}
     <div class="col-sm-4 text-end">
         <a class="btn btn-primary" href="{{ url_for('book.edit', book_id=view_model.book.id) }}">Rediger</a>
         <a id="btn-delete-book" class="btn btn-danger" data-book-id="{{ view_model.book.id }}" href="">Slet</a>
@@ -69,6 +69,10 @@
                 <a class="btn btn-secondary disabled mb-1" aria-disabled="true">Prisudvikling</a>
                 {% endif %}
                 <a class="btn btn-secondary mb-1" target="_blank" rel="noopener" href="{{ p.url }}">Link</a>
+                {% if view_model.show_edit_and_delete_buttons %}
+                <a id="btn-delete-book-from-bookstore" class="btn btn-danger mb-1"
+                   data-book-id="{{ view_model.book.id }}" data-bookstore-id="{{ p.book_store_id }}" href="">Slet</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
@@ -87,7 +91,7 @@
 <script src="{{ url_for('static', filename='js/book.js') }}" integrity="{{ sri_attribute_values['book_js'] }}"></script>
 {% endif %}
 
-{% if current_user.is_authenticated %}
+{% if view_model.show_edit_and_delete_buttons %}
 <script src="{{ url_for('static', filename='js/delete_book.js') }}"
         integrity="{{ sri_attribute_values['delete_book_js'] }}"></script>
 {% endif %}

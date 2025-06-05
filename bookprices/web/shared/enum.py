@@ -34,6 +34,8 @@ class Endpoint(Enum):
     JOB_EDIT = "job.edit"
     JOB_CREATE_JOB_RUN = "job.create_job_run"
     JOB_UPDATE_JOB_RUN = "job.update_job_run"
+    STATUS_INDEX = "status.index"
+    USER_INDEX = "user.index"
 
 
 class SessionKey(Enum):
