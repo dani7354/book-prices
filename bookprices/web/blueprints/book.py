@@ -214,3 +214,22 @@ def delete(book_id: int) -> tuple[Response, int]:
         return jsonify({"error": "Der opstod en fejl under sletning af bogen"}), HttpStatusCode.INTERNAL_SERVER_ERROR
 
     return jsonify({}), HttpStatusCode.OK
+
+
+@book_blueprint.route("/book/delete/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.POST.value])
+@flask_login.login_required
+@require_admin
+def delete_book_from_bookstore(book_id: int, store_id: int) -> tuple[Response, int]:
+    try:
+        if not service.is_book_from_bookstore(book_id, store_id):
+            return (jsonify(
+                {"error": f"Bog med id {book_id} eller boghandler med id {store_id} findes ikke"}),
+                HttpStatusCode.NOT_FOUND)
+
+        service.delete_book_in_bookstore(book_id, store_id)
+    except Exception as ex:
+        logger.error(f"An error occurred while deleting book fin bookstore: {ex}")
+        return (jsonify({"error": "Der opstod en fejl under sletning af bogen fra boghandlen"}),
+                HttpStatusCode.INTERNAL_SERVER_ERROR)
+
+    return jsonify({}), HttpStatusCode.OK
