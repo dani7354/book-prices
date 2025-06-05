@@ -212,6 +212,7 @@ def map_book_item(book: Book,
 
 def map_book_details(book: Book,
                      book_prices: list[BookStoreBookPrice],
+                     user_can_edit_and_delete: bool,
                      page: Optional[int],
                      author: Optional[str],
                      search_phrase: Optional[str],
@@ -258,7 +259,8 @@ def map_book_details(book: Book,
                                 index_url,
                                 author_search_url,
                                 page,
-                                search_phrase)
+                                search_phrase,
+                                user_can_edit_and_delete)
 
 
 def map_price_history(book_in_book_store: BookInBookStore,

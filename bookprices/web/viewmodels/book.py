@@ -74,6 +74,7 @@ class BookDetailsViewModel:
     author_search_url: str
     page: Optional[int]
     search_phrase: Optional[str]
+    show_edit_and_delete_buttons: bool
 
 
 @dataclass(frozen=True)

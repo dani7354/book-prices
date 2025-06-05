@@ -4,10 +4,11 @@ import bookprices.web.mapper.book as bookmapper
 from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app, jsonify
 from bookprices.shared.db import database
 from bookprices.shared.model.book import Book
+from bookprices.shared.model.user import UserAccessLevel
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.mapper.book import map_from_create_view_model
-from bookprices.web.service.auth_service import require_admin
+from bookprices.web.service.auth_service import require_admin, AuthService
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
@@ -71,9 +72,13 @@ def book(book_id: int) -> str:
     order_by = args.get(ORDER_BY_URL_PARAMETER)
     descending = args.get(DESCENDING_URL_PARAMETER)
 
+    auth_service = AuthService(db, cache)
+    user_can_edit_and_delete = auth_service.user_can_access(UserAccessLevel.ADMIN)
+
     latest_prices = service.get_latest_prices(book_id)
     book_details = bookmapper.map_book_details(book_result,
                                                latest_prices,
+                                               user_can_edit_and_delete,
                                                page,
                                                author,
                                                search_phrase,
