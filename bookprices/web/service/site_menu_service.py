@@ -64,6 +64,3 @@ class SiteMenuService:
     @staticmethod
     def get_url(endpoint: Endpoint) -> str:
         return url_for(endpoint.value)
-
-
-
