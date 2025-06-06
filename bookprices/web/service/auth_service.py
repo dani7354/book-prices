@@ -85,7 +85,12 @@ class AuthService:
         self._cache.delete(get_user_key(user_id))
 
     def update_user_info(
-            self, user_id: str, email: str, firstname: str, lastname: str, access_level: UserAccessLevel, is_active: bool) -> None:
+            self, user_id:
+            str, email: str,
+            firstname: str,
+            lastname: str,
+            access_level: UserAccessLevel,
+            is_active: bool) -> None:
         self._db.user_db.update_user_info(
             user_id=user_id,
             email=email,
