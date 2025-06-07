@@ -9,6 +9,12 @@ class UserAccessLevel(Enum):
     JOB_MANAGER = 0xa
     ADMIN = 0xff
 
+    @staticmethod
+    def from_string(str_value: str) -> Optional["UserAccessLevel"]:
+        try:
+            return UserAccessLevel(str_value)
+        except ValueError:
+            return None
 
 
 @dataclass(frozen=True)

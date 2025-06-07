@@ -2,7 +2,7 @@
 {% set active_page = "user" %}
 {% set errors = view_model.input_errors %}
 {% block content %}
-<h1 class="mb-4">Redigér bruger {{ view_model.email }}</h1>
+<h1 class="mb-4">Redigér bruger</h1>
 {% if view_model.image_url %}
 <img class="img-thumbnail rounded mx-auto d-block" src="{{ view_model.image_url }}" alt="{{ view_model.email }}">
 {% endif %}

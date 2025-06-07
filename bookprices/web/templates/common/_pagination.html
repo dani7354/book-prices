@@ -1,0 +1,19 @@
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        <li class="{{ 'page-item' if view_model.previous_page_url else 'page-item disabled' }}">
+            <a aria-label="Previous" class="page-link link-secondary" href="{{ view_model.previous_page_url }}">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link link-secondary" href="">
+                {{ view_model.current_page }}
+            </a>
+        </li>
+        <li class="{{ 'page-item' if view_model.next_page_url else 'page-item disabled' }}">
+            <a aria-label="Next" class="page-link link-secondary" href="{{ view_model.next_page_url }}">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
