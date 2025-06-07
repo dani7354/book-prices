@@ -16,10 +16,17 @@
     </div>
     <div class="mb-3">
         <label for="{{ view_model.email_field_name }}" class="form-label">Email</label>
+        {% if not view_model.edit_current_user %}
         <input type="email" class="form-control" id="{{ view_model.email_field_name }}"
                name="{{ view_model.email_field_name }}" value="{{ view_model.email }}"
                minlength="{{ view_model.email_min_length }}" maxlength="{{ view_model.email_max_length }}"
                required="required">
+        {% else %}
+        <input type="email" class="form-control" id="{{ view_model.email_field_name }}"
+               name="{{ view_model.email_field_name }}" value="{{ view_model.email }}"
+               minlength="{{ view_model.email_min_length }}" maxlength="{{ view_model.email_max_length }}"
+               required="required" disabled="disabled">
+        {% endif %}
         {% if view_model.email_field_name in errors %}
             {% for error in errors[view_model.email_field_name] %}
                 <span id="email-error" class="form-text text-danger">{{ error }}</span>

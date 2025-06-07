@@ -48,11 +48,11 @@ def index() -> str:
 @require_member
 def edit_current() -> str | Response:
     if request.method == "POST":
-        email = request.form.get(UserEditViewModel.email_field_name)
         firstname = request.form.get(UserEditViewModel.firstname_field_name)
         lastname = request.form.get(UserEditViewModel.lastname_field_name)
         is_active = bool(request.form.get(UserEditViewModel.is_active_field_name))
         form_action_url = url_for(Endpoint.USER_EDIT_CURRENT.value, user_id=flask_login.current_user.id)
+        email = flask_login.current_user.email
         access_level = flask_login.current_user.access_level
 
         view_model = UserEditViewModel(
@@ -60,7 +60,7 @@ def edit_current() -> str | Response:
             id=flask_login.current_user.id,
             created=flask_login.current_user.created.isoformat(),
             updated=flask_login.current_user.updated.isoformat(),
-            email=email.strip(),
+            email=email,
             firstname=firstname.strip(),
             lastname=lastname.strip(),
             is_active=is_active,
@@ -76,7 +76,7 @@ def edit_current() -> str | Response:
             view_model.email,
             view_model.firstname,
             view_model.lastname,
-            flask_login.current_user.access_level,
+            UserAccessLevel.from_string(view_model.access_level),
             view_model.is_active)
 
         return redirect(url_for(Endpoint.USER_EDIT_CURRENT.value))
