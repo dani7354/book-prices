@@ -3,7 +3,6 @@ import bookprices.web.mapper.user as usermapper
 from flask import Blueprint, request, render_template, Response, redirect, url_for, abort
 from bookprices.shared.db import database
 from bookprices.shared.model.user import UserAccessLevel
-from bookprices.web.blueprints.page import about
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService, require_member, require_admin
 from bookprices.web.service.csrf import get_csrf_token
@@ -44,16 +43,17 @@ def index() -> str:
     return render_template(UserTemplate.INDEX.value, view_model=view_model)
 
 
-@user_blueprint.route("/user/edit_current/", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@user_blueprint.route("edit-current", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @flask_login.login_required
 @require_member
-def edit_current_user() -> str | Response:  # Should be separated from the edit function for clarity. TODO
+def edit_current() -> str | Response:
     if request.method == "POST":
         email = request.form.get(UserEditViewModel.email_field_name)
         firstname = request.form.get(UserEditViewModel.firstname_field_name)
         lastname = request.form.get(UserEditViewModel.lastname_field_name)
         is_active = bool(request.form.get(UserEditViewModel.is_active_field_name))
         form_action_url = url_for(Endpoint.USER_EDIT_CURRENT.value, user_id=flask_login.current_user.id)
+        access_level = flask_login.current_user.access_level
 
         view_model = UserEditViewModel(
             image_url=flask_login.current_user.image_url,
@@ -64,7 +64,8 @@ def edit_current_user() -> str | Response:  # Should be separated from the edit 
             firstname=firstname.strip(),
             lastname=lastname.strip(),
             is_active=is_active,
-            access_level=flask_login.current_user.access_level,
+            edit_current_user=True,
+            access_level=access_level,
             form_action_url=form_action_url)
 
         if not view_model.is_valid():
@@ -78,10 +79,13 @@ def edit_current_user() -> str | Response:  # Should be separated from the edit 
             flask_login.current_user.access_level,
             view_model.is_active)
 
-        return redirect(url_for(Endpoint.USER_INDEX.value))
+        return redirect(url_for(Endpoint.USER_EDIT_CURRENT.value))
 
     view_model = usermapper.map_user_view_model(
-        flask_login.current_user, form_action_url=url_for(Endpoint.USER_EDIT_CURRENT.value))
+        flask_login.current_user,
+        form_action_url=url_for(Endpoint.USER_EDIT_CURRENT.value),
+        edit_current_user=True)
+
     return render_template(UserTemplate.EDIT_CURRENT.value, view_model=view_model)
 
 
@@ -109,6 +113,7 @@ def edit(user_id: str) -> str | Response:
             firstname=firstname.strip(),
             lastname=lastname.strip(),
             is_active=is_active,
+            edit_current_user=False,
             access_level=access_level,
             form_action_url=url_for(Endpoint.USER_EDIT.value, user_id=user.id))
 
@@ -129,5 +134,7 @@ def edit(user_id: str) -> str | Response:
         return redirect(url_for(Endpoint.USER_INDEX.value))
 
     view_model = usermapper.map_user_view_model(
-        user, form_action_url=url_for(Endpoint.USER_EDIT.value, user_id=user.id))
+        user,
+        form_action_url=url_for(Endpoint.USER_EDIT.value, user_id=user.id),
+        edit_current_user=False)
     return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)

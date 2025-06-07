@@ -7,7 +7,7 @@ from bookprices.web.shared.enum import UserTemplate
 from bookprices.web.viewmodels.user import UserEditViewModel, UserListViewModel, UserListItemViewModel
 
 
-def map_user_view_model(user: WebUser, form_action_url: str) -> UserEditViewModel:
+def map_user_view_model(user: WebUser, form_action_url: str, edit_current_user: bool) -> UserEditViewModel:
     return UserEditViewModel(
         id=user.id,
         created=user.created.isoformat(),
@@ -16,6 +16,7 @@ def map_user_view_model(user: WebUser, form_action_url: str) -> UserEditViewMode
         firstname=user.firstname,
         lastname=user.lastname,
         is_active=user.is_active,
+        edit_current_user=edit_current_user,
         image_url=user.image_url,
         access_level=user.access_level.name,
         form_action_url=form_action_url)

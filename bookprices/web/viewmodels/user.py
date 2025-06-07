@@ -31,6 +31,7 @@ class UserEditViewModel:
     firstname: str
     lastname: str
     is_active: bool
+    edit_current_user: bool
     access_level: str
     form_action_url: str
     created: Optional[str] = None
