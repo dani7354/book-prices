@@ -85,6 +85,6 @@
     {% endif %}
     <button type="submit" class="btn btn-primary">Gem</button>
     {% if view_model.edit_current_user %}
-        <a id="btn-delete-user" class="btn btn-danger" data-user-id="{{ view_model.id }}" href="">Slet</a>
+        <a class="btn btn-danger btn-delete-user" data-user-id="{{ view_model.id }}" href="">Slet</a>
     {% endif %}
 </form>

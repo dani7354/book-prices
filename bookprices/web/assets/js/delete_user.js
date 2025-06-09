@@ -6,7 +6,7 @@ const btnDeleteUser = $(".btn-delete-user");
 $(document).ready(function () {
     btnDeleteUser.on("click", function (e) {
         e.preventDefault();
-        if (confirm("Er du sikker på at du vil slette din bruger?")) {
+        if (confirm("Er du sikker på, at du vil slette brugeren?")) {
             let userId = $(e.target).data("user-id");
             deleteUser(userId);
         }

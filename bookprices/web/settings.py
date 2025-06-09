@@ -72,9 +72,9 @@ SRI_ATTRIBUTE_VALUES = {
     "user_js": ("sha256-aKEHc3Kf8tAfE6tLYbIuOlYCT2D/9WTU7um9NJKuMcY= "
                 "sha384-ZpmdIt4+irNcJCErXLguTvncm+Y+fbhfwwgYWWfI1b6egMRJwMcl6m2pDVS1Wc67 "
                 "sha512-jnl4HxlOclxy2kNihl24xNf2gfVPXRkZIv2NHc380tDtbhGQgFB936VL+HMYtk7K3K7OLjnjNFBkRmcb+JW18w=="),
-    "delete_user_js": ("sha256-glr2Dt8elD2seLGeH2tZJiRdxai++EHQVkZpVvgVLDY= "
-                       "sha384-XGQs6HgWma+SM8an2skd52TCRSo1WVnHSg+1nPSNBmafY+TEYhAuUXBuTW/VLg1g "
-                       "sha512-esVy67kn1agyhXEfOMCZLRjQ7RFNnCG3vsQCbsv/dItIR79tMAkbqRQ/R4rWrVmFeac6vC3n+Ko6Z2Hd/h0KNw=="),
+    "delete_user_js": ("sha256-KPXwacPFr76zwXqi3KH/0tpXOFkqDE9Ap84NmYUipAc= "
+                       "sha384-+VL1JPQ60RG49J1TkyLOnvPhJsWkq3PIbvjZpggvFSkcaFTjsvuINnf5Q98+pY/+ "
+                       "sha512-heleqxRjTHQAl+70CReT8/3u/xiwzoWFqhl51d7X/HMXF+FVFbpNFTgB1+r1ZgLJxmbLR3m+UlbJ01qXvE0U2g=="),
     "jquery_js": ("sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo= "
                   "sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs "
                   "sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="),
