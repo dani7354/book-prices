@@ -55,22 +55,19 @@ def edit_current() -> str | Response:
     if request.method == "POST":
         firstname = request.form.get(UserEditViewModel.firstname_field_name)
         lastname = request.form.get(UserEditViewModel.lastname_field_name)
-        is_active = bool(request.form.get(UserEditViewModel.is_active_field_name))
         form_action_url = url_for(Endpoint.USER_EDIT_CURRENT.value, user_id=flask_login.current_user.id)
-        email = flask_login.current_user.email
-        access_level = flask_login.current_user.access_level
 
         view_model = UserEditViewModel(
             image_url=flask_login.current_user.image_url,
             id=flask_login.current_user.id,
             created=flask_login.current_user.created.isoformat(),
             updated=flask_login.current_user.updated.isoformat(),
-            email=email,
+            email=flask_login.current_user.email,
             firstname=firstname.strip(),
             lastname=lastname.strip(),
-            is_active=is_active,
+            is_active=flask_login.current_user.is_active,
             edit_current_user=True,
-            access_level=access_level,
+            access_level=flask_login.current_user.access_level,
             form_action_url=form_action_url)
 
         if not view_model.is_valid():
@@ -140,6 +137,7 @@ def edit(user_id: str) -> str | Response:
         user,
         form_action_url=url_for(Endpoint.USER_EDIT.value, user_id=user.id),
         edit_current_user=False)
+
     return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)
 
 

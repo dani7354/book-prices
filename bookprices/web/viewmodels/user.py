@@ -34,6 +34,7 @@ class UserEditViewModel:
     edit_current_user: bool
     access_level: str
     form_action_url: str
+    return_url: Optional[str] = None
     created: Optional[str] = None
     updated: Optional[str] = None
     image_url: Optional[str] = None
