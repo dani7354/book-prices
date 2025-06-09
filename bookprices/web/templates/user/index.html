@@ -44,7 +44,8 @@
 
 {% include "common/_pagination.html" %}
 
-<script src="{{ url_for('static', filename='js/delete_user.js') }}"></script>
-        <!--integrity="{{ sri_attribute_values['delete_user_js'] }}" -->
+<script src="{{ url_for('static', filename='js/delete_user.js') }}"
+        integrity="{{ sri_attribute_values['delete_user_js'] }}"></script>
+
 
 {% endblock %}
