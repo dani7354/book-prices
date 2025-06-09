@@ -1,5 +1,5 @@
 import flask_login
-from flask_login import login_required
+from flask_login import login_required, logout_user
 from werkzeug.local import LocalProxy
 
 import bookprices.web.mapper.user as usermapper
@@ -67,7 +67,7 @@ def edit_current() -> str | Response:
             lastname=lastname.strip(),
             is_active=flask_login.current_user.is_active,
             edit_current_user=True,
-            access_level=flask_login.current_user.access_level,
+            access_level=flask_login.current_user.access_level.name,
             form_action_url=form_action_url)
 
         if not view_model.is_valid():
@@ -143,15 +143,22 @@ def edit(user_id: str) -> str | Response:
 
 @user_blueprint.route("delete/<user_id>", methods=[HttpMethod.POST.value])
 @login_required
-@require_admin
+@require_member
 def delete(user_id: str) -> tuple[Response, int]:
     try:
+        if not (deleting_current_user := flask_login.current_user.id == user_id) and not auth_service.user_can_access(UserAccessLevel.ADMIN):
+            return jsonify("You cannot delete other users than your own."), HttpStatusCode.FORBIDDEN
+
         if not (user := auth_service.get_user(user_id)):
             return jsonify(f"User with ID {user_id} not found"), HttpStatusCode.NOT_FOUND
 
         logger.debug(f"Deleting user with email {user.email}...")
         auth_service.delete_user(user_id)
         logger.info(f"User {user.email} deleted by user {flask_login.current_user.email}.")
+        if deleting_current_user:
+            logger.info("Current user deleted, logging out...")
+            logout_user()
+
         return jsonify({}), HttpStatusCode.OK
     except Exception as ex:
         logger.error(f"Failed to delete user {user_id}: {ex}")

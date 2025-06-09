@@ -1,6 +1,6 @@
 const baseUrl = "/user";
 const redirectUrl = "/user";
-const btnDeleteUser = $("#btn-delete-user");
+const btnDeleteUser = $(".btn-delete-user");
 
 
 $(document).ready(function () {

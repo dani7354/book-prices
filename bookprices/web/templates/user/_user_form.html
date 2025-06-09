@@ -71,6 +71,7 @@
         <input type="text" class="form-control" id="{{ view_model.access_level_field_name }}" value="{{ view_model.access_level }}" disabled="disabled">
         {% endif %}
     </div>
+    {% if not view_model.edit_current_user %}
     <div class="mb-3">
         <label for="{{ view_model.is_active_field_name }}" class="form-label">Aktiv</label>
         {% if view_model.is_active %}
@@ -81,5 +82,9 @@
                name="{{ view_model.is_active_field_name }}">
         {% endif %}
     </div>
+    {% endif %}
     <button type="submit" class="btn btn-primary">Gem</button>
+    {% if view_model.edit_current_user %}
+        <a id="btn-delete-user" class="btn btn-danger" data-user-id="{{ view_model.id }}" href="">Slet</a>
+    {% endif %}
 </form>

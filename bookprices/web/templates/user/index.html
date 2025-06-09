@@ -33,7 +33,7 @@
                 <a class="btn btn-secondary mb-1" href="{{ u.edit_url }}">Edit</a>
                 {% endif %}
                 {% if view_model.can_delete %}
-                <a id="btn-delete-user" class="btn btn-danger mb-1" data-user-id="{{ u.id }}" href="">Slet</a>
+                <a class="btn btn-danger mb-1 btn-delete-user" data-user-id="{{ u.id }}" href="">Slet</a>
                 {% endif %}
             </td>
         </tr>
