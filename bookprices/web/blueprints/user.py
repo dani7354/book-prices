@@ -1,6 +1,8 @@
 import flask_login
+from werkzeug.local import LocalProxy
+
 import bookprices.web.mapper.user as usermapper
-from flask import Blueprint, request, render_template, Response, redirect, url_for, abort
+from flask import Blueprint, request, render_template, Response, redirect, url_for, abort, current_app
 from bookprices.shared.db import database
 from bookprices.shared.model.user import UserAccessLevel
 from bookprices.web.cache.redis import cache
@@ -14,6 +16,8 @@ user_blueprint = Blueprint("user", __name__)
 
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 auth_service = AuthService(db, cache)
+
+logger = LocalProxy(lambda: current_app.logger)
 
 
 @user_blueprint.context_processor
@@ -127,6 +131,7 @@ def edit(user_id: str) -> str | Response:
             lastname=view_model.lastname,
             access_level=parsed_access_level,
             is_active=view_model.is_active)
+        logger.info(f"User {user.email} updated successfully by {flask_login.current_user.email}.")
 
         return redirect(url_for(Endpoint.USER_INDEX.value))
 
