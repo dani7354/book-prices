@@ -97,7 +97,6 @@ def edit(user_id: str) -> str | Response:
         abort(HttpStatusCode.NOT_FOUND, f"Brugeren med id {user_id} blev ikke fundet")
 
     if request.method == "POST":
-        user_id = request.form.get(UserEditViewModel.id_field_name)
         email = request.form.get(UserEditViewModel.email_field_name)
         firstname = request.form.get(UserEditViewModel.firstname_field_name)
         lastname = request.form.get(UserEditViewModel.lastname_field_name)
@@ -119,17 +118,15 @@ def edit(user_id: str) -> str | Response:
 
         if not view_model.is_valid():
             return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)
-        if user_id != user.id:
-            view_model.add_input_error(view_model.id_field_name, "Forkert bruger-id. Id kan ikke ændres!")
-            return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)
 
+        parsed_access_level = UserAccessLevel.from_string(access_level)
         auth_service.update_user_info(
-            view_model.id,
-            view_model.email,
-            view_model.firstname,
-            view_model.lastname,
-            UserAccessLevel.from_string(access_level),
-            view_model.is_active)
+            user_id=view_model.id,
+            email=view_model.email,
+            firstname=view_model.firstname,
+            lastname=view_model.lastname,
+            access_level=parsed_access_level,
+            is_active=view_model.is_active)
 
         return redirect(url_for(Endpoint.USER_INDEX.value))
 

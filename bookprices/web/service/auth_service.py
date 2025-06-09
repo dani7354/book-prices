@@ -84,6 +84,21 @@ class AuthService:
         self._db.user_db.update_user_token_and_image_url(user_id, token, image_url)
         self._cache.delete(get_user_key(user_id))
 
+    def create_user(self, id_: str, email: str, access_token: str, image_url: str) -> None:
+        new_user = User(
+            id=id_,
+            email=email,
+            firstname=email,
+            lastname=None,
+            is_active=True,
+            google_api_token=access_token,
+            image_url=image_url,
+            access_level=UserAccessLevel.MEMBER,
+            created=datetime.now(),
+            updated=datetime.now())
+
+        self._db.user_db.create_user(new_user)
+
     def update_user_info(
             self, user_id:
             str, email: str,
@@ -98,6 +113,7 @@ class AuthService:
             lastname=lastname,
             is_active=is_active,
             access_level=access_level.value)
+
         self._cache.delete(get_user_key(user_id))
 
     @classmethod

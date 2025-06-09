@@ -53,6 +53,25 @@ class UserDb(BaseDb):
                                       row["Updated"]))
                 return users
 
+    def create_user(self, new_user: User) -> None:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("INSERT INTO User (Id, Email, FirstName, LastName, IsActive, GoogleApiToken, ImageUrl, "
+                         "AccessLevel, Created, Updated) "
+                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+                cursor.execute(query, (
+                    new_user.id,
+                    new_user.email,
+                    new_user.firstname,
+                    new_user.lastname,
+                    new_user.is_active,
+                    new_user.google_api_token,
+                    new_user.image_url,
+                    new_user.access_level.value,
+                    new_user.created,
+                    new_user.updated))
+                con.commit()
+
     def update_user_token_and_image_url(self, user_id: str, token: str, image_url: str):
         with self.get_connection() as con:
             with con.cursor() as cursor:

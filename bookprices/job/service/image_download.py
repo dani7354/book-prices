@@ -68,7 +68,7 @@ class ImageDownloadService:
             image_source = self._image_source_queue.get()
             try:
                 self._logger.debug(f"Downloading image for book with id {image_source.book_id}...")
-                image = self._image_downloader.download_image(image_source)
+                image = self._image_downloader. download_image(image_source)
                 self._image_filenames[image_source.book_id] = image
             except ImageNotDownloadedException as ex:
                 self._logger.error(ex)

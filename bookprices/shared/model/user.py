@@ -11,10 +11,7 @@ class UserAccessLevel(Enum):
 
     @staticmethod
     def from_string(str_value: str) -> Optional["UserAccessLevel"]:
-        try:
-            return UserAccessLevel(str_value)
-        except ValueError:
-            return None
+        return next((al for al in UserAccessLevel if al.name.upper() == str_value.upper()), None)
 
 
 @dataclass(frozen=True)
@@ -22,7 +19,7 @@ class User:
     id: str
     email: str
     firstname: str
-    lastname: str
+    lastname: str | None
     is_active: bool
     google_api_token: str
     image_url: Optional[str]
