@@ -36,6 +36,8 @@ class Endpoint(Enum):
     JOB_UPDATE_JOB_RUN = "job.update_job_run"
     STATUS_INDEX = "status.index"
     USER_INDEX = "user.index"
+    USER_EDIT = "user.edit"
+    USER_EDIT_CURRENT = "user.edit_current"
 
 
 class SessionKey(Enum):
@@ -64,7 +66,10 @@ class StatusTemplate(Enum):
 
 
 class UserTemplate(Enum):
+    INDEX = "user/index.html"
     EDIT_USER = "user/edit.html"
+    EDIT_CURRENT = "user/edit_current.html"
+
 
 
 class JobTemplate(Enum):

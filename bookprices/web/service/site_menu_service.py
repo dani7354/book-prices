@@ -28,9 +28,9 @@ class SiteMenuService:
         if self._auth_service.user_can_access(UserAccessLevel.MEMBER):
             items.append(
                 MenuItem(
-                    url=self.get_url(Endpoint.USER_INDEX),
+                    url=self.get_url(Endpoint.USER_EDIT_CURRENT),
                     title="Rediger bruger",
-                    is_active=current_url.startswith(self.get_url(Endpoint.USER_INDEX)),
+                    is_active=current_url.startswith(self.get_url(Endpoint.USER_EDIT_CURRENT)),
                     order_number=10)
             )
         if self._auth_service.user_can_access(UserAccessLevel.JOB_MANAGER):
@@ -43,6 +43,12 @@ class SiteMenuService:
             )
         if self._auth_service.user_can_access(UserAccessLevel.ADMIN):
             items.extend([
+                MenuItem(
+                    url=self.get_url(Endpoint.USER_INDEX),
+                    title="Brugere",
+                    is_active=current_url.startswith(self.get_url(Endpoint.USER_INDEX))
+                              and current_url != self.get_url(Endpoint.USER_EDIT_CURRENT),
+                    order_number=11),
                 MenuItem(
                     url=self.get_url(Endpoint.BOOK_CREATE),
                     title="Tilføj bog",

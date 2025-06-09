@@ -44,7 +44,7 @@ def _get_user_with_access_level(access_level) -> WebUser:
 
 @pytest.mark.parametrize(
     ["user_access_level", "number_of_items"],
-    [(UserAccessLevel.MEMBER, 1), (UserAccessLevel.JOB_MANAGER, 2), (UserAccessLevel.ADMIN, 4)])
+    [(UserAccessLevel.MEMBER, 1), (UserAccessLevel.JOB_MANAGER, 2), (UserAccessLevel.ADMIN, 5)])
 def test_site_menu_service_gives_correct_number_of_items_for_user(
         auth_service_mock: AuthService,
         user_access_level: UserAccessLevel,
@@ -89,6 +89,7 @@ def test_site_menu_services_gives_correct_items_for_admin(
 
     assert items
     assert items[0].title == "Rediger bruger"
-    assert items[1].title == "Tilføj bog"
-    assert items[2].title == "Job"
-    assert items[3].title == "Status"
+    assert items[1].title == "Brugere"
+    assert items[2].title == "Tilføj bog"
+    assert items[3].title == "Job"
+    assert items[4].title == "Status"

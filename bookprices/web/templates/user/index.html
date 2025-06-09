@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% set active_page = "user" %}
+
+{% block content %}
+<h1>Brugerhåndtering</h1>
+
+<div class="container pb-4">
+    <table aria-describedby="latest-prices-heading" class="table mb-6">
+        <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Email</th>
+            <th scope="col">Fornavn</th>
+            <th scope="col">Efternavn</th>
+            <th scope="col">Adgangsniveau</th>
+            <th scope="col">Oprettet</th>
+            <th scope="col">Opdateret</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for u in view_model.users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.firstname }}</td>
+            <td>{{ u.lastname }}</td>
+            <td>{{ u.access_level }}</td>
+            <td>{{ u.created }}</td>
+            <td>{{ u.updated }}</td>
+            <td>
+                {% if view_model.can_edit %}
+                <a class="btn btn-secondary mb-1" href="{{ u.edit_url }}">Edit</a>
+                {% endif %}
+                {% if view_model.can_delete %}
+                <a class="btn btn-danger mb-1 btn-delete-user" data-user-id="{{ u.id }}" href="">Slet</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "common/_pagination.html" %}
+
+<script src="{{ url_for('static', filename='js/delete_user.js') }}"
+        integrity="{{ sri_attribute_values['delete_user_js'] }}"></script>
+
+
+{% endblock %}

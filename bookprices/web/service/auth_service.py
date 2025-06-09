@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask import abort
 from flask_caching import Cache
-from typing import Optional
+from typing import Optional, ClassVar
 from bookprices.shared.db. database import Database
 from bookprices.shared.model.user import User, UserAccessLevel
 from bookprices.shared.cache.key_generator import get_user_key
@@ -61,6 +61,8 @@ class WebUser(flask_login.UserMixin):
 
 
 class AuthService:
+    max_users_per_page: ClassVar[int] = 20
+
     def __init__(self, db: Database, cache: Cache):
         self._db = db
         self._cache = cache
@@ -72,12 +74,38 @@ class AuthService:
                 self._cache.set(get_user_key(user_id), user)
         return WebUser(user) if user else None
 
+    def get_users(self, page: int) -> list[WebUser]:
+        offset = (page - 1) * self.max_users_per_page
+        users = self._db.user_db.get_users(self.max_users_per_page, offset)
+
+        return [WebUser(user) for user in users] if users else []
+
     def update_user_token_and_image_url(self, user_id: str, token: str, image_url: str) -> None:
         self._db.user_db.update_user_token_and_image_url(user_id, token, image_url)
         self._cache.delete(get_user_key(user_id))
 
+    def create_user(self, id_: str, email: str, access_token: str, image_url: str) -> None:
+        new_user = User(
+            id=id_,
+            email=email,
+            firstname=email,
+            lastname=None,
+            is_active=True,
+            google_api_token=access_token,
+            image_url=image_url,
+            access_level=UserAccessLevel.MEMBER,
+            created=datetime.now(),
+            updated=datetime.now())
+
+        self._db.user_db.create_user(new_user)
+
     def update_user_info(
-            self, user_id: str, email: str, firstname: str, lastname: str, access_level: UserAccessLevel, is_active: bool) -> None:
+            self, user_id:
+            str, email: str,
+            firstname: str,
+            lastname: str,
+            access_level: UserAccessLevel,
+            is_active: bool) -> None:
         self._db.user_db.update_user_info(
             user_id=user_id,
             email=email,
@@ -85,6 +113,11 @@ class AuthService:
             lastname=lastname,
             is_active=is_active,
             access_level=access_level.value)
+
+        self._cache.delete(get_user_key(user_id))
+
+    def delete_user(self, user_id: str) -> None:
+        self._db.user_db.delete_user(user_id)
         self._cache.delete(get_user_key(user_id))
 
     @classmethod

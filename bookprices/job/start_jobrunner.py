@@ -95,7 +95,7 @@ def setup_event_manager(config: Config) -> EventManager:
     book_deleted_event.add_listener(StartJobListener(job_service, DeleteImagesJob.name))
 
     books_found_in_stores = Event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
-    books_found_in_stores.add_listener(StartJobListener(job_service, DownloadImagesForBooksJob.name))
+    books_found_in_stores.add_listener(StartJobListener(job_service, DownloadImagesJob.name))
     books_found_in_stores.add_listener(StartJobListener(job_service, BookPricesUpdateJob.name))
 
     events = {
