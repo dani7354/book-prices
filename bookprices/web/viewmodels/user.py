@@ -49,9 +49,9 @@ class UserEditViewModel:
             self.add_input_error(self.firstname_field_name, min_length_not_met("Fornavn", self.firstname_min_length))
         if len(self.firstname) > self.firstname_max_length:
             self.add_input_error(self.firstname_field_name, max_length_exceeded("Fornavn", self.firstname_max_length))
-        if len(self.lastname) < self.lastname_min_length:
+        if self.lastname and len(self.lastname) < self.lastname_min_length:
             self.add_input_error(self.lastname_field_name, min_length_not_met("Efternavn", self.lastname_min_length))
-        if len(self.lastname) > self.lastname_max_length:
+        if self.lastname and len(self.lastname) > self.lastname_max_length:
             self.add_input_error(
                 self.lastname_field_name, max_length_exceeded("Efternavn", self.lastname_max_length))
         if not UserAccessLevel.from_string(self.access_level):

@@ -1,8 +1,9 @@
 import flask_login
+from flask_login import login_required
 from werkzeug.local import LocalProxy
 
 import bookprices.web.mapper.user as usermapper
-from flask import Blueprint, request, render_template, Response, redirect, url_for, abort, current_app
+from flask import Blueprint, request, render_template, Response, redirect, url_for, abort, current_app, jsonify
 from bookprices.shared.db import database
 from bookprices.shared.model.user import UserAccessLevel
 from bookprices.web.cache.redis import cache
@@ -140,3 +141,21 @@ def edit(user_id: str) -> str | Response:
         form_action_url=url_for(Endpoint.USER_EDIT.value, user_id=user.id),
         edit_current_user=False)
     return render_template(UserTemplate.EDIT_USER.value, view_model=view_model)
+
+
+@user_blueprint.route("delete/<user_id>", methods=[HttpMethod.POST.value])
+@login_required
+@require_admin
+def delete(user_id: str) -> tuple[Response, int]:
+    try:
+        if not (user := auth_service.get_user(user_id)):
+            return jsonify(f"User with ID {user_id} not found"), HttpStatusCode.NOT_FOUND
+
+        logger.debug(f"Deleting user with email {user.email}...")
+        auth_service.delete_user(user_id)
+        logger.info(f"User {user.email} deleted by user {flask_login.current_user.email}.")
+        return jsonify({}), HttpStatusCode.OK
+    except Exception as ex:
+        logger.error(f"Failed to delete user {user_id}: {ex}")
+        return (jsonify({"error": f"Der opstod en fejl under sletning af brugeren med id {user_id}"}),
+                HttpStatusCode.INTERNAL_SERVER_ERROR)

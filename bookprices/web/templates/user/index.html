@@ -12,6 +12,7 @@
             <th scope="col">Email</th>
             <th scope="col">Fornavn</th>
             <th scope="col">Efternavn</th>
+            <th scope="col">Adgangsniveau</th>
             <th scope="col">Oprettet</th>
             <th scope="col">Opdateret</th>
             <th scope="col"></th>
@@ -24,6 +25,7 @@
             <td>{{ u.email }}</td>
             <td>{{ u.firstname }}</td>
             <td>{{ u.lastname }}</td>
+            <td>{{ u.access_level }}</td>
             <td>{{ u.created }}</td>
             <td>{{ u.updated }}</td>
             <td>
@@ -41,5 +43,8 @@
 </div>
 
 {% include "common/_pagination.html" %}
+
+<script src="{{ url_for('static', filename='js/delete_user.js') }}"></script>
+        <!--integrity="{{ sri_attribute_values['delete_user_js'] }}" -->
 
 {% endblock %}

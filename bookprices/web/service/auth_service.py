@@ -116,6 +116,10 @@ class AuthService:
 
         self._cache.delete(get_user_key(user_id))
 
+    def delete_user(self, user_id: str) -> None:
+        self._db.user_db.delete_user(user_id)
+        self._cache.delete(get_user_key(user_id))
+
     @classmethod
     def user_can_access(cls, access_level: UserAccessLevel) -> bool:
         current_user = cls.get_current_user()

@@ -90,3 +90,10 @@ class UserDb(BaseDb):
                          "WHERE Id = %s")
                 cursor.execute(query, (email, firstname, lastname, is_active, access_level, user_id))
                 con.commit()
+
+    def delete_user(self, user_id: str):
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = "DELETE FROM User WHERE Id = %s"
+                cursor.execute(query, (user_id,))
+                con.commit()

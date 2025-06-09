@@ -48,9 +48,7 @@
     <div class="mb-3">
         <label for="{{ view_model.lastname_field_name }}" class="form-label">Efternavn</label>
         <input type="text" class="form-control" id="{{ view_model.lastname_field_name }}"
-               name="{{ view_model.lastname_field_name }}" value="{{ view_model.lastname }}"
-               minlength="{{ view_model.lastname_min_length }}" maxlength="{{ view_model.lastname_max_length }}"
-               required="required">
+               name="{{ view_model.lastname_field_name }}" value="{{ view_model.lastname }}">
         {% if view_model.lastname_field_name in errors %}
             {% for error in errors[view_model.lastname_field_name] %}
                 <span id="lastname-error" class="form-text text-danger">{{ error }}</span>

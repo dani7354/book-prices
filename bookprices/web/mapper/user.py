@@ -8,13 +8,14 @@ from bookprices.web.viewmodels.user import UserEditViewModel, UserListViewModel,
 
 
 def map_user_view_model(user: WebUser, form_action_url: str, edit_current_user: bool) -> UserEditViewModel:
+    lastname = user.lastname if user.lastname else ""
     return UserEditViewModel(
         id=user.id,
         created=user.created.isoformat(),
         updated=user.updated.isoformat(),
         email=user.email,
         firstname=user.firstname,
-        lastname=user.lastname,
+        lastname=lastname,
         is_active=user.is_active,
         edit_current_user=edit_current_user,
         image_url=user.image_url,
@@ -33,7 +34,7 @@ def map_user_list_view_model(
             id=u.id,
             email=u.email,
             firstname=u.firstname,
-            lastname=u.lastname,
+            lastname=u.lastname if u.lastname else "",
             is_active=u.is_active,
             access_level=u.access_level.name,
             edit_url=url_for('user.edit', user_id=u.id),
