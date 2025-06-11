@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, abort, current_app, render_template, Response
 from flask_login import login_required
 from werkzeug.local import LocalProxy
 
@@ -9,7 +9,7 @@ from bookprices.shared.db.database import Database
 from bookprices.web.mapper.bookstore import map_to_bookstore_list
 from bookprices.web.cache.redis import cache
 from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
-from bookprices.web.shared.enum import BookStoreTemplate
+from bookprices.web.shared.enum import BookStoreTemplate, HttpMethod, HttpStatusCode
 
 logger = LocalProxy(lambda: current_app.logger)
 
@@ -20,7 +20,7 @@ db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 bookstore_service = BookStoreService(db, cache)
 
 
-@bookstore_blueprint.route("", methods=["GET"])
+@bookstore_blueprint.route("", methods=[HttpMethod.GET.value])
 @login_required
 @require_admin
 def index() -> str:
@@ -32,8 +32,13 @@ def index() -> str:
     return render_template(BookStoreTemplate.INDEX.value, view_model=view_model)
 
 
-@bookstore_blueprint.route("edit/<int:bookstore_id>", methods=["POST"])
+@bookstore_blueprint.route("edit/<int:bookstore_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @login_required
 @require_admin
-def edit(bookstore_id: int) -> str:
-    pass
+def edit(bookstore_id: int) -> str | Response:
+    if not (bookstore := bookstore_service.get_bookstore(bookstore_id)):
+        return abort(HttpStatusCode.NOT_FOUND, "Boghandlen blev ikke fundet")
+
+
+
+    return render_template(BookStoreTemplate.EDIT.value, view_model=None)

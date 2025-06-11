@@ -1,6 +1,6 @@
 from flask_caching import Cache
 
-from bookprices.shared.cache.key_generator import get_bookstores_key
+from bookprices.shared.cache.key_generator import get_bookstores_key, get_bookstore_key
 from bookprices.shared.db.database import Database
 from bookprices.shared.model.bookstore import BookStore
 
@@ -17,4 +17,9 @@ class BookStoreService:
 
         return bookstores
 
+    def get_bookstore(self, bookstore_id: int) -> BookStore | None:
+        if not (bookstore := self._cache.get(get_bookstore_key(bookstore_id))):
+            if bookstore := self._database.bookstore_db.get_bookstore(bookstore_id):
+                self._cache.set(get_bookstore_key(bookstore_id), bookstore)
 
+        return bookstore

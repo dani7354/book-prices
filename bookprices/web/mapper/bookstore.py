@@ -20,3 +20,7 @@ def map_to_bookstore_list(
                 url=bookstore.url,
                 edit_url=url_for(Endpoint.BOOKSTORE_EDIT.value, bookstore_id=bookstore.id)
             ) for bookstore in bookstores])
+
+
+def map_bookstore_edit_view_model():
+    pass
