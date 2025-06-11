@@ -31,6 +31,29 @@ class BookStoreDb(BaseDb):
 
                 return bookstores
 
+    def get_bookstore(self, bookstore_id: int) -> BookStore | None:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
+                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector "
+                         "FROM BookStore "
+                         "WHERE Id = %s")
+                cursor.execute(query, (bookstore_id,))
+                if not (row := cursor.fetchone()):
+                    return None
+
+                return BookStore(row["Id"],
+                                 row["Name"],
+                                 row["Url"],
+                                 row["SearchUrl"],
+                                 row["SearchResultCssSelector"],
+                                 row["PriceCssSelector"],
+                                 row["ImageCssSelector"],
+                                 row["IsbnCssSelector"],
+                                 row["PriceFormat"],
+                                 row["HasDynamicallyLoadedContent"])
+
     def get_missing_bookstores(self, book_id: int) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:

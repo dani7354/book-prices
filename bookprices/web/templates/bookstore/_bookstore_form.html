@@ -1,0 +1,105 @@
+<form method="post" action="{{ view_model.form_action_url }}">
+    {% if active_page == "edit_book" %}
+    <div class="mb-3">
+        <label for="{{ view_model.name_field_name }}" class="form-label">Navn</label>
+        <input name="{{ view_model.name_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.name_min_length }}" maxlength="{{ view_model.name_max_length }}"
+               id="{{ view_model.name_field_name }}" value="{{ view_model.name }}" required="required">
+        {% if view_model.name_field_name in errors %}
+            {% for error in errors[view_model.name_field_name] %}
+                <span id="name-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.url_field_name }}" class="form-label">URL</label>
+        <input name="{{ view_model.url_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.url_min_length }}" maxlength="{{ view_model.url_max_length }}"
+               id="{{ view_model.url_field_name }}" value="{{ view_model.url }}" required="required">
+        {% if view_model.url_field_name in errors %}
+            {% for error in errors[view_model.url_field_name] %}
+                <span id="url-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.search_url_field_name }}" class="form-label">URL til søgning</label>
+        <input name="{{ view_model.search_url_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.search_url_min_length }}" maxlength="{{ view_model.search_url_max_length }}"
+               id="{{ view_model.search_url_field_name }}" value="{{ view_model.search_url }}" required="required">
+        {% if view_model.search_url_field_name in errors %}
+            {% for error in errors[view_model.search_url_field_name] %}
+                <span id="author-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.search_result_css_field_name }}" class="form-label">CSS-selektor til søgeresultater</label>
+        <input name="{{ view_model.search_result_css_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.search_result_css_min_length }}"
+               maxlength="{{ view_model.search_result_css_max_length }}" id="{{ view_model.search_result_css_field_name }}"
+               value="{{ view_model.search_result_css }}" required="required">
+        {% if view_model.search_result_css_field_name in errors %}
+            {% for error in errors[view_model.search_result_css_field_name] %}
+                <span id="search-result-css-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.isbn_css_field_name }}" class="form-label">CSS-selektor til ISBN-13</label>
+        <input name="{{ view_model.isbn_css_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.isbn_css_min_length }}"
+               maxlength="{{ view_model.isbn_css_max_length }}" id="{{ view_model.isbn_css_field_name }}"
+               value="{{ view_model.isbn_css }}" required="required">
+        {% if view_model.isbn_css_field_name in errors %}
+            {% for error in errors[view_model.isbn_css_field_name] %}
+                <span id="isbn-css-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.price_css_field_name }}" class="form-label">CSS-selektor til priser</label>
+        <input name="{{ view_model.price_css_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.price_css_min_length }}"
+               maxlength="{{ view_model.price_css_css_max_length }}" id="{{ view_model.price_css_field_name }}"
+               value="{{ view_model.price_css }}" required="required">
+        {% if view_model.price_css_field_name in errors %}
+            {% for error in errors[view_model.price_css_field_name] %}
+                <span id="price-css-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.image_css_field_name }}" class="form-label">CSS-selektor til billeder</label>
+        <input name="{{ view_model.image_css_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.image_css_min_length }}" maxlength="{{ view_model.image_css_max_length }}"
+               id="{{ view_model.image_css_field_name }}" value="{{ view_model.image_css }}" required="required">
+        {% if view_model.image_css_field_name in errors %}
+            {% for error in errors[view_model.image_css_field_name] %}
+                <span id="image-css-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.price_format_field_name }}" class="form-label">Prisformat</label>
+        <input name="{{ view_model.price_format_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.price_format_min_length }}" maxlength="{{ view_model.price_format_max_length }}"
+               id="{{ view_model.price_format_field_name }}" value="{{ view_model.price_format }}" required="required">
+        {% if view_model.price_format_field_name in errors %}
+            {% for error in errors[view_model.price_format_field_name] %}
+                <span id="price-format-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="mb-3">
+        <label for="{{ view_model.view_model.dynamic_content_field_name }}" class="form-label">Dynamisk indlæst indhold</label>
+        {% if view_model.is_active %}
+        <input type="checkbox" class="form-check-input" id="{{ view_model.view_model.dynamic_content_field_name }}"
+               name="{{ view_model.view_model.dynamic_content_field_name }}" checked="checked">
+        {% else %}
+        <input type="checkbox" class="form-check-input" id="{{ view_model.view_model.dynamic_content_field_name }}"
+               name="{{ view_model.view_model.dynamic_content_field_name }}">
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Gem</button>
+</form>
