@@ -9,6 +9,7 @@ from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.auth import auth_blueprint
 from bookprices.web.blueprints.book import book_blueprint
+from bookprices.web.blueprints.bookstore import bookstore_blueprint
 from bookprices.web.blueprints.error_handler import (
     not_found_html, internal_server_error_html, forbidden_html, unauthorized_html)
 from bookprices.web.blueprints.job import job_blueprint
@@ -69,6 +70,7 @@ app.logger.addHandler(default_handler)
 # blueprints
 app.register_blueprint(page_blueprint)
 app.register_blueprint(book_blueprint)
+app.register_blueprint(bookstore_blueprint, url_prefix="/bookstore")
 app.register_blueprint(api_blueprint, url_prefix="/api")
 app.register_blueprint(auth_blueprint, url_prefix="/auth")
 app.register_blueprint(user_blueprint, url_prefix="/user")

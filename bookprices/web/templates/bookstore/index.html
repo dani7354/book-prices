@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set active_page = "bookstore" %}
+{% block content %}
+<h1>Boghandlere</h1>
+
+<div class="container pb-4">
+    {% if view_model.bookstores %}
+    <table class="table mb-6">
+        <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Url</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for bs in view_model.bookstores %}
+        <tr>
+            <td>{{ bs.id }}</td>
+            <td>{{ bs.name }}</td>
+            <td><a href="{{ bs.url }}">{{ bs.url }}</a></td>
+            <td>
+                {% if view_model.can_edit %}
+                <a class="btn btn-secondary mb-1" href="{{ bs.edit_url }}">Edit</a>
+                {% endif %}
+                {% if view_model.can_delete %}
+                <a class="btn btn-danger mb-1 btn-delete-bookstore" data-user-id="{{ bs.id }}" href="">Slet</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Ingen boghandlere fundet.</p>
+    {% endif %}
+</div>
+
+
+{% endblock %}
