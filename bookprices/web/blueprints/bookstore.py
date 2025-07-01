@@ -10,6 +10,7 @@ from bookprices.web.mapper.bookstore import map_to_bookstore_list, map_bookstore
 from bookprices.web.cache.redis import cache
 from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 from bookprices.web.shared.enum import BookStoreTemplate, HttpMethod, HttpStatusCode
+from bookprices.web.viewmodels.bookstore import BookStoreEditViewModel
 
 logger = LocalProxy(lambda: current_app.logger)
 
@@ -40,7 +41,15 @@ def edit(bookstore_id: int) -> str | Response:
         return abort(HttpStatusCode.NOT_FOUND, "Boghandlen blev ikke fundet")
 
     if request.method == HttpMethod.POST.value:
-        pass
+        bookstore_id_from_form = request.form.get(BookStoreEditViewModel.id_field_name)
+        name = request.form.get(BookStoreEditViewModel.name_field_name) or ""
+        url = request.form.get(BookStoreEditViewModel.url_field_name) or ""
+        search_url = request.form.get(BookStoreEditViewModel.search_url_field_name) or ""
+        search_result_css = request.form.get(BookStoreEditViewModel.search_result_css_field_name) or ""
+        image_css = request.form.get(BookStoreEditViewModel.image_css_field_name) or ""
+        isbn_css = request.form.get(BookStoreEditViewModel.isbn_css_field_name) or ""
+        price_format = request.form.get(BookStoreEditViewModel.price_format_field_name) or ""
+
 
     view_model = map_bookstore_edit_view_model(bookstore)
     return render_template(BookStoreTemplate.EDIT.value, view_model=view_model)
