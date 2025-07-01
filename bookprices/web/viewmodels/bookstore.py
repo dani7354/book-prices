@@ -16,6 +16,7 @@ class BookStoreListViewModel:
     bookstores: list[BookStoreListItem]
 
 
+@dataclasses.dataclass(frozen=True)
 class BookStoreEditViewModel:
     has_dynamic_content: bool
     id: int
@@ -27,3 +28,5 @@ class BookStoreEditViewModel:
     isbn_css: str
     price_format: str
     form_action_url: str
+    return_url: str
+    errors: dict[str, list[str]] = dataclasses.field(default_factory=dict)

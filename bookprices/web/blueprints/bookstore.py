@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, current_app, render_template, Response
+from flask import Blueprint, abort, current_app, render_template, Response, request
 from flask_login import login_required
 from werkzeug.local import LocalProxy
 
@@ -6,7 +6,7 @@ from bookprices.shared.model.user import UserAccessLevel
 from bookprices.web.service.auth_service import require_admin, AuthService
 from bookprices.web.service.bookstore_service import BookStoreService
 from bookprices.shared.db.database import Database
-from bookprices.web.mapper.bookstore import map_to_bookstore_list
+from bookprices.web.mapper.bookstore import map_to_bookstore_list, map_bookstore_edit_view_model
 from bookprices.web.cache.redis import cache
 from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 from bookprices.web.shared.enum import BookStoreTemplate, HttpMethod, HttpStatusCode
@@ -39,6 +39,8 @@ def edit(bookstore_id: int) -> str | Response:
     if not (bookstore := bookstore_service.get_bookstore(bookstore_id)):
         return abort(HttpStatusCode.NOT_FOUND, "Boghandlen blev ikke fundet")
 
+    if request.method == HttpMethod.POST.value:
+        pass
 
-
-    return render_template(BookStoreTemplate.EDIT.value, view_model=None)
+    view_model = map_bookstore_edit_view_model(bookstore)
+    return render_template(BookStoreTemplate.EDIT.value, view_model=view_model)
