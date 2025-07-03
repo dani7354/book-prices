@@ -25,7 +25,7 @@
                 <a class="btn btn-secondary mb-1" href="{{ bs.edit_url }}">Edit</a>
                 {% endif %}
                 {% if view_model.can_delete %}
-                <a class="btn btn-danger mb-1 btn-delete-bookstore" data-user-id="{{ bs.id }}" href="">Slet</a>
+                <a class="btn btn-danger mb-1 btn-delete-bookstore" data-bookstore-id="{{ bs.id }}" href="">Slet</a>
                 {% endif %}
             </td>
         </tr>
@@ -35,8 +35,9 @@
     {% else %}
     <p>Ingen boghandlere fundet.</p>
     {% endif %}
-    <a id="btn-create-job" href="{{ view_model.create_url }}" class="btn btn-primary">Opret</a>
+    <a id="btn-create-bookstore" href="{{ view_model.create_url }}" class="btn btn-primary">Opret</a>
 </div>
 
+<script src="{{ url_for('static', filename='js/delete_bookstore.js') }}"></script>
 
 {% endblock %}

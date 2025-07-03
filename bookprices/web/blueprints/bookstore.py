@@ -112,3 +112,10 @@ def edit(bookstore_id: int) -> str | Response:
 
     view_model = map_bookstore_edit_view_model(bookstore)
     return render_template(BookStoreTemplate.EDIT.value, view_model=view_model)
+
+
+@bookstore_blueprint.route("delete/<int:bookstore_id>", methods=[HttpMethod.POST.value])
+@login_required
+@require_admin
+def delete(bookstore_id: int) -> Response:
+    pass
