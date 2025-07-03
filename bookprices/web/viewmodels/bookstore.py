@@ -89,37 +89,38 @@ class BookStoreEditViewModel:
             self.errors[self.url_field_name].append(
                 max_length_exceeded("URL", self.url_max_length))
 
-        if not length_equals_or_longer_than(self.search_url, self.search_url_min_length):
+        if not length_equals_or_longer_than(self.search_url, self.search_url_min_length, allow_none=True):
             self.errors[self.search_url_field_name].append(
                 min_length_not_met("URL til søgning", self.search_url_min_length))
-        elif not length_equals_or_shorter_than(self.search_url, self.search_url_max_length):
+        elif not length_equals_or_shorter_than(self.search_url, self.search_url_max_length, allow_none=True):
             self.errors[self.search_url_field_name].append(
                 max_length_exceeded("URL til søgning", self.search_url_max_length))
 
-        if not length_equals_or_longer_than(self.search_result_css, self.search_result_css_min_length):
+        if not length_equals_or_longer_than(self.search_result_css, self.search_result_css_min_length, allow_none=True):
             self.errors[self.search_result_css_field_name].append(
                 min_length_not_met("CSS-selektor for søgeresultater", self.search_result_css_min_length))
-        elif not length_equals_or_shorter_than(self.search_result_css, self.search_result_css_max_length):
+        elif not length_equals_or_shorter_than(
+                self.search_result_css, self.search_result_css_max_length, allow_none=True):
             self.errors[self.search_result_css_field_name].append(
                 max_length_exceeded("CSS-selektor for søgeresultater", self.search_result_css_max_length))
 
-        if not length_equals_or_longer_than(self.isbn_css, self.isbn_css_min_length):
+        if not length_equals_or_longer_than(self.isbn_css, self.isbn_css_min_length, allow_none=True):
             self.errors[self.isbn_css_field_name].append(
                 min_length_not_met("CSS-selektor til ISBN-13", self.isbn_css_min_length))
-        elif not length_equals_or_shorter_than(self.isbn_css, self.isbn_css_max_length):
+        elif not length_equals_or_shorter_than(self.isbn_css, self.isbn_css_max_length, allow_none=True):
             self.errors[self.isbn_css_field_name].append(
                 max_length_exceeded("CSS-selektor til ISBN-13", self.isbn_css_max_length))
 
-        if not length_equals_or_longer_than(self.price_css, self.price_format_min_length):
+        if not length_equals_or_longer_than(self.price_css, self.price_format_min_length, allow_none=True):
             self.errors[self.price_css_field_name].append(
                 min_length_not_met("CSS-selektor for priser", self.price_css_min_length))
-        elif not length_equals_or_shorter_than(self.price_css, self.price_css_max_length):
+        elif not length_equals_or_shorter_than(self.price_css, self.price_css_max_length, allow_none=True):
             self.errors[self.price_css_field_name].append(
                 max_length_exceeded("CSS-selektor for priser", self.price_css_max_length))
 
-        if not length_equals_or_longer_than(self.image_css, self.image_css_min_length):
+        if not length_equals_or_longer_than(self.image_css, self.image_css_min_length, allow_none=True):
             self.errors[self.image_css_field_name].append(
                 min_length_not_met("CSS-selektor for billeder", self.image_css_min_length))
-        elif not length_equals_or_shorter_than(self.image_css, self.image_css_max_length):
+        elif not length_equals_or_shorter_than(self.image_css, self.image_css_max_length, allow_none=True):
             self.errors[self.image_css_field_name].append(
                 max_length_exceeded("CSS-selektor for billeder", self.image_css_max_length))

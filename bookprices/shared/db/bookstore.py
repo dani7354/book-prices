@@ -14,7 +14,7 @@ class BookStoreDb(BaseDb):
                          "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
                          "HasDynamicallyLoadedContent, IsbnCssSelector "
                          "FROM BookStore "
-                         "ORDER BY Name ASC")
+                         "ORDER BY Id ASC")
                 cursor.execute(query)
                 bookstores = []
                 for row in cursor:
