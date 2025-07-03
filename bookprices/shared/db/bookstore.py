@@ -54,6 +54,29 @@ class BookStoreDb(BaseDb):
                                  row["PriceFormat"],
                                  row["HasDynamicallyLoadedContent"])
 
+    def update_bookstore(self, bookstore: BookStore) -> BookStore:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("UPDATE BookStore "
+                         "SET Name = %s, Url = %s, SearchUrl = %s, "
+                         "SearchResultCssSelector = %s, PriceCssSelector = %s, "
+                         "ImageCssSelector = %s, IsbnCssSelector = %s, "
+                         "PriceFormat = %s, HasDynamicallyLoadedContent = %s "
+                         "WHERE Id = %s")
+                cursor.execute(query, (bookstore.name,
+                                       bookstore.url,
+                                       bookstore.search_url,
+                                       bookstore.search_result_css_selector,
+                                       bookstore.price_css_selector,
+                                       bookstore.image_css_selector,
+                                       bookstore.isbn_css_selector,
+                                       bookstore.price_format,
+                                       bookstore.has_dynamically_loaded_content,
+                                       bookstore.id))
+                con.commit()
+
+                return self.get_bookstore(bookstore.id)
+
     def get_missing_bookstores(self, book_id: int) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:

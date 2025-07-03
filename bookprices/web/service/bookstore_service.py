@@ -23,3 +23,32 @@ class BookStoreService:
                 self._cache.set(get_bookstore_key(bookstore_id), bookstore)
 
         return bookstore
+
+    def update(
+            self,
+            bookstore_id: int,
+            name: str,
+            url: str,
+            search_url: str | None,
+            search_result_css: str | None,
+            image_css: str | None,
+            isbn_css: str | None,
+            price_css: str | None,
+            price_format: str | None,
+            has_dynamic_content: bool) -> None:
+
+        bookstore = BookStore(
+            id=bookstore_id,
+            name=name,
+            url=url,
+            search_url=search_url,
+            search_result_css_selector=search_result_css,
+            image_css_selector=image_css,
+            isbn_css_selector=isbn_css,
+            price_css_selector=price_css,
+            price_format=price_format,
+            has_dynamically_loaded_content=has_dynamic_content)
+
+        self._database.bookstore_db.update_bookstore(bookstore)
+        self._cache.delete(get_bookstores_key())
+        self._cache.delete(get_bookstore_key(bookstore_id))

@@ -32,6 +32,7 @@ def map_bookstore_edit_view_model(bookstore: BookStore) -> BookStoreEditViewMode
         search_result_css=bookstore.search_result_css_selector,
         image_css=bookstore.image_css_selector,
         isbn_css=bookstore.isbn_css_selector,
+        price_css=bookstore.price_css_selector,
         price_format=bookstore.price_format,
         form_action_url=url_for(Endpoint.BOOKSTORE_EDIT.value, bookstore_id=bookstore.id),
         return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))

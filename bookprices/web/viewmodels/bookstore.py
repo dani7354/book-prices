@@ -1,4 +1,5 @@
 import dataclasses
+from collections import defaultdict
 from typing import ClassVar
 
 from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
@@ -62,7 +63,10 @@ class BookStoreEditViewModel:
     price_format: str
     form_action_url: str
     return_url: str
-    errors: dict[str, list[str]] = dataclasses.field(default_factory=dict)
+    errors: dict[str, list[str]] = dataclasses.field(default_factory=lambda: defaultdict(list))
+
+    def add_error(self, field_name: str, message: str) -> None:
+        self.errors[field_name].append(message)
 
     def is_valid(self) -> bool:
         if not self.errors:
