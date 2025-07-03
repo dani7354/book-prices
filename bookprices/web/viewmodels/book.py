@@ -5,7 +5,7 @@ from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStore
 from bookprices.shared.validation.isbn import check_isbn13
 from bookprices.web.settings import BOOK_IMAGES_BASE_URL
-from bookprices.web.shared.input_validation_message import min_length_not_met, max_length_exceeded
+from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
 
 
 @dataclass(frozen=True)
