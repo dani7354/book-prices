@@ -13,6 +13,7 @@ def map_to_bookstore_list(
     return BookStoreListViewModel(
         can_edit=current_user_is_admin,
         can_delete=current_user_is_admin,
+        create_url=url_for(Endpoint.BOOKSTORE_CREATE.value),
         bookstores=[
             BookStoreListItem(
                 id=bookstore.id,

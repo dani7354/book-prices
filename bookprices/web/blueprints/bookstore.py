@@ -39,6 +39,20 @@ def index() -> str:
     return render_template(BookStoreTemplate.INDEX.value, view_model=view_model)
 
 
+@bookstore_blueprint.route("create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@login_required
+@require_admin
+def create() -> str | Response:
+    if request.method == HttpMethod.POST.value:
+        pass
+
+    view_model = BookStoreEditViewModel.empty(
+        form_action_url=url_for(Endpoint.BOOKSTORE_CREATE.value),
+        return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
+
+    return render_template(BookStoreTemplate.CREATE.value, view_model=view_model)
+
+
 @bookstore_blueprint.route("edit/<int:bookstore_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @login_required
 @require_admin

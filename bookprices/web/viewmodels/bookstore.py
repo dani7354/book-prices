@@ -18,6 +18,7 @@ class BookStoreListItem:
 class BookStoreListViewModel:
     can_edit: bool
     can_delete: bool
+    create_url: str
     bookstores: list[BookStoreListItem]
 
 
@@ -55,12 +56,12 @@ class BookStoreEditViewModel:
     id: int
     name: str
     url: str
-    search_url: str
-    search_result_css: str
-    image_css: str
-    isbn_css: str
-    price_css: str
-    price_format: str
+    search_url: str | None
+    search_result_css: str | None
+    image_css: str | None
+    isbn_css: str | None
+    price_css: str | None
+    price_format: str | None
     form_action_url: str
     return_url: str
     errors: dict[str, list[str]] = dataclasses.field(default_factory=lambda: defaultdict(list))
@@ -124,3 +125,19 @@ class BookStoreEditViewModel:
         elif not length_equals_or_shorter_than(self.image_css, self.image_css_max_length, allow_none=True):
             self.errors[self.image_css_field_name].append(
                 max_length_exceeded("CSS-selektor for billeder", self.image_css_max_length))
+
+    @staticmethod
+    def empty(form_action_url: str, return_url: str) -> "BookStoreEditViewModel":
+        return BookStoreEditViewModel(
+            has_dynamic_content=False,
+            id=0,
+            name="",
+            url="",
+            search_url=None,
+            search_result_css=None,
+            image_css=None,
+            isbn_css=None,
+            price_css=None,
+            price_format=None,
+            form_action_url=form_action_url,
+            return_url=return_url)
