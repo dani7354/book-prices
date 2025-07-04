@@ -14,7 +14,7 @@ class BookStoreDb(BaseDb):
                          "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
                          "HasDynamicallyLoadedContent, IsbnCssSelector "
                          "FROM BookStore "
-                         "ORDER BY Name ASC")
+                         "ORDER BY Id ASC")
                 cursor.execute(query)
                 bookstores = []
                 for row in cursor:
@@ -30,6 +30,78 @@ class BookStoreDb(BaseDb):
                                                 row["HasDynamicallyLoadedContent"]))
 
                 return bookstores
+
+    def get_bookstore(self, bookstore_id: int) -> BookStore | None:
+        with self.get_connection() as con:
+            with con.cursor(dictionary=True) as cursor:
+                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
+                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector "
+                         "FROM BookStore "
+                         "WHERE Id = %s")
+                cursor.execute(query, (bookstore_id,))
+                if not (row := cursor.fetchone()):
+                    return None
+
+                return BookStore(row["Id"],
+                                 row["Name"],
+                                 row["Url"],
+                                 row["SearchUrl"],
+                                 row["SearchResultCssSelector"],
+                                 row["PriceCssSelector"],
+                                 row["ImageCssSelector"],
+                                 row["IsbnCssSelector"],
+                                 row["PriceFormat"],
+                                 row["HasDynamicallyLoadedContent"])
+
+    def create_bookstore(self, bookstore: BookStore) -> None:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("INSERT INTO BookStore (Name, Url, SearchUrl, "
+                         "SearchResultCssSelector, PriceCssSelector, "
+                         "ImageCssSelector, IsbnCssSelector, PriceFormat, "
+                         "HasDynamicallyLoadedContent) "
+                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+                cursor.execute(query, (bookstore.name,
+                                       bookstore.url,
+                                       bookstore.search_url,
+                                       bookstore.search_result_css_selector,
+                                       bookstore.price_css_selector,
+                                       bookstore.image_css_selector,
+                                       bookstore.isbn_css_selector,
+                                       bookstore.price_format,
+                                       bookstore.has_dynamically_loaded_content))
+                con.commit()
+
+    def update_bookstore(self, bookstore: BookStore) -> BookStore:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("UPDATE BookStore "
+                         "SET Name = %s, Url = %s, SearchUrl = %s, "
+                         "SearchResultCssSelector = %s, PriceCssSelector = %s, "
+                         "ImageCssSelector = %s, IsbnCssSelector = %s, "
+                         "PriceFormat = %s, HasDynamicallyLoadedContent = %s "
+                         "WHERE Id = %s")
+                cursor.execute(query, (bookstore.name,
+                                       bookstore.url,
+                                       bookstore.search_url,
+                                       bookstore.search_result_css_selector,
+                                       bookstore.price_css_selector,
+                                       bookstore.image_css_selector,
+                                       bookstore.isbn_css_selector,
+                                       bookstore.price_format,
+                                       bookstore.has_dynamically_loaded_content,
+                                       bookstore.id))
+                con.commit()
+
+                return self.get_bookstore(bookstore.id)
+
+    def delete_bookstore(self, bookstore_id: int) -> None:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = "DELETE FROM BookStore WHERE Id = %s"
+                cursor.execute(query, (bookstore_id,))
+                con.commit()
 
     def get_missing_bookstores(self, book_id: int) -> list:
         with self.get_connection() as con:

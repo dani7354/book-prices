@@ -50,10 +50,15 @@ class SiteMenuService:
                               and current_url != self.get_url(Endpoint.USER_EDIT_CURRENT),
                     order_number=11),
                 MenuItem(
+                    url=self.get_url(Endpoint.BOOKSTORE_INDEX),
+                    title="Boghandlere",
+                    is_active=current_url.startswith(self.get_url(Endpoint.BOOKSTORE_INDEX)),
+                    order_number=12),
+                MenuItem(
                     url=self.get_url(Endpoint.BOOK_CREATE),
                     title="Tilføj bog",
                     is_active=current_url.startswith(self.get_url(Endpoint.BOOK_CREATE)),
-                    order_number=12),
+                    order_number=14),
                 MenuItem(
                     url=self.get_url(Endpoint.STATUS_INDEX),
                     title="Status",

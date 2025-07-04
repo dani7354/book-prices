@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from bookprices.web.shared.input_validation_message import min_length_not_met, max_length_exceeded
+from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
 
 
 @dataclass(frozen=True)

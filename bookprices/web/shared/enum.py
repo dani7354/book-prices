@@ -30,6 +30,9 @@ class Endpoint(Enum):
     BOOK_EDIT = "book.edit"
     BOOK_PRICE_HISTORY = "book.price_history"
     BOOK_SEARCH = "book.search"
+    BOOKSTORE_INDEX = "bookstore.index"
+    BOOKSTORE_EDIT = "bookstore.edit"
+    BOOKSTORE_CREATE = "bookstore.create"
     JOB_INDEX = "job.index"
     JOB_EDIT = "job.edit"
     JOB_CREATE_JOB_RUN = "job.create_job_run"
@@ -53,6 +56,12 @@ class BookTemplate(Enum):
     PRICE_HISTORY = "book/price_history.html"
 
 
+class BookStoreTemplate(Enum):
+    INDEX = "bookstore/index.html"
+    EDIT = "bookstore/edit.html"
+    CREATE = "bookstore/create.html"
+
+
 class PageTemplate(Enum):
     INDEX = "index.html"
     ABOUT = "about.html"
@@ -69,7 +78,6 @@ class UserTemplate(Enum):
     INDEX = "user/index.html"
     EDIT_USER = "user/edit.html"
     EDIT_CURRENT = "user/edit_current.html"
-
 
 
 class JobTemplate(Enum):

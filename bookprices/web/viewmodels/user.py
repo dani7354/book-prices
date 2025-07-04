@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import ClassVar, Optional
 
 from bookprices.shared.model.user import UserAccessLevel
-from bookprices.web.shared.input_validation_message import min_length_not_met, max_length_exceeded
+from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
 
 
 @dataclass(frozen=True)
@@ -24,8 +24,6 @@ class UserEditViewModel:
     lastname_min_length: ClassVar[int] = 1
     lastname_max_length: ClassVar[int] = 255
 
-    access_levels: ClassVar[list[UserAccessLevel]] = [level for level in UserAccessLevel]
-
     id: str
     email: str
     firstname: str
@@ -38,6 +36,7 @@ class UserEditViewModel:
     created: Optional[str] = None
     updated: Optional[str] = None
     image_url: Optional[str] = None
+    access_levels: list[UserAccessLevel] = field(default_factory=lambda: list(UserAccessLevel))
     input_errors: dict[str, list[str]] = field(init=False, default_factory=lambda: defaultdict(list))
 
     def validate_input(self) -> None:

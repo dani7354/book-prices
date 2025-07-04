@@ -14,6 +14,10 @@ def get_bookstores_key() -> str:
     return "bookstores"
 
 
+def get_bookstore_key(bookstore_id: int) -> str:
+    return f"bookstore_{bookstore_id}"
+
+
 def get_book_key(book_id: int) -> str:
     return f"book_{book_id}"
 
