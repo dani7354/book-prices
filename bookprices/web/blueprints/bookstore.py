@@ -6,7 +6,8 @@ from bookprices.shared.model.user import UserAccessLevel
 from bookprices.web.service.auth_service import require_admin, AuthService
 from bookprices.web.service.bookstore_service import BookStoreService
 from bookprices.shared.db.database import Database
-from bookprices.web.mapper.bookstore import map_to_bookstore_list, map_bookstore_edit_view_model
+from bookprices.web.mapper.bookstore import map_to_bookstore_list, map_bookstore_edit_view_model, \
+    map_bookstore_edit_view_model_from_form
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
@@ -44,27 +45,8 @@ def index() -> str:
 @require_admin
 def create() -> str | Response:
     if request.method == HttpMethod.POST.value:
-        name = request.form.get(BookStoreEditViewModel.name_field_name) or ""
-        url = request.form.get(BookStoreEditViewModel.url_field_name) or ""
-        search_url = request.form.get(BookStoreEditViewModel.search_url_field_name) or None
-        search_result_css = request.form.get(BookStoreEditViewModel.search_result_css_field_name) or None
-        image_css = request.form.get(BookStoreEditViewModel.image_css_field_name) or None
-        isbn_css = request.form.get(BookStoreEditViewModel.isbn_css_field_name) or None
-        price_css = request.form.get(BookStoreEditViewModel.price_css_field_name) or None
-        price_format = request.form.get(BookStoreEditViewModel.price_format_field_name) or None
-        has_dynamic_content = bool(request.form.get(BookStoreEditViewModel.has_dynamic_content_field_name)) or False
-
-        view_model = BookStoreEditViewModel(
-            id=0,
-            name=name,
-            url=url,
-            search_url=search_url,
-            search_result_css=search_result_css,
-            image_css=image_css,
-            isbn_css=isbn_css,
-            price_css=price_css,
-            price_format=price_format,
-            has_dynamic_content=has_dynamic_content,
+        view_model = map_bookstore_edit_view_model_from_form(
+            request,
             form_action_url=url_for(Endpoint.BOOKSTORE_CREATE.value),
             return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
 
@@ -99,30 +81,11 @@ def edit(bookstore_id: int) -> str | Response:
         return abort(HttpStatusCode.NOT_FOUND, "Boghandlen blev ikke fundet")
 
     if request.method == HttpMethod.POST.value:
-        bookstore_id_from_form = request.form.get(BookStoreEditViewModel.id_field_name) or bookstore_id
-        name = request.form.get(BookStoreEditViewModel.name_field_name) or ""
-        url = request.form.get(BookStoreEditViewModel.url_field_name) or ""
-        search_url = request.form.get(BookStoreEditViewModel.search_url_field_name) or None
-        search_result_css = request.form.get(BookStoreEditViewModel.search_result_css_field_name) or None
-        image_css = request.form.get(BookStoreEditViewModel.image_css_field_name) or None
-        isbn_css = request.form.get(BookStoreEditViewModel.isbn_css_field_name) or None
-        price_css = request.form.get(BookStoreEditViewModel.price_css_field_name) or None
-        price_format = request.form.get(BookStoreEditViewModel.price_format_field_name) or None
-        has_dynamic_content = bool(request.form.get(BookStoreEditViewModel.has_dynamic_content_field_name)) or False
-
-        view_model = BookStoreEditViewModel(
-            id=bookstore_id_from_form,
-            name=name,
-            url=url,
-            search_url=search_url,
-            search_result_css=search_result_css,
-            image_css=image_css,
-            isbn_css=isbn_css,
-            price_css=price_css,
-            price_format=price_format,
-            has_dynamic_content=has_dynamic_content,
+        view_model = map_bookstore_edit_view_model_from_form(
+            request,
             form_action_url=url_for(Endpoint.BOOKSTORE_EDIT.value, bookstore_id=bookstore_id),
-            return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
+            return_url=url_for(Endpoint.BOOKSTORE_INDEX.value),
+            bookstore_id=bookstore_id)
 
         if not view_model.is_valid():
             return render_template(BookStoreTemplate.EDIT.value, view_model=view_model)
