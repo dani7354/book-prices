@@ -38,6 +38,7 @@
     <a id="btn-create-bookstore" href="{{ view_model.create_url }}" class="btn btn-primary">Opret</a>
 </div>
 
-<script src="{{ url_for('static', filename='js/delete_bookstore.js') }}"></script>
+<script src="{{ url_for('static', filename='js/delete_bookstore.js') }}"
+        integrity="{{ sri_attribute_values['delete_bookstore_js'] }}"></script>
 
 {% endblock %}
