@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, current_app, render_template, Response, request, url_for, redirect
+from flask import Blueprint, abort, current_app, render_template, Response, request, url_for, redirect, jsonify
 from flask_login import login_required
 from werkzeug.local import LocalProxy
 
@@ -44,7 +44,45 @@ def index() -> str:
 @require_admin
 def create() -> str | Response:
     if request.method == HttpMethod.POST.value:
-        pass
+        name = request.form.get(BookStoreEditViewModel.name_field_name) or ""
+        url = request.form.get(BookStoreEditViewModel.url_field_name) or ""
+        search_url = request.form.get(BookStoreEditViewModel.search_url_field_name) or None
+        search_result_css = request.form.get(BookStoreEditViewModel.search_result_css_field_name) or None
+        image_css = request.form.get(BookStoreEditViewModel.image_css_field_name) or None
+        isbn_css = request.form.get(BookStoreEditViewModel.isbn_css_field_name) or None
+        price_css = request.form.get(BookStoreEditViewModel.price_css_field_name) or None
+        price_format = request.form.get(BookStoreEditViewModel.price_format_field_name) or None
+        has_dynamic_content = bool(request.form.get(BookStoreEditViewModel.has_dynamic_content_field_name)) or False
+
+        view_model = BookStoreEditViewModel(
+            id=0,
+            name=name,
+            url=url,
+            search_url=search_url,
+            search_result_css=search_result_css,
+            image_css=image_css,
+            isbn_css=isbn_css,
+            price_css=price_css,
+            price_format=price_format,
+            has_dynamic_content=has_dynamic_content,
+            form_action_url=url_for(Endpoint.BOOKSTORE_CREATE.value),
+            return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
+
+        if not view_model.is_valid():
+            return render_template(BookStoreTemplate.CREATE.value, view_model=view_model)
+
+        bookstore_service.create(
+            name=view_model.name,
+            url=view_model.url,
+            search_url=view_model.search_url,
+            search_result_css=view_model.search_result_css,
+            image_css=view_model.image_css,
+            isbn_css=view_model.isbn_css,
+            price_css=view_model.price_css,
+            price_format=view_model.price_format,
+            has_dynamic_content=view_model.has_dynamic_content)
+
+        return redirect(url_for(Endpoint.BOOKSTORE_INDEX.value))
 
     view_model = BookStoreEditViewModel.empty(
         form_action_url=url_for(Endpoint.BOOKSTORE_CREATE.value),
@@ -108,8 +146,6 @@ def edit(bookstore_id: int) -> str | Response:
             logger.error(f"Failed to update bookstore: {ex}")
             view_model.add_error(BookStoreEditViewModel.name_field_name, str(ex))
 
-
-
     view_model = map_bookstore_edit_view_model(bookstore)
     return render_template(BookStoreTemplate.EDIT.value, view_model=view_model)
 
@@ -117,5 +153,13 @@ def edit(bookstore_id: int) -> str | Response:
 @bookstore_blueprint.route("delete/<int:bookstore_id>", methods=[HttpMethod.POST.value])
 @login_required
 @require_admin
-def delete(bookstore_id: int) -> Response:
-    pass
+def delete(bookstore_id: int) -> tuple[Response, int]:
+    if not (bookstore_service.get_bookstore(bookstore_id)):
+        return jsonify({"error": f"Boghandlen med id {bookstore_id} blev ikke fundet"}), HttpStatusCode.NOT_FOUND
+    try:
+        bookstore_service.delete(bookstore_id)
+    except Exception as ex:
+        logger.error(f"Failed to delete bookstore: {ex}")
+        return jsonify({"error": "Noget gik galt under sletning af boghandlen"}), HttpStatusCode.INTERNAL_SERVER_ERROR
+
+    return jsonify({}), HttpStatusCode.OK
