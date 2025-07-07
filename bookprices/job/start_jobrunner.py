@@ -103,6 +103,7 @@ def setup_event_manager(config: Config) -> EventManager:
         book_created_event.name: book_created_event,
         book_deleted_event.name: book_deleted_event,
         books_found_in_stores.name: books_found_in_stores,
+        books_imported_event.name: books_imported_event
     }
     event_manager = EventManager(events)
 

@@ -67,7 +67,7 @@
         <input name="{{ view_model.price_css_field_name }}" type="text" class="form-control"
                minlength="{{ view_model.price_css_min_length }}"
                maxlength="{{ view_model.price_css_css_max_length }}" id="{{ view_model.price_css_field_name }}"
-               value="{{ view_model.price_css if price_css else '' }}">
+               value="{{ view_model.price_css if view_model.price_css else '' }}">
         {% if view_model.price_css_field_name in errors %}
             {% for error in errors[view_model.price_css_field_name] %}
                 <span id="price-css-error" class="form-text text-danger">{{ error }}</span>
@@ -79,7 +79,7 @@
         <input name="{{ view_model.image_css_field_name }}" type="text" class="form-control"
                minlength="{{ view_model.image_css_min_length }}" maxlength="{{ view_model.image_css_max_length }}"
                id="{{ view_model.image_css_field_name }}"
-               value="{{ view_model.image_css if image_css else '' }}">
+               value="{{ view_model.image_css if view_model.image_css else '' }}">
         {% if view_model.image_css_field_name in errors %}
             {% for error in errors[view_model.image_css_field_name] %}
                 <span id="image-css-error" class="form-text text-danger">{{ error }}</span>
