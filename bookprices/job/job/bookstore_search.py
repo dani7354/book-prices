@@ -9,7 +9,14 @@ from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
-from bookprices.shared.webscraping.book import BookFinder, IsbnSearch, BookNotFoundError
+from bookprices.shared.webscraping.book import BookFinder, BookNotFoundError
+
+
+class IsbnSearch(NamedTuple):
+    """ Used for holding a search for a book in a bookstore. """
+    bookstore_id: int
+    book_id: int
+    isbn: str
 
 
 class BookStoreBookUrl(NamedTuple):
@@ -37,6 +44,7 @@ class BookStoreSearchJob(JobBase):
         self._db = db
         self._cache_key_remover = cache_key_remover
         self._event_manager = event_manager
+        self._book_searchers = {}
         self._search_queue = Queue()
         self._results = []
         self._logger = logging.getLogger(self.name)
@@ -44,6 +52,7 @@ class BookStoreSearchJob(JobBase):
     def start(self, **kwargs) -> JobResult:
         try:
             self._logger.info("Starting searching for book availability in bookstores...")
+            self._create_book_finders()
             book_bookstore_offset, book_bookstore_page = 0, 1
             total_searches_count = 0
             while self._get_and_enqueue_next_searches(book_bookstore_offset):
@@ -57,7 +66,6 @@ class BookStoreSearchJob(JobBase):
                 book_bookstore_page += 1
                 book_bookstore_offset = (book_bookstore_page - 1) * self.book_bookstore_batch_size
 
-
             self._logger.info(f"Total searches_processed: {total_searches_count}")
             self._event_manager.trigger_event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
             return JobResult(JobExitStatus.SUCCESS)
@@ -65,17 +73,26 @@ class BookStoreSearchJob(JobBase):
             self._logger.error(f"Unexpected error: {ex}")
             return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
 
+    def _create_book_finders(self) -> None:
+        self._logger.info("Initializing book searchers...")
+        self._book_searchers.clear()
+        for bookstore in self._db.bookstore_db.get_bookstores():
+            self._book_searchers[bookstore.id] = BookFinder(
+                bookstore_id=bookstore.id,
+                bookstore_name=bookstore.name,
+                bookstore_url=bookstore.url,
+                search_url=bookstore.search_url,
+                bookstore_isbn_css_selector=bookstore.isbn_css_selector,
+                search_result_css_selector=bookstore.search_result_css_selector,
+                redirects_on_match=not bookstore.search_result_css_selector)
+
+        self._logger.info(f"{len(self._book_searchers)} book finders created for bookstores.")
+
+
     def _get_and_enqueue_next_searches(self, offset: int) -> bool:
         for row in self._db.bookstore_db.get_book_isbn_and_missing_bookstores(offset, self.book_bookstore_batch_size):
             self._search_queue.put(
-                IsbnSearch(
-                    book_id=row["BookId"],
-                    bookstore_id=row["BookStoreId"],
-                    search_url=row["SearchUrl"],
-                    match_css_selector=row["SearchResultCssSelector"],
-                    isbn=row["Isbn"],
-                    isbn_css_selector=row["IsbnCssSelector"],
-                    store_url=row["Url"]))
+                IsbnSearch(book_id=row["BookId"], bookstore_id=row["BookStoreId"], isbn=row["Isbn"]))
 
         return not self._search_queue.empty()
 
@@ -102,14 +119,22 @@ class BookStoreSearchJob(JobBase):
         while not self._search_queue.empty():
             try:
                 isbn_search = self._search_queue.get()
-                match_url = BookFinder.search_book_isbn(isbn_search)
-                # Should return none if no book found instead of raising exceptions.
-                self._logger.info(f"Found book with id {isbn_search.book_id} at {match_url} (bookstore {isbn_search.bookstore_id})")
+                if not (book_finder := self._book_searchers.get(isbn_search.bookstore_id)):
+                    self._logger.error(f"No book finder found for bookstore id {isbn_search.bookstore_id}.")
+                    continue
+                if not (search_result := book_finder.find_url_for_book(isbn_search.book_id, isbn_search.isbn)):
+                    self._logger.info(
+                        f"No search result found for book with id {isbn_search.book_id} "
+                        f"and ISBN {isbn_search.isbn} at bookstore {isbn_search.bookstore_id}.")
+                    continue
+                self._logger.info(
+                    f"Found book with id {isbn_search.book_id} at {search_result.url} "
+                    f"(bookstore {isbn_search.bookstore_id})")
                 self._results.append(
                     BookStoreBookUrl(
-                        book_id=isbn_search.book_id,
-                        bookstore_id=isbn_search.bookstore_id,
-                        url=urlparse(match_url).path))
+                        book_id=search_result.book_id,
+                        bookstore_id=search_result.bookstore_id,
+                        url=urlparse(search_result.url).path))
             except BookNotFoundError:
                 continue
             except Exception as ex:
