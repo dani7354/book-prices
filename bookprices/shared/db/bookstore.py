@@ -134,8 +134,7 @@ class BookStoreDb(BaseDb):
                          "FROM Book b "
                          "CROSS JOIN BookStore bs "
                          "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
-                         "WHERE bsb.BookId IS NULL AND bsb.BookStoreId IS NULL "
-                         "AND SearchResultCssSelector IS NOT NULL AND IsbnCssSelector IS NOT NULL AND SearchUrl IS NOT NULL "
+                         "WHERE bsb.BookId IS NULL AND bsb.BookStoreId IS NULL AND bs.SearchUrl IS NOT NULL "
                          "ORDER BY b.Id ASC "
                          "LIMIT %s OFFSET %s;")
 
