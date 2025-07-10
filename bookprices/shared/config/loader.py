@@ -35,7 +35,7 @@ def load_from_file(file: str) -> Config:
     json_content = _load_from_json(file)
     database_section = json_content["database"]
     cache_section = json_content["cache"]
-    job_api_section = json_content.get("job_api", dict())  # Just until the jobs are fully migrated...
+    job_api_section = json_content.get("job_api", {})  # Just until the jobs are fully migrated...
 
     return Config(Database(database_section["host"],
                            database_section["port"],
