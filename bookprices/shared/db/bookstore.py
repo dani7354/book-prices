@@ -150,6 +150,14 @@ class BookStoreDb(BaseDb):
                 cursor.executemany(query, bookstores_for_books)
                 con.commit()
 
+    def create_bookstore_for_book_if_not_exists(self, book_id: int, bookstore_id: int, url: str) -> None:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("INSERT IGNORE INTO BookStoreBook (BookId, BookStoreId, Url) "
+                         "VALUES (%s, %s, %s)")
+                cursor.execute(query, (book_id, bookstore_id, url))
+                con.commit()
+
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int):
         with self.get_connection() as con:
             with con.cursor() as cursor:
