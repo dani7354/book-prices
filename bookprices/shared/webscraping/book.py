@@ -87,7 +87,7 @@ class BookFinder:
         if not (content_bs := BeautifulSoup(response.content.decode(self.encoding), options.BS_HTML_PARSER)):
             raise BookNotFoundError(f"Failed to parse response content from {search_url}")
         if (not self._search_result_css_selector
-                or (match_url_tag := content_bs.select_one(self._search_result_css_selector))):
+                or not (match_url_tag := content_bs.select_one(self._search_result_css_selector))):
             raise BookNotFoundError(f"No match found for CSS selector {self._search_result_css_selector} at {search_url}")
 
         return match_url_tag.get(self.href_attribute)
@@ -111,7 +111,7 @@ class BookFinder:
         response_body = response.content.decode(self.encoding)
         response_bs = BeautifulSoup(response_body, options.BS_HTML_PARSER)
         if (not self._bookstore_isbn_css_selector
-                or (isbn_element := response_bs.select_one(self._bookstore_isbn_css_selector))):
+                or not (isbn_element := response_bs.select_one(self._bookstore_isbn_css_selector))):
             self._logger.error(
                 f"Failed to parse response body from {match_url}. "
                 f"CSS selector {self._bookstore_isbn_css_selector} not found.")
