@@ -10,6 +10,7 @@ from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
+from bookprices.job.job.update_prices import AllBookPricesUpdateJob
 from bookprices.shared.service.job_service import JobService, JobSchemaFields, JobRunPriority, CreationFailedError
 from bookprices.job.job.trim_prices import TrimPricesJob
 
@@ -42,18 +43,22 @@ class JobScheduler:
 
     def schedule_jobs(self) -> None:
         schedule.every().day.at("01:00", self.time_zone).do(self._set_available_jobs)
-        schedule.every().monday.at("10:00", self.time_zone).do(
-            self._send_start_job_request, TrimPricesJob.name)
+
         schedule.every().day.at("02:00", self.time_zone).do(
             self._send_start_job_request, DeleteUnavailableBooksJob.name)
-        schedule.every().day.at("08:00", self.time_zone).do(
-            self._send_start_job_request, DownloadImagesJob.name)
-        schedule.every().day.at("07:00", self.time_zone).do(
-            self._send_start_job_request, DeleteImagesJob.name)
-        schedule.every().day.at("06:00", self.time_zone).do(
-            self._send_start_job_request, BookStoreSearchJob.name)
+        schedule.every().day.at("03:00", self.time_zone).do(
+            self._send_start_job_request, AllBookPricesUpdateJob.name)
         schedule.every().day.at("05:00", self.time_zone).do(
             self._send_start_job_request, WilliamDamBookImportJob.name)
+        schedule.every().day.at("06:00", self.time_zone).do(
+            self._send_start_job_request, BookStoreSearchJob.name)
+        schedule.every().day.at("07:00", self.time_zone).do(
+            self._send_start_job_request, DeleteImagesJob.name)
+        schedule.every().day.at("08:00", self.time_zone).do(
+            self._send_start_job_request, DownloadImagesJob.name)
+
+        schedule.every().monday.at("10:00", self.time_zone).do(
+            self._send_start_job_request, TrimPricesJob.name)
 
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")

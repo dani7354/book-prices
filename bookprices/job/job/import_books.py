@@ -1,9 +1,12 @@
+import dataclasses
 import logging
+from urllib.parse import urlparse
+
 import requests
 import queue
 from bs4 import BeautifulSoup
 from threading import Thread
-from typing import ClassVar
+from typing import ClassVar, NamedTuple
 
 from requests import RequestException
 
@@ -17,6 +20,11 @@ from bookprices.shared.model.book import Book
 from bookprices.shared.validation import isbn as isbn_validator
 
 
+class NewBook(NamedTuple):
+    book: Book
+    url: str
+
+
 class WilliamDamBookImportJob(JobBase):
     """ Imports books from WilliamDam.dk """
 
@@ -25,6 +33,7 @@ class WilliamDamBookImportJob(JobBase):
     _book_details_list_css: ClassVar[str] = "ul.list li"
     _title_css: ClassVar[str] = "h1"
     _author_css: ClassVar[str] = "h2.wd_text_large > span:nth-child(1) > a:nth-child(1)"
+    _bookstore_id: ClassVar[int] = 2
 
     def __init__(
             self,
@@ -49,7 +58,7 @@ class WilliamDamBookImportJob(JobBase):
             self._logger.info("Getting book urls...")
             self._enqueue_urls_for_book_list_pages(
                 "https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={page}",
-                150)
+                250)
 
             if self._book_list_url_queue.empty():
                 self._logger.info("No book list urls found!")
@@ -124,18 +133,18 @@ class WilliamDamBookImportJob(JobBase):
                 book = self._parse_book(book_response.content.decode())
                 if self._is_book_valid(book):
                     logging.debug(f"Found valid book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})")
-                    self._new_books.append(book)
+                    self._new_books.append(NewBook(book=book, url=urlparse(book_url).path))
             except (RequestException, ValueError, KeyError) as ex:
                 self._logger.error(ex)
 
     def _create_or_update_books(self) -> None:
         created_count, updated_count = 0, 0
         existing_books_isbn = {b.isbn: b for b in self._db.book_db.get_books()}
-        for book in self._new_books:
+        for book, url in self._new_books:
             try:
-                if book.isbn in existing_books_isbn:
+                if existing_book := existing_books_isbn.get(book.isbn):
                     self._logger.debug(f"Updating book with ISBN {book.isbn}")
-                    existing_book = existing_books_isbn[book.isbn]
+                    book_id = existing_book.id
                     updated_book = Book(id=existing_book.id,
                                         isbn=existing_book.isbn,
                                         title=book.title,
@@ -150,9 +159,12 @@ class WilliamDamBookImportJob(JobBase):
                     updated_count += 1
                 else:
                     self._logger.debug(f"Saving book with ISBN {book.isbn}")
-                    self._db.book_db.create_book(book)
+                    book_id = self._db.book_db.create_book(book)
                     self._cache_key_remover.remove_key_for_authors()
+                    self._cache_key_remover.remove_keys_for_book_and_bookstore(book_id, self._bookstore_id)
                     created_count += 1
+
+                self._db.bookstore_db.create_bookstore_for_book_if_not_exists(book_id, self._bookstore_id, url)
             except Exception as ex:
                 self._logger.error(f"Error while inserting book: {book.title}, {book.author}, {book.isbn}")
                 self._logger.error(ex)

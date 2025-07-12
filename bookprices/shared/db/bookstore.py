@@ -134,9 +134,8 @@ class BookStoreDb(BaseDb):
                          "FROM Book b "
                          "CROSS JOIN BookStore bs "
                          "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
-                         "WHERE bsb.BookId IS NULL AND bsb.BookStoreId IS NULL "
-                         "AND SearchResultCssSelector IS NOT NULL AND IsbnCssSelector IS NOT NULL AND SearchUrl IS NOT NULL "
-                         "ORDER BY b.Id ASC "
+                         "WHERE bsb.BookId IS NULL AND bsb.BookStoreId IS NULL AND bs.SearchUrl IS NOT NULL "
+                         "ORDER BY b.Id DESC "
                          "LIMIT %s OFFSET %s;")
 
                 cursor.execute(query, (limit, offset))
@@ -149,6 +148,14 @@ class BookStoreDb(BaseDb):
                 query = ("INSERT INTO BookStoreBook (BookId, BookStoreId, Url) "
                          "VALUES (%s, %s, %s)")
                 cursor.executemany(query, bookstores_for_books)
+                con.commit()
+
+    def create_bookstore_for_book_if_not_exists(self, book_id: int, bookstore_id: int, url: str) -> None:
+        with self.get_connection() as con:
+            with con.cursor() as cursor:
+                query = ("INSERT IGNORE INTO BookStoreBook (BookId, BookStoreId, Url) "
+                         "VALUES (%s, %s, %s)")
+                cursor.execute(query, (book_id, bookstore_id, url))
                 con.commit()
 
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int):
