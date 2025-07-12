@@ -154,5 +154,6 @@ class BookStoreEditViewModel:
             isbn_css=None,
             price_css=None,
             price_format=None,
+            color_hex=None,
             form_action_url=form_action_url,
             return_url=return_url)
