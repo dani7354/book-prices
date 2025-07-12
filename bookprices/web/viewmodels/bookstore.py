@@ -3,7 +3,8 @@ from collections import defaultdict
 from typing import ClassVar
 
 from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
-from bookprices.web.validation.input import length_equals_or_longer_than, length_equals_or_shorter_than
+from bookprices.web.validation.input import length_equals_or_longer_than, length_equals_or_shorter_than, \
+    contains_only_hexadecimal
 
 
 @dataclasses.dataclass(frozen=True)
@@ -34,6 +35,7 @@ class BookStoreEditViewModel:
     isbn_css_field_name: ClassVar[str] = "isbn-css"
     price_css_field_name: ClassVar[str] = "price-css"
     price_format_field_name: ClassVar[str] = "price-format"
+    color_hex_field_name: ClassVar[str] = "color-hex"
 
     name_min_length: ClassVar[int] = 1
     name_max_length: ClassVar[int] = 255
@@ -51,6 +53,8 @@ class BookStoreEditViewModel:
     isbn_css_max_length: ClassVar[int] = 255
     price_format_min_length: ClassVar[int] = 1
     price_format_max_length: ClassVar[int] = 80
+    color_hex_min_length: ClassVar[int] = 6
+    color_hex_max_length: ClassVar[int] = 6
 
     has_dynamic_content: bool
     id: int
@@ -62,6 +66,7 @@ class BookStoreEditViewModel:
     isbn_css: str | None
     price_css: str | None
     price_format: str | None
+    color_hex: str | None
     form_action_url: str
     return_url: str
     errors: dict[str, list[str]] = dataclasses.field(default_factory=lambda: defaultdict(list))
@@ -125,6 +130,16 @@ class BookStoreEditViewModel:
         elif not length_equals_or_shorter_than(self.image_css, self.image_css_max_length, allow_none=True):
             self.errors[self.image_css_field_name].append(
                 max_length_exceeded("CSS-selektor for billeder", self.image_css_max_length))
+
+        if not length_equals_or_longer_than(self.color_hex, self.color_hex_min_length, allow_none=True):
+            self.errors[self.color_hex_field_name].append(
+                min_length_not_met("Farvekode", self.color_hex_min_length))
+        elif not length_equals_or_shorter_than(self.color_hex, self.color_hex_max_length, allow_none=True):
+            self.errors[self.color_hex_field_name].append(
+                max_length_exceeded("Farvekode", self.color_hex_max_length))
+        if not contains_only_hexadecimal(self.color_hex, allow_none=True):
+            self.errors[self.color_hex_field_name].append(
+                "Farvekoden må kun indeholde hexadecimale tegn (0-9, a-f, A-F).")
 
     @staticmethod
     def empty(form_action_url: str, return_url: str) -> "BookStoreEditViewModel":

@@ -37,6 +37,7 @@ class BaseDb:
                                                  row["ImageCssSelector"],
                                                  row["IsbnCssSelector"],
                                                  row["PriceFormat"],
-                                                 row["HasDynamicallyLoadedContent"]))
+                                                 row["HasDynamicallyLoadedContent"],
+                                                 row["ColorHex"]))
 
                 return book_stores[0] if len(book_stores) > 0 else None

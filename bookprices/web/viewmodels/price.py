@@ -11,6 +11,7 @@ class PriceHistoryResponse:
 @dataclass(frozen=True)
 class PriceHistoryForBookStoreResponse:
     bookstore_name: str
+    color: str
     prices: list[str]
 
 
