@@ -62,6 +62,7 @@ def create() -> str | Response:
             isbn_css=view_model.isbn_css,
             price_css=view_model.price_css,
             price_format=view_model.price_format,
+            color_hex=view_model.color_hex,
             has_dynamic_content=view_model.has_dynamic_content)
 
         return redirect(url_for(Endpoint.BOOKSTORE_INDEX.value))
@@ -101,6 +102,7 @@ def edit(bookstore_id: int) -> str | Response:
                 isbn_css=view_model.isbn_css,
                 price_css=view_model.price_css,
                 price_format=view_model.price_format,
+                color_hex=view_model.color_hex,
                 has_dynamic_content=view_model.has_dynamic_content)
 
             return redirect(url_for(Endpoint.BOOKSTORE_INDEX.value))

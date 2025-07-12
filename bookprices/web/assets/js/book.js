@@ -5,7 +5,11 @@ function createChart(priceHistoryResponse) {
     let prices_for_bookstores = priceHistoryResponse["prices"];
     let options = getChartBaseOptions();
     $.each(prices_for_bookstores, function (index, prices_for_bookstore) {
-        options["series"][index] = { name: prices_for_bookstore.bookstore_name,  data: prices_for_bookstore.prices };
+        options["series"][index] = {
+            name: prices_for_bookstore.bookstore_name,
+            data: prices_for_bookstore.prices,
+            color: prices_for_bookstore.color
+        };
     });
     options["xaxis"]["categories"] = dates;
 

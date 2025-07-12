@@ -65,7 +65,8 @@ def map_price_history_for_stores(
     all_dates = sorted({price.created.strftime(DATE_FORMAT) for prices in bookprices_by_bookstore.values()
                         for price in prices})
     price_history_for_stores = [
-        PriceHistoryForBookStoreResponse(bookstore.name, _get_price_history_for_all_dates(all_dates, prices))
+        PriceHistoryForBookStoreResponse(
+            bookstore.name, bookstore.color_hex, _get_price_history_for_all_dates(all_dates, prices))
         for bookstore, prices in bookprices_by_bookstore.items()
     ]
 

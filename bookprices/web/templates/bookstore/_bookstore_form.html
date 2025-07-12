@@ -98,6 +98,18 @@
             {% endfor %}
         {% endif %}
     </div>
+     <div class="mb-3">
+        <label for="{{ view_model.color_hex_field_name }}" class="form-label">Farvekode</label>
+        <input name="{{ view_model.color_hex_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.color_hex_min_length }}" maxlength="{{ view_model.color_hex_max_length }}"
+               id="{{ view_model.color_hex_field_name }}"
+               value="{{ view_model.color_hex if view_model.color_hex else '' }}">
+        {% if view_model.color_hex_field_name in errors %}
+            {% for error in errors[view_model.color_hex_field_name] %}
+                <span id="color-hex-error" class="form-text text-danger">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
     <div class="mb-3">
         <label for="{{ view_model.has_dynamic_content_field_name }}" class="form-label">Dynamisk indlæst indhold</label>
         {% if view_model.has_dynamic_content %}
