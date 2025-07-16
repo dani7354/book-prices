@@ -13,6 +13,12 @@ GREEN_ROW_CSS_CLASS = "table-success"
 RED_ROW_CSS_CLASS = "table-danger"
 YELLOW_ROW_CSS_CLASS = "table-warning"
 
+LINE_CHART_DEFAULT_COLOR = "#ff0000"
+
+
+def _format_color_hex(color_hex: str | None) -> str:
+    return f"#{color_hex}" if color_hex else LINE_CHART_DEFAULT_COLOR
+
 
 def _get_css_classes_for_price_rows(prices: list[BookPrice]) -> list[str]:
     min_price = min(prices, key=lambda p: p.price).price
@@ -34,14 +40,14 @@ def _get_css_classes_for_price_rows(prices: list[BookPrice]) -> list[str]:
     return css_classes
 
 
-def map_prices_history(bookprices: list[BookPrice]) -> PriceHistoryResponse:
+def map_prices_history(bookstore_color_hex: str, bookprices: list[BookPrice]) -> PriceHistoryResponse:
     dates, prices = [], []
     for p in bookprices:
         dates.append(f"{p.created.strftime(DATE_FORMAT)}")
         prices.append(f"{p.price:{PRICE_DECIMAL_FORMAT}}")
     row_css_classes = _get_css_classes_for_price_rows(bookprices)
 
-    return PriceHistoryResponse(dates, prices, row_css_classes)
+    return PriceHistoryResponse(_format_color_hex(bookstore_color_hex), dates, prices, row_css_classes)
 
 
 def _get_price_history_for_all_dates(all_dates: list[str], prices_for_bookstore: list[BookPrice]) -> list[str]:
@@ -66,7 +72,7 @@ def map_price_history_for_stores(
                         for price in prices})
     price_history_for_stores = [
         PriceHistoryForBookStoreResponse(
-            bookstore.name, bookstore.color_hex, _get_price_history_for_all_dates(all_dates, prices))
+            bookstore.name, _format_color_hex(bookstore.color_hex), _get_price_history_for_all_dates(all_dates, prices))
         for bookstore, prices in bookprices_by_bookstore.items()
     ]
 

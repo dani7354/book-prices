@@ -10,8 +10,8 @@ class BookStoreDb(BaseDb):
     def get_bookstores(self) -> list[BookStore]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
+                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
                          "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "ORDER BY Id ASC")
@@ -22,8 +22,8 @@ class BookStoreDb(BaseDb):
     def get_bookstore(self, bookstore_id: int) -> BookStore | None:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
+                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
                          "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "WHERE Id = %s")
@@ -86,8 +86,8 @@ class BookStoreDb(BaseDb):
     def get_missing_bookstores(self, book_id: int) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
+                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
                          "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "WHERE Id NOT IN (SELECT BookStoreId FROM BookStoreBook WHERE BookId = %s)")
@@ -163,7 +163,7 @@ class BookStoreDb(BaseDb):
                 for row in cursor:
                     bookstore_id = row["BookStoreId"]
                     if bookstore_id not in bookstores:
-                        self._add_bookstore_from_row(row, bookstores)
+                        bookstores[bookstore_id] = self._map_bookstore(row)
 
                     book_id = row["BookId"]
                     if book_id not in books_in_bookstore:
@@ -211,7 +211,7 @@ class BookStoreDb(BaseDb):
     @staticmethod
     def _map_bookstore(row: dict) -> BookStore:
         return BookStore(
-            id=row["Id"],
+            id=row["BookStoreId"],
             name=row["BookStoreName"],
             url=row["BookStoreUrl"],
             search_url=row["SearchUrl"],

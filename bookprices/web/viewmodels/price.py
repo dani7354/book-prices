@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class PriceHistoryResponse:
+    color: str
     dates: list[str]
     prices: list[str]
     row_css_classes: list[str]

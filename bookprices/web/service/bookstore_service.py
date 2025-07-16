@@ -45,7 +45,7 @@ class BookStoreService:
             isbn_css_selector=isbn_css,
             price_css_selector=price_css,
             price_format=price_format,
-            color_hex=color_hex,
+            color_hex=color_hex.lower() if color_hex else None,
             has_dynamically_loaded_content=has_dynamic_content)
 
         self._database.bookstore_db.create_bookstore(bookstore)
@@ -75,7 +75,7 @@ class BookStoreService:
             isbn_css_selector=isbn_css,
             price_css_selector=price_css,
             price_format=price_format,
-            color_hex=color_hex,
+            color_hex=color_hex.lower() if color_hex else None,
             has_dynamically_loaded_content=has_dynamic_content)
 
         self._database.bookstore_db.update_bookstore(bookstore)

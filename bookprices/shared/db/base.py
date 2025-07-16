@@ -22,22 +22,22 @@ class BaseDb:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name,  PriceFormat, Url, "
                          "SearchUrl, SearchResultCssSelector, PriceCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_store_id,))
                 book_stores = []
                 for row in cursor:
-                    book_stores.append(BookStore(row["Id"],
-                                                 row["Name"],
-                                                 row["Url"],
-                                                 row["SearchUrl"],
-                                                 row["SearchResultCssSelector"],
-                                                 row["PriceCssSelector"],
-                                                 row["ImageCssSelector"],
-                                                 row["IsbnCssSelector"],
-                                                 row["PriceFormat"],
-                                                 row["HasDynamicallyLoadedContent"],
-                                                 row["ColorHex"]))
+                    book_stores.append(BookStore(id=row["Id"],
+                                                 name=row["Name"],
+                                                 url=row["Url"],
+                                                 search_url=row["SearchUrl"],
+                                                 search_result_css_selector=row["SearchResultCssSelector"],
+                                                 price_css_selector=row["PriceCssSelector"],
+                                                 image_css_selector=row["ImageCssSelector"],
+                                                 isbn_css_selector=row["IsbnCssSelector"],
+                                                 price_format=row["PriceFormat"],
+                                                 color_hex=row["ColorHex"],
+                                                 has_dynamically_loaded_content=row["HasDynamicallyLoadedContent"]))
 
                 return book_stores[0] if len(book_stores) > 0 else None

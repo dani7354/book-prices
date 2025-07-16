@@ -11,10 +11,10 @@ function getChartBaseOptions() {
                 }
             },
             dataLabels: {
-                enabled: false
+                enabled: true
             },
             stroke: {
-                curve: "straight"
+                curve: "stepline",
             },
             grid: {
                 row: {
@@ -23,10 +23,10 @@ function getChartBaseOptions() {
                 },
             },
             xaxis: {
-                title: {text: "Dato"},
+                title: { text: "Dato" },
             },
             yaxis: {
-                title: {text: "Pris"}
+                title: { text: "Pris" }
             }
         };
 }
