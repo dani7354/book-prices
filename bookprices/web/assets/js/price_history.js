@@ -9,7 +9,6 @@ function createChart(datesDesc, prices, color) {
     let pricesOrdered = prices.slice().reverse();
 
     let options = getChartBaseOptions();
-    console.log("Setting color to: " + color);
     options["series"] = [
         {
             name: "Pris",
@@ -18,7 +17,6 @@ function createChart(datesDesc, prices, color) {
         }
     ];
     options["xaxis"]["categories"] = datesAsc;
-    console.log(options);
 
     let chart = new ApexCharts(priceChartContainer.get(0), options);
     chart.render();
