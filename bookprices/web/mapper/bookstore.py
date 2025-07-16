@@ -36,6 +36,7 @@ def map_bookstore_edit_view_model(bookstore: BookStore) -> BookStoreEditViewMode
         isbn_css=bookstore.isbn_css_selector,
         price_css=bookstore.price_css_selector,
         price_format=bookstore.price_format,
+        color_hex=bookstore.color_hex,
         form_action_url=url_for(Endpoint.BOOKSTORE_EDIT.value, bookstore_id=bookstore.id),
         return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
 
@@ -51,6 +52,7 @@ def map_bookstore_edit_view_model_from_form(
     isbn_css = request.form.get(BookStoreEditViewModel.isbn_css_field_name) or None
     price_css = request.form.get(BookStoreEditViewModel.price_css_field_name) or None
     price_format = request.form.get(BookStoreEditViewModel.price_format_field_name) or None
+    color_hex = request.form.get(BookStoreEditViewModel.color_hex_field_name) or None
     has_dynamic_content = bool(request.form.get(BookStoreEditViewModel.has_dynamic_content_field_name)) or False
 
     return BookStoreEditViewModel(
@@ -63,6 +65,7 @@ def map_bookstore_edit_view_model_from_form(
         isbn_css=isbn_css,
         price_css=price_css,
         price_format=price_format,
+        color_hex=color_hex,
         has_dynamic_content=has_dynamic_content,
         form_action_url=form_action_url,
         return_url=return_url)

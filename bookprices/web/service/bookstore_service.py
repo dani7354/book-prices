@@ -33,6 +33,7 @@ class BookStoreService:
                isbn_css: str | None,
                price_css: str | None,
                price_format: str | None,
+               color_hex: str | None,
                has_dynamic_content: bool) -> None:
         bookstore = BookStore(
             id=0,
@@ -44,6 +45,7 @@ class BookStoreService:
             isbn_css_selector=isbn_css,
             price_css_selector=price_css,
             price_format=price_format,
+            color_hex=color_hex.lower() if color_hex else None,
             has_dynamically_loaded_content=has_dynamic_content)
 
         self._database.bookstore_db.create_bookstore(bookstore)
@@ -60,6 +62,7 @@ class BookStoreService:
             isbn_css: str | None,
             price_css: str | None,
             price_format: str | None,
+            color_hex: str | None,
             has_dynamic_content: bool) -> None:
 
         bookstore = BookStore(
@@ -72,6 +75,7 @@ class BookStoreService:
             isbn_css_selector=isbn_css,
             price_css_selector=price_css,
             price_format=price_format,
+            color_hex=color_hex.lower() if color_hex else None,
             has_dynamically_loaded_content=has_dynamic_content)
 
         self._database.bookstore_db.update_bookstore(bookstore)

@@ -4,12 +4,18 @@ const priceTable = $("#price-table");
 const pageHeading = $("h3");
 const priceTableHeading = $("#price-table-heading");
 
-function createChart(datesDesc, prices) {
+function createChart(datesDesc, prices, color) {
     let datesAsc = datesDesc.slice().reverse(); // dates are returned in descending order
     let pricesOrdered = prices.slice().reverse();
 
     let options = getChartBaseOptions();
-    options["series"][0] = { name: "Pris",  data: pricesOrdered };
+    options["series"] = [
+        {
+            name: "Pris",
+            color: color,
+            data: pricesOrdered
+        }
+    ];
     options["xaxis"]["categories"] = datesAsc;
 
     let chart = new ApexCharts(priceChartContainer.get(0), options);
@@ -38,6 +44,7 @@ $(document).ready(function () {
         "success" : function (data, status, xhr) {
             let datesDesc = data["dates"];
             let prices = data["prices"];
+            let color = data["color"];
             let rowsCss = data["row_css_classes"];
             if (datesDesc.length === 0 || prices.length === 0) {
                 priceTable.remove();
@@ -46,7 +53,7 @@ $(document).ready(function () {
             }
             else {
                 createTable(datesDesc, prices, rowsCss);
-                createChart(datesDesc, prices);
+                createChart(datesDesc, prices, color);
             }
         },
         "error" : function (error) {

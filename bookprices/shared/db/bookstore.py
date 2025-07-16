@@ -10,49 +10,26 @@ class BookStoreDb(BaseDb):
     def get_bookstores(self) -> list[BookStore]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector "
+                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
+                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "ORDER BY Id ASC")
                 cursor.execute(query)
-                bookstores = []
-                for row in cursor:
-                    bookstores.append(BookStore(row["Id"],
-                                                row["Name"],
-                                                row["Url"],
-                                                row["SearchUrl"],
-                                                row["SearchResultCssSelector"],
-                                                row["PriceCssSelector"],
-                                                row["ImageCssSelector"],
-                                                row["IsbnCssSelector"],
-                                                row["PriceFormat"],
-                                                row["HasDynamicallyLoadedContent"]))
 
-                return bookstores
+                return [self._map_bookstore(row) for row in cursor]
 
     def get_bookstore(self, bookstore_id: int) -> BookStore | None:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector "
+                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
+                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "WHERE Id = %s")
                 cursor.execute(query, (bookstore_id,))
-                if not (row := cursor.fetchone()):
-                    return None
 
-                return BookStore(row["Id"],
-                                 row["Name"],
-                                 row["Url"],
-                                 row["SearchUrl"],
-                                 row["SearchResultCssSelector"],
-                                 row["PriceCssSelector"],
-                                 row["ImageCssSelector"],
-                                 row["IsbnCssSelector"],
-                                 row["PriceFormat"],
-                                 row["HasDynamicallyLoadedContent"])
+                return self._map_bookstore(row) if (row := cursor.fetchone()) else None
 
     def create_bookstore(self, bookstore: BookStore) -> None:
         with self.get_connection() as con:
@@ -60,8 +37,8 @@ class BookStoreDb(BaseDb):
                 query = ("INSERT INTO BookStore (Name, Url, SearchUrl, "
                          "SearchResultCssSelector, PriceCssSelector, "
                          "ImageCssSelector, IsbnCssSelector, PriceFormat, "
-                         "HasDynamicallyLoadedContent) "
-                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+                         "ColorHex, HasDynamicallyLoadedContent) "
+                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
                 cursor.execute(query, (bookstore.name,
                                        bookstore.url,
                                        bookstore.search_url,
@@ -70,6 +47,7 @@ class BookStoreDb(BaseDb):
                                        bookstore.image_css_selector,
                                        bookstore.isbn_css_selector,
                                        bookstore.price_format,
+                                       bookstore.color_hex,
                                        bookstore.has_dynamically_loaded_content))
                 con.commit()
 
@@ -80,7 +58,8 @@ class BookStoreDb(BaseDb):
                          "SET Name = %s, Url = %s, SearchUrl = %s, "
                          "SearchResultCssSelector = %s, PriceCssSelector = %s, "
                          "ImageCssSelector = %s, IsbnCssSelector = %s, "
-                         "PriceFormat = %s, HasDynamicallyLoadedContent = %s "
+                         "PriceFormat = %s, HasDynamicallyLoadedContent = %s, "
+                         "ColorHex = %s "
                          "WHERE Id = %s")
                 cursor.execute(query, (bookstore.name,
                                        bookstore.url,
@@ -91,6 +70,7 @@ class BookStoreDb(BaseDb):
                                        bookstore.isbn_css_selector,
                                        bookstore.price_format,
                                        bookstore.has_dynamically_loaded_content,
+                                       bookstore.color_hex,
                                        bookstore.id))
                 con.commit()
 
@@ -106,31 +86,20 @@ class BookStoreDb(BaseDb):
     def get_missing_bookstores(self, book_id: int) -> list:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, Name, PriceCssSelector, PriceFormat, Url, "
-                         "SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector "
+                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
+                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
+                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "WHERE Id NOT IN (SELECT BookStoreId FROM BookStoreBook WHERE BookId = %s)")
                 cursor.execute(query, (book_id,))
-                bookstores = []
-                for row in cursor:
-                    bookstores.append(BookStore(row["Id"],
-                                                row["Name"],
-                                                row["Url"],
-                                                row["SearchUrl"],
-                                                row["SearchResultCssSelector"],
-                                                row["PriceCssSelector"],
-                                                row["ImageCssSelector"],
-                                                row["IsbnCssSelector"],
-                                                row["PriceFormat"],
-                                                row["HasDynamicallyLoadedContent"]))
 
-                return bookstores
+                return [self._map_bookstore(row) for row in cursor]
 
     def get_book_isbn_and_missing_bookstores(self, offset: int, limit: int) -> list[dict[str, Any]]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, bs.IsbnCssSelector, bs.Url "
+                query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, "
+                         "bs.IsbnCssSelector, bs.Url, bs.ColorHex "
                          "FROM Book b "
                          "CROSS JOIN BookStore bs "
                          "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
@@ -182,7 +151,7 @@ class BookStoreDb(BaseDb):
                 query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
                          "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
                          "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
-                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector " 
+                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector, bs.ColorHex " 
                          "FROM BookStoreBook bsb " 
                          "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
                          f"WHERE bsb.BookId IN ({ids_format_string})")
@@ -194,7 +163,7 @@ class BookStoreDb(BaseDb):
                 for row in cursor:
                     bookstore_id = row["BookStoreId"]
                     if bookstore_id not in bookstores:
-                        self._add_bookstore_from_row(row, bookstores)
+                        bookstores[bookstore_id] = self._map_bookstore(row)
 
                     book_id = row["BookId"]
                     if book_id not in books_in_bookstore:
@@ -213,7 +182,7 @@ class BookStoreDb(BaseDb):
                 query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
                          "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
                          "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
-                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector " 
+                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector, bs.ColorHex " 
                          "FROM BookStoreBook bsb " 
                          "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
                          f"WHERE bsb.BookId IN ({ids_format_string}) AND bs.ImageCssSelector IS NOT NULL;")
@@ -234,17 +203,22 @@ class BookStoreDb(BaseDb):
 
         return books_in_bookstore
 
+    @classmethod
+    def _add_bookstore_from_row(cls, row: dict, bookstore_dict: dict[int, BookStore]):
+        bookstore_id = row["BookStoreId"]
+        bookstore_dict[bookstore_id] = cls._map_bookstore(row)
 
     @staticmethod
-    def _add_bookstore_from_row(row: dict, bookstore_dict: dict[int, BookStore]):
-        bookstore_id = row["BookStoreId"]
-        bookstore_dict[bookstore_id] = BookStore(bookstore_id,
-                                                 row["BookStoreName"],
-                                                 row["BookStoreUrl"],
-                                                 row["SearchUrl"],
-                                                 row["SearchResultCssSelector"],
-                                                 row["PriceCssSelector"],
-                                                 row["ImageCssSelector"],
-                                                 row["IsbnCssSelector"],
-                                                 row["PriceFormat"],
-                                                 row["HasDynamicallyLoadedContent"])
+    def _map_bookstore(row: dict) -> BookStore:
+        return BookStore(
+            id=row["BookStoreId"],
+            name=row["BookStoreName"],
+            url=row["BookStoreUrl"],
+            search_url=row["SearchUrl"],
+            search_result_css_selector=row["SearchResultCssSelector"],
+            price_css_selector=row["PriceCssSelector"],
+            image_css_selector=row["ImageCssSelector"],
+            isbn_css_selector=row["IsbnCssSelector"],
+            price_format=row["PriceFormat"],
+            color_hex=row["ColorHex"],
+            has_dynamically_loaded_content=row["HasDynamicallyLoadedContent"])

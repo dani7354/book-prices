@@ -47,7 +47,7 @@ def prices(book_id: int, store_id: int) -> tuple[Response, int]:
         abort(HttpStatusCode.NOT_FOUND, "Bogen er ikke tilknyttet den valgte boghandel")
 
     book_prices_for_store = book_service.get_prices_for_book_in_bookstore(book_result, book_in_book_store.book_store)
-    price_history_response = map_prices_history(book_prices_for_store)
+    price_history_response = map_prices_history(book_in_book_store.book_store.color_hex, book_prices_for_store)
 
     return jsonify(price_history_response), HttpStatusCode.OK
 
