@@ -3,8 +3,8 @@ from collections import defaultdict
 from typing import ClassVar
 
 from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
-from bookprices.web.validation.input import length_equals_or_longer_than, length_equals_or_shorter_than, \
-    contains_only_hexadecimal
+from bookprices.web.validation.input import (length_equals_or_longer_than, length_equals_or_shorter_than,
+    contains_only_hexadecimal)
 
 
 @dataclasses.dataclass(frozen=True)
