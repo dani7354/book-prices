@@ -9,7 +9,6 @@ booklist_blueprint = Blueprint("booklist", __name__)
 logger = LocalProxy(lambda: current_app.logger)
 
 
-
 @booklist_blueprint.context_processor
 def include_csrf_token() -> dict[str, str]:
     return get_csrf_token()
