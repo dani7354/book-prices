@@ -30,6 +30,7 @@ class Endpoint(Enum):
     BOOK_EDIT = "book.edit"
     BOOK_PRICE_HISTORY = "book.price_history"
     BOOK_SEARCH = "book.search"
+    BOOKLIST_INDEX = "booklist.index"
     BOOKSTORE_INDEX = "bookstore.index"
     BOOKSTORE_EDIT = "bookstore.edit"
     BOOKSTORE_CREATE = "bookstore.create"
@@ -54,6 +55,10 @@ class BookTemplate(Enum):
     CREATE = "book/create.html"
     EDIT = "book/edit.html"
     PRICE_HISTORY = "book/price_history.html"
+
+
+class BookListTemplate(Enum):
+    INDEX = "booklist/index.html"
 
 
 class BookStoreTemplate(Enum):
