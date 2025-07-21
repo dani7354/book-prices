@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from bookprices.shared.db.tables import BookList
@@ -12,3 +13,7 @@ class BookListRepository(RepositoryBase[BookList]):
     @property
     def entity_type(self) -> type:
         return BookList
+
+    def list_for_user(self, user_id: str) -> list[BookList]:
+        booklists =  self._session.execute(select(self.entity_type).filter_by(UserId=user_id)).scalars().all()
+        return list(booklists)
