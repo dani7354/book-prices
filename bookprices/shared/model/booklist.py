@@ -5,6 +5,7 @@ from datetime import datetime
 @dataclass(frozen=True)
 class BookList:
     id: int
+    user_id: str
     name: str
     created: datetime
     updated: datetime
