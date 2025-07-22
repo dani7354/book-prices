@@ -15,5 +15,10 @@ class BookListRepository(RepositoryBase[BookList]):
         return BookList
 
     def list_for_user(self, user_id: str) -> list[BookList]:
-        booklists =  self._session.execute(select(self.entity_type).filter_by(UserId=user_id)).scalars().all()
-        return list(booklists)
+        booklists_result = self._session.execute(select(self.entity_type).filter_by(user_id=user_id)).scalars().all()
+        booklists = []
+        for booklist in booklists_result:
+            self._session.expunge(booklist)
+            booklists.append(booklist)
+
+        return booklists

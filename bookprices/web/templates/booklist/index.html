@@ -2,5 +2,21 @@
 {% set active_page = "booklists" %}
 {% block content %}
 <h1>Boglister</h1>
-<p> ... </p>
+<p>Dine gemte boglister</p>
+{% for bl in view_model.booklists %}
+<div class="card">
+  <div class="card-body">
+    <a href="{{ bl.url }}"><h5 class="card-title">{{ bl.name }}</h5></a>
+    <p class="card-text">Oprettet: {{ bl.created}} (opdateret {{ bl.updated }})</p>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    <p>Du har ingen boglister endnu.</p>
+</div>
+{% endfor %}
+<div class="mt-4">
+    <a href="{{ view_model.create_url }}" class="btn btn-primary">Opret</a>
+</div>
+
 {% endblock %}

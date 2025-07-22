@@ -8,96 +8,111 @@ class BaseModel(DeclarativeBase):
 
 class ApiKey(BaseModel):
     __tablename__ = 'ApiKey'
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    ApiName = Column(String(255), nullable=False)
-    ApiUser = Column(String(255), nullable=False)
-    ApiKey = Column(String(1024), nullable=False)
-    updated = Column(TIMESTAMP, nullable=True)
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    api_name = Column('ApiName', String(255), nullable=False)
+    api_user = Column('ApiUser', String(255), nullable=False)
+    api_key = Column('ApiKey', String(1024), nullable=False)
+    updated = Column('updated', TIMESTAMP, nullable=True)
 
 
 class Book(BaseModel):
     __tablename__ = 'Book'
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Isbn = Column(String(13), nullable=False, unique=True, default='')
-    Title = Column(String(255), nullable=False)
-    Author = Column(String(255), nullable=False)
-    Format = Column(String(255), nullable=False, default='')
-    ImageUrl = Column(String(255), nullable=True)
-    Created = Column(DateTime, nullable=False, default='0001-01-01 00:00:00')
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    isbn = Column('Isbn', String(13), nullable=False, unique=True, default='')
+    title = Column('Title', String(255), nullable=False)
+    author = Column('Author', String(255), nullable=False)
+    format = Column('Format', String(255), nullable=False, default='')
+    image_url = Column('ImageUrl', String(255), nullable=True)
+    created = Column('Created', DateTime, nullable=False, default='0001-01-01 00:00:00')
 
 
 class BookPrice(BaseModel):
     __tablename__ = 'BookPrice'
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    BookId = Column(Integer, ForeignKey('Book.Id', ondelete='CASCADE'), nullable=True)
-    BookStoreId = Column(Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), nullable=True)
-    Price = Column(Float(precision=2), nullable=False)
-    Created = Column(DateTime, nullable=False)
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    book_id = Column('BookId', Integer, ForeignKey('Book.Id', ondelete='CASCADE'), nullable=True)
+    book_store_id = Column('BookStoreId', Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), nullable=True)
+    price = Column('Price', Float(precision=2), nullable=False)
+    created = Column('Created', DateTime, nullable=False)
 
 
 class BookStore(BaseModel):
     __tablename__ = 'BookStore'
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Name = Column(String(255), nullable=False)
-    Url = Column(String(255), nullable=False)
-    SearchUrl = Column(String(255), nullable=True)
-    SearchResultCssSelector = Column(String(255), nullable=True)
-    PriceCssSelector = Column(String(255), nullable=True)
-    ImageCssSelector = Column(String(255), nullable=True)
-    IsbnCssSelector = Column(String(255), nullable=True)
-    PriceFormat = Column(String(80), nullable=True)
-    HasDynamicallyLoadedContent = Column(Boolean, nullable=False)
-    ColorHex = Column(CHAR(6), nullable=True)
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    name = Column('Name', String(255), nullable=False)
+    url = Column('Url', String(255), nullable=False)
+    search_url = Column('SearchUrl', String(255), nullable=True)
+    search_result_css_selector = Column('SearchResultCssSelector', String(255), nullable=True)
+    price_css_selector = Column('PriceCssSelector', String(255), nullable=True)
+    image_css_selector = Column('ImageCssSelector', String(255), nullable=True)
+    isbn_css_selector = Column('IsbnCssSelector', String(255), nullable=True)
+    price_format = Column('PriceFormat', String(80), nullable=True)
+    has_dynamically_loaded_content = Column('HasDynamicallyLoadedContent', Boolean, nullable=False)
+    color_hex = Column('ColorHex', CHAR(6), nullable=True)
 
 
 class BookStoreBook(BaseModel):
     __tablename__ = 'BookStoreBook'
-    BookId = Column(Integer, ForeignKey('Book.Id', ondelete='CASCADE'), primary_key=True)
-    BookStoreId = Column(Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), primary_key=True)
-    Url = Column(String(255), nullable=False)
+    book_id = Column(
+        'BookId', Integer, ForeignKey('Book.Id', ondelete='CASCADE'), primary_key=True)
+    book_store_id = Column(
+        'BookStoreId', Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), primary_key=True)
+    url = Column('Url', String(255), nullable=False)
 
 
 class BookList(BaseModel):
     __tablename__ = 'BookList'
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    UserId = Column(CHAR(36), ForeignKey('User.Id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    Name = Column(String(255), nullable=False)
-    Created = Column(DateTime, nullable=False)
-    Updated = Column(DateTime, nullable=False)
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    user_id = Column('UserId', CHAR(36), ForeignKey('User.Id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    name = Column('Name', String(255), nullable=False)
+    created = Column('Created', DateTime, nullable=False)
+    updated = Column('Updated', DateTime, nullable=False)
 
 
 class BookListBook(BaseModel):
-    __tablename__ = 'BookListBook'
-    BookListId = Column(Integer, ForeignKey('BookList.Id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-    BookId = Column(Integer, ForeignKey('Book.Id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-    Created = Column(DateTime, nullable=False)
+    __tablename__ = 'BookListBook '
+    book_list_id = Column(
+        'BookListId',
+        Integer,
+        ForeignKey('BookList.Id', ondelete='CASCADE', onupdate='CASCADE'),
+        primary_key=True)
+    book_id = Column(
+        'BookId',
+        Integer,
+        ForeignKey('Book.Id', ondelete='CASCADE', onupdate='CASCADE'),
+        primary_key=True)
+    created = Column('Created', DateTime, nullable=False)
 
 
 class BookStoreSitemap(BaseModel):
     __tablename__ = 'BookStoreSitemap'
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    BookStoreId = Column(Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), nullable=False)
-    Url = Column(String(255), nullable=False)
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    book_store_id = Column(
+        'BookStoreId',
+        Integer,
+        ForeignKey('BookStore.Id', ondelete='CASCADE'),
+        nullable=False)
+    url = Column('Url', String(255), nullable=False)
 
 
 class FailedPriceUpdate(BaseModel):
     __tablename__ = 'FailedPriceUpdate'
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    BookId = Column(Integer, ForeignKey('Book.Id', ondelete='CASCADE'), nullable=False)
-    BookStoreId = Column(Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), nullable=False)
-    Reason = Column(String(100), nullable=False)
-    Created = Column(DateTime, nullable=False)
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    book_id = Column('BookId', Integer, ForeignKey('Book.Id', ondelete='CASCADE'), nullable=False)
+    book_store_id = Column(
+        'BookStoreId', Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), nullable=False)
+    reason = Column('Reason', String(100), nullable=False)
+    created = Column('Created', DateTime, nullable=False)
 
 
 class User(BaseModel):
     __tablename__ = 'User'
-    Id = Column(String(100), primary_key=True)
-    Email = Column(String(255), unique=True, nullable=False)
-    FirstName = Column(String(255), nullable=False)
-    LastName = Column(String(255), nullable=True)
-    IsActive = Column(Boolean, nullable=False)
-    GoogleApiToken = Column(String(255), nullable=False)
-    Created = Column(DateTime, nullable=False)
-    Updated = Column(DateTime, nullable=False)
-    ImageUrl = Column(String(255), nullable=True)
-    AccessLevel = Column(Integer, nullable=False, default=1)
+    id = Column('Id', String(100), primary_key=True)
+    email = Column('Email', String(255), unique=True, nullable=False)
+    first_name = Column('FirstName', String(255), nullable=False)
+    last_name = Column('LastName', String(255), nullable=True)
+    is_active = Column('IsActive', Boolean, nullable=False)
+    google_api_token = Column('GoogleApiToken', String(255), nullable=False)
+    created = Column('Created', DateTime, nullable=False)
+    updated = Column('Updated', DateTime, nullable=False)
+    image_url = Column('ImageUrl', String(255), nullable=True)
+    access_level = Column('AccessLevel', Integer, nullable=False, default=1)

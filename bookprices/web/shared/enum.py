@@ -31,6 +31,9 @@ class Endpoint(Enum):
     BOOK_PRICE_HISTORY = "book.price_history"
     BOOK_SEARCH = "book.search"
     BOOKLIST_INDEX = "booklist.index"
+    BOOKLIST_EDIT = "booklist.edit"
+    BOOKLIST_CREATE = "booklist.create"
+    BOOKLIST_VIEW = "booklist.view"
     BOOKSTORE_INDEX = "bookstore.index"
     BOOKSTORE_EDIT = "bookstore.edit"
     BOOKSTORE_CREATE = "bookstore.create"
@@ -59,6 +62,8 @@ class BookTemplate(Enum):
 
 class BookListTemplate(Enum):
     INDEX = "booklist/index.html"
+    CREATE = "booklist/create.html"
+    BOOKLIST = "booklist/booklist.html"
 
 
 class BookStoreTemplate(Enum):
