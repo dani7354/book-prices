@@ -2,12 +2,11 @@ import flask
 import flask_login
 from flask import render_template, current_app, Blueprint
 from flask_login import login_required
-from sqlalchemy import create_engine
 from werkzeug.local import LocalProxy
 
 from bookprices.web.cache.redis import cache
 from bookprices.shared.repository.unit_of_work import UnitOfWork
-from bookprices.web.mapper.booklist import map_to_booklist_list
+from bookprices.web.mapper.booklist import map_to_booklist_list, map_to_details_view_model
 from bookprices.web.service.auth_service import require_member
 from bookprices.web.service.booklist_service import BookListService
 from bookprices.web.service.csrf import get_csrf_token
@@ -41,7 +40,10 @@ def index() -> str:
 @login_required
 @require_member
 def view(booklist_id: int) -> str:
-    return render_template(BookListTemplate.INDEX)
+    booklist_service = _create_booklist_service()
+    booklist = booklist_service.get_booklist(booklist_id, flask_login.current_user.id)
+    view_model = map_to_details_view_model(booklist)
+    return render_template(BookListTemplate.BOOKLIST.value, view_model=view_model)
 
 
 @booklist_blueprint.route("create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])

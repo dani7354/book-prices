@@ -21,7 +21,10 @@ class RepositoryBase(Generic[T]):
         self._session.add(entity)
 
     def get(self, entity_id: int) -> T | None:
-        return self._session.get(self.entity_type, entity_id)
+        entity = self._session.get(self.entity_type, entity_id)
+        if entity:
+            self._session.expunge(entity)
+        return entity
 
     def update(self, entity: T) -> None:
         self._session.merge(entity)
