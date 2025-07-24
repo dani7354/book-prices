@@ -73,6 +73,7 @@ def create() -> str | Response:
         BookListTemplate.CREATE.value,
         view_model=BookListEditViewModel.empty(form_action_url=form_action_url, return_url=return_url))
 
+
 @booklist_blueprint.route("add", methods=[HttpMethod.POST.value])
 @login_required
 @require_member

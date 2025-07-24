@@ -107,12 +107,21 @@ def include_sri_attribute_values() -> dict[str, str]:
 
 
 @app.context_processor
-def include_menu_items() -> dict[str, list]:
+def include_user_menu_items() -> dict[str, list]:
     db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
     auth_service = AuthService(db, cache)
     menu_items_service = SiteMenuService(auth_service)
 
-    return {"menu_items": menu_items_service.get_menu_items()}
+    return {"main_menu_items": menu_items_service.get_main_menu_items()}
+
+
+@app.context_processor
+def include_user_menu_items() -> dict[str, list]:
+    db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+    auth_service = AuthService(db, cache)
+    menu_items_service = SiteMenuService(auth_service)
+
+    return {"user_menu_items": menu_items_service.get_user_menu_items()}
 
 
 @login_manager.user_loader
