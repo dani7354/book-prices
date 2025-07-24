@@ -1,14 +1,14 @@
 <form method="post" action="{{ view_model.form_action_url }}">
-    <div class="mb-3">
-        <label for="{{ view_model.isbn_field_name }}" class="form-label">ISBN-13</label>
-        <input name="{{ view_model.isbn_field_name }}" type="text" class="form-control"
-               minlength="{{ view_model.isbn_min_length }}" maxlength="{{ view_model.isbn_max_length }}"
-               id="{{ view_model.isbn_field_name }}" value="{{ view_model.isbn }}" required="required">
-        {% if view_model.isbn_field_name in errors %}
-            {% for error in errors[view_model.isbn_field_name] %}
-                <span id="isbn-error" class="form-text text-danger">{{ error }}</span>
+    <div class="mb-3 col-8">
+        <label for="{{ view_model.name_field_name }}" class="form-label">Name</label>
+        <input name="{{ view_model.name_field_name }}" type="text" class="form-control"
+               minlength="{{ view_model.name_min_length }}" maxlength="{{ view_model.name_max_length }}"
+               id="{{ view_model.name_field_name }}" value="{{ view_model.name }}" required="required">
+        {% if view_model.name_field_name in errors %}
+            {% for error in errors[view_model.name_field_name] %}
+                <span id="name-error" class="form-text text-danger">{{ error }}</span>
             {% endfor %}
         {% endif %}
     </div>
-    <!-- TODO: add input fields -->
+    <button type="submit" class="btn btn-primary">Gem</button>
 </form>

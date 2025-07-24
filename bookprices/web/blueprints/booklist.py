@@ -1,6 +1,5 @@
-import flask
 import flask_login
-from flask import render_template, current_app, Blueprint
+from flask import render_template, current_app, Blueprint, request, redirect, url_for, Response
 from flask_login import login_required
 from werkzeug.local import LocalProxy
 
@@ -11,7 +10,8 @@ from bookprices.web.service.auth_service import require_member
 from bookprices.web.service.booklist_service import BookListService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.shared.db_session import SessionFactory
-from bookprices.web.shared.enum import HttpMethod, BookListTemplate
+from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint
+from bookprices.web.viewmodels.booklist import BookListEditViewModel
 
 booklist_blueprint = Blueprint("booklist", __name__)
 logger = LocalProxy(lambda: current_app.logger)
@@ -49,6 +49,27 @@ def view(booklist_id: int) -> str:
 @booklist_blueprint.route("create", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @login_required
 @require_member
-def create() -> str:
-    return render_template(BookListTemplate.CREATE.value)
+def create() -> str | Response:
+    return_url = url_for(Endpoint.BOOKLIST_INDEX.value)
+    form_action_url = url_for(Endpoint.BOOKLIST_CREATE.value)
+    if request.method == HttpMethod.POST.value:
+        name = request.form.get(BookListEditViewModel.name_field_name) or None
+
+        view_model = BookListEditViewModel(
+            name=name,
+            form_action_url=form_action_url,
+            return_url=return_url)
+        if not view_model.is_valid():
+            return render_template(BookListTemplate.CREATE.value, view_model=view_model)
+        booklist_service = _create_booklist_service()
+        if not booklist_service.name_available(view_model.name, flask_login.current_user.id):
+            view_model.add_error(BookListEditViewModel.name_field_name, "Bogliste findes allerede")
+            return render_template(BookListTemplate.CREATE.value, view_model=view_model)
+
+        booklist_service.create_booklist(name= view_model.name, user_id=flask_login.current_user.id)
+        return redirect(url_for(Endpoint.BOOKLIST_INDEX.value))
+
+    return render_template(
+        BookListTemplate.CREATE.value,
+        view_model=BookListEditViewModel.empty(form_action_url=form_action_url, return_url=return_url))
 

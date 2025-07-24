@@ -4,8 +4,7 @@ from datetime import datetime
 from flask_caching import Cache
 
 from bookprices.shared.cache.key_generator import get_booklists_for_user_key, get_booklist_key
-from bookprices.shared.db.database import Database
-from bookprices.shared.model.booklist import BookList
+from bookprices.shared.db.tables import BookList
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 
 
@@ -40,6 +39,25 @@ class BookListService:
                     self._cache.set(get_booklists_for_user_key(user_id), booklists)
 
         return booklists
+
+    def create_booklist(self, name: str, user_id) -> None:
+        """ Creates a new book list. """
+        booklist = BookList(
+            id=0,
+            name=name,
+            user_id=user_id,
+            created=datetime.now(),
+            updated=datetime.now())
+
+        with self._unit_of_work:
+            self._unit_of_work.booklist_repository.add(booklist)
+
+        self._cache.delete(get_booklists_for_user_key(user_id))
+        self._logger.info(f"Created new book list '{name}' for user {user_id}.")
+
+    def name_available(self, name: str, user_id: str) -> bool:
+        booklists = self.get_booklists(user_id)
+        return not any([b for b in booklists if b.name == name])
 
 
 
