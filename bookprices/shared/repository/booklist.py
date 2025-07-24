@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from bookprices.shared.db.tables import BookList
+from bookprices.shared.db.tables import BookList, BookListBook
 from bookprices.shared.repository.base import RepositoryBase
 
 
@@ -23,3 +23,7 @@ class BookListRepository(RepositoryBase[BookList]):
             booklists.append(booklist)
 
         return booklists
+
+    def add_book_to_booklist(self, book_id: int, booklist_id: int) -> None:
+        booklist_book = BookListBook(book_id=book_id, booklist_id=booklist_id)
+        self._session.add(booklist_book)

@@ -66,3 +66,12 @@ class BookListEditViewModel:
     @staticmethod
     def empty(form_action_url: str, return_url: str) -> "BookListEditViewModel":
         return BookListEditViewModel(name="", form_action_url=form_action_url, return_url=return_url)
+
+
+@dataclass(frozen=True)
+class AddToListRequest:
+    book_id_field_name: ClassVar[str] = "book_id"
+    booklist_id_field_name: ClassVar[str] = "booklist_id"
+
+    book_id: int
+    booklist_id: int

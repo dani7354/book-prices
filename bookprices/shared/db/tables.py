@@ -70,7 +70,7 @@ class BookList(BaseModel):
 
 class BookListBook(BaseModel):
     __tablename__ = 'BookListBook '
-    book_list_id = Column(
+    booklist_id = Column(
         'BookListId',
         Integer,
         ForeignKey('BookList.Id', ondelete='CASCADE', onupdate='CASCADE'),
