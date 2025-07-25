@@ -21,8 +21,38 @@ class SiteMenuService:
     def __init__(self, auth_service: AuthService) -> None:
         self._auth_service = auth_service
 
+    def get_main_menu_items(self) -> list[MenuItem]:
+        current_url = self.get_current_request_path()
+        items = [
+            MenuItem(
+                url=self.get_url(Endpoint.PAGE_INDEX),
+                title="Forside",
+                is_active=current_url == self.get_url(Endpoint.PAGE_INDEX),
+                order_number=10),
+            MenuItem(
+                url=self.get_url(Endpoint.BOOK_SEARCH),
+                title="Søg",
+                is_active=current_url.startswith(self.get_url(Endpoint.BOOK_SEARCH)),
+                order_number=20),
+            MenuItem(
+                url=self.get_url(Endpoint.PAGE_ABOUT),
+                title="Om siden",
+                is_active=current_url.startswith(self.get_url(Endpoint.PAGE_ABOUT)),
+                order_number=30)
+        ]
 
-    def get_menu_items(self) -> list[MenuItem]:
+        if self._auth_service.user_can_access(UserAccessLevel.MEMBER):
+            items.append(
+                MenuItem(
+                    url=self.get_url(Endpoint.BOOKLIST_INDEX),
+                    title="Boglister",
+                    is_active=current_url.startswith(self.get_url(Endpoint.BOOKLIST_INDEX)),
+                    order_number=25)
+            )
+
+        return sorted(items, key=lambda item: item.order_number)
+
+    def get_user_menu_items(self) -> list[MenuItem]:
         items = []
         current_url = self.get_current_request_path()
         if self._auth_service.user_can_access(UserAccessLevel.MEMBER):

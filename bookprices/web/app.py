@@ -9,6 +9,7 @@ from bookprices.shared.db.database import Database
 from bookprices.web.blueprints.api import api_blueprint
 from bookprices.web.blueprints.auth import auth_blueprint
 from bookprices.web.blueprints.book import book_blueprint
+from bookprices.web.blueprints.booklist import booklist_blueprint
 from bookprices.web.blueprints.bookstore import bookstore_blueprint
 from bookprices.web.blueprints.error_handler import (
     not_found_html, internal_server_error_html, forbidden_html, unauthorized_html)
@@ -70,6 +71,7 @@ app.logger.addHandler(default_handler)
 # blueprints
 app.register_blueprint(page_blueprint)
 app.register_blueprint(book_blueprint)
+app.register_blueprint(booklist_blueprint, url_prefix="/booklist")
 app.register_blueprint(bookstore_blueprint, url_prefix="/bookstore")
 app.register_blueprint(api_blueprint, url_prefix="/api")
 app.register_blueprint(auth_blueprint, url_prefix="/auth")
@@ -105,12 +107,21 @@ def include_sri_attribute_values() -> dict[str, str]:
 
 
 @app.context_processor
-def include_menu_items() -> dict[str, list]:
+def include_user_menu_items() -> dict[str, list]:
     db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
     auth_service = AuthService(db, cache)
     menu_items_service = SiteMenuService(auth_service)
 
-    return {"menu_items": menu_items_service.get_menu_items()}
+    return {"main_menu_items": menu_items_service.get_main_menu_items()}
+
+
+@app.context_processor
+def include_user_menu_items() -> dict[str, list]:
+    db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+    auth_service = AuthService(db, cache)
+    menu_items_service = SiteMenuService(auth_service)
+
+    return {"user_menu_items": menu_items_service.get_user_menu_items()}
 
 
 @login_manager.user_loader
