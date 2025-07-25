@@ -14,8 +14,14 @@
           <p class="fs-2">{{ bl.item_count  }}</p>
       </div>
   </div>
-    <div class="card-footer text-muted pb-0">
-        <p><small>Opdateret {{ bl.updated }}</small></p>
+    <div class="card-footer text-muted d-flex justify-content-between">
+        <div>
+            <small>Opdateret {{ bl.updated }}</small>
+        </div>
+        <div>
+            <a href="{{ bl.edit_url }}" class="btn btn-secondary btn-sm">Rediger</a>
+            <a href="{{ bl.delete_url }}" class="btn btn-danger btn-sm">Slet</a>
+        </div>
     </div>
 </div>
 {% else %}

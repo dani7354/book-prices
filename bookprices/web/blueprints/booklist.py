@@ -74,6 +74,20 @@ def create() -> str | Response:
         view_model=BookListEditViewModel.empty(form_action_url=form_action_url, return_url=return_url))
 
 
+@booklist_blueprint.route("edit/<int:booklist_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
+@login_required
+@require_member
+def edit() -> str | Response:
+    pass
+
+
+@booklist_blueprint.route("delete/<int:booklist_id>", methods=[HttpMethod.POST.value])
+@login_required
+@require_member
+def delete() -> tuple[Response, int]:
+    pass
+
+
 @booklist_blueprint.route("add", methods=[HttpMethod.POST.value])
 @login_required
 @require_member

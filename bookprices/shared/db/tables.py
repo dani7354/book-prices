@@ -67,7 +67,7 @@ class BookList(BaseModel):
     created = Column('Created', DateTime, nullable=False)
     updated = Column('Updated', DateTime, nullable=False)
 
-    books: Mapped[list["BookListBook"]] = relationship("BookListBook", lazy='joined')
+    books: Mapped[list["BookListBook"]] = relationship("BookListBook")
 
 
 class BookListBook(BaseModel):
@@ -83,6 +83,8 @@ class BookListBook(BaseModel):
         ForeignKey('Book.Id', ondelete='CASCADE', onupdate='CASCADE'),
         primary_key=True)
     created = Column('Created', DateTime, nullable=False)
+
+    book: Mapped[Book] = relationship("Book", uselist=False)
 
 
 class BookStoreSitemap(BaseModel):
