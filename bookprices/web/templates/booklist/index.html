@@ -5,10 +5,18 @@
 <p>Dine gemte boglister</p>
 {% for bl in view_model.booklists %}
 <div class="card mt-3">
-  <div class="card-body">
-    <a href="{{ bl.url }}"><h5 class="card-title">{{ bl.name }}</h5></a>
-    <p class="card-text">Oprettet: {{ bl.created}} (opdateret {{ bl.updated }})</p>
+  <div class="card-body d-flex justify-content-between">
+
+      <div>
+          <a href="{{ bl.url }}"><h5 class="card-title">{{ bl.name }}</h5></a>
+      </div>
+      <div>
+          <p class="fs-2">{{ bl.item_count  }}</p>
+      </div>
   </div>
+    <div class="card-footer text-muted pb-0">
+        <p><small>Opdateret {{ bl.updated }}</small></p>
+    </div>
 </div>
 {% else %}
 <div class="alert alert-info" role="alert">

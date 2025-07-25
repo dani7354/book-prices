@@ -13,6 +13,7 @@ def map_to_booklist_list(booklists: Sequence[BookList]) -> BookListIndexViewMode
         booklists=[
             BookListItemViewModel(
                 id=booklist.id,
+                item_count=len(booklist.books),
                 name=booklist.name,
                 created=booklist.created.isoformat(),
                 updated=booklist.updated.isoformat(),

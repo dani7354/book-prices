@@ -16,7 +16,7 @@ class BookListRepository(RepositoryBase[BookList]):
 
     def list_for_user(self, user_id: str) -> list[BookList]:
         booklists_result = self._session.execute(
-            select(self.entity_type).filter_by(user_id=user_id).order_by(BookList.updated.desc())).scalars().all()
+            select(self.entity_type).filter_by(user_id=user_id).order_by(BookList.updated.desc())).scalars().unique().all()
         booklists = []
         for booklist in booklists_result:
             self._session.expunge(booklist)

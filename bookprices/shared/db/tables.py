@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Boolean, CHAR, TIMESTAMP
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, relationship, Mapped
 
 
 class BaseModel(DeclarativeBase):
@@ -67,9 +67,11 @@ class BookList(BaseModel):
     created = Column('Created', DateTime, nullable=False)
     updated = Column('Updated', DateTime, nullable=False)
 
+    books: Mapped[list["BookListBook"]] = relationship("BookListBook", lazy='joined')
+
 
 class BookListBook(BaseModel):
-    __tablename__ = 'BookListBook '
+    __tablename__ = 'BookListBook'
     booklist_id = Column(
         'BookListId',
         Integer,

@@ -13,6 +13,7 @@ from bookprices.web.validation.input import length_equals_or_longer_than, length
 @dataclass(frozen=True)
 class BookListItemViewModel:
     id: int
+    item_count: int
     name: str
     created: str
     updated: str
