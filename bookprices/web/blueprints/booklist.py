@@ -54,9 +54,11 @@ def create() -> str | Response:
     form_action_url = url_for(Endpoint.BOOKLIST_CREATE.value)
     if request.method == HttpMethod.POST.value:
         name = request.form.get(BookListEditViewModel.name_field_name) or None
+        description = request.form.get(BookListEditViewModel.description_field_name) or None
 
         view_model = BookListEditViewModel(
             name=name,
+            description=description,
             form_action_url=form_action_url,
             return_url=return_url)
         if not view_model.is_valid():
@@ -66,7 +68,7 @@ def create() -> str | Response:
             view_model.add_error(BookListEditViewModel.name_field_name, "Bogliste findes allerede")
             return render_template(BookListTemplate.CREATE.value, view_model=view_model)
 
-        booklist_service.create_booklist(name= view_model.name, user_id=flask_login.current_user.id)
+        booklist_service.create_booklist(name=view_model.name, description=description, user_id=flask_login.current_user.id)
         return redirect(url_for(Endpoint.BOOKLIST_INDEX.value))
 
     return render_template(

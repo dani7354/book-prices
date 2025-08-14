@@ -11,17 +11,19 @@ BOOKLIST_ITEM_DESCRIPTION_LENGTH = 100
 
 
 def _get_description_for_booklist_item(booklist: BookList) -> str | None:
+    if not booklist.description:
+        return None
+
+    description = None
     if (description_length := len(booklist.description)) > BOOKLIST_ITEM_DESCRIPTION_LENGTH:
         try:
-            description_end_index = booklist.description[BOOKLIST_ITEM_DESCRIPTION_LENGTH:].index(" ")
+            description_end_index = booklist.description[BOOKLIST_ITEM_DESCRIPTION_LENGTH:].index(" ") + BOOKLIST_ITEM_DESCRIPTION_LENGTH
         except ValueError:
             description_end_index = BOOKLIST_ITEM_DESCRIPTION_LENGTH
         description = f"{booklist.description[:description_end_index]}..."
     elif description_length > 0:
         description_end_index = description_length
         description = booklist.description[:description_end_index]
-    else:
-        description = None
 
     return description
 
@@ -44,18 +46,7 @@ def map_booklist_item(booklist: BookList) -> BookListItemViewModel:
 def map_to_booklist_list(booklists: Sequence[BookList]) -> BookListIndexViewModel:
     return BookListIndexViewModel(
         create_url=url_for(Endpoint.BOOKLIST_CREATE.value),
-        booklists=[
-            BookListItemViewModel(
-                id=booklist.id,
-                item_count=len(booklist.books),
-                name=booklist.name,
-                created=booklist.created.isoformat(),
-                updated=booklist.updated.isoformat(),
-                url=url_for(Endpoint.BOOKLIST_VIEW.value, booklist_id=booklist.id),
-                edit_url=url_for(Endpoint.BOOKLIST_EDIT.value, booklist_id=booklist.id),
-                description=booklist.description[:100] if booklist.description else None
-            ) for booklist in booklists
-        ]
+        booklists=[map_booklist_item(booklist) for booklist in booklists]
     )
 
 

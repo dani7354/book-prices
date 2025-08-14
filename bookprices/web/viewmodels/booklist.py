@@ -41,11 +41,15 @@ class BookListDetailsViewModel:
 @dataclass(frozen=True)
 class BookListEditViewModel:
     name_field_name: ClassVar[str] = "name"
+    description_field_name: ClassVar[str] = "description"
 
     name_min_length: ClassVar[int] = 1
     name_max_length: ClassVar[int] = 255
+    description_min_length: ClassVar[int] = 1
+    description_max_length: ClassVar[int] = 512
 
     name: str
+    description: str | None
     form_action_url: str
     return_url: str
     errors: dict[str, list[str]] = dataclasses.field(default_factory=lambda: defaultdict(list))
@@ -62,14 +66,23 @@ class BookListEditViewModel:
     def _validate_input(self):
         if not length_equals_or_longer_than(self.name, self.name_min_length):
             self.errors[self.name_field_name].append(
-                min_length_not_met("Navnet", self.name_min_length))
+                min_length_not_met("Navn", self.name_min_length))
         elif not length_equals_or_shorter_than(self.name, self.name_max_length):
             self.errors[self.name_field_name].append(
-                max_length_exceeded("Navnet", self.name_max_length))
+                max_length_exceeded("Navn", self.name_max_length))
+
+        if not length_equals_or_longer_than(self.name, self.name_min_length, allow_none=True):
+            self.errors[self.description_field_name].append(
+                min_length_not_met("Beskrivelse", self.name_min_length))
+        elif not length_equals_or_shorter_than(self.name, self.name_max_length, allow_none=True):
+            self.errors[self.description_field_name].append(
+                max_length_exceeded("Beskrivelse", self.name_max_length))
+
+
 
     @staticmethod
     def empty(form_action_url: str, return_url: str) -> "BookListEditViewModel":
-        return BookListEditViewModel(name="", form_action_url=form_action_url, return_url=return_url)
+        return BookListEditViewModel(name="", description=None,  form_action_url=form_action_url, return_url=return_url)
 
 
 @dataclass(frozen=True)

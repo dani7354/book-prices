@@ -5,14 +5,16 @@
 <p>Dine gemte boglister</p>
 {% for bl in view_model.booklists %}
 <div class="card mt-3">
-  <div class="card-body d-flex justify-content-between">
-
-      <div>
-          <a href="{{ bl.url }}"><h5 class="card-title">{{ bl.name }}</h5></a>
+  <div class="card-body">
+      <div class="d-flex justify-content-between">
+          <div>
+            <a href="{{ bl.url }}"><h5 class="card-title">{{ bl.name }}</h5></a>
+          </div>
+          <div>
+            <p class="fs-2">{{ bl.item_count  }}</p>
+          </div>
       </div>
-      <div>
-          <p class="fs-2">{{ bl.item_count  }}</p>
-      </div>
+      <p>{{ bl.description if bl.description else '' }}</p>
   </div>
     <div class="card-footer text-muted d-flex justify-content-between">
         <div>

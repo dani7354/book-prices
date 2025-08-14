@@ -44,11 +44,12 @@ class BookListService:
 
         return booklists
 
-    def create_booklist(self, name: str, user_id) -> None:
+    def create_booklist(self, name: str, description: str | None,  user_id) -> None:
         """ Creates a new book list. """
         booklist = BookList(
             id=0,
             name=name,
+            description=description,
             user_id=user_id,
             created=datetime.now(),
             updated=datetime.now())
