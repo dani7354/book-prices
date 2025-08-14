@@ -18,6 +18,8 @@ class BookListItemViewModel:
     created: str
     updated: str
     url: str
+    edit_url: str
+    description: str | None
 
 
 @dataclass(frozen=True)
@@ -33,6 +35,7 @@ class BookListDetailsViewModel:
     name: str
     created: str
     updated: str
+    description: str | None
 
 
 @dataclass(frozen=True)

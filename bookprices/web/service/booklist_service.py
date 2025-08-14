@@ -8,6 +8,10 @@ from bookprices.shared.db.tables import BookList
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 
 
+class BookListNotFoundError(Exception):
+    pass
+
+
 class BookListService:
     """ Service for book list related functionality. """
 
@@ -54,6 +58,16 @@ class BookListService:
 
         self._cache.delete(get_booklists_for_user_key(user_id))
         self._logger.info(f"Created new book list '{name}' for user {user_id}.")
+
+    def delete_booklist(self, booklist_id: int, user_id: str) -> None:
+        if not (self.get_booklist(booklist_id, user_id)):
+            raise BookListNotFoundError(f"Booklist cannot be found or accessed by user {user_id}.")
+
+        with self._unit_of_work:
+            self._unit_of_work.booklist_repository.delete(booklist_id)
+        self._cache.delete(get_booklists_for_user_key(user_id))
+        self._cache.delete(get_booklist_key(booklist_id))
+
 
     def name_available(self, name: str, user_id: str) -> bool:
         booklists = self.get_booklists(user_id)

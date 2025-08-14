@@ -20,7 +20,7 @@
         </div>
         <div>
             <a href="{{ bl.edit_url }}" class="btn btn-secondary btn-sm">Rediger</a>
-            <a href="{{ bl.delete_url }}" class="btn btn-danger btn-sm">Slet</a>
+            <a class="btn btn-danger btn-sm btn-delete-booklist" data-booklist-id="{{ bl.id }}">Slet</a>
         </div>
     </div>
 </div>
@@ -32,5 +32,7 @@
 <div class="mt-4">
     <a href="{{ view_model.create_url }}" class="btn btn-primary">Opret</a>
 </div>
+
+<script src="{{ url_for('static', filename='js/delete_booklist.js') }}"></script>
 
 {% endblock %}

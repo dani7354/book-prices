@@ -64,6 +64,7 @@ class BookList(BaseModel):
     id = Column('Id', Integer, primary_key=True, autoincrement=True)
     user_id = Column('UserId', CHAR(36), ForeignKey('User.Id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     name = Column('Name', String(255), nullable=False)
+    description = Column('Description', String(512), nullable=True)
     created = Column('Created', DateTime, nullable=False)
     updated = Column('Updated', DateTime, nullable=False)
 
@@ -120,3 +121,4 @@ class User(BaseModel):
     updated = Column('Updated', DateTime, nullable=False)
     image_url = Column('ImageUrl', String(255), nullable=True)
     access_level = Column('AccessLevel', Integer, nullable=False, default=1)
+    booklist_id = Column('BookListId', Integer, ForeignKey('BookList.Id', ondelete='SET NULL'), nullable=True)

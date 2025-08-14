@@ -7,7 +7,7 @@ from bookprices.web.cache.redis import cache
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.web.mapper.booklist import map_to_booklist_list, map_to_details_view_model
 from bookprices.web.service.auth_service import require_member
-from bookprices.web.service.booklist_service import BookListService
+from bookprices.web.service.booklist_service import BookListService, BookListNotFoundError
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint
@@ -84,8 +84,15 @@ def edit() -> str | Response:
 @booklist_blueprint.route("delete/<int:booklist_id>", methods=[HttpMethod.POST.value])
 @login_required
 @require_member
-def delete() -> tuple[Response, int]:
-    pass
+def delete(booklist_id: int) -> tuple[Response, int]:
+    booklist_service = _create_booklist_service()
+    try:
+        booklist_service.delete_booklist(booklist_id, flask_login.current_user.id)
+        logger.info(f"Booklist {booklist_id} deleted for user {flask_login.current_user.id}")
+        return jsonify({}), 200
+    except BookListNotFoundError as ex:
+        logger.error(f"Failed to delete booklist {booklist_id} for user {flask_login.current_user.id}: {ex}")
+        return jsonify({"error": str(ex)}), 404
 
 
 @booklist_blueprint.route("add", methods=[HttpMethod.POST.value])

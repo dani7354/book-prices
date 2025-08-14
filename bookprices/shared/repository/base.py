@@ -29,7 +29,11 @@ class RepositoryBase(Generic[T]):
     def update(self, entity: T) -> None:
         self._session.merge(entity)
 
-    def delete(self, entity: T) -> None:
+    def delete(self, entity_id: int) -> None:
+        entity = self._session.get(self.entity_type, entity_id)
+        if not entity:
+            raise ValueError(f"Entity with id {entity_id} not found.")
+
         self._session.delete(entity)
 
     def list(self) -> list[T]:
