@@ -52,8 +52,10 @@ def map_to_booklist_list(booklists: Sequence[BookList]) -> BookListIndexViewMode
 
 def map_to_details_view_model(booklist: BookList) -> BookListDetailsViewModel:
     return BookListDetailsViewModel(
+        id=booklist.id,
         books=[],
         return_url=url_for(Endpoint.BOOKLIST_INDEX.value),
+        edit_url=url_for(Endpoint.BOOKLIST_EDIT.value, booklist_id=booklist.id),
         name=booklist.name,
         created=booklist.created.isoformat(),
         updated=booklist.updated.isoformat(),

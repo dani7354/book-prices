@@ -30,8 +30,10 @@ class BookListIndexViewModel:
 
 @dataclass(frozen=True)
 class BookListDetailsViewModel:
+    id: int
     books: list
     return_url: str
+    edit_url: str
     name: str
     created: str
     updated: str

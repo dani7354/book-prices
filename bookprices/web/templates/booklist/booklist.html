@@ -3,18 +3,28 @@
 {% set errors = view_model.errors %}
 {% block content %}
 
-<div class="col-sm-8 mb-4">
-    <a class="link-secondary text-decoration-none" href="{{ view_model.return_url }}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up"
-             viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"></path>
-        </svg>
-        <span>Tilbage til oversigt</span>
-    </a>
+
+<div class="row">
+    <div class="col-sm-8 mb-4">
+        <a class="link-secondary text-decoration-none" href="{{ view_model.return_url }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up"
+                 viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                  d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"></path>
+            </svg>
+            <span>Tilbage til oversigt</span>
+        </a>
+    </div>
+    <div class="col-sm-4 text-end">
+        <a class="btn btn-primary" href="{{ view_model.edit_url }}">Rediger</a>
+        <a id="btn-delete-booklist" class="btn btn-danger btn-delete-booklist" data-booklist-id="{{ view_model.id }}" href="">Slet</a>
+    </div>
 </div>
 
 <h1>{{ view_model.name }}</h1>
+{% if view_model.description %}
+<p>{{ view_model.description }}</p>
+{% endif %}
 
 {% for book in view_model.books %}
 
@@ -23,4 +33,8 @@
     <p>Der er ingen bøger i denne bogliste.</p>
 </div>
 {% endfor %}
+
+<script type="application/javascript" src="{{ url_for('static', filename='js/delete_booklist.js') }}"></script>
+
 {% endblock %}
+
