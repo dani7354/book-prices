@@ -1,16 +1,16 @@
 import flask_login
-from flask import render_template, current_app, Blueprint, request, redirect, url_for, Response, jsonify
+from flask import render_template, current_app, Blueprint, request, redirect, url_for, Response, jsonify, abort
 from flask_login import login_required
 from werkzeug.local import LocalProxy
 
 from bookprices.web.cache.redis import cache
 from bookprices.shared.repository.unit_of_work import UnitOfWork
-from bookprices.web.mapper.booklist import map_to_booklist_list, map_to_details_view_model
+from bookprices.web.mapper.booklist import map_to_booklist_list, map_to_details_view_model, map_to_edit_view_model
 from bookprices.web.service.auth_service import require_member
 from bookprices.web.service.booklist_service import BookListService, BookListNotFoundError
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.shared.db_session import SessionFactory
-from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint
+from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint, HttpStatusCode
 from bookprices.web.viewmodels.booklist import BookListEditViewModel, AddToListRequest
 
 booklist_blueprint = Blueprint("booklist", __name__)
@@ -79,8 +79,45 @@ def create() -> str | Response:
 @booklist_blueprint.route("edit/<int:booklist_id>", methods=[HttpMethod.GET.value, HttpMethod.POST.value])
 @login_required
 @require_member
-def edit() -> str | Response:
-    pass
+def edit(booklist_id: int) -> str | Response:
+    booklist_service = _create_booklist_service()
+    user_id = flask_login.current_user.id
+    if not (booklist := booklist_service.get_booklist(booklist_id, user_id)):
+        return abort(HttpStatusCode.NOT_FOUND.value, "Boghandlen blev ikke fundet")
+
+    if request.method == HttpMethod.POST.value:
+        name = request.form.get(BookListEditViewModel.name_field_name, type=str) or None
+        description = request.form.get(BookListEditViewModel.description_field_name, type=str) or None
+        return_url = url_for(Endpoint.BOOKLIST_VIEW.value, booklist_id=booklist_id)
+        form_action_url = url_for(Endpoint.BOOKLIST_EDIT.value, booklist_id=booklist_id)
+
+        view_model = BookListEditViewModel(
+            name=name,
+            description=description,
+            form_action_url=form_action_url,
+            return_url=return_url)
+
+        if not view_model.is_valid():
+            return render_template(BookListTemplate.EDIT.value, view_model=view_model)
+
+        if not booklist_service.name_available(view_model.name, user_id, booklist_id):
+            view_model.add_error(BookListEditViewModel.name_field_name, "Bogliste findes allerede")
+            return render_template(BookListTemplate.EDIT.value, view_model=view_model)
+
+        booklist_service.update_booklist(
+            booklist_id=booklist_id,
+            name=view_model.name,
+            description=view_model.description,
+            user_id=flask_login.current_user.id)
+        logger.info(f"Booklist {booklist_id} updated for user with id {user_id}")
+        return redirect(return_url)
+
+    view_model = map_to_edit_view_model(
+        booklist,
+        form_action_url=url_for(Endpoint.BOOKLIST_EDIT.value, booklist_id=booklist_id),
+        return_url=url_for(Endpoint.BOOKLIST_INDEX.value))
+
+    return render_template(BookListTemplate.EDIT.value, view_model=view_model)
 
 
 @booklist_blueprint.route("delete/<int:booklist_id>", methods=[HttpMethod.POST.value])

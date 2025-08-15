@@ -63,6 +63,7 @@ class BookTemplate(Enum):
 class BookListTemplate(Enum):
     INDEX = "booklist/index.html"
     CREATE = "booklist/create.html"
+    EDIT = "booklist/edit.html"
     BOOKLIST = "booklist/booklist.html"
 
 

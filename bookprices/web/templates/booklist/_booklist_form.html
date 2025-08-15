@@ -14,7 +14,7 @@
         <label for="{{ view_model.description_field_name }}" class="form-label">Beskrivelse</label>
         <input name="{{ view_model.description_field_name }}" type="text" class="form-control"
                minlength="{{ view_model.description_min_length }}" maxlength="{{ view_model.description_max_length }}"
-               id="{{ view_model.description_field_name }}" value="{{ view_model.description if view_model.description else '' }}" required="required">
+               id="{{ view_model.description_field_name }}" value="{{ view_model.description if view_model.description else '' }}">
         {% if view_model.name_field_name in errors %}
             {% for error in errors[view_model.name_field_name] %}
                 <span id="description-error" class="form-text text-danger">{{ error }}</span>

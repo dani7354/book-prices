@@ -60,6 +60,21 @@ class BookListService:
         self._cache.delete(get_booklists_for_user_key(user_id))
         self._logger.info(f"Created new book list '{name}' for user {user_id}.")
 
+    def update_booklist(self, booklist_id: int, name: str, description: str | None, user_id: str) -> None:
+        if not (booklist := self.get_booklist(booklist_id, user_id)):
+            raise BookListNotFoundError(f"Booklist with id {booklist_id} cannot be found or accessed by user {user_id}.")
+
+        booklist.name = name
+        booklist.description = description
+        booklist.updated = datetime.now()
+
+        with self._unit_of_work:
+            self._unit_of_work.booklist_repository.update(booklist)
+
+        self._cache.delete(get_booklists_for_user_key(user_id))
+        self._cache.set(get_booklist_key(booklist_id), booklist)
+        self._logger.info(f"Updated book list '{name}' for user {user_id}.")
+
     def delete_booklist(self, booklist_id: int, user_id: str) -> None:
         if not (self.get_booklist(booklist_id, user_id)):
             raise BookListNotFoundError(f"Booklist cannot be found or accessed by user {user_id}.")
@@ -70,9 +85,10 @@ class BookListService:
         self._cache.delete(get_booklist_key(booklist_id))
 
 
-    def name_available(self, name: str, user_id: str) -> bool:
+    def name_available(self, name: str, user_id: str, existing_booklist_id: int | None = None) -> bool:
         booklists = self.get_booklists(user_id)
-        return not any([b for b in booklists if b.name == name])
+        return not any(
+            [b for b in booklists if b.name == name and (not existing_booklist_id or b.id != existing_booklist_id)])
 
     def add_book(self, book_id: int, booklist_id: int, user_id: str) -> bool:
         if not (_ := self.get_booklist(booklist_id, user_id)):
@@ -88,5 +104,3 @@ class BookListService:
             self._unit_of_work.booklist_repository.add_book_to_booklist(book_id, booklist_id)
 
         return True
-
-

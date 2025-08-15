@@ -4,10 +4,10 @@ from flask import url_for
 
 from bookprices.shared.db.tables import BookList
 from bookprices.web.shared.enum import Endpoint
-from bookprices.web.viewmodels.booklist import BookListIndexViewModel, BookListItemViewModel, BookListDetailsViewModel
+from bookprices.web.viewmodels.booklist import BookListIndexViewModel, BookListItemViewModel, BookListDetailsViewModel, \
+    BookListEditViewModel
 
-
-BOOKLIST_ITEM_DESCRIPTION_LENGTH = 100
+BOOKLIST_ITEM_DESCRIPTION_LENGTH = 200
 
 
 def _get_description_for_booklist_item(booklist: BookList) -> str | None:
@@ -59,3 +59,10 @@ def map_to_details_view_model(booklist: BookList) -> BookListDetailsViewModel:
         updated=booklist.updated.isoformat(),
         description=booklist.description
     )
+
+def map_to_edit_view_model(booklist: BookList | None, form_action_url: str, return_url: str) -> BookListEditViewModel:
+    return BookListEditViewModel(
+        name=booklist.name if booklist else "",
+        description=booklist.description if booklist else None,
+        form_action_url=form_action_url,
+        return_url=return_url)
