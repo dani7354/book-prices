@@ -21,7 +21,7 @@
             <small>Opdateret {{ bl.updated }}</small>
         </div>
         <div>
-            <a class="{{ 'btn btn-success btn-sm' if not bl.selected else 'btn btn-success btn-sm disabled' }}"
+            <a class="{{ 'btn btn-success btn-sm btn-select-booklist' if not bl.selected else 'btn btn-success btn-sm disabled' }}"
                data-booklist-id="{{ bl.id }}">Vælg</a>
             <a href="{{ bl.edit_url }}" class="btn btn-secondary btn-sm">Rediger</a>
             <a class="btn btn-danger btn-sm btn-delete-booklist" data-booklist-id="{{ bl.id }}">Slet</a>
@@ -38,5 +38,6 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/delete_booklist.js') }}"></script>
+<script src="{{ url_for('static', filename='js/select_booklist.js') }}"></script>
 
 {% endblock %}
