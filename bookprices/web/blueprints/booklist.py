@@ -31,8 +31,9 @@ def include_csrf_token() -> dict[str, str]:
 @require_member
 def index() -> str:
     booklist_service = _create_booklist_service()
-    booklists = booklist_service.get_booklists(flask_login.current_user.id)
-    view_model = map_to_booklist_list(booklists)
+    user = flask_login.current_user
+    booklists = booklist_service.get_booklists(user.id)
+    view_model = map_to_booklist_list(booklists, selected_booklist_id=user.booklist_id if user.booklist_id else None)
     return render_template(BookListTemplate.INDEX.value, view_model=view_model)
 
 

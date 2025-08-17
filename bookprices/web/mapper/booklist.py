@@ -28,10 +28,11 @@ def _get_description_for_booklist_item(booklist: BookList) -> str | None:
     return description
 
 
-def map_booklist_item(booklist: BookList) -> BookListItemViewModel:
+def map_booklist_item(booklist: BookList, selected_booklist_id: int | None) -> BookListItemViewModel:
     description = _get_description_for_booklist_item(booklist)
-
+    selected = selected_booklist_id == booklist.id if selected_booklist_id else False
     return BookListItemViewModel(
+        selected=selected,
         id=booklist.id,
         item_count=len(booklist.books),
         name=booklist.name,
@@ -43,10 +44,10 @@ def map_booklist_item(booklist: BookList) -> BookListItemViewModel:
     )
 
 
-def map_to_booklist_list(booklists: Sequence[BookList]) -> BookListIndexViewModel:
+def map_to_booklist_list(booklists: Sequence[BookList], selected_booklist_id: int  | None) -> BookListIndexViewModel:
     return BookListIndexViewModel(
         create_url=url_for(Endpoint.BOOKLIST_CREATE.value),
-        booklists=[map_booklist_item(booklist) for booklist in booklists]
+        booklists=[map_booklist_item(booklist, selected_booklist_id=selected_booklist_id) for booklist in booklists]
     )
 
 

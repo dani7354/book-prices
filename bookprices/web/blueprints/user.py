@@ -6,10 +6,13 @@ import bookprices.web.mapper.user as usermapper
 from flask import Blueprint, request, render_template, Response, redirect, url_for, abort, current_app, jsonify
 from bookprices.shared.db import database
 from bookprices.shared.model.user import UserAccessLevel
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import AuthService, require_member, require_admin
+from bookprices.web.service.booklist_service import BookListService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT
+from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpMethod, UserTemplate, Endpoint, HttpStatusCode
 from bookprices.web.viewmodels.user import UserEditViewModel
 
@@ -164,3 +167,19 @@ def delete(user_id: str) -> tuple[Response, int]:
         logger.error(f"Failed to delete user {user_id}: {ex}")
         return (jsonify({"error": f"Der opstod en fejl under sletning af brugeren med id {user_id}"}),
                 HttpStatusCode.INTERNAL_SERVER_ERROR)
+
+
+@user_blueprint.route("set-booklist/<int:booklist_id>", methods=[HttpMethod.POST.value])
+@login_required
+@require_member
+def set_booklist(booklist_id: int) -> tuple[Response, int]:
+    user_id = flask_login.current_user.id
+    try:
+        booklist_service  = BookListService(UnitOfWork(SessionFactory()), cache)
+        if not (booklist_service.get_booklist(booklist_id, user_id)):
+            return jsonify({"error": f"Booklist with ID {booklist_id} not found"}), HttpStatusCode.NOT_FOUND
+        auth_service.set_booklist_for_user(user_id, booklist_id)
+        return jsonify({}), HttpStatusCode.OK
+    except Exception as ex:
+        logger.error(f"Failed to set booklist {booklist_id} for user {user_id}: {ex}")
+        return jsonify({"error": str(ex)}), HttpStatusCode.INTERNAL_SERVER_ERROR

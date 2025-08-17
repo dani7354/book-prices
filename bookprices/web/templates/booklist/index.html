@@ -21,6 +21,8 @@
             <small>Opdateret {{ bl.updated }}</small>
         </div>
         <div>
+            <a class="{{ 'btn btn-success btn-sm' if not bl.selected else 'btn btn-success btn-sm disabled' }}"
+               data-booklist-id="{{ bl.id }}">Vælg</a>
             <a href="{{ bl.edit_url }}" class="btn btn-secondary btn-sm">Rediger</a>
             <a class="btn btn-danger btn-sm btn-delete-booklist" data-booklist-id="{{ bl.id }}">Slet</a>
         </div>

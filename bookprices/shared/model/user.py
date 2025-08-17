@@ -17,6 +17,7 @@ class UserAccessLevel(Enum):
 @dataclass(frozen=True)
 class User:
     id: str
+    booklist_id: int | None
     email: str
     firstname: str
     lastname: str | None
