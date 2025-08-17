@@ -1,5 +1,4 @@
 const baseUrl = "/booklist";
-const redirectUrl = "/booklist";
 const btnDeleteBookList = $(".btn-delete-booklist");
 
 
@@ -23,7 +22,7 @@ function deleteBookList(bookListId) {
             "csrf_token": $(csrfTokenNodeId).val()
         },
         "success": function () {
-            window.location.href = redirectUrl;
+            window.location.reload();
         },
         "error": function (error) {
             console.log(error);
