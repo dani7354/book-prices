@@ -116,7 +116,7 @@ class User(BaseModel):
     first_name = Column('FirstName', String(255), nullable=False)
     last_name = Column('LastName', String(255), nullable=True)
     is_active = Column('IsActive', Boolean, nullable=False)
-    google_api_token = Column('GoogleApiToken', String(255), nullable=False)
+    google_api_token = Column('GoogleApiToken', String(512), nullable=False)
     created = Column('Created', DateTime, nullable=False)
     updated = Column('Updated', DateTime, nullable=False)
     image_url = Column('ImageUrl', String(255), nullable=True)
