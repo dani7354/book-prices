@@ -5,17 +5,20 @@ from flask import Blueprint, abort, request, render_template, Response, redirect
 from bookprices.shared.db import database
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.user import UserAccessLevel
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.mapper.book import map_from_create_view_model
 from bookprices.web.service.auth_service import require_admin, AuthService
 from bookprices.web.service.book_service import BookService
+from bookprices.web.service.booklist_service import BookListService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE, BOOK_IMAGE_FILE_PATH,
     BOOK_IMAGES_BASE_URL)
 from bookprices.web.cache.redis import cache
+from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate, Endpoint
 from bookprices.web.viewmodels.book import CreateBookViewModel
 
@@ -23,7 +26,7 @@ from bookprices.web.viewmodels.book import CreateBookViewModel
 logger = LocalProxy(lambda: current_app.logger)
 book_blueprint = Blueprint("book", __name__)
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
-service = BookService(db, cache)
+book_service = BookService(db, cache)
 
 
 @book_blueprint.context_processor
@@ -40,9 +43,16 @@ def search() -> str:
     descending = args.get(DESCENDING_URL_PARAMETER)
     page = args.get(PAGE_URL_PARAMETER)
 
-    authors = service.get_authors()
-    current_books = service.search(search_phrase, author, page, BOOK_PAGESIZE, order_by, descending)
-    next_books = service.search(search_phrase, author, page + 1, BOOK_PAGESIZE, order_by, descending)
+    authors = book_service.get_authors()
+    current_books = book_service.search(search_phrase, author, page, BOOK_PAGESIZE, order_by, descending)
+    next_books = book_service.search(search_phrase, author, page + 1, BOOK_PAGESIZE, order_by, descending)
+
+    booklist_service = BookListService(UnitOfWork(SessionFactory()), cache)
+    if flask_login.current_user.is_authenticated and flask_login.current_user.booklist_id:
+        user = flask_login.current_user
+        book_ids_from_current_booklist = booklist_service.get_book_ids_from_booklist(user.booklist_id, user.id)
+    else:
+        book_ids_from_current_booklist = None
 
     next_page = page + 1 if len(next_books) > 0 else None
     previous_page = page - 1 if page >= 2 else None
@@ -55,14 +65,15 @@ def search() -> str:
                                   previous_page,
                                   next_page,
                                   order_by,
-                                  descending)
+                                  descending,
+                                  book_ids_from_current_booklist)
 
     return render_template(BookTemplate.SEARCH.value, view_model=vm)
 
 
 @book_blueprint.route("/book/<int:book_id>", methods=[HttpMethod.GET.value])
 def book(book_id: int) -> str:
-    if not (book_result := service.get_book(book_id)):
+    if not (book_result := book_service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
 
     args = parse_args_for_search(request.args)
@@ -74,8 +85,18 @@ def book(book_id: int) -> str:
 
     auth_service = AuthService(db, cache)
     user_can_edit_and_delete = auth_service.user_can_access(UserAccessLevel.ADMIN)
+    booklist_service = BookListService(UnitOfWork(SessionFactory()), cache)
 
-    latest_prices = service.get_latest_prices(book_id)
+    if flask_login.current_user.is_authenticated and flask_login.current_user.booklist_id:
+        booklist_active = True
+        user = flask_login.current_user
+        book_ids_from_current_booklist = booklist_service.get_book_ids_from_booklist(user.booklist_id, user.id)
+        book_on_current_booklist = book_result.id in book_ids_from_current_booklist
+    else:
+        booklist_active = False
+        book_on_current_booklist = False
+
+    latest_prices = book_service.get_latest_prices(book_id)
     book_details = bookmapper.map_book_details(book_result,
                                                latest_prices,
                                                user_can_edit_and_delete,
@@ -83,7 +104,9 @@ def book(book_id: int) -> str:
                                                author,
                                                search_phrase,
                                                order_by,
-                                               descending)
+                                               descending,
+                                               booklist_active,
+                                               book_on_current_booklist)
 
     return render_template(BookTemplate.BOOK.value, view_model=book_details)
 
@@ -108,11 +131,11 @@ def create() -> str | Response:
 
         if not view_model.is_valid():
             return render_template(BookTemplate.CREATE.value, view_model=view_model)
-        if service.get_book_by_isbn(view_model.isbn):
+        if book_service.get_book_by_isbn(view_model.isbn):
             view_model.add_error(view_model.isbn_field_name, "Bogen findes allerede")
             return render_template(BookTemplate.CREATE.value, view_model=view_model)
 
-        book_id = service.create_book(
+        book_id = book_service.create_book(
             Book(id=0,
                  isbn=view_model.isbn,
                  title=view_model.title,
@@ -131,7 +154,7 @@ def create() -> str | Response:
 @flask_login.login_required
 @require_admin
 def edit(book_id: int) -> str | Response:
-    if not (book_ := service.get_book(book_id)):
+    if not (book_ := book_service.get_book(book_id)):
         return abort(HttpStatusCode.NOT_FOUND, f"Bog med id {book_id} findes ikke")
 
     book_image_files_service = BookImageFileService(BOOK_IMAGE_FILE_PATH)
@@ -161,7 +184,7 @@ def edit(book_id: int) -> str | Response:
             view_model.add_error(view_model.image_url_field_name, "Billedet findes ikke")
             return render_template(BookTemplate.EDIT.value, view_model=view_model)
         try:
-            service.update_book(map_from_create_view_model(view_model))
+            book_service.update_book(map_from_create_view_model(view_model))
         except Exception as ex:
             logger.error(f"An error occurred while updating book: {ex}")
             view_model.add_error(view_model.isbn_field_name, "Der opstod en fejl under opdatering af bogen")
@@ -177,10 +200,10 @@ def edit(book_id: int) -> str | Response:
 
 @book_blueprint.route("/book/<int:book_id>/store/<int:store_id>", methods=[HttpMethod.GET.value])
 def price_history(book_id: int, store_id: int) -> str:
-    if not (book_result := service.get_book(book_id)):
+    if not (book_result := book_service.get_book(book_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen findes ikke")
 
-    if not (book_in_bookstore := service.get_book_in_bookstore(book_result, store_id)):
+    if not (book_in_bookstore := book_service.get_book_in_bookstore(book_result, store_id)):
         abort(HttpStatusCode.NOT_FOUND, "Bogen er ikke tilknyttet den valgte boghandel")
 
     args = parse_args_for_search(request.args)
@@ -204,11 +227,11 @@ def price_history(book_id: int, store_id: int) -> str:
 @flask_login.login_required
 @require_admin
 def delete(book_id: int) -> tuple[Response, int]:
-    if not service.get_book(book_id):
+    if not book_service.get_book(book_id):
         return jsonify({"error": f"Bog med id {book_id} findes ikke"}), HttpStatusCode.NOT_FOUND
 
     try:
-        service.delete_book(book_id)
+        book_service.delete_book(book_id)
     except Exception as ex:
         logger.error(f"An error occurred while deleting the book: {ex}")
         return jsonify({"error": "Der opstod en fejl under sletning af bogen"}), HttpStatusCode.INTERNAL_SERVER_ERROR
@@ -221,12 +244,12 @@ def delete(book_id: int) -> tuple[Response, int]:
 @require_admin
 def delete_book_from_bookstore(book_id: int, store_id: int) -> tuple[Response, int]:
     try:
-        if not service.is_book_from_bookstore(book_id, store_id):
+        if not book_service.is_book_from_bookstore(book_id, store_id):
             return (jsonify(
                 {"error": f"Bog med id {book_id} eller boghandler med id {store_id} findes ikke"}),
                 HttpStatusCode.NOT_FOUND)
 
-        service.delete_book_in_bookstore(book_id, store_id)
+        book_service.delete_book_in_bookstore(book_id, store_id)
     except Exception as ex:
         logger.error(f"An error occurred while deleting book fin bookstore: {ex}")
         return (jsonify({"error": "Der opstod en fejl under sletning af bogen fra boghandlen"}),

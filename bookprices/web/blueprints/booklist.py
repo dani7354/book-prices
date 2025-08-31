@@ -146,10 +146,13 @@ def add_to_list() -> tuple[Response, int]:
         return jsonify({"error": "Book and book list id is required!"}), 400
 
     booklist_service = _create_booklist_service()
-    booklist_service.add_book(
+    success = booklist_service.add_book(
         book_id=book_id,
         booklist_id=booklist_id,
         user_id=flask_login.current_user.id)
+    if not success:
+        return jsonify({"error": "Could not add book to booklist, booklist not found or not accessible."}), 400
+
     logger.info(f"Book {book_id} added to booklist {booklist_id} for user {flask_login.current_user.id}")
 
     return jsonify({}), 200

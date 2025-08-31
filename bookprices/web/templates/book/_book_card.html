@@ -1,4 +1,4 @@
-<div class="card d-flex flex-column flex-fill">
+<div class="card d-flex flex-column flex-fill" xmlns="http://www.w3.org/1999/html">
     {% if b.image_url %}
     <a href="{{ b.url }}">
         <img alt="{{ b.title }}" class="card-img-top" src="{{ b.image_url }}">
@@ -10,7 +10,25 @@
             {% if b.was_added_recently %}
             <span class="badge bg-success">Ny</span>
             {% endif %}
+
         </h5>
+        <div class="d-flex justify-content-between align-items-end">
         <p class="card-text">{{ b.author }}</p>
+        {% if not b.on_current_booklist %}
+        <a class="btn btn-primary btn-sm" href="">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-file-plus fs-3" viewBox="0 0 16 16">
+                <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5z"/>
+                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/>
+            </svg>
+        </a>
+        {% elif b.on_current_booklist and view_model.booklist_active %}
+        <a class="btn btn-danger btn-sm" href="">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+                <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708"/>
+                <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+            </svg>
+        </a>
+        {% endif %}
+        </div>
     </div>
 </div>

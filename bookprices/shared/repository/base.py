@@ -1,7 +1,7 @@
 from typing import Generic, TypeVar
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from bookprices.shared.db.tables import BaseModel
 
@@ -21,7 +21,7 @@ class RepositoryBase(Generic[T]):
         self._session.add(entity)
 
     def get(self, entity_id: int) -> T | None:
-        entity = self._session.get(self.entity_type, entity_id)
+        entity = self._session.get(self.entity_type, entity_id, options=[joinedload(entity_type.books)])
         if entity:
             self._session.expunge(entity)
         return entity

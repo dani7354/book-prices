@@ -44,6 +44,12 @@ class BookListService:
 
         return booklists
 
+    def get_book_ids_from_booklist(self, booklist_id: int, user_id: str) -> set[int]:
+        if not (booklist := self.get_booklist(booklist_id, user_id)):
+            raise BookListNotFoundError(f"Booklist with id {booklist_id} cannot be found or accessed by user {user_id}.")
+
+        return {book.book_id for book in booklist.books}
+
     def create_booklist(self, name: str, description: str | None,  user_id) -> None:
         """ Creates a new book list. """
         booklist = BookList(

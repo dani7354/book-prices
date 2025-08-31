@@ -31,6 +31,7 @@ class BookListItemViewModel:
     url: str
     image_url: str
     was_added_recently: bool
+    on_current_booklist: bool
 
 
 @dataclass(frozen=True)
@@ -75,6 +76,7 @@ class BookDetailsViewModel:
     page: Optional[int]
     search_phrase: Optional[str]
     show_edit_and_delete_buttons: bool
+    show_add_to_booklist_button: bool
 
 
 @dataclass(frozen=True)

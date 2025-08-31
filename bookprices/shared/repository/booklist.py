@@ -14,6 +14,12 @@ class BookListRepository(RepositoryBase[BookList]):
     def entity_type(self) -> type:
         return BookList
 
+    def get(self, entity_id: int) -> BookList | None:
+        entity = self._session.get(self.entity_type, entity_id)
+        if entity:
+            self._session.expunge(entity)
+        return entity
+
     def list_for_user(self, user_id: str) -> list[BookList]:
         booklists_result = (self._session.execute(
             select(self.entity_type)

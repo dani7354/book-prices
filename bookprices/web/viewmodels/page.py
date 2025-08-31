@@ -8,6 +8,7 @@ class IndexViewModel:
     latest_prices_books: list[BookListItemViewModel]
     newest_books_url: str
     latest_prices_books_url: str
+    booklist_active: bool
 
 
 @dataclass(frozen=True)

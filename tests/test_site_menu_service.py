@@ -28,6 +28,7 @@ def _get_service_with_patched_methods(auth_service: AuthService) -> SiteMenuServ
 def _get_user_with_access_level(access_level) -> WebUser:
     user = User(
         id=str(uuid.uuid4()),
+        booklist_id=1,
         email="jens@xyz.com",
         firstname="Jens",
         lastname="Jensen",
