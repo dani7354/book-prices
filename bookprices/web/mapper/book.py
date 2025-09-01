@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import Optional, Hashable
+from typing import Optional
 from flask import url_for
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.bookstore import BookStoreBookPrice, BookInBookStore, BookStore
@@ -131,8 +131,8 @@ def _map_sorting_options(search_phrase: str,
 def map_index_vm(
         newest_books: list[Book],
         latest_updated_books: list[Book],
-        booklist_active: bool = False,
-        book_ids_from_booklist: set[int] | None = None) -> IndexViewModel:
+        book_ids_from_booklist: set[int],
+        booklist_active: bool) -> IndexViewModel:
     url_parameters_newest_books = {
         ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
         DESCENDING_URL_PARAMETER: True,
@@ -175,6 +175,7 @@ def map_index_vm(
 
 def map_search_vm(books: list[Book],
                   author_names: list[str],
+                  book_ids_from_booklist: set[int],
                   search_phrase: str,
                   current_page: int,
                   author: Optional[str],
@@ -182,7 +183,7 @@ def map_search_vm(books: list[Book],
                   next_page: Optional[int],
                   order_by: BookSearchSortOption,
                   descending: bool,
-                  book_ids_from_booklist: set[int] | None) -> SearchViewModel:
+                  booklist_active: bool) -> SearchViewModel:
 
     author_options = [AuthorOption(AUTHOR_DEFAULT_OPTION_TEXT, "", not author)]
     for author_name in author_names:
@@ -222,7 +223,8 @@ def map_search_vm(books: list[Book],
                            previous_page,
                            next_page,
                            previous_page_url,
-                           next_page_url)
+                           next_page_url,
+                           booklist_active)
 
 
 def map_book_item(book: Book,
@@ -294,7 +296,7 @@ def map_book_details(book: Book,
                                 page,
                                 search_phrase,
                                 user_can_edit_and_delete,
-                                booklist_active and not on_current_booklist)
+                                booklist_active and on_current_booklist)
 
 
 

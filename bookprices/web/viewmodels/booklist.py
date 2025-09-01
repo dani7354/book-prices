@@ -95,3 +95,10 @@ class AddToListRequest:
 
     book_id: int
     booklist_id: int
+
+
+@dataclass(frozen=True)
+class RemoveFromListRequest:
+    book_id_field_name: ClassVar[str] = "book_id"
+
+    book_id: int

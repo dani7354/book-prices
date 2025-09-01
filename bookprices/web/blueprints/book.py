@@ -56,9 +56,11 @@ def search() -> str:
 
     next_page = page + 1 if len(next_books) > 0 else None
     previous_page = page - 1 if page >= 2 else None
+    booklists_active = book_ids_from_current_booklist is not None
 
     vm = bookmapper.map_search_vm(current_books,
                                   authors,
+                                  book_ids_from_current_booklist,
                                   search_phrase,
                                   page,
                                   author,
@@ -66,7 +68,7 @@ def search() -> str:
                                   next_page,
                                   order_by,
                                   descending,
-                                  book_ids_from_current_booklist)
+                                  booklists_active)
 
     return render_template(BookTemplate.SEARCH.value, view_model=vm)
 

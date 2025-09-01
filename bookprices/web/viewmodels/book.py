@@ -65,6 +65,7 @@ class SearchViewModel:
     next_page: Optional[int]
     previous_page_url: Optional[str]
     next_page_url: Optional[str]
+    booklist_active: bool
 
 
 @dataclass(frozen=True)
@@ -76,7 +77,7 @@ class BookDetailsViewModel:
     page: Optional[int]
     search_phrase: Optional[str]
     show_edit_and_delete_buttons: bool
-    show_add_to_booklist_button: bool
+    book_on_current_booklist: bool
 
 
 @dataclass(frozen=True)

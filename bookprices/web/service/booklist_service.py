@@ -108,5 +108,20 @@ class BookListService:
                 return False
 
             self._unit_of_work.booklist_repository.add_book_to_booklist(book_id, booklist_id)
+            self._cache.delete(get_booklists_for_user_key(user_id))
+            self._cache.delete(get_booklist_key(booklist_id))
+
+        return True
+
+    def delete_book(self, book_id, booklist_id, user_id) -> bool:
+        if not (_ := self.get_booklist(booklist_id, user_id)):
+            self._logger.error(
+                f"User {user_id} failed to access {booklist_id}. Either it does not exist or does not belong to the user.")
+            return False
+
+        with self._unit_of_work:
+            self._unit_of_work.booklist_repository.delete_book_from_booklist(book_id, booklist_id)
+            self._cache.delete(get_booklists_for_user_key(user_id))
+            self._cache.delete(get_booklist_key(booklist_id))
 
         return True

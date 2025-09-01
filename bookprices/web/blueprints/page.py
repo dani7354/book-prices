@@ -50,10 +50,13 @@ def index() -> str:
         sort_option=BookSearchSortOption.Created,
         descending=True)
 
-    if flask_login.current_user.is_authenticated:
-        user = flask_login.current_user
-        booklist_book_ids = booklist_service.get_book_ids_from_booklist(user.booklist_id, user.id) \
-            if user.booklist_id else set()
+    user = flask_login.current_user
+    if user.is_authenticated and user.booklist_id:
+        booklist_book_ids = booklist_service.get_book_ids_from_booklist(user.booklist_id, user.id)
+        booklist_active = True
+    else:
+        booklist_book_ids = set()
+        booklist_active = False
 
     newest_prices_books = book_service.search(
         search_phrase="",
@@ -65,7 +68,9 @@ def index() -> str:
 
     view_model = bookmapper.map_index_vm(
         newest_books=newest_books,
-        latest_updated_books=newest_prices_books)
+        latest_updated_books=newest_prices_books,
+        book_ids_from_booklist=booklist_book_ids,
+        booklist_active=booklist_active)
 
     return render_template(PageTemplate.INDEX.value, view_model=view_model)
 

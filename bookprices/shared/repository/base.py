@@ -21,7 +21,7 @@ class RepositoryBase(Generic[T]):
         self._session.add(entity)
 
     def get(self, entity_id: int) -> T | None:
-        entity = self._session.get(self.entity_type, entity_id, options=[joinedload(entity_type.books)])
+        entity = self._session.get(self.entity_type, entity_id)
         if entity:
             self._session.expunge(entity)
         return entity

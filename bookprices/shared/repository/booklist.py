@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
@@ -37,5 +38,14 @@ class BookListRepository(RepositoryBase[BookList]):
         return booklists
 
     def add_book_to_booklist(self, book_id: int, booklist_id: int) -> None:
-        booklist_book = BookListBook(book_id=book_id, booklist_id=booklist_id)
+        booklist_book = BookListBook(book_id=book_id, booklist_id=booklist_id, created=datetime.now())
         self._session.add(booklist_book)
+
+    def delete_book_from_booklist(self, book_id: int, booklist_id: int) -> None:
+        booklist_book = (self._session.execute(
+            select(BookListBook)
+            .filter_by(book_id=book_id, booklist_id=booklist_id))
+            .scalars()
+            .first())
+        if booklist_book:
+            self._session.delete(booklist_book)

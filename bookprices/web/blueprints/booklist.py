@@ -11,7 +11,7 @@ from bookprices.web.service.booklist_service import BookListService, BookListNot
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint, HttpStatusCode
-from bookprices.web.viewmodels.booklist import BookListEditViewModel, AddToListRequest
+from bookprices.web.viewmodels.booklist import BookListEditViewModel, AddToListRequest, RemoveFromListRequest
 
 booklist_blueprint = Blueprint("booklist", __name__)
 logger = LocalProxy(lambda: current_app.logger)
@@ -139,20 +139,35 @@ def delete(booklist_id: int) -> tuple[Response, int]:
 @login_required
 @require_member
 def add_to_list() -> tuple[Response, int]:
-    book_id = request.form.get(AddToListRequest.book_id_field_name, type=int)
-    booklist_id = request.form.get(AddToListRequest.booklist_id_field_name, type=int)
-
-    if not book_id or not booklist_id:
-        return jsonify({"error": "Book and book list id is required!"}), 400
+    if not (book_id := request.form.get(AddToListRequest.book_id_field_name, type=int)):
+        return jsonify({"error": "Book id is required!"}), 400
 
     booklist_service = _create_booklist_service()
-    success = booklist_service.add_book(
-        book_id=book_id,
-        booklist_id=booklist_id,
-        user_id=flask_login.current_user.id)
-    if not success:
+    user = flask_login.current_user
+    if not (booklist := booklist_service.get_booklist(user.booklist_id, user.id)):
+        return jsonify({"error": "No booklist found for user, cannot add book to booklist."}), 400
+
+    if not (booklist_service.add_book(book_id=book_id, booklist_id=booklist.id, user_id=flask_login.current_user.id)):
         return jsonify({"error": "Could not add book to booklist, booklist not found or not accessible."}), 400
 
-    logger.info(f"Book {book_id} added to booklist {booklist_id} for user {flask_login.current_user.id}")
+    logger.info(f"Book {book_id} added to booklist {booklist.id} for user {flask_login.current_user.id}")
+
+    return jsonify({}), 200
+
+
+@booklist_blueprint.route("remove", methods=[HttpMethod.POST.value])
+@login_required
+@require_member
+def remove_from_list() -> tuple[Response, int]:
+    if not (book_id := request.form.get(RemoveFromListRequest.book_id_field_name, type=int)):
+        return jsonify({"error": "Book id is required!"}), 400
+
+    booklist_service = _create_booklist_service()
+    user = flask_login.current_user
+    if not (booklist := booklist_service.get_booklist(user.booklist_id, user.id)):
+        return jsonify({"error": "No booklist found for user, cannot add book to booklist."}), 400
+
+    if not (booklist_service.delete_book(book_id=book_id, booklist_id=booklist.id, user_id=user.id)):
+        return jsonify({"error": "Could not remove book from booklist, booklist not found or not accessible."}), 400
 
     return jsonify({}), 200
