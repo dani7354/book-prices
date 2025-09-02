@@ -26,15 +26,24 @@
 <p>{{ view_model.description }}</p>
 {% endif %}
 
-{% for book in view_model.books %}
 
+ {% if view_model.books|length == 0 %}
+    <div class="col alert alert-info" role="alert">
+        <p>Ingen bøger på listen endnu</p>
+    </div>
 {% else %}
-<div class="alert alert-info" role="alert">
-    <p>Der er ingen bøger i denne bogliste.</p>
-</div>
+    <div class="row row-cols-1 row-cols-md-4 g-4 pb-5">
+        {% for b in view_model.books %}
+            <div class="col d-flex align-items-stretch">
+                {% include "book/_book_card.html" %}
+            </div>
+        {% else %}
+    </div>
 {% endfor %}
+{% endif %}
 
 <script type="application/javascript" src="{{ url_for('static', filename='js/delete_booklist.js') }}"></script>
+<script src="{{ url_for('static', filename='js/booklist.js') }}"></script>
 
 {% endblock %}
 

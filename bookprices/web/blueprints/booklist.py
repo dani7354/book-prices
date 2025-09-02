@@ -3,12 +3,16 @@ from flask import render_template, current_app, Blueprint, request, redirect, ur
 from flask_login import login_required
 from werkzeug.local import LocalProxy
 
+from bookprices.shared.db.database import Database
 from bookprices.web.cache.redis import cache
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.web.mapper.booklist import map_to_booklist_list, map_to_details_view_model, map_to_edit_view_model
 from bookprices.web.service.auth_service import require_member
+from bookprices.web.service.book_service import BookService
 from bookprices.web.service.booklist_service import BookListService, BookListNotFoundError
 from bookprices.web.service.csrf import get_csrf_token
+from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, \
+    PAGE_URL_PARAMETER
 from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint, HttpStatusCode
 from bookprices.web.viewmodels.booklist import BookListEditViewModel, AddToListRequest, RemoveFromListRequest
@@ -19,6 +23,11 @@ logger = LocalProxy(lambda: current_app.logger)
 
 def _create_booklist_service() -> BookListService:
     return BookListService(UnitOfWork(SessionFactory()), cache)
+
+
+def _create_book_service() -> BookService:
+    db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+    return BookService(db, cache)
 
 
 @booklist_blueprint.context_processor
@@ -42,8 +51,16 @@ def index() -> str:
 @require_member
 def view(booklist_id: int) -> str:
     booklist_service = _create_booklist_service()
-    booklist = booklist_service.get_booklist(booklist_id, flask_login.current_user.id)
-    view_model = map_to_details_view_model(booklist)
+    user = flask_login.current_user
+    if not (booklist := booklist_service.get_booklist(booklist_id, user.id)):
+        return abort(HttpStatusCode.NOT_FOUND.value, "Boglisten blev ikke fundet")
+
+    page = request.args.get(PAGE_URL_PARAMETER, type=int, default=1)
+
+    book_service = _create_book_service()
+    books = book_service.get_books_by_ids([book.book_id for book in booklist.books])
+
+    view_model = map_to_details_view_model(booklist, books, user.booklist_id, page)
     return render_template(BookListTemplate.BOOKLIST.value, view_model=view_model)
 
 

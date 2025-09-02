@@ -39,6 +39,7 @@ class BookListDetailsViewModel:
     created: str
     updated: str
     description: str | None
+    booklist_active: bool
 
 
 @dataclass(frozen=True)

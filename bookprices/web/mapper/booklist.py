@@ -3,6 +3,8 @@ from typing import Sequence
 from flask import url_for
 
 from bookprices.shared.db.tables import BookList
+from bookprices.shared.model.book import Book
+from bookprices.web.mapper.book import map_book_item
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.booklist import BookListIndexViewModel, BookListItemViewModel, BookListDetailsViewModel, \
     BookListEditViewModel
@@ -51,17 +53,26 @@ def map_to_booklist_list(booklists: Sequence[BookList], selected_booklist_id: in
     )
 
 
-def map_to_details_view_model(booklist: BookList) -> BookListDetailsViewModel:
+def map_to_details_view_model(
+        booklist: BookList,
+        books: list[Book],
+        acitve_booklist_id: int | None,
+        current_page: int) -> BookListDetailsViewModel:
+    url_parameters = {}
+
+    book_models = [
+        map_book_item(book, current_page, url_parameters, on_current_booklist=True) for book in books]
+
     return BookListDetailsViewModel(
         id=booklist.id,
-        books=[],
+        books=book_models,
         return_url=url_for(Endpoint.BOOKLIST_INDEX.value),
         edit_url=url_for(Endpoint.BOOKLIST_EDIT.value, booklist_id=booklist.id),
         name=booklist.name,
         created=booklist.created.isoformat(),
         updated=booklist.updated.isoformat(),
-        description=booklist.description
-    )
+        description=booklist.description,
+        booklist_active=booklist.id == acitve_booklist_id)
 
 def map_to_edit_view_model(booklist: BookList | None, form_action_url: str, return_url: str) -> BookListEditViewModel:
     return BookListEditViewModel(
