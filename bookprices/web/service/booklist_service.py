@@ -93,7 +93,7 @@ class BookListService:
     def name_available(self, name: str, user_id: str, existing_booklist_id: int | None = None) -> bool:
         booklists = self.get_booklists(user_id)
         return not any(
-            [b for b in booklists if b.name == name and (not existing_booklist_id or b.id != existing_booklist_id)])
+            b for b in booklists if b.name == name and (not existing_booklist_id or b.id != existing_booklist_id))
 
     def add_book(self, book_id: int, booklist_id: int, user_id: str) -> bool:
         if not (_ := self.get_booklist(booklist_id, user_id)):
