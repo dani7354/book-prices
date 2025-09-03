@@ -29,7 +29,7 @@ class BookListService:
                     self._cache.set(get_booklist_key(booklist_id), booklist)
 
         if booklist and booklist.user_id != user_id:
-            self._logger.warning(f"User with id {user_id} attempted to access booklist {booklist_id}, "
+            self._logger.warning(f"User with id {user_id} attempted to access booklist {booklist.id}, "
                                  f"which belongs to another user.")
             return None
 

@@ -163,15 +163,18 @@ def add_to_list() -> tuple[Response, int]:
     if not (book_id := request.form.get(AddToListRequest.book_id_field_name, type=int)):
         return jsonify({"error": "Book id is required!"}), 400
 
+    add_view_model = AddToListRequest(book_id=book_id)
+    if not add_view_model.is_valid():
+        return jsonify({"error": "Invalid book id format!"}), 400
+
     booklist_service = _create_booklist_service()
     user = flask_login.current_user
     if not (booklist := booklist_service.get_booklist(user.booklist_id, user.id)):
         return jsonify({"error": "No booklist found for user, cannot add book to booklist."}), 400
 
-    if not (booklist_service.add_book(book_id=book_id, booklist_id=booklist.id, user_id=flask_login.current_user.id)):
+    if not (booklist_service.add_book(book_id=add_view_model.book_id, booklist_id=booklist.id, user_id=flask_login.current_user.id)):
         return jsonify({"error": "Could not add book to booklist, booklist not found or not accessible."}), 400
 
-    logger.info(f"Book {book_id} added to booklist {booklist.id} for user {flask_login.current_user.id}")
     return jsonify({}), 200
 
 
@@ -182,12 +185,16 @@ def remove_from_list() -> tuple[Response, int]:
     if not (book_id := request.form.get(RemoveFromListRequest.book_id_field_name, type=int)):
         return jsonify({"error": "Book id is required!"}), 400
 
+    remove_view_model = RemoveFromListRequest(book_id=book_id)
+    if not remove_view_model.is_valid():
+        return jsonify({"error": "Invalid book id format!"}), 400
+
     booklist_service = _create_booklist_service()
     user = flask_login.current_user
     if not (booklist := booklist_service.get_booklist(user.booklist_id, user.id)):
         return jsonify({"error": "No booklist found for user, cannot add book to booklist."}), 400
 
-    if not (booklist_service.delete_book(book_id=book_id, booklist_id=booklist.id, user_id=user.id)):
+    if not (booklist_service.delete_book(book_id=remove_view_model.book_id, booklist_id=booklist.id, user_id=user.id)):
         return jsonify({"error": "Could not remove book from booklist, booklist not found or not accessible."}), 400
 
     return jsonify({}), 200

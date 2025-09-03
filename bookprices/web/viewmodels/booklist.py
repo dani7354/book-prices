@@ -7,7 +7,8 @@ from flask import url_for
 
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
-from bookprices.web.validation.input import length_equals_or_longer_than, length_equals_or_shorter_than
+from bookprices.web.validation.input import length_equals_or_longer_than, length_equals_or_shorter_than, \
+    is_int_larger_than
 
 
 @dataclass(frozen=True)
@@ -95,14 +96,16 @@ class BookListEditViewModel:
 @dataclass(frozen=True)
 class AddToListRequest:
     book_id_field_name: ClassVar[str] = "book_id"
-    booklist_id_field_name: ClassVar[str] = "booklist_id"
-
     book_id: int
-    booklist_id: int
+
+    def is_valid(self) -> bool:
+        return is_int_larger_than(self.book_id, 0)
 
 
 @dataclass(frozen=True)
 class RemoveFromListRequest:
     book_id_field_name: ClassVar[str] = "book_id"
-
     book_id: int
+
+    def is_valid(self) -> bool:
+        return is_int_larger_than(self.book_id, 0)
