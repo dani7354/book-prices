@@ -40,6 +40,8 @@
         {% else %}
     </div>
 {% endfor %}
+
+{% include "common/_pagination.html" %}
 {% endif %}
 
 <script type="application/javascript" src="{{ url_for('static', filename='js/delete_booklist.js') }}"></script>

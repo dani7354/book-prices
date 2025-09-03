@@ -16,7 +16,7 @@ from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE, BOOK_IMAGE_FILE_PATH,
-    BOOK_IMAGES_BASE_URL)
+    BOOK_IMAGES_BASE_URL, BOOKLIST_ID_URL_PARAMETER)
 from bookprices.web.cache.redis import cache
 from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate, Endpoint
@@ -84,6 +84,7 @@ def book(book_id: int) -> str:
     author = args.get(AUTHOR_URL_PARAMETER)
     order_by = args.get(ORDER_BY_URL_PARAMETER)
     descending = args.get(DESCENDING_URL_PARAMETER)
+    booklist_id = args.get(BOOKLIST_ID_URL_PARAMETER)
 
     auth_service = AuthService(db, cache)
     user_can_edit_and_delete = auth_service.user_can_access(UserAccessLevel.ADMIN)
@@ -94,7 +95,9 @@ def book(book_id: int) -> str:
         user = flask_login.current_user
         book_ids_from_current_booklist = booklist_service.get_book_ids_from_booklist(user.booklist_id, user.id)
         book_on_current_booklist = book_result.id in book_ids_from_current_booklist
+        return_endpoint = Endpoint.BOOKLIST_VIEW if booklist_id else Endpoint.BOOK_SEARCH
     else:
+        return_endpoint = Endpoint.BOOK_SEARCH
         booklist_active = False
         book_on_current_booklist = False
 
@@ -103,8 +106,10 @@ def book(book_id: int) -> str:
                                                latest_prices,
                                                user_can_edit_and_delete,
                                                page,
+                                               booklist_id,
                                                author,
                                                search_phrase,
+                                               return_endpoint,
                                                order_by,
                                                descending,
                                                booklist_active,

@@ -5,9 +5,10 @@ from flask import url_for
 from bookprices.shared.db.tables import BookList
 from bookprices.shared.model.book import Book
 from bookprices.web.mapper.book import map_book_item
+from bookprices.web.settings import BOOKLIST_ID_URL_PARAMETER, PAGE_URL_PARAMETER
 from bookprices.web.shared.enum import Endpoint
-from bookprices.web.viewmodels.booklist import BookListIndexViewModel, BookListItemViewModel, BookListDetailsViewModel, \
-    BookListEditViewModel
+from bookprices.web.viewmodels.booklist import (
+    BookListIndexViewModel, BookListItemViewModel, BookListDetailsViewModel, BookListEditViewModel)
 
 BOOKLIST_ITEM_DESCRIPTION_LENGTH = 200
 
@@ -57,11 +58,22 @@ def map_to_details_view_model(
         booklist: BookList,
         books: list[Book],
         acitve_booklist_id: int | None,
-        current_page: int) -> BookListDetailsViewModel:
-    url_parameters = {}
+        current_page: int,
+        next_page: int,
+        previous_page: int) -> BookListDetailsViewModel:
+
+    url_parameters = {
+        BOOKLIST_ID_URL_PARAMETER: booklist.id,
+        PAGE_URL_PARAMETER: current_page
+    }
 
     book_models = [
         map_book_item(book, current_page, url_parameters, on_current_booklist=True) for book in books]
+
+    next_page_url = url_for(Endpoint.BOOKLIST_VIEW.value, booklist_id=booklist.id, page=next_page) \
+        if next_page else None
+    previous_page_url = url_for(Endpoint.BOOKLIST_VIEW.value, booklist_id=booklist.id, page=previous_page) \
+        if previous_page else None
 
     return BookListDetailsViewModel(
         id=booklist.id,
@@ -72,7 +84,10 @@ def map_to_details_view_model(
         created=booklist.created.isoformat(),
         updated=booklist.updated.isoformat(),
         description=booklist.description,
-        booklist_active=booklist.id == acitve_booklist_id)
+        booklist_active=booklist.id == acitve_booklist_id,
+        current_page=current_page,
+        next_page_url=next_page_url,
+        previous_page_url=previous_page_url)
 
 def map_to_edit_view_model(booklist: BookList | None, form_action_url: str, return_url: str) -> BookListEditViewModel:
     return BookListEditViewModel(

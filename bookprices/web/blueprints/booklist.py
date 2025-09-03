@@ -12,7 +12,7 @@ from bookprices.web.service.book_service import BookService
 from bookprices.web.service.booklist_service import BookListService, BookListNotFoundError
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, \
-    PAGE_URL_PARAMETER
+    PAGE_URL_PARAMETER, BOOK_PAGESIZE
 from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint, HttpStatusCode
 from bookprices.web.viewmodels.booklist import BookListEditViewModel, AddToListRequest, RemoveFromListRequest
@@ -56,11 +56,15 @@ def view(booklist_id: int) -> str:
         return abort(HttpStatusCode.NOT_FOUND.value, "Boglisten blev ikke fundet")
 
     page = request.args.get(PAGE_URL_PARAMETER, type=int, default=1)
+    offset = (page - 1) * BOOK_PAGESIZE
+    book_ids = [book.book_id for book in sorted(booklist.books, key=lambda b: b.created)]
+    next_page = page + 1 if offset + BOOK_PAGESIZE < len(book_ids) else None
+    previous_page = page - 1 if page > 1 else None
 
     book_service = _create_book_service()
-    books = book_service.get_books_by_ids([book.book_id for book in booklist.books])
+    books = book_service.get_books_by_ids(book_ids[offset: offset + BOOK_PAGESIZE])
 
-    view_model = map_to_details_view_model(booklist, books, user.booklist_id, page)
+    view_model = map_to_details_view_model(booklist, books, user.booklist_id, page, next_page, previous_page)
     return render_template(BookListTemplate.BOOKLIST.value, view_model=view_model)
 
 

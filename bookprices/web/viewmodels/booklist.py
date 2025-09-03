@@ -40,6 +40,9 @@ class BookListDetailsViewModel:
     updated: str
     description: str | None
     booklist_active: bool
+    current_page: int
+    next_page_url: str | None
+    previous_page_url: str | None
 
 
 @dataclass(frozen=True)
