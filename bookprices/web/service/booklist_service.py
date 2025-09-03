@@ -64,7 +64,7 @@ class BookListService:
             self._unit_of_work.booklist_repository.add(booklist)
 
         self._cache.delete(get_booklists_for_user_key(user_id))
-        self._logger.info(f"Created new book list '{name}' for user {user_id}.")
+        self._logger.info(f"Created new book list for user {user_id}.")
 
     def update_booklist(self, booklist_id: int, name: str, description: str | None, user_id: str) -> None:
         if not (booklist := self.get_booklist(booklist_id, user_id)):
@@ -79,7 +79,7 @@ class BookListService:
 
         self._cache.delete(get_booklists_for_user_key(user_id))
         self._cache.set(get_booklist_key(booklist_id), booklist)
-        self._logger.info(f"Updated book list '{name}' for user {user_id}.")
+        self._logger.info(f"Updated book list {booklist.id} for user {user_id}.")
 
     def delete_booklist(self, booklist_id: int, user_id: str) -> None:
         if not (self.get_booklist(booklist_id, user_id)):
