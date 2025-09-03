@@ -56,6 +56,10 @@ class WebUser(flask_login.UserMixin):
     def access_level(self) -> UserAccessLevel:
         return self._user_model.access_level
 
+    @property
+    def booklist_id(self) -> int:
+        return self._user_model.booklist_id
+
     def get_id(self) -> str:
         return self.id
 
@@ -118,6 +122,10 @@ class AuthService:
 
     def delete_user(self, user_id: str) -> None:
         self._db.user_db.delete_user(user_id)
+        self._cache.delete(get_user_key(user_id))
+
+    def set_booklist_for_user(self, user_id: str, booklist_id: int) -> None:
+        self._db.user_db.update_user_booklist(user_id, booklist_id)
         self._cache.delete(get_user_key(user_id))
 
     @classmethod

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set active_page = "booklists" %}
+{% block content %}
+<h1>Boglister</h1>
+<p>Dine gemte boglister</p>
+{% for bl in view_model.booklists %}
+<div class="card mt-3">
+  <div class="card-body">
+      <div class="d-flex justify-content-between">
+          <div>
+            <a href="{{ bl.url }}"><h5 class="card-title">{{ bl.name }}</h5></a>
+          </div>
+          <div>
+            <p class="fs-2">{{ bl.item_count  }}</p>
+          </div>
+      </div>
+      <p>{{ bl.description if bl.description else '' }}</p>
+  </div>
+    <div class="card-footer text-muted d-flex justify-content-between">
+        <div>
+            <small>Opdateret {{ bl.updated }}</small>
+        </div>
+        <div>
+            <a class="{{ 'btn btn-success btn-sm btn-select-booklist' if not bl.selected else 'btn btn-success btn-sm disabled' }}"
+               data-booklist-id="{{ bl.id }}">Vælg</a>
+            <a href="{{ bl.edit_url }}" class="btn btn-secondary btn-sm">Rediger</a>
+            <a class="btn btn-danger btn-sm btn-delete-booklist" data-booklist-id="{{ bl.id }}">Slet</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    <p>Du har ingen boglister endnu.</p>
+</div>
+{% endfor %}
+<div class="mt-4">
+    <a href="{{ view_model.create_url }}" class="btn btn-primary">Opret</a>
+</div>
+
+<script src="{{ url_for('static', filename='js/delete_booklist.js') }}"
+        integrity="{{ sri_attribute_values['delete_booklist_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/select_booklist.js') }}"
+        integrity="{{ sri_attribute_values['select_booklist_js'] }}"></script>
+
+{% endblock %}

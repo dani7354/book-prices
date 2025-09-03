@@ -28,6 +28,7 @@ def _get_service_with_patched_methods(auth_service: AuthService) -> SiteMenuServ
 def _get_user_with_access_level(access_level) -> WebUser:
     user = User(
         id=str(uuid.uuid4()),
+        booklist_id=1,
         email="jens@xyz.com",
         firstname="Jens",
         lastname="Jensen",
@@ -52,7 +53,7 @@ def test_site_menu_service_gives_correct_number_of_items_for_user(
     AuthService.get_current_user = lambda: _get_user_with_access_level(user_access_level)
     service = _get_service_with_patched_methods(auth_service_mock)
 
-    items = service.get_menu_items()
+    items = service.get_user_menu_items()
 
     assert len(items) == number_of_items
 
@@ -62,7 +63,7 @@ def test_site_menu_services_gives_correct_items_for_member(
     AuthService.get_current_user = lambda: _get_user_with_access_level(UserAccessLevel.MEMBER)
     service = _get_service_with_patched_methods(auth_service_mock)
 
-    items = service.get_menu_items()
+    items = service.get_user_menu_items()
 
     assert items
     assert items[0].title == "Rediger bruger"
@@ -73,7 +74,7 @@ def test_site_menu_services_gives_correct_items_for_job_manager(
     AuthService.get_current_user = lambda: _get_user_with_access_level(UserAccessLevel.JOB_MANAGER)
     service = _get_service_with_patched_methods(auth_service_mock)
 
-    items = service.get_menu_items()
+    items = service.get_user_menu_items()
 
     assert items
     assert items[0].title == "Rediger bruger"
@@ -85,7 +86,7 @@ def test_site_menu_services_gives_correct_items_for_admin(
     AuthService.get_current_user = lambda: _get_user_with_access_level(UserAccessLevel.ADMIN)
     service = _get_service_with_patched_methods(auth_service_mock)
 
-    items = service.get_menu_items()
+    items = service.get_user_menu_items()
 
     assert items
     assert items[0].title == "Rediger bruger"

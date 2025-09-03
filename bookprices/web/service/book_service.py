@@ -52,6 +52,9 @@ class BookService:
 
         return book
 
+    def get_books_by_ids(self, book_ids: list[int]) -> list[Book]:
+        return [self.get_book(book_id) for book_id in book_ids]
+
     def get_book_by_isbn(self, isbn: str) -> Book | None:
         return self._db.book_db.get_book_by_isbn(isbn)
 

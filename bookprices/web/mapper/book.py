@@ -13,7 +13,7 @@ from bookprices.web.settings import (
     ORDER_BY_URL_PARAMETER,
     DESCENDING_URL_PARAMETER,
     BOOK_IMAGES_BASE_URL,
-    BOOK_FALLBACK_IMAGE_NAME)
+    BOOK_FALLBACK_IMAGE_NAME, BOOKLIST_ID_URL_PARAMETER)
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.book import (
     SearchViewModel,
@@ -128,7 +128,11 @@ def _map_sorting_options(search_phrase: str,
     return sorting_options
 
 
-def map_index_vm(newest_books: list[Book], latest_updated_books: list[Book]) -> IndexViewModel:
+def map_index_vm(
+        newest_books: list[Book],
+        latest_updated_books: list[Book],
+        book_ids_from_booklist: set[int],
+        booklist_active: bool) -> IndexViewModel:
     url_parameters_newest_books = {
         ORDER_BY_URL_PARAMETER: BookSearchSortOption.Created.name,
         DESCENDING_URL_PARAMETER: True,
@@ -147,21 +151,39 @@ def map_index_vm(newest_books: list[Book], latest_updated_books: list[Book]) -> 
         endpoint=Endpoint.BOOK_SEARCH.value,
         **url_parameters_latest_prices)
 
+    newest_books_models = [
+        map_book_item(
+            book=b,
+            page=1,
+            url_parameters=url_parameters_newest_books,
+            on_current_booklist=booklist_active and b.id in book_ids_from_booklist) for b in newest_books]
+
+    latest_updated_books_models = [
+        map_book_item(
+            book=b,
+            page=1,
+            url_parameters=url_parameters_latest_prices,
+            on_current_booklist=booklist_active and b.id in book_ids_from_booklist) for b in latest_updated_books]
+
     return IndexViewModel(
-        [map_book_item(book=b, page=1, url_parameters=url_parameters_newest_books) for b in newest_books],
-        [map_book_item(book=b, page=1, url_parameters=url_parameters_latest_prices) for b in latest_updated_books],
-        newest_books_url=newest_books_url, latest_prices_books_url=latest_prices_url)
+        newest_books=newest_books_models,
+        latest_prices_books=latest_updated_books_models,
+        newest_books_url=newest_books_url,
+        latest_prices_books_url=latest_prices_url,
+        booklist_active=booklist_active)
 
 
 def map_search_vm(books: list[Book],
                   author_names: list[str],
+                  book_ids_from_booklist: set[int],
                   search_phrase: str,
                   current_page: int,
                   author: Optional[str],
                   previous_page: Optional[int],
                   next_page: Optional[int],
                   order_by: BookSearchSortOption,
-                  descending: bool) -> SearchViewModel:
+                  descending: bool,
+                  booklist_active: bool) -> SearchViewModel:
 
     author_options = [AuthorOption(AUTHOR_DEFAULT_OPTION_TEXT, "", not author)]
     for author_name in author_names:
@@ -184,7 +206,15 @@ def map_search_vm(books: list[Book],
                                     endpoint=Endpoint.BOOK_SEARCH.value,
                                     **url_parameters)
 
-    return SearchViewModel([map_book_item(b, current_page, url_parameters) for b in books],
+    book_models = [
+        map_book_item(
+            book=b,
+            page=current_page,
+            url_parameters=url_parameters,
+            on_current_booklist=book_ids_from_booklist and b.id in book_ids_from_booklist)
+        for b in books]
+
+    return SearchViewModel(book_models,
                            author_options,
                            sorting_options,
                            search_phrase,
@@ -193,12 +223,14 @@ def map_search_vm(books: list[Book],
                            previous_page,
                            next_page,
                            previous_page_url,
-                           next_page_url)
+                           next_page_url,
+                           booklist_active)
 
 
 def map_book_item(book: Book,
                   page: int,
-                  url_parameters: dict) -> BookListItemViewModel:
+                  url_parameters: dict,
+                  on_current_booklist: bool) -> BookListItemViewModel:
 
     image_url = _get_image_url(book)
     was_added_recently = _was_book_recently_added(book)
@@ -207,17 +239,48 @@ def map_book_item(book: Book,
                       book_id=book.id,
                       **url_parameters)
 
-    return BookListItemViewModel(book.id, book.isbn, book.title, book.author, url, image_url, was_added_recently)
+    return BookListItemViewModel(
+        book.id, book.isbn, book.title, book.author, url, image_url, was_added_recently, on_current_booklist)
 
+
+def _create_return_url_for_book_details(
+        endpoint: Endpoint,
+        page: int | None,
+        booklist_id: int | None,
+        search_phrase: str | None,
+        author: str | None,
+        return_endpoint: Endpoint,
+        order_by: BookSearchSortOption,
+        descending: bool) -> str:
+
+    if endpoint == Endpoint.BOOK_SEARCH:
+        return_url = _create_url(page,
+                           endpoint=return_endpoint.value,
+                           **{SEARCH_URL_PARAMETER: search_phrase,
+                              AUTHOR_URL_PARAMETER: author,
+                              ORDER_BY_URL_PARAMETER: order_by.name,
+                              DESCENDING_URL_PARAMETER: descending})
+    elif endpoint == Endpoint.BOOKLIST_VIEW:
+        return_url = _create_url(page,
+                           endpoint=return_endpoint.value,
+                           **{BOOKLIST_ID_URL_PARAMETER: booklist_id})
+    else:
+        return_url = url_for(Endpoint.PAGE_INDEX.value)
+
+    return return_url
 
 def map_book_details(book: Book,
                      book_prices: list[BookStoreBookPrice],
                      user_can_edit_and_delete: bool,
-                     page: Optional[int],
-                     author: Optional[str],
-                     search_phrase: Optional[str],
+                     page: int | None,
+                     booklist_id: int | None,
+                     author: str | None,
+                     search_phrase: str | None,
+                     return_endpoint: Endpoint,
                      order_by: BookSearchSortOption,
-                     descending: bool) -> BookDetailsViewModel:
+                     descending: bool,
+                     booklist_active: bool,
+                     on_current_booklist: bool) -> BookDetailsViewModel:
 
     book_price_view_models = []
     for bp in book_prices:
@@ -243,12 +306,16 @@ def map_book_details(book: Book,
 
     image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
     book.image_url = os.path.join(BOOK_IMAGES_BASE_URL, image)
-    index_url = _create_url(page,
-                            endpoint=Endpoint.BOOK_SEARCH.value,
-                            **{SEARCH_URL_PARAMETER: search_phrase,
-                               AUTHOR_URL_PARAMETER: author,
-                               ORDER_BY_URL_PARAMETER: order_by.name,
-                               DESCENDING_URL_PARAMETER: descending})
+
+    return_url = _create_return_url_for_book_details(
+        endpoint=return_endpoint,
+        page=page,
+        booklist_id=booklist_id,
+        search_phrase=search_phrase,
+        author=author,
+        return_endpoint=return_endpoint,
+        order_by=order_by,
+        descending=descending)
 
     author_search_url = _create_url(page_number=1,
                                     endpoint=Endpoint.BOOK_SEARCH.value,
@@ -256,11 +323,12 @@ def map_book_details(book: Book,
 
     return BookDetailsViewModel(book,
                                 book_price_view_models,
-                                index_url,
+                                return_url,
                                 author_search_url,
                                 page,
                                 search_phrase,
-                                user_can_edit_and_delete)
+                                user_can_edit_and_delete,
+                                booklist_active and on_current_booklist)
 
 
 def map_price_history(book_in_book_store: BookInBookStore,

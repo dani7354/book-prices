@@ -40,6 +40,7 @@ DESCENDING_URL_PARAMETER = "descending"
 GOOGLE_AUTH_ERROR_URL_PARAMETER = "error"
 GOOGLE_AUTH_CODE_URL_PARAMETER = "code"
 TIMEPERIOD_DAYS_URL_PARAMETER = "days"
+BOOKLIST_ID_URL_PARAMETER = "booklist_id"
 
 FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", os.urandom(32))
 FLASK_APP_PORT = int(os.environ.get("FLASK_APP_PORT", 3031))
@@ -96,4 +97,13 @@ SRI_ATTRIBUTE_VALUES = {
     "job_run_modal_js": ("sha256-mWSWhUYXMU8ml3ueC2EDBABRLTHOeBXKa57GCEtFxB4= "
                          "sha384-e96AaRmLQhoFTx4SewulM+/l2rqlFU1Mh/vfDMeM5rWXW7Ig59PVOMSQFmAMmQTm "
                          "sha512-TXmOaHNuWUPoyD5oDfVYdHbzhyPg9CsFdF24WubycLTGQqSV+31LD9GXk9AijUfbZnUQRVc+gAqkT0AmhH96VA=="),
+    "booklist_js": ("sha256-4PtKdpYTfI8TKFcg4q5byRLTJvsY4pTm1WCByYGzmz0= "
+                    "sha384-o95Ap2cF9cZ3cAVagHKwir7XYexWMiWYpM+DhIJSJkPbfmSSep/+Yujd5svASQaG "
+                    "sha512-eWGmXEENOyMI6L0U7ui5Qa+/IW1L9yhxLJVw6YFC7DWpXhau0Y7eN+8e4JTMsfYGAvxGSgDRbLJPTSsBTRXB4Q=="),
+    "delete_booklist_js": ("sha256-YOkZY5Z+PimeUji2efEPp5ZP/yKGWpBOlLNC2EJJIFs= "
+                           "sha384-OOWKdY72m9Orh1K8Oe0+tdqO8KaSgjmP3DHrrS4yVNUbc7zNEZnbRqerebnrrC4c "
+                           "sha512-GL2H/jmS0YVGBYmd68NZpHu/S9VHgM66yVNbzxEuEi8HfTXHQEZ3eYp1omowVHChPwB+vd0lnANssCrAZuQDhQ=="),
+    "select_booklist_js": ("sha256-J1rZZtzJdOUzGNF+tgjAIv7CmIX3RWmTO8T5uaoxEWA= "
+                           "sha384-vof1pkASMIxt/I84Di63GNeBsevL2GzjudeMoD/aiMBCdsIyuxAJh/4r/02Mb/PR "
+                           "sha512-LFz/h94ZvOzYkGbmWHXbwhC92zNK/wSLgqDYcD4Be9xY+e3rPnYVWBfW+iJ/Rqd5EQyvSJexpX6IxCyaTCRSWw==")
 }

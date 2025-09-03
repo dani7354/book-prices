@@ -1,3 +1,5 @@
+from typing import Any
+
 from urllib3.util import parse_url, Url
 from werkzeug.datastructures.structures import MultiDict
 from bookprices.shared.db.book import BookSearchSortOption
@@ -6,14 +8,14 @@ from bookprices.web.settings import (
     AUTHOR_URL_PARAMETER,
     PAGE_URL_PARAMETER,
     ORDER_BY_URL_PARAMETER,
-    DESCENDING_URL_PARAMETER, TIMEPERIOD_DAYS_URL_PARAMETER)
+    DESCENDING_URL_PARAMETER, TIMEPERIOD_DAYS_URL_PARAMETER, BOOKLIST_ID_URL_PARAMETER)
 
 
 def parse_args_for_search(request_args: MultiDict) -> dict:
-    args = {
+    args: dict[str, Any] = {
         SEARCH_URL_PARAMETER: request_args.get(SEARCH_URL_PARAMETER, type=str, default=""),
         AUTHOR_URL_PARAMETER: request_args.get(AUTHOR_URL_PARAMETER, type=str, default=""),
-        DESCENDING_URL_PARAMETER: request_args.get(DESCENDING_URL_PARAMETER, type=bool, default=False)
+        DESCENDING_URL_PARAMETER: request_args.get(DESCENDING_URL_PARAMETER, type=bool, default=False),
     }
 
     order_by = request_args.get(ORDER_BY_URL_PARAMETER, type=str)
@@ -26,6 +28,12 @@ def parse_args_for_search(request_args: MultiDict) -> dict:
         args[PAGE_URL_PARAMETER] = page
     else:
         args[PAGE_URL_PARAMETER] = 1
+
+    if booklist_id := request_args.get(BOOKLIST_ID_URL_PARAMETER, default=""):
+        try:
+            args[BOOKLIST_ID_URL_PARAMETER] = int(booklist_id)
+        except ValueError:
+            args[BOOKLIST_ID_URL_PARAMETER] = None
 
     return args
 
