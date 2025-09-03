@@ -107,7 +107,7 @@ class BookListService:
                 self._logger.error(f"Book with id {book_id} does not exist.")
                 return False
 
-            self._unit_of_work.booklist_repository.add_book_to_booklist(book_id, booklist_id)
+            self._unit_of_work.booklist_repository.add_book_to_booklist(book_id, booklist_id, datetime.now())
             self._cache.delete(get_booklists_for_user_key(user_id))
             self._cache.delete(get_booklist_key(booklist_id))
 

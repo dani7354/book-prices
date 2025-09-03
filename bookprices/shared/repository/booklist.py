@@ -37,8 +37,8 @@ class BookListRepository(RepositoryBase[BookList]):
 
         return booklists
 
-    def add_book_to_booklist(self, book_id: int, booklist_id: int) -> None:
-        booklist_book = BookListBook(book_id=book_id, booklist_id=booklist_id, created=datetime.now())
+    def add_book_to_booklist(self, book_id: int, booklist_id: int, created: datetime) -> None:
+        booklist_book = BookListBook(book_id=book_id, booklist_id=booklist_id, created=created)
         self._session.add(booklist_book)
 
     def delete_book_from_booklist(self, book_id: int, booklist_id: int) -> None:

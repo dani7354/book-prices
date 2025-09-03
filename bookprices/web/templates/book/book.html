@@ -107,7 +107,8 @@
         integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
 <script src="{{ url_for('static', filename='js/book.js') }}"
         integrity="{{ sri_attribute_values['book_js'] }}"></script>
-<script src="{{ url_for('static', filename='js/booklist.js') }}"></script>
+<script src="{{ url_for('static', filename='js/booklist.js') }}"
+        integrity="{{ sri_attribute_values['booklist_js'] }}"></script>
 {% endif %}
 
 {% if view_model.show_edit_and_delete_buttons %}

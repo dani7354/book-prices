@@ -11,8 +11,8 @@ from bookprices.web.service.auth_service import require_member
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.booklist_service import BookListService, BookListNotFoundError
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, \
-    PAGE_URL_PARAMETER, BOOK_PAGESIZE
+from bookprices.web.settings import (
+    MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, PAGE_URL_PARAMETER, BOOK_PAGESIZE)
 from bookprices.web.shared.db_session import SessionFactory
 from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint, HttpStatusCode
 from bookprices.web.viewmodels.booklist import BookListEditViewModel, AddToListRequest, RemoveFromListRequest
@@ -172,7 +172,6 @@ def add_to_list() -> tuple[Response, int]:
         return jsonify({"error": "Could not add book to booklist, booklist not found or not accessible."}), 400
 
     logger.info(f"Book {book_id} added to booklist {booklist.id} for user {flask_login.current_user.id}")
-
     return jsonify({}), 200
 
 

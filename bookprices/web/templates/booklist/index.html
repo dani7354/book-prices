@@ -37,7 +37,9 @@
     <a href="{{ view_model.create_url }}" class="btn btn-primary">Opret</a>
 </div>
 
-<script src="{{ url_for('static', filename='js/delete_booklist.js') }}"></script>
-<script src="{{ url_for('static', filename='js/select_booklist.js') }}"></script>
+<script src="{{ url_for('static', filename='js/delete_booklist.js') }}"
+        integrity="{{ sri_attribute_values['delete_booklist_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/select_booklist.js') }}"
+        integrity="{{ sri_attribute_values['select_booklist_js'] }}"></script>
 
 {% endblock %}
