@@ -90,7 +90,6 @@ class BookListService:
         self._cache.delete(get_booklists_for_user_key(user_id))
         self._cache.delete(get_booklist_key(booklist_id))
 
-
     def name_available(self, name: str, user_id: str, existing_booklist_id: int | None = None) -> bool:
         booklists = self.get_booklists(user_id)
         return not any(
