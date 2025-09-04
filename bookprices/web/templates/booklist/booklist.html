@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "booklists" %}
 {% set errors = view_model.errors %}
+{% set contains_books = view_model.books|length > 0 %}
 {% block content %}
 
 
@@ -26,12 +27,12 @@
 <p>{{ view_model.description }}</p>
 {% endif %}
 
-
- {% if view_model.books|length == 0 %}
+<div class="container">
+    {% if not contains_books %}
     <div class="col alert alert-info" role="alert">
         <p>Ingen bøger på listen endnu</p>
     </div>
-{% else %}
+    {% else %}
     <div class="row row-cols-1 row-cols-md-4 g-4 pb-5">
         {% for b in view_model.books %}
             <div class="col d-flex align-items-stretch">
@@ -39,8 +40,11 @@
             </div>
         {% else %}
     </div>
-{% endfor %}
+    {% endfor %}
+    {% endif %}
+</div>
 
+{% if contains_books %}
 {% include "common/_pagination.html" %}
 {% endif %}
 
