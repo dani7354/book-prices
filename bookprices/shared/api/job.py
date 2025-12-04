@@ -1,9 +1,12 @@
 import json
 import logging
+import threading
+
 import requests
+import time
 from typing import ClassVar, Callable
 
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ConnectionError
 from requests.status_codes import codes
 from enum import Enum
 from bookprices.shared.db.api import ApiKeyDb
@@ -11,6 +14,10 @@ from bookprices.shared.model.api import ApiKey
 
 
 logger = logging.getLogger(__name__)
+
+
+class ApiUnavailableError(Exception):
+    pass
 
 
 class Endpoint(Enum):
@@ -40,6 +47,8 @@ class UrlParameter(Enum):
 class JobApiClient:
     response_encoding: ClassVar[str] = "utf-8"
     request_timeout: ClassVar[int] = 10
+    connection_error_retry_limit = 5
+    connection_error_retry_sleep_seconds = 3
 
     def __init__(
             self, base_url: str, api_username: str, api_password: str, client_name: str, api_key_db: ApiKeyDb) -> None:
@@ -49,6 +58,9 @@ class JobApiClient:
         self._client_name = client_name
         self._api_key_db = api_key_db
         self._api_key = None
+
+        self._lock = threading.RLock()
+        self._connection_retries = 0
 
     def get(self, endpoint: str) -> dict:
         return self._send_get(endpoint)
@@ -62,6 +74,22 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
+        except ConnectionError as e:
+            if self._connection_retries >= self.connection_error_retry_limit:
+                logger.error(
+                    "Retry limit reached for connection errors (%s). Please verify the Job API service is running",
+                    self.connection_error_retry_limit)
+                raise ApiUnavailableError from e
+            else:
+                with self._lock:
+                    self._connection_retries += 1
+                logger.error(
+                    "Job API not available. Retry %s/%s after %s seconds...",
+                    self._connection_retries,
+                    self.connection_error_retry_limit,
+                    self.connection_error_retry_sleep_seconds)
+                time.sleep(self.connection_error_retry_sleep_seconds)
+                return self._send_get(endpoint, is_retry)
         except HTTPError as e:
             logger.error("Failed to send GET request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -81,6 +109,22 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
+        except ConnectionError as e:
+            if self._connection_retries >= self.connection_error_retry_limit:
+                logger.error(
+                    "Retry limit reached for connection errors (%s). Please verify the Job API service is running",
+                    self.connection_error_retry_limit)
+                raise ApiUnavailableError from e
+            else:
+                with self._lock:
+                    self._connection_retries += 1
+                logger.error(
+                    "Job API not available. Retry %s/%s after %s seconds...",
+                    self._connection_retries,
+                    self.connection_error_retry_limit,
+                    self.connection_error_retry_sleep_seconds)
+                time.sleep(self.connection_error_retry_sleep_seconds)
+                return self._send_post(endpoint, data, is_retry)
         except HTTPError as e:
             logger.error("Failed to send POST request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -142,6 +186,10 @@ class JobApiClient:
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_delete, endpoint)
             raise
+
+    def _reset_connection_retries(self) -> None:
+        with self._lock:
+            self._connection_retries = 0
 
     def _refresh_key_and_retry(
             self,
