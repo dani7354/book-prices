@@ -1,23 +1,20 @@
 import json
 import logging
-import threading
 
 import requests
-import time
 from typing import ClassVar, Callable
 
-from requests.exceptions import HTTPError, ConnectionError
+from requests.exceptions import HTTPError
 from requests.status_codes import codes
 from enum import Enum
+
+from bookprices.shared.api.error import retry_on_connection_error
 from bookprices.shared.db.api import ApiKeyDb
 from bookprices.shared.model.api import ApiKey
 
 
 logger = logging.getLogger(__name__)
 
-
-class ApiUnavailableError(Exception):
-    pass
 
 
 class Endpoint(Enum):
@@ -47,8 +44,6 @@ class UrlParameter(Enum):
 class JobApiClient:
     response_encoding: ClassVar[str] = "utf-8"
     request_timeout: ClassVar[int] = 10
-    connection_error_retry_limit = 5
-    connection_error_retry_sleep_seconds = 3
 
     def __init__(
             self, base_url: str, api_username: str, api_password: str, client_name: str, api_key_db: ApiKeyDb) -> None:
@@ -59,12 +54,10 @@ class JobApiClient:
         self._api_key_db = api_key_db
         self._api_key = None
 
-        self._lock = threading.RLock()
-        self._connection_retries = 0
-
     def get(self, endpoint: str) -> dict:
         return self._send_get(endpoint)
 
+    @retry_on_connection_error()
     def _send_get(self, endpoint: str, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -74,8 +67,6 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
-        except ConnectionError as e:
-            return self._handle_connection_error(self._send_get, e, endpoint, is_retry)
         except HTTPError as e:
             logger.error("Failed to send GET request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -85,6 +76,7 @@ class JobApiClient:
     def post(self, endpoint: str, data: dict) -> dict:
         return self._send_post(endpoint, data)
 
+    @retry_on_connection_error()
     def _send_post(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -95,8 +87,6 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return response.json()
-        except ConnectionError as e:
-            return self._handle_connection_error(self._send_post, e, endpoint, data, is_retry)
         except HTTPError as e:
             logger.error("Failed to send POST request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -106,6 +96,7 @@ class JobApiClient:
     def put(self, endpoint: str, data: dict) -> dict:
         return self._send_put(endpoint, data)
 
+    @retry_on_connection_error()
     def _send_put(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -116,8 +107,6 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
-        except ConnectionError as e:
-            return self._handle_connection_error(self._send_put, e, endpoint, data, is_retry)
         except HTTPError as e:
             logger.error("Failed to send PUT request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -127,6 +116,7 @@ class JobApiClient:
     def patch(self, endpoint: str, data: dict) -> dict:
         return self._send_patch(endpoint, data)
 
+    @retry_on_connection_error()
     def _send_patch(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -137,8 +127,6 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
-        except ConnectionError as e:
-            return self._handle_connection_error(self._send_patch, e, endpoint, data, is_retry)
         except HTTPError as e:
             logger.error("Failed to send PATCH request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -148,6 +136,7 @@ class JobApiClient:
     def delete(self, endpoint: str) -> dict:
         return self._send_delete(endpoint)
 
+    @retry_on_connection_error()
     def _send_delete(self, endpoint: str, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -157,38 +146,11 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
-        except ConnectionError as e:
-            return self._handle_connection_error(self._send_delete, e, endpoint, is_retry)
         except HTTPError as e:
             logger.error("Failed to send DELETE request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_delete, endpoint)
             raise
-
-    def _handle_connection_error(
-            self,
-            request_func: Callable[[str, bool], dict] | Callable[[str, dict, bool], dict],
-            error: ConnectionError,
-            *args) -> dict:
-        if self._connection_retries >= self.connection_error_retry_limit:
-            logger.error(
-                "Retry limit reached for connection errors (%s). Please verify the Job API service is running",
-                self.connection_error_retry_limit)
-            raise ApiUnavailableError from error
-        else:
-            with self._lock:
-                self._connection_retries += 1
-            logger.error(
-                "Job API not available. Retry %s/%s after %s seconds...",
-                self._connection_retries,
-                self.connection_error_retry_limit,
-                self.connection_error_retry_sleep_seconds)
-            time.sleep(self.connection_error_retry_sleep_seconds)
-            return request_func(*args)
-
-    def _reset_connection_retries(self) -> None:
-        with self._lock:
-            self._connection_retries = 0
 
     def _refresh_key_and_retry(
             self,

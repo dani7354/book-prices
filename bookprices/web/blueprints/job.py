@@ -3,16 +3,15 @@ from flask_login import login_required
 
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db.database import Database
-from bookprices.web.service.auth_service import require_admin, require_job_manager
-from bookprices.web.service.csrf import get_csrf_token
 from bookprices.shared.service.job_service import (
     JobService,
     AlreadyExistError,
     DeletionFailedError,
     UpdateFailedError, FailedToGetJobRunsError, CreationFailedError)
-from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode, Endpoint
 from bookprices.web.mapper.job import map_job_list, map_job_edit_view_model, map_job_run_list, \
     map_job_run_edit_view_model, map_job_run_create_view_model
+from bookprices.web.service.auth_service import require_job_manager
+from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,
@@ -23,6 +22,7 @@ from bookprices.web.settings import (
     JOB_API_USERNAME,
     JOB_API_PASSWORD,
     JOB_API_CLIENT_ID)
+from bookprices.web.shared.enum import HttpMethod, JobTemplate, HttpStatusCode, Endpoint
 from bookprices.web.viewmodels.job import CreateJobViewModel
 from bookprices.web.viewmodels.job_run import JobRunPriority, JobRunCreateViewModel, JobRunEditViewModel
 

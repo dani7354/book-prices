@@ -5,7 +5,7 @@ from collections import Counter
 
 from bookprices.job.job.base import JobExitStatus, JobBase
 from bookprices.job.runner.service import RunnerJobService, JobRun
-from bookprices.shared.api.job import ApiUnavailableError
+from bookprices.shared.api.error import ApiUnavailableError
 from bookprices.shared.config.config import Config
 from bookprices.shared.service.job_service import UpdateFailedError, JobRunStatus, FailedToGetJobRunsError
 

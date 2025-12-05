@@ -11,7 +11,7 @@ from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJo
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob
-from bookprices.shared.api.job import ApiUnavailableError
+from bookprices.shared.api.error import ApiUnavailableError
 from bookprices.shared.service.job_service import JobService, JobSchemaFields, JobRunPriority, CreationFailedError
 from bookprices.job.job.trim_prices import TrimPricesJob
 
