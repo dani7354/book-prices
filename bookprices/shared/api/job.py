@@ -75,21 +75,7 @@ class JobApiClient:
             response.raise_for_status()
             return response.json()
         except ConnectionError as e:
-            if self._connection_retries >= self.connection_error_retry_limit:
-                logger.error(
-                    "Retry limit reached for connection errors (%s). Please verify the Job API service is running",
-                    self.connection_error_retry_limit)
-                raise ApiUnavailableError from e
-            else:
-                with self._lock:
-                    self._connection_retries += 1
-                logger.error(
-                    "Job API not available. Retry %s/%s after %s seconds...",
-                    self._connection_retries,
-                    self.connection_error_retry_limit,
-                    self.connection_error_retry_sleep_seconds)
-                time.sleep(self.connection_error_retry_sleep_seconds)
-                return self._send_get(endpoint, is_retry)
+            return self._handle_connection_error(self._send_get, e, endpoint, is_retry)
         except HTTPError as e:
             logger.error("Failed to send GET request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -110,21 +96,7 @@ class JobApiClient:
             response.raise_for_status()
             return response.json()
         except ConnectionError as e:
-            if self._connection_retries >= self.connection_error_retry_limit:
-                logger.error(
-                    "Retry limit reached for connection errors (%s). Please verify the Job API service is running",
-                    self.connection_error_retry_limit)
-                raise ApiUnavailableError from e
-            else:
-                with self._lock:
-                    self._connection_retries += 1
-                logger.error(
-                    "Job API not available. Retry %s/%s after %s seconds...",
-                    self._connection_retries,
-                    self.connection_error_retry_limit,
-                    self.connection_error_retry_sleep_seconds)
-                time.sleep(self.connection_error_retry_sleep_seconds)
-                return self._send_post(endpoint, data, is_retry)
+            return self._handle_connection_error(self._send_post, e, endpoint, data, is_retry)
         except HTTPError as e:
             logger.error("Failed to send POST request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -144,6 +116,8 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
+        except ConnectionError as e:
+            return self._handle_connection_error(self._send_put, e, endpoint, data, is_retry)
         except HTTPError as e:
             logger.error("Failed to send PUT request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -163,6 +137,8 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
+        except ConnectionError as e:
+            return self._handle_connection_error(self._send_patch, e, endpoint, data, is_retry)
         except HTTPError as e:
             logger.error("Failed to send PATCH request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
@@ -181,11 +157,34 @@ class JobApiClient:
                 timeout=self.request_timeout)
             response.raise_for_status()
             return self._decode_json_response(response)
+        except ConnectionError as e:
+            return self._handle_connection_error(self._send_delete, e, endpoint, is_retry)
         except HTTPError as e:
             logger.error("Failed to send DELETE request to %s. Error: %s", url, e)
             if e.response.status_code == codes.unauthorized and not is_retry:
                 return self._refresh_key_and_retry(self._send_delete, endpoint)
             raise
+
+    def _handle_connection_error(
+            self,
+            request_func: Callable[[str, bool], dict] | Callable[[str, dict, bool], dict],
+            error: ConnectionError,
+            *args) -> dict:
+        if self._connection_retries >= self.connection_error_retry_limit:
+            logger.error(
+                "Retry limit reached for connection errors (%s). Please verify the Job API service is running",
+                self.connection_error_retry_limit)
+            raise ApiUnavailableError from error
+        else:
+            with self._lock:
+                self._connection_retries += 1
+            logger.error(
+                "Job API not available. Retry %s/%s after %s seconds...",
+                self._connection_retries,
+                self.connection_error_retry_limit,
+                self.connection_error_retry_sleep_seconds)
+            time.sleep(self.connection_error_retry_sleep_seconds)
+            return request_func(*args)
 
     def _reset_connection_retries(self) -> None:
         with self._lock:
