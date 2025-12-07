@@ -2,15 +2,14 @@ import json
 import logging
 
 import requests
-from typing import ClassVar, Callable
-
 from requests.exceptions import HTTPError
 from requests.status_codes import codes
-from enum import Enum
 
 from bookprices.shared.api.error import retry_on_connection_error
 from bookprices.shared.db.api import ApiKeyDb
 from bookprices.shared.model.api import ApiKey
+from enum import Enum
+from typing import ClassVar, Callable
 
 
 logger = logging.getLogger(__name__)
