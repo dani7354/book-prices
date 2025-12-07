@@ -62,7 +62,7 @@ class RunnerJobService:
 
             return job_run_dto
         except HTTPError as e:
-            self._logger.error(f"Failed to get job run with id {job_run_id}")
+            self._logger.error(f"Failed to get job run with id {job_run_id}: {e}")
             return None
 
     def update_job_run_status(
