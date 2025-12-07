@@ -1,16 +1,19 @@
 import json
 import logging
-import requests
-from typing import ClassVar, Callable
 
+import requests
 from requests.exceptions import HTTPError
 from requests.status_codes import codes
-from enum import Enum
+
+from bookprices.shared.api.error import retry_on_connection_error
 from bookprices.shared.db.api import ApiKeyDb
 from bookprices.shared.model.api import ApiKey
+from enum import Enum
+from typing import ClassVar, Callable
 
 
 logger = logging.getLogger(__name__)
+
 
 
 class Endpoint(Enum):
@@ -53,6 +56,7 @@ class JobApiClient:
     def get(self, endpoint: str) -> dict:
         return self._send_get(endpoint)
 
+    @retry_on_connection_error()
     def _send_get(self, endpoint: str, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -71,6 +75,7 @@ class JobApiClient:
     def post(self, endpoint: str, data: dict) -> dict:
         return self._send_post(endpoint, data)
 
+    @retry_on_connection_error()
     def _send_post(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -90,6 +95,7 @@ class JobApiClient:
     def put(self, endpoint: str, data: dict) -> dict:
         return self._send_put(endpoint, data)
 
+    @retry_on_connection_error()
     def _send_put(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -109,6 +115,7 @@ class JobApiClient:
     def patch(self, endpoint: str, data: dict) -> dict:
         return self._send_patch(endpoint, data)
 
+    @retry_on_connection_error()
     def _send_patch(self, endpoint: str, data: dict, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:
@@ -128,6 +135,7 @@ class JobApiClient:
     def delete(self, endpoint: str) -> dict:
         return self._send_delete(endpoint)
 
+    @retry_on_connection_error()
     def _send_delete(self, endpoint: str, is_retry: bool = False) -> dict:
         url = self.format_url(endpoint)
         try:

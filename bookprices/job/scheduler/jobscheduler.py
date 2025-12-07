@@ -11,7 +11,8 @@ from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJo
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob
-from bookprices.shared.service.job_service import JobService, JobSchemaFields, JobRunPriority, CreationFailedError
+from bookprices.shared.service.job_service import JobService, JobSchemaFields, JobRunPriority, CreationFailedError, \
+    JobSourceUnavailableError
 from bookprices.job.job.trim_prices import TrimPricesJob
 
 
@@ -35,6 +36,9 @@ class JobScheduler:
                 time.sleep(1)
             except KeyboardInterrupt:
                 self._logger.info("Received keyboard interrupt. Exiting...")
+                running = False
+            except JobSourceUnavailableError as e:
+                self._logger.error(f"Job API is unavailable: {e}. Exiting...")
                 running = False
             except Exception as ex:
                 self._logger.error(f"Error while sending start request: {ex}")
