@@ -57,7 +57,7 @@ class WilliamDamBookImportJob(JobBase):
             self._logger.info("Getting book urls...")
             self._enqueue_urls_for_book_list_pages(
                 "https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={page}",
-                5)
+                500)
 
             if self._book_list_url_queue.empty():
                 self._logger.info("No book list urls found!")
