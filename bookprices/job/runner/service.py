@@ -3,10 +3,11 @@ from dataclasses import dataclass
 
 from requests import HTTPError
 
+from bookprices.shared.api.error import ApiUnavailableError
 from bookprices.shared.api.job import JobApiClient, Endpoint, UrlParameter
 from bookprices.shared.service.job_service import (
-    FailedToGetJobRunsError, JobRunSchemaFields, JobRunArgumentSchemaFields, JobRunArgumentType,UpdateFailedError,
-    JobRunStatus)
+    FailedToGetJobRunsError, JobRunSchemaFields, JobRunArgumentSchemaFields, JobRunArgumentType, UpdateFailedError,
+    JobRunStatus, JobSourceUnavailableError)
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class RunnerJobService:
         self._logger = logging.getLogger(__name__)
 
     def get_next_job_run_dto(self) -> JobRun | None:
+        next_job_id = None
         try:
             if not (next_job_id := self._get_next_job_run_id_from_list()):
                 return None
@@ -45,6 +47,9 @@ class RunnerJobService:
             job_run_dto = self.get_job_run_dto(next_job_id)
 
             return job_run_dto
+        except ApiUnavailableError as e:
+            self._logger.error(f"Failed to get next job run with id {next_job_id}")
+            raise JobSourceUnavailableError from e
         except HTTPError as e:
             self._logger.error(f"Failed to get job runs: {e}")
             raise FailedToGetJobRunsError
@@ -57,7 +62,7 @@ class RunnerJobService:
 
             return job_run_dto
         except HTTPError as e:
-            self._logger.error(f"Failed to get job run with id {job_run_id}: {e}")
+            self._logger.error(f"Failed to get job run with id {job_run_id}")
             return None
 
     def update_job_run_status(
@@ -75,6 +80,9 @@ class RunnerJobService:
                 data[JobRunSchemaFields.ERROR_MESSAGE.value] = error_message
             self._logger.debug(f"Updating job run with id {job_run_dto.id} to status {status}")
             self._job_api_client.patch(Endpoint.get_job_run_url(job_run_dto.id), data=data)
+        except ApiUnavailableError as e:
+            self._logger.error(f"Failed to update job run status for job run with id {job_run_dto.id}")
+            raise JobSourceUnavailableError from e
         except HTTPError as e:
             self._logger.error(f"Failed to update job run status: {e}")
             raise UpdateFailedError
@@ -91,6 +99,9 @@ class RunnerJobService:
             if job_run_json:
                 return job_run_json[0][JobRunSchemaFields.ID.value]
             return None
+        except ApiUnavailableError as e:
+            self._logger.error("Failed to get next job run id. Job API is unavailable")
+            raise JobSourceUnavailableError from e
         except HTTPError as e:
             self._logger.error(f"Failed to get job runs: {e}")
             raise FailedToGetJobRunsError
