@@ -1,4 +1,3 @@
-import dataclasses
 import logging
 from urllib.parse import urlparse
 
@@ -32,7 +31,7 @@ class WilliamDamBookImportJob(JobBase):
     _book_url_css: ClassVar[str] = "a.product-name"
     _book_details_list_css: ClassVar[str] = "ul.list li"
     _title_css: ClassVar[str] = "h1"
-    _author_css: ClassVar[str] = "h2.wd_text_large > span:nth-child(1) > a:nth-child(1)"
+    _author_css: ClassVar[str] = "a.manufacturer-link"
     _bookstore_id: ClassVar[int] = 2
 
     def __init__(
@@ -58,7 +57,7 @@ class WilliamDamBookImportJob(JobBase):
             self._logger.info("Getting book urls...")
             self._enqueue_urls_for_book_list_pages(
                 "https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={page}",
-                400)
+                5)
 
             if self._book_list_url_queue.empty():
                 self._logger.info("No book list urls found!")
@@ -176,7 +175,6 @@ class WilliamDamBookImportJob(JobBase):
         title, author, isbn, format_ = (None, None, None, None)
 
         title = self._parse_title(data_bs)
-        format_ = self._parse_format(data_bs)
         author_tag = data_bs.select_one(self._author_css)
         if author_tag:
             author = author_tag.get_text().strip()
@@ -184,7 +182,11 @@ class WilliamDamBookImportJob(JobBase):
         for li in data_bs.select(self._book_details_list_css):
             all_text = li.get_text()
             if "ISBN-13" in all_text:
-                isbn = li.select_one("span").get_text().strip()
+                isbn = li.select_one("span.detail-value").get_text().strip()
+            if "Format" in all_text:
+                format_value = li.select_one("span.detail-value").get_text().strip()
+                if format_value in self._valid_book_formats:
+                    format_ = format_value
 
         return Book(0, isbn, title, author, format_, None)
 
@@ -197,17 +199,6 @@ class WilliamDamBookImportJob(JobBase):
             title = title.replace(span_text, "")
 
         return title.strip() if title else None
-
-    def _parse_format(self, data_bs: BeautifulSoup) -> str | None:
-        title_tag = data_bs.select_one(self._title_css)
-        if not title_tag or not (span_tag := title_tag.select_one("span")):
-            return None
-        span_text = span_tag.get_text()
-        for valid_format in self._valid_book_formats:
-            if valid_format in span_text:
-                return valid_format
-
-        return None
 
     def _is_book_valid(self, book: Book) -> bool:
         self._logger.debug(f"Validating book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})...")
