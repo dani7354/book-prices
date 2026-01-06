@@ -17,8 +17,8 @@ class BookListRepository(RepositoryBase[BookList]):
 
     def get(self, entity_id: int) -> BookList | None:
         entity = self._session.get(self.entity_type, entity_id)
-        if entity:
-            self._session.expunge(entity)
+        self._session.expunge_all()
+
         return entity
 
     def list_for_user(self, user_id: str) -> list[BookList]:
@@ -30,12 +30,9 @@ class BookListRepository(RepositoryBase[BookList]):
             .scalars()
             .unique()
             .all())
-        booklists = []
-        for booklist in booklists_result:
-            self._session.expunge(booklist)
-            booklists.append(booklist)
+        self._session.expunge_all()
 
-        return booklists
+        return list(booklists_result)
 
     def add_book_to_booklist(self, book_id: int, booklist_id: int, created: datetime) -> None:
         booklist_book = BookListBook(book_id=book_id, booklist_id=booklist_id, created=created)

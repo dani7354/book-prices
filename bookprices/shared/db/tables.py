@@ -46,8 +46,8 @@ class BookStore(BaseModel):
     image_css_selector = Column('ImageCssSelector', String(255), nullable=True)
     isbn_css_selector = Column('IsbnCssSelector', String(255), nullable=True)
     price_format = Column('PriceFormat', String(80), nullable=True)
-    has_dynamically_loaded_content = Column('HasDynamicallyLoadedContent', Boolean, nullable=False)
     color_hex = Column('ColorHex', CHAR(6), nullable=True)
+    scraper_id = Column('ScraperId', String(255), nullable=True)
 
 
 class BookStoreBook(BaseModel):

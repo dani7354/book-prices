@@ -16,7 +16,7 @@ class BookStore:
     isbn_css_selector: Optional[str]
     price_format: Optional[str]
     color_hex: Optional[str]
-    has_dynamically_loaded_content: bool
+    scraper_id: Optional[str]
 
 
 @dataclass(frozen=True)

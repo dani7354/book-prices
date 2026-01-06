@@ -22,7 +22,7 @@ class BaseDb:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id, Name,  PriceFormat, Url, "
                          "SearchUrl, SearchResultCssSelector, PriceCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
+                         "IsbnCssSelector, ColorHex "
                          "FROM BookStore "
                          "WHERE Id = %s;")
                 cursor.execute(query, (book_store_id,))
@@ -37,7 +37,6 @@ class BaseDb:
                                                  image_css_selector=row["ImageCssSelector"],
                                                  isbn_css_selector=row["IsbnCssSelector"],
                                                  price_format=row["PriceFormat"],
-                                                 color_hex=row["ColorHex"],
-                                                 has_dynamically_loaded_content=row["HasDynamicallyLoadedContent"]))
+                                                 color_hex=row["ColorHex"]))
 
                 return book_stores[0] if len(book_stores) > 0 else None

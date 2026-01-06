@@ -1,13 +1,30 @@
 import dataclasses
+import re
 from abc import ABC, abstractmethod
 from logging import getLogger
+from typing import ClassVar
 from urllib.parse import urlparse, urljoin
 
 from bookprices.shared.webscraping.content import HtmlContent
 from bookprices.shared.webscraping.http import RequestFailedError, HttpClient
 
 
+FALLBACK_PRICE_FORMAT = r".*"
+
+
 class BookNotFoundError(Exception):
+    pass
+
+
+class PriceNotFoundException(Exception):
+    pass
+
+
+class PriceSelectorError(Exception):
+    pass
+
+
+class PriceFormatError(Exception):
     pass
 
 
@@ -24,20 +41,17 @@ class BookStoreConfiguration:
     bookstore_name: str
     bookstore_url: str
     bookstore_search_url: str
+    bookstore_price_css_selector: str
     bookstore_isbn_css_selector: str | None
     search_result_css_selector: str | None
 
 
 class BookStoreScraper(ABC):
     """ Base class for BookStore webscraper. """
+    name: ClassVar[str]
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         self._configuration = configuration
-
-    @abstractmethod
-    @property
-    def name(self) -> str:
-        raise NotImplementedError
 
     @abstractmethod
     def find_book(self, book_id: int, isbn: str) -> BookSearchResult | None:
@@ -47,9 +61,24 @@ class BookStoreScraper(ABC):
     def get_price(self, url: str) -> float:
         raise NotImplementedError
 
+    @classmethod
+    @abstractmethod
+    def get_name(cls) -> str:
+        raise NotImplementedError
+
 
 class StaticBookStoreScraper(BookStoreScraper):
-    """ Scraper for static BookStore websites. """
+    """
+    Scraper for static BookStore websites.
+    This scraper assumes that the bookstore website does not load dynamic content via JavaScript and
+    that the request is redirected to the book detail page when searching for a book by ISBN
+    """
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
+
+    _price_format_fallback: ClassVar[str] = FALLBACK_PRICE_FORMAT
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
@@ -69,7 +98,10 @@ class StaticBookStoreScraper(BookStoreScraper):
                     return None
 
                 self._logger.info(f"Found match for book {book_id} with ISBN {isbn} at {match_url}")
-                return BookSearchResult(book_id=book_id, bookstore_id=self.bookstore_id, url=match_url)
+                return BookSearchResult(
+                    book_id=book_id,
+                    bookstore_id=self._configuration.bookstore_id,
+                    url=match_url)
         except RequestFailedError as ex:
             self._logger.error(f"Failed to format search URL for book {book_id} with ISBN {isbn}: {ex}")
             return None
@@ -94,8 +126,24 @@ class StaticBookStoreScraper(BookStoreScraper):
         return isbn in isbn_element or html_content.contains_text(isbn)
 
     def get_price(self, url: str) -> float:
-        pass
+        with HttpClient() as http_client:
+            try:
+                response = http_client.get(url)
+                return self._parse_price(response.text)
+            except RequestFailedError as ex:
+                raise PriceNotFoundException from ex
 
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
+    def _parse_price(self, response_text: str) -> float:
+        html_content = HtmlContent(response_text)
+        if not (price_text := html_content.find_element_text_by_css(self._configuration.bookstore_price_css_selector)):
+            raise PriceSelectorError
+
+        price_format = self._configuration.bookstore_price_css_selector or self._price_format_fallback
+        if not (price_match := re.search(price_format, price_text.replace(",", "."))):
+            raise PriceFormatError
+
+        try:
+            return float(price_match.group())
+        except ValueError as ex:
+            self._logger.error(f"Failed to parse value as float: {price_match.group()}")
+            raise PriceFormatError from ex

@@ -1,20 +1,46 @@
 import logging
 
-from bookprices.shared.webscraping.bookstore import BookStoreScraper
+from bookprices.shared.db.tables import BookStore
+from bookprices.shared.repository.unit_of_work import UnitOfWork
+from bookprices.shared.webscraping.bookstore import BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration
 
 
 class BookStoreScraperService:
     """ Service for listing and getting bookstore scrapers """
-    def __init__(self) -> None:
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._scrapers = {}
 
-    def add_scraper(self, scraper: BookStoreScraper) -> None:
-        self._scrapers[scraper.name] = scraper
+    def __init__(self, unit_of_work: UnitOfWork) -> None:
+        self._logger = logging.getLogger(self.__class__.__name__)
+        self._unit_of_work = unit_of_work
+        self._scraper_types = {
+            StaticBookStoreScraper.get_name(): StaticBookStoreScraper,
+        }
 
     def list_scrapers(self) -> list[BookStoreScraper]:
-        pass
+        with self._unit_of_work as unit_of_work:
+            bookstores = unit_of_work.bookstore_repository.get_list()
 
-    def get_scraper(self, scraper_id: str) -> BookStoreScraper | None:
-        pass
+        return [scraper for bookstore in bookstores if (scraper := self._create_scraper_for_bookstore(bookstore))]
 
+
+    def get_scraper(self, bookstore_id: int) -> BookStoreScraper | None:
+        with self._unit_of_work as unit_of_work:
+            bookstore = unit_of_work.bookstore_repository.get(bookstore_id)
+
+        return self._create_scraper_for_bookstore(bookstore)
+
+    def _create_scraper_for_bookstore(self, bookstore: BookStore) -> BookStoreScraper | None:
+        scraper_class = self._scraper_types.get(bookstore.name)
+        if not scraper_class:
+            self._logger.warning(f"No scraper found for bookstore {bookstore.name}")
+            return None
+
+        configuration = BookStoreConfiguration(
+            bookstore_id=bookstore.id,
+            bookstore_name=bookstore.name,
+            bookstore_url=bookstore.url,
+            bookstore_search_url=bookstore.search_url,
+            bookstore_price_css_selector=bookstore.price_css_selector,
+            bookstore_isbn_css_selector=bookstore.isbn_css_selector,
+            search_result_css_selector=bookstore.search_result_css_selector)
+
+        return scraper_class(configuration)
