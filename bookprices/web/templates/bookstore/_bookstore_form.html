@@ -111,14 +111,17 @@
         {% endif %}
     </div>
     <div class="mb-3">
-        <label for="{{ view_model.has_dynamic_content_field_name }}" class="form-label">Dynamisk indlæst indhold</label>
-        {% if view_model.has_dynamic_content %}
-        <input type="checkbox" class="form-check-input" id="{{ view_model.has_dynamic_content_field_name }}"
-               name="{{ view_model.has_dynamic_content_field_name }}" checked="checked">
-        {% else %}
-        <input type="checkbox" class="form-check-input" id="{{ view_model.has_dynamic_content_field_name }}"
-               name="{{ view_model.has_dynamic_content_field_name }}">
-        {% endif %}
+        <label for="{{ view_model.scraper_id_field_name }}" class="form-label">Scraper</label>
+        <select id="{{ view_model.scraper_id_field_name }}" name="{{ view_model.scraper_id_field_name }}" class="form-select">
+            <option value="">Standard</option>
+            {% for scraper in view_model.scraper_names %}
+                {% if view_model.scraper_id == scraper %}
+                    <option value="{{ scraper }}" selected="selected">{{ scraper }}</option>
+                {% else %}
+                    <option value="{{ scraper }}">{{ scraper }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
     </div>
     <button type="submit" class="btn btn-primary">Gem</button>
 </form>

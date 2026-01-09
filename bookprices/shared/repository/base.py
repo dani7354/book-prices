@@ -20,19 +20,22 @@ class RepositoryBase[T: BaseModel](ABC):
 
     def get(self, entity_id: int) -> T | None:
         entity = self._session.get(self.entity_type, entity_id)
-        if entity:
-            self._session.expunge(entity)
+        self._session.expunge_all()
+
         return entity
 
+    @abstractmethod
     def update(self, entity: T) -> None:
-        self._session.merge(entity)
+        raise NotImplementedError()
 
     def delete(self, entity_id: int) -> None:
-        entity = self._session.get(self.entity_type, entity_id)
-        if not entity:
+        if not (entity := self._session.get(self.entity_type, entity_id)):
             raise ValueError(f"Entity with id {entity_id} not found.")
 
         self._session.delete(entity)
 
     def get_list(self) -> list[T]:
-        return list(self._session.execute(select(self.entity_type)).scalars().all())
+        entities = self._session.execute(select(self.entity_type)).scalars().all()
+        self._session.expunge_all()
+
+        return list(entities)

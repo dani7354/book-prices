@@ -46,7 +46,7 @@ class HttpClient:
                 url=response.url
             )
         except requests.RequestException as e:
-            self._logger.error(f"HTTP GET request to {url} failed with status code {e.response.status_code}: {e}")
+            self._logger.error(f"HTTP GET request to {url} failed: {e}")
             raise RequestFailedError from e
 
     def __enter__(self) -> "HttpClient":

@@ -15,7 +15,7 @@ class UnitOfWork:
         self.bookstore_repository: BookStoreRepository | None = None
 
     def __enter__(self) -> "UnitOfWork":
-        try :
+        try:
             self._session = self._session_factory.create_session()
             self.booklist_repository = BookListRepository(self._session)
             self.book_repository = BookRepository(self._session)

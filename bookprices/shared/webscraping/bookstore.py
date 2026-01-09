@@ -42,6 +42,7 @@ class BookStoreConfiguration:
     bookstore_url: str
     bookstore_search_url: str
     bookstore_price_css_selector: str
+    bookstore_price_format: str | None
     bookstore_isbn_css_selector: str | None
     search_result_css_selector: str | None
 
@@ -103,7 +104,7 @@ class StaticBookStoreScraper(BookStoreScraper):
                     bookstore_id=self._configuration.bookstore_id,
                     url=match_url)
         except RequestFailedError as ex:
-            self._logger.error(f"Failed to format search URL for book {book_id} with ISBN {isbn}: {ex}")
+            self._logger.error(f"HTTP request failed while searching for book {book_id} with ISBN {isbn}: {ex}")
             return None
 
     @staticmethod
@@ -111,7 +112,7 @@ class StaticBookStoreScraper(BookStoreScraper):
         response = client.get(search_url)
         return response.url if response.redirected else None
 
-    def _match_url_valid(self, client: HttpClient, isbn: str, match_url: str) -> bool:
+    def _match_url_valid(self, client: HttpClient, match_url: str, isbn: str) -> bool:
         if isbn in match_url:
             return True
 
@@ -138,7 +139,7 @@ class StaticBookStoreScraper(BookStoreScraper):
         if not (price_text := html_content.find_element_text_by_css(self._configuration.bookstore_price_css_selector)):
             raise PriceSelectorError
 
-        price_format = self._configuration.bookstore_price_css_selector or self._price_format_fallback
+        price_format = self._configuration.bookstore_price_format or self._price_format_fallback
         if not (price_match := re.search(price_format, price_text.replace(",", "."))):
             raise PriceFormatError
 

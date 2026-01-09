@@ -5,10 +5,12 @@ from bookprices.shared.repository.base import RepositoryBase
 
 
 class BookRepository(RepositoryBase[Book]):
-
     def __init__(self, session: Session) -> None:
         super().__init__(session)
 
     @property
     def entity_type(self) -> type:
         return Book
+
+    def update(self, entity: Book) -> None:
+        raise NotImplementedError

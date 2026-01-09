@@ -12,7 +12,7 @@ class BookStoreDb(BaseDb):
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
                          "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "IsbnCssSelector, ColorHex, ScraperId"
+                         "IsbnCssSelector, ColorHex, ScraperId "
                          "FROM BookStore "
                          "ORDER BY Id ASC")
                 cursor.execute(query)
