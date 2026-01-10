@@ -9,10 +9,11 @@ from bookprices.job.job.download_images import DownloadImagesJob, DownloadImages
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob, BookPricesUpdateJob
+from bookprices.job.job.update_prices_new import AllBookPricesUpdateJobNew
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.job.service.image_download import ImageDownloadService
-from bookprices.job.service.price_update import PriceUpdateService
+from bookprices.job.service.price_update import PriceUpdateService, NewPriceUpdateService
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
@@ -24,10 +25,12 @@ from bookprices.shared.event.base import EventManager, Event
 from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.event.listener import StartJobListener
 from bookprices.shared.log import setup_logging
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.job_service import JobService
+from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.image import ImageDownloader
 from bookprices.shared.service.book_image_file_service import BookImageFileService
-
+from bookprices.web.shared.db_session import SessionFactory
 
 THREAD_COUNT = 8
 JOB_API_CLIENT_ID = "JobApiJobRunner"
@@ -173,6 +176,18 @@ def create_all_book_prices_update_job(config: Config, event_manager: EventManage
     return AllBookPricesUpdateJob(config, db, price_update_service, event_manager)
 
 
+def create_all_book_prices_update_job_new(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJobNew:
+    db = create_database_container(config)
+    cache_key_remover = create_cache_key_remover(config)
+    session_factory = SessionFactory()
+    unit_of_work = UnitOfWork(session_factory)
+    scraper_service = BookStoreScraperService(unit_of_work)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
+    price_update_service = NewPriceUpdateService(db, cache_key_remover, unit_of_work, scraper_service, thread_count)
+
+    return AllBookPricesUpdateJobNew(config, unit_of_work, price_update_service, event_manager)
+
+
 def create_book_price_update_job(config: Config, event_manager: EventManager) -> BookPricesUpdateJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
@@ -206,6 +221,7 @@ def main() -> None:
         create_bookstore_search_job(config, event_manager),
         create_delete_prices_job(config),
         create_book_price_update_job(config, event_manager),
+        create_all_book_prices_update_job_new(config, event_manager),
         create_all_book_prices_update_job(config, event_manager),
         create_william_dam_book_import_job(config, event_manager)
     ]

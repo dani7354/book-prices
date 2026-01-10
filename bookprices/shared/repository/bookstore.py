@@ -19,7 +19,8 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         return BookStore
 
     def get_bookstores_for_books(self, book_ids: Sequence[int]) -> dict[int, list[BookStoreBook]]:
-        entities = self._session.execute(select(BookStoreBook).where(BookStoreBook.book_id.in_(book_ids))).scalars().all()
+        entities = self._session.execute(
+            select(BookStoreBook).where(BookStoreBook.book_id.in_(book_ids))).scalars().all()
         self._session.expunge_all()
 
         bookstores_by_book_id = defaultdict(list)
