@@ -17,6 +17,7 @@ from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.bookstore import BookStoreScraper
 from bookprices.shared.webscraping.price import (
     PriceSelectorError, PriceFormatError, PriceNotFoundException, PriceFinderConnectionError, get_price)
+import bookprices.shared.webscraping.bookstore as bs
 
 
 class PriceUpdateService:
@@ -154,7 +155,7 @@ class NewPriceUpdateService(PriceUpdateService):
         self._save_new_prices_and_clear_cache()
 
     def _fill_queue(self, book_stores_by_book_id: dict[int, list[BookStoreBook]]) -> None:
-        self._logger.debug("Filling book stores for book into queue...")
+        self._logger.debug(f"Filling {len(book_stores_by_book_id.values())} book stores for book {book_stores_by_book_id.keys()} into queue...")
         for book_stores in book_stores_by_book_id.values():
             self._book_stores_queue.put(book_stores)
 
@@ -179,22 +180,22 @@ class NewPriceUpdateService(PriceUpdateService):
                               book_store_id=bookstore_id,
                               price=price_value,
                               created=datetime.now()))
-            except PriceSelectorError as ex:
+            except bs.PriceSelectorError as ex:
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
-                    book_in_store.book.id, book_in_store.book_store.id, FailedUpdateReason.PRICE_SELECT_ERROR)
-            except PriceFormatError as ex:
+                    book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.PRICE_SELECT_ERROR)
+            except bs.PriceFormatError as ex:
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
-                    book_in_store.book.id, book_in_store.book_store.id, FailedUpdateReason.INVALID_PRICE_FORMAT)
-            except PriceNotFoundException as ex:
+                    book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.INVALID_PRICE_FORMAT)
+            except bs.PriceNotFoundException as ex:
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
-                    book_in_store.book.id, book_in_store.book_store.id, FailedUpdateReason.PAGE_NOT_FOUND)
+                    book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.PAGE_NOT_FOUND)
             except PriceFinderConnectionError as ex:
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
-                    book_in_store.book.id, book_in_store.book_store.id, FailedUpdateReason.CONNECTION_ERROR)
+                    book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.CONNECTION_ERROR)
 
     def _get_scraper_for_bookstore(self, bookstore_id: int) -> BookStoreScraper | None:
         if scraper := self._scrapers_by_bookstore_id.get(bookstore_id):

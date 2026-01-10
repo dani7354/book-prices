@@ -130,7 +130,9 @@ class StaticBookStoreScraper(BookStoreScraper):
         with HttpClient() as http_client:
             try:
                 response = http_client.get(url)
-                return self._parse_price(response.text)
+                if response.text:
+                    return self._parse_price(response.text)
+                raise PriceNotFoundException
             except RequestFailedError as ex:
                 raise PriceNotFoundException from ex
 
@@ -140,11 +142,11 @@ class StaticBookStoreScraper(BookStoreScraper):
             raise PriceSelectorError
 
         price_format = self._configuration.bookstore_price_format or self._price_format_fallback
-        if not (price_match := re.search(price_format, price_text.replace(",", "."))):
+        if not (price_match := re.search(price_format, price_text)):
             raise PriceFormatError
 
         try:
-            return float(price_match.group())
+            return float(price_match.group().replace(",", "."))
         except ValueError as ex:
             self._logger.error(f"Failed to parse value as float: {price_match.group()}")
             raise PriceFormatError from ex
