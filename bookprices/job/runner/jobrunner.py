@@ -70,7 +70,7 @@ class JobRunner:
                     job_run, status=JobRunStatus.FAILED.value, error_message=str(result.error_message))
         except Exception as e:
             self._logger.error(f"Failed to run job {job_run.job_name}: {e}")
-            if not self._try_set_job_run_status(job_run, status=JobRunStatus.FAILED.value, error_message=str(e)):
+            if not self._try_set_job_run_status(job_run, status=JobRunStatus.FAILED.value, error_message=str(e)[:500]):
                 raise
 
     def _increment_error_counter_and_update_status(self, job_run: JobRun) -> None:

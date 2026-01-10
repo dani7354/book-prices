@@ -13,7 +13,7 @@ from bookprices.web.mapper.bookstore import (
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
-from bookprices.web.shared.db_session import SessionFactory
+from bookprices.web.shared.db_session import WebSessionFactory
 from bookprices.web.shared.enum import BookStoreTemplate, HttpMethod, HttpStatusCode, Endpoint
 from bookprices.web.viewmodels.bookstore import BookStoreEditViewModel
 
@@ -23,8 +23,8 @@ bookstore_blueprint = Blueprint("bookstore", __name__)
 
 
 db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
-bookstore_service = BookStoreService(UnitOfWork(SessionFactory()), cache)
-bookstore_scraper_service = BookStoreScraperService(UnitOfWork(SessionFactory()))
+bookstore_service = BookStoreService(UnitOfWork(WebSessionFactory()), cache)
+bookstore_scraper_service = BookStoreScraperService(UnitOfWork(WebSessionFactory()))
 
 
 @bookstore_blueprint.context_processor

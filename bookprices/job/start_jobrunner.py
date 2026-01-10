@@ -14,6 +14,7 @@ from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.job.service.price_update import PriceUpdateService, NewPriceUpdateService
+from bookprices.job.db.session import JobSessionFactory
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
@@ -30,7 +31,7 @@ from bookprices.shared.service.job_service import JobService
 from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.image import ImageDownloader
 from bookprices.shared.service.book_image_file_service import BookImageFileService
-from bookprices.web.shared.db_session import SessionFactory
+from bookprices.shared.db.data_session import SessionFactory
 
 THREAD_COUNT = 8
 JOB_API_CLIENT_ID = "JobApiJobRunner"
@@ -44,6 +45,10 @@ def create_database_container(config: Config) -> Database:
         config.database.db_user,
         config.database.db_password,
         config.database.db_name)
+
+
+def create_data_session_factory(config: Config) -> SessionFactory:
+    return JobSessionFactory(config)
 
 
 def create_cache_key_remover(config: Config) -> BookPriceKeyRemover:
@@ -178,8 +183,8 @@ def create_all_book_prices_update_job(config: Config, event_manager: EventManage
 
 def create_all_book_prices_update_job_new(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJobNew:
     db = create_database_container(config)
+    session_factory = create_data_session_factory(config)
     cache_key_remover = create_cache_key_remover(config)
-    session_factory = SessionFactory()
     unit_of_work = UnitOfWork(session_factory)
     scraper_service = BookStoreScraperService(unit_of_work)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT

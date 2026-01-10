@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Tuple, Sequence
 
 from sqlalchemy import select, and_, outerjoin
+from sqlalchemy.orm import joinedload
 
 from bookprices.shared.db.tables import BookStore, BookStoreBook, Book
 from bookprices.shared.repository.base import RepositoryBase
@@ -19,8 +20,13 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         return BookStore
 
     def get_bookstores_for_books(self, book_ids: Sequence[int]) -> dict[int, list[BookStoreBook]]:
-        entities = self._session.execute(
-            select(BookStoreBook).where(BookStoreBook.book_id.in_(book_ids))).scalars().all()
+        entities = (self._session.execute(
+            select(BookStoreBook)
+            .options(joinedload(BookStoreBook.book))
+            .options(joinedload(BookStoreBook.book_store))
+            .where(BookStoreBook.book_id.in_(book_ids)))
+            .scalars()
+            .all())
         self._session.expunge_all()
 
         bookstores_by_book_id = defaultdict(list)

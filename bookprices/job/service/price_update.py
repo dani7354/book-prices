@@ -161,7 +161,7 @@ class NewPriceUpdateService(PriceUpdateService):
     def _get_prices_for_book(self, book_stores: list[BookStoreBook]) -> None:
         for book_in_store in book_stores:
             try:
-                full_url = urljoin(book_in_store.url, book_in_store.url)
+                full_url = urljoin(book_in_store.book_store.url, book_in_store.url)
                 bookstore_id = book_in_store.book_store_id
                 book_id = book_in_store.book_id
                 self._logger.debug("Getting price for book ID %s at book store ID %s (URL %s)",

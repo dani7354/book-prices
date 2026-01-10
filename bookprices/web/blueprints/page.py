@@ -13,7 +13,7 @@ from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.booklist_service import BookListService
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.shared.db_session import SessionFactory
+from bookprices.web.shared.db_session import SessionFactory, WebSessionFactory
 from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, PageTemplate, Endpoint
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.shared.cache.key_generator import get_bookstores_key
@@ -32,7 +32,7 @@ page_blueprint.register_error_handler(HttpStatusCode.INTERNAL_SERVER_ERROR, inte
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 auth_service = AuthService(db, cache)
 book_service = BookService(db, cache)
-booklist_service = BookListService(UnitOfWork(SessionFactory()), cache)
+booklist_service = BookListService(UnitOfWork(WebSessionFactory()), cache)
 
 
 @page_blueprint.context_processor

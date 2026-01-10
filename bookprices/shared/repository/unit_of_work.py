@@ -4,7 +4,7 @@ from bookprices.shared.repository.book import BookRepository
 from bookprices.shared.repository.booklist import BookListRepository
 from bookprices.shared.repository.bookprice import BookPriceRepository
 from bookprices.shared.repository.bookstore import BookStoreRepository
-from bookprices.web.shared.db_session import SessionFactory
+from bookprices.shared.db.data_session import SessionFactory
 
 
 class UnitOfWork:
