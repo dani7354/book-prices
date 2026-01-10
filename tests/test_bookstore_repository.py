@@ -36,7 +36,7 @@ def test_create_and_list_bookstore(
     first_bookstore = bookstore_list[0]
     assert first_bookstore.id == 1
     assert first_bookstore.url == bookstore.url
-    assert first_bookstore.name == first_bookstore.name
+    assert first_bookstore.name == bookstore.name
     assert first_bookstore.search_url == bookstore.search_url
     assert first_bookstore.price_format == bookstore.price_format
     assert first_bookstore.color_hex == bookstore.color_hex
