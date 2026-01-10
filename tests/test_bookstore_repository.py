@@ -8,6 +8,7 @@ from bookprices.shared.repository.bookstore import BookStoreRepository
 def bookstore_repository(data_session) -> BookStoreRepository:
     return BookStoreRepository(data_session)
 
+
 @pytest.fixture
 def bookstore() -> BookStore:
     return BookStore(
