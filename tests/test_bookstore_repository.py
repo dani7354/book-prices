@@ -13,8 +13,8 @@ def bookstore_repository(data_session) -> BookStoreRepository:
 def bookstore() -> BookStore:
     return BookStore(
         name="TestBookStore 0",
-        url="http://testbookstore1.com",
-        search_url="http://testbookstore1.com/search?q={0}",
+        url="https://testbookstore1.com",
+        search_url="https://testbookstore1.com/search?q={0}",
         search_result_css_selector=".search-result",
         price_css_selector=".price",
         image_css_selector=".image",
