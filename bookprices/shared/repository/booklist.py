@@ -38,7 +38,14 @@ class BookListRepository(RepositoryBase[BookList]):
         self._session.add(booklist_book)
 
     def update(self, entity: BookList) -> None:
-        raise NotImplementedError
+        if not (existing_entity := self._session.get(self.entity_type, entity.id)):
+            raise ValueError(f"Entity with id {entity.id} not found.")
+
+        existing_entity.name = entity.name
+        existing_entity.description = entity.description
+        existing_entity.updated = entity.updated
+
+        self._session.merge(existing_entity)
 
     def delete_book_from_booklist(self, book_id: int, booklist_id: int) -> None:
         booklist_book = (self._session.execute(

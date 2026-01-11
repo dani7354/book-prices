@@ -5,8 +5,8 @@ from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.model.bookstore import BookInBookStore, BookStore
 from bookprices.shared.db.database import Database
-from fake.cache import FakeCacheClient
-import shared
+from tests.fake.cache import FakeCacheClient
+import tests.shared as shared
 
 
 @pytest.fixture
