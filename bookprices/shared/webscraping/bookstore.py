@@ -1,5 +1,4 @@
 import dataclasses
-import re
 from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import ClassVar

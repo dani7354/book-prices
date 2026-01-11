@@ -10,8 +10,6 @@ from bookprices.shared.repository.base import RepositoryBase
 
 class BookStoreRepository(RepositoryBase[BookStore]):
 
-
-
     def __init__(self, session) -> None:
         super().__init__(session)
 
@@ -34,7 +32,6 @@ class BookStoreRepository(RepositoryBase[BookStore]):
             bookstores_by_book_id[bookstore_book.book_id].append(bookstore_book)
 
         return bookstores_by_book_id
-
 
     def get_missing_bookstores_by_isbn(self, offset: int, limit: int) -> dict[Tuple[int, str], list[BookStore]]:
             stmt = (

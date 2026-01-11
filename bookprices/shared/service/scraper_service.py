@@ -23,10 +23,9 @@ class BookStoreScraperService:
 
 
     def get_scraper(self, bookstore_id: int) -> BookStoreScraper | None:
-        with self._unit_of_work as unit_of_work:
-            if not (bookstore := unit_of_work.bookstore_repository.get(bookstore_id)):
-                self._logger.warning(f"Bookstore with id {bookstore_id} not found.")
-                return None
+        if not (bookstore := self._unit_of_work.bookstore_repository.get(bookstore_id)):
+            self._logger.warning(f"Bookstore with id {bookstore_id} not found.")
+            return None
 
         return self._create_scraper_for_bookstore(bookstore)
 
