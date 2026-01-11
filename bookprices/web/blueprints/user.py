@@ -12,7 +12,7 @@ from bookprices.web.service.auth_service import AuthService, require_member, req
 from bookprices.web.service.booklist_service import BookListService
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT
-from bookprices.web.shared.db_session import SessionFactory
+from bookprices.web.shared.db_session import SessionFactory, WebSessionFactory
 from bookprices.web.shared.enum import HttpMethod, UserTemplate, Endpoint, HttpStatusCode
 from bookprices.web.viewmodels.user import UserEditViewModel
 
@@ -175,7 +175,7 @@ def delete(user_id: str) -> tuple[Response, int]:
 def set_booklist(booklist_id: int) -> tuple[Response, int]:
     user_id = flask_login.current_user.id
     try:
-        booklist_service  = BookListService(UnitOfWork(SessionFactory()), cache)
+        booklist_service  = BookListService(UnitOfWork(WebSessionFactory()), cache)
         if not (booklist_service.get_booklist(booklist_id, user_id)):
             return jsonify({"error": f"Booklist with ID {booklist_id} not found"}), HttpStatusCode.NOT_FOUND
         auth_service.set_booklist_for_user(user_id, booklist_id)

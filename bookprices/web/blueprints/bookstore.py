@@ -3,14 +3,17 @@ from flask_login import login_required
 from werkzeug.local import LocalProxy
 
 from bookprices.shared.model.user import UserAccessLevel
+from bookprices.shared.repository.unit_of_work import UnitOfWork
+from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.web.service.auth_service import require_admin, AuthService
 from bookprices.web.service.bookstore_service import BookStoreService
 from bookprices.shared.db.database import Database
-from bookprices.web.mapper.bookstore import map_to_bookstore_list, map_bookstore_edit_view_model, \
-    map_bookstore_edit_view_model_from_form
+from bookprices.web.mapper.bookstore import (
+    map_to_bookstore_list, map_bookstore_edit_view_model, map_bookstore_edit_view_model_from_form)
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
+from bookprices.web.shared.db_session import WebSessionFactory
 from bookprices.web.shared.enum import BookStoreTemplate, HttpMethod, HttpStatusCode, Endpoint
 from bookprices.web.viewmodels.bookstore import BookStoreEditViewModel
 
@@ -20,7 +23,8 @@ bookstore_blueprint = Blueprint("bookstore", __name__)
 
 
 db = Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
-bookstore_service = BookStoreService(db, cache)
+bookstore_service = BookStoreService(UnitOfWork(WebSessionFactory()), cache)
+bookstore_scraper_service = BookStoreScraperService(UnitOfWork(WebSessionFactory()))
 
 
 @bookstore_blueprint.context_processor
@@ -44,11 +48,13 @@ def index() -> str:
 @login_required
 @require_admin
 def create() -> str | Response:
+    scraper_names = bookstore_scraper_service.get_scraper_names()
     if request.method == HttpMethod.POST.value:
         view_model = map_bookstore_edit_view_model_from_form(
             request,
             form_action_url=url_for(Endpoint.BOOKSTORE_CREATE.value),
-            return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
+            return_url=url_for(Endpoint.BOOKSTORE_INDEX.value),
+            scraper_names=scraper_names)
 
         if not view_model.is_valid():
             return render_template(BookStoreTemplate.CREATE.value, view_model=view_model)
@@ -63,13 +69,14 @@ def create() -> str | Response:
             price_css=view_model.price_css,
             price_format=view_model.price_format,
             color_hex=view_model.color_hex,
-            has_dynamic_content=view_model.has_dynamic_content)
+            scraper_id=view_model.scraper_id)
 
         return redirect(url_for(Endpoint.BOOKSTORE_INDEX.value))
 
     view_model = BookStoreEditViewModel.empty(
         form_action_url=url_for(Endpoint.BOOKSTORE_CREATE.value),
-        return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
+        return_url=url_for(Endpoint.BOOKSTORE_INDEX.value),
+        scraper_names=scraper_names)
 
     return render_template(BookStoreTemplate.CREATE.value, view_model=view_model)
 
@@ -81,11 +88,13 @@ def edit(bookstore_id: int) -> str | Response:
     if not (bookstore := bookstore_service.get_bookstore(bookstore_id)):
         return abort(HttpStatusCode.NOT_FOUND, "Boghandlen blev ikke fundet")
 
+    scraper_names = bookstore_scraper_service.get_scraper_names()
     if request.method == HttpMethod.POST.value:
         view_model = map_bookstore_edit_view_model_from_form(
             request,
             form_action_url=url_for(Endpoint.BOOKSTORE_EDIT.value, bookstore_id=bookstore_id),
             return_url=url_for(Endpoint.BOOKSTORE_INDEX.value),
+            scraper_names=scraper_names,
             bookstore_id=bookstore_id)
 
         if not view_model.is_valid():
@@ -103,7 +112,7 @@ def edit(bookstore_id: int) -> str | Response:
                 price_css=view_model.price_css,
                 price_format=view_model.price_format,
                 color_hex=view_model.color_hex,
-                has_dynamic_content=view_model.has_dynamic_content)
+                scraper_id=view_model.scraper_id)
 
             return redirect(url_for(Endpoint.BOOKSTORE_INDEX.value))
 
@@ -111,7 +120,7 @@ def edit(bookstore_id: int) -> str | Response:
             logger.error(f"Failed to update bookstore: {ex}")
             view_model.add_error(BookStoreEditViewModel.name_field_name, str(ex))
 
-    view_model = map_bookstore_edit_view_model(bookstore)
+    view_model = map_bookstore_edit_view_model(bookstore, scraper_names)
     return render_template(BookStoreTemplate.EDIT.value, view_model=view_model)
 
 

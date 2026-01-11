@@ -1,6 +1,6 @@
 import dataclasses
 from collections import defaultdict
-from typing import ClassVar
+from typing import ClassVar, Sequence
 
 from bookprices.web.validation.error_message import min_length_not_met, max_length_exceeded
 from bookprices.web.validation.input import (length_equals_or_longer_than, length_equals_or_shorter_than,
@@ -36,6 +36,7 @@ class BookStoreEditViewModel:
     price_css_field_name: ClassVar[str] = "price-css"
     price_format_field_name: ClassVar[str] = "price-format"
     color_hex_field_name: ClassVar[str] = "color-hex"
+    scraper_id_field_name: ClassVar[str] = "scraper-id"
 
     name_min_length: ClassVar[int] = 1
     name_max_length: ClassVar[int] = 255
@@ -55,8 +56,9 @@ class BookStoreEditViewModel:
     price_format_max_length: ClassVar[int] = 80
     color_hex_min_length: ClassVar[int] = 6
     color_hex_max_length: ClassVar[int] = 6
+    scraper_id_min_length: ClassVar[int] = 1
+    scraper_id_max_length: ClassVar[int] = 255
 
-    has_dynamic_content: bool
     id: int
     name: str
     url: str
@@ -67,8 +69,10 @@ class BookStoreEditViewModel:
     price_css: str | None
     price_format: str | None
     color_hex: str | None
+    scraper_id: str | None
     form_action_url: str
     return_url: str
+    scraper_names: list[str]
     errors: dict[str, list[str]] = dataclasses.field(default_factory=lambda: defaultdict(list))
 
     def add_error(self, field_name: str, message: str) -> None:
@@ -141,10 +145,16 @@ class BookStoreEditViewModel:
             self.errors[self.color_hex_field_name].append(
                 "Farvekoden må kun indeholde hexadecimale tegn (0-9, a-f, A-F).")
 
+        if not length_equals_or_longer_than(self.scraper_id, self.scraper_id_min_length, allow_none=True):
+            self.errors[self.scraper_id_field_name].append(
+                min_length_not_met("Scraper", self.scraper_id_min_length))
+        elif not length_equals_or_shorter_than(self.scraper_id, self.scraper_id_max_length, allow_none=True):
+            self.errors[self.scraper_id_field_name].append(
+                max_length_exceeded("Scraper", self.scraper_id_max_length))
+
     @staticmethod
-    def empty(form_action_url: str, return_url: str) -> "BookStoreEditViewModel":
+    def empty(form_action_url: str, return_url: str, scraper_names: Sequence[str]) -> "BookStoreEditViewModel":
         return BookStoreEditViewModel(
-            has_dynamic_content=False,
             id=0,
             name="",
             url="",
@@ -155,5 +165,7 @@ class BookStoreEditViewModel:
             price_css=None,
             price_format=None,
             color_hex=None,
+            scraper_id=None,
             form_action_url=form_action_url,
-            return_url=return_url)
+            return_url=return_url,
+            scraper_names=list(scraper_names))

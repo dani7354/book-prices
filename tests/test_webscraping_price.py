@@ -1,6 +1,6 @@
 import pytest
 import requests
-import shared
+import tests.shared as shared
 from bookprices.shared.webscraping.price import (
     get_price,
     PriceSelectorError,

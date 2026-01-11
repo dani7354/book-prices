@@ -5,8 +5,8 @@ from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.model.bookstore import BookInBookStore, BookStore
 from bookprices.shared.db.database import Database
-from fake.cache import FakeCacheClient
-import shared
+from tests.fake.cache import FakeCacheClient
+import tests.shared as shared
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
                             price_css_selector=".table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)",
                             image_css_selector=None,
                             price_format="\\d+",
-                            has_dynamically_loaded_content=False,
+                            scraper_id="",
                             isbn_css_selector=None,
                             color_hex=None),
                             url="/book1"),
@@ -31,7 +31,7 @@ def books_in_bookstore() -> dict[int, list[BookInBookStore]]:
                             price_css_selector=".table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)",
                             image_css_selector=None,
                             price_format="\\d+",
-                            has_dynamically_loaded_content=False,
+                            scraper_id="",
                             isbn_css_selector=None,
                             color_hex=None),
                             url="/book1"),

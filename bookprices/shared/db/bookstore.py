@@ -12,7 +12,7 @@ class BookStoreDb(BaseDb):
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
                          "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
+                         "IsbnCssSelector, ColorHex, ScraperId "
                          "FROM BookStore "
                          "ORDER BY Id ASC")
                 cursor.execute(query)
@@ -24,7 +24,7 @@ class BookStoreDb(BaseDb):
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
                          "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
+                         "IsbnCssSelector, ColorHex, ScraperId "
                          "FROM BookStore "
                          "WHERE Id = %s")
                 cursor.execute(query, (bookstore_id,))
@@ -37,7 +37,7 @@ class BookStoreDb(BaseDb):
                 query = ("INSERT INTO BookStore (Name, Url, SearchUrl, "
                          "SearchResultCssSelector, PriceCssSelector, "
                          "ImageCssSelector, IsbnCssSelector, PriceFormat, "
-                         "ColorHex, HasDynamicallyLoadedContent) "
+                         "ColorHex, ScraperId) "
                          "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
                 cursor.execute(query, (bookstore.name,
                                        bookstore.url,
@@ -48,7 +48,7 @@ class BookStoreDb(BaseDb):
                                        bookstore.isbn_css_selector,
                                        bookstore.price_format,
                                        bookstore.color_hex,
-                                       bookstore.has_dynamically_loaded_content))
+                                       bookstore.scraper_id))
                 con.commit()
 
     def update_bookstore(self, bookstore: BookStore) -> BookStore:
@@ -58,7 +58,7 @@ class BookStoreDb(BaseDb):
                          "SET Name = %s, Url = %s, SearchUrl = %s, "
                          "SearchResultCssSelector = %s, PriceCssSelector = %s, "
                          "ImageCssSelector = %s, IsbnCssSelector = %s, "
-                         "PriceFormat = %s, HasDynamicallyLoadedContent = %s, "
+                         "PriceFormat = %s, ScraperId = %s, "
                          "ColorHex = %s "
                          "WHERE Id = %s")
                 cursor.execute(query, (bookstore.name,
@@ -69,7 +69,7 @@ class BookStoreDb(BaseDb):
                                        bookstore.image_css_selector,
                                        bookstore.isbn_css_selector,
                                        bookstore.price_format,
-                                       bookstore.has_dynamically_loaded_content,
+                                       bookstore.scraper_id,
                                        bookstore.color_hex,
                                        bookstore.id))
                 con.commit()
@@ -88,7 +88,7 @@ class BookStoreDb(BaseDb):
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
                          "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "HasDynamicallyLoadedContent, IsbnCssSelector, ColorHex "
+                         "IsbnCssSelector, ColorHex, ScraperId "
                          "FROM BookStore "
                          "WHERE Id NOT IN (SELECT BookStoreId FROM BookStoreBook WHERE BookId = %s)")
                 cursor.execute(query, (book_id,))
@@ -99,7 +99,7 @@ class BookStoreDb(BaseDb):
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
                 query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, "
-                         "bs.IsbnCssSelector, bs.Url, bs.ColorHex "
+                         "bs.IsbnCssSelector, bs.Url, bs.ColorHex, bs.ScraperId "
                          "FROM Book b "
                          "CROSS JOIN BookStore bs "
                          "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
@@ -151,7 +151,7 @@ class BookStoreDb(BaseDb):
                 query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
                          "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
                          "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
-                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector, bs.ColorHex " 
+                         "bs.IsbnCssSelector, bs.ColorHex, bs.ScraperId " 
                          "FROM BookStoreBook bsb " 
                          "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
                          f"WHERE bsb.BookId IN ({ids_format_string})")
@@ -182,7 +182,7 @@ class BookStoreDb(BaseDb):
                 query = ("SELECT bsb.BookId, bsb.BookStoreId, bsb.Url as BookUrl, " 
                          "bs.Name as BookStoreName, bs.Url as BookStoreUrl, bs.PriceCssSelector, " 
                          "bs.PriceFormat, bs.SearchUrl, bs.SearchResultCssSelector, bs.ImageCssSelector, "
-                         "bs.HasDynamicallyLoadedContent, bs.IsbnCssSelector, bs.ColorHex " 
+                         "bs.IsbnCssSelector, bs.ColorHex, bs.ScraperId " 
                          "FROM BookStoreBook bsb " 
                          "JOIN BookStore bs ON bs.Id = bsb.BookStoreId " 
                          f"WHERE bsb.BookId IN ({ids_format_string}) AND bs.ImageCssSelector IS NOT NULL;")
@@ -221,4 +221,4 @@ class BookStoreDb(BaseDb):
             isbn_css_selector=row["IsbnCssSelector"],
             price_format=row["PriceFormat"],
             color_hex=row["ColorHex"],
-            has_dynamically_loaded_content=row["HasDynamicallyLoadedContent"])
+            scraper_id=row["ScraperId"])

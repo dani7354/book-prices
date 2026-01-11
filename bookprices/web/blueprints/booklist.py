@@ -13,7 +13,7 @@ from bookprices.web.service.booklist_service import BookListService, BookListNot
 from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, PAGE_URL_PARAMETER, BOOK_PAGESIZE)
-from bookprices.web.shared.db_session import SessionFactory
+from bookprices.web.shared.db_session import WebSessionFactory
 from bookprices.web.shared.enum import HttpMethod, BookListTemplate, Endpoint, HttpStatusCode
 from bookprices.web.viewmodels.booklist import BookListEditViewModel, AddToListRequest, RemoveFromListRequest
 
@@ -22,7 +22,7 @@ logger = LocalProxy(lambda: current_app.logger)
 
 
 def _create_booklist_service() -> BookListService:
-    return BookListService(UnitOfWork(SessionFactory()), cache)
+    return BookListService(UnitOfWork(WebSessionFactory()), cache)
 
 
 def _create_book_service() -> BookService:

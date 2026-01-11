@@ -18,7 +18,7 @@ from bookprices.web.settings import (
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE, BOOK_IMAGE_FILE_PATH,
     BOOK_IMAGES_BASE_URL, BOOKLIST_ID_URL_PARAMETER)
 from bookprices.web.cache.redis import cache
-from bookprices.web.shared.db_session import SessionFactory
+from bookprices.web.shared.db_session import WebSessionFactory
 from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate, Endpoint
 from bookprices.web.viewmodels.book import CreateBookViewModel
 
@@ -47,7 +47,7 @@ def search() -> str:
     current_books = book_service.search(search_phrase, author, page, BOOK_PAGESIZE, order_by, descending)
     next_books = book_service.search(search_phrase, author, page + 1, BOOK_PAGESIZE, order_by, descending)
 
-    booklist_service = BookListService(UnitOfWork(SessionFactory()), cache)
+    booklist_service = BookListService(UnitOfWork(WebSessionFactory()), cache)
     if flask_login.current_user.is_authenticated and flask_login.current_user.booklist_id:
         user = flask_login.current_user
         book_ids_from_current_booklist = booklist_service.get_book_ids_from_booklist(user.booklist_id, user.id)
@@ -88,7 +88,7 @@ def book(book_id: int) -> str:
 
     auth_service = AuthService(db, cache)
     user_can_edit_and_delete = auth_service.user_can_access(UserAccessLevel.ADMIN)
-    booklist_service = BookListService(UnitOfWork(SessionFactory()), cache)
+    booklist_service = BookListService(UnitOfWork(WebSessionFactory()), cache)
 
     if flask_login.current_user.is_authenticated and flask_login.current_user.booklist_id:
         booklist_active = True
