@@ -1,10 +1,14 @@
+import logging
 import re
 import requests
 import bookprices.shared.webscraping.options as options
+from abc import ABC, abstractmethod
 from typing import Optional
 from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
+from bookprices.shared.webscraping.content import HtmlContent
+from bookprices.shared.webscraping.http import HttpClient, RequestFailedError
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -23,6 +27,51 @@ class PriceFormatError(Exception):
 
 class PriceFinderConnectionError(Exception):
     pass
+
+
+class PriceScraper(ABC):
+    """ Abstract base class for price scrapers."""
+    def __init__(self) -> None:
+        self._http_client = HttpClient()
+
+    @abstractmethod
+    def get_price(self, url: str) -> float:
+        raise NotImplementedError
+
+
+class StaticHtmlPriceScraper(PriceScraper):
+    """ Price scraper for static HTML content. """
+
+    def __init__(self, price_css_selector: str, price_format: str | None) -> None:
+        super().__init__()
+        self._price_css_selector = price_css_selector
+        self._price_format = price_format or FALLBACK_PRICE_FORMAT
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    def get_price(self, url: str) -> float:
+        with HttpClient() as http_client:
+            try:
+                response = http_client.get(url)
+                if response.text:
+                    return self._parse_price(response.text)
+                raise PriceNotFoundException
+            except RequestFailedError as ex:
+                raise PriceNotFoundException from ex
+
+    def _parse_price(self, response_text: str) -> float:
+        html_content = HtmlContent(response_text)
+        if not (
+        price_text := html_content.find_element_text_by_css(self._price_css_selector)):
+            raise PriceSelectorError
+
+        if not (price_match := re.search(self._price_format, price_text)):
+            raise PriceFormatError
+
+        try:
+            return float(price_match.group().replace(",", "."))
+        except ValueError as ex:
+            self._logger.error(f"Failed to parse value as float: {price_match.group()}")
+            raise PriceFormatError from ex
 
 
 def _parse_price(response_content: str, css_path: str, price_format: Optional[str]) -> float:

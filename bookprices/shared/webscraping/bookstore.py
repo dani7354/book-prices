@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urljoin
 
 from bookprices.shared.webscraping.content import HtmlContent
 from bookprices.shared.webscraping.http import RequestFailedError, HttpClient
-
+from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -84,6 +84,9 @@ class StaticBookStoreScraper(BookStoreScraper):
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
         self._logger = getLogger(self.__class__.__name__)
+        self._price_scraper: PriceScraper = StaticHtmlPriceScraper(
+            configuration.bookstore_price_css_selector,
+            configuration.bookstore_price_format)
 
     def find_book(self, book_id: int, isbn: str) -> BookSearchResult | None:
         try:
@@ -127,26 +130,6 @@ class StaticBookStoreScraper(BookStoreScraper):
         return isbn in isbn_element or html_content.contains_text(isbn)
 
     def get_price(self, url: str) -> float:
-        with HttpClient() as http_client:
-            try:
-                response = http_client.get(url)
-                if response.text:
-                    return self._parse_price(response.text)
-                raise PriceNotFoundException
-            except RequestFailedError as ex:
-                raise PriceNotFoundException from ex
+        return self._price_scraper.get_price(url)
 
-    def _parse_price(self, response_text: str) -> float:
-        html_content = HtmlContent(response_text)
-        if not (price_text := html_content.find_element_text_by_css(self._configuration.bookstore_price_css_selector)):
-            raise PriceSelectorError
 
-        price_format = self._configuration.bookstore_price_format or self._price_format_fallback
-        if not (price_match := re.search(price_format, price_text)):
-            raise PriceFormatError
-
-        try:
-            return float(price_match.group().replace(",", "."))
-        except ValueError as ex:
-            self._logger.error(f"Failed to parse value as float: {price_match.group()}")
-            raise PriceFormatError from ex
