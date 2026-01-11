@@ -34,8 +34,6 @@ class HttpClient:
         self._timeout_seconds = timeout_seconds if timeout_seconds is not None else self._default_timeout_seconds
 
         merged_request_headers = self._get_default_headers(headers)
-
-
         merged_request_headers.update(headers or {})
         self._session.headers.update(merged_request_headers)
 
@@ -67,9 +65,9 @@ class HttpClient:
     @classmethod
     def _get_default_headers(cls, custom_headers: dict[str, str] | None) -> dict[str, str]:
         merged_headers = {}
-        if not custom_headers or not HttpHeader.USER_AGENT in custom_headers:
+        if not custom_headers or HttpHeader.USER_AGENT not in custom_headers:
             merged_headers[HttpHeader.USER_AGENT] = cls._get_ua_header_value_random_versions()
-        if not custom_headers or not HttpHeader.ACCEPT in custom_headers:
+        if not custom_headers or HttpHeader.ACCEPT not in custom_headers:
             merged_headers[HttpHeader.ACCEPT] = (
                 "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
                 "application/signed-exchange;v=b3;q=0.7")
