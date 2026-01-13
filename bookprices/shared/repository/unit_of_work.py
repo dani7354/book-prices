@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, scoped_session
 
 from bookprices.shared.repository.book import BookRepository
 from bookprices.shared.repository.booklist import BookListRepository
@@ -18,7 +18,7 @@ class UnitOfWork:
 
     def __enter__(self) -> "UnitOfWork":
         try:
-            self._session = self._session_factory.create_session()
+            self._session = self._session_factory.create_scoped_session()
             self.booklist_repository = BookListRepository(self._session)
             self.book_repository = BookRepository(self._session)
             self.bookstore_repository = BookStoreRepository(self._session)

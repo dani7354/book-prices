@@ -145,6 +145,7 @@ class NewPriceUpdateService(PriceUpdateService):
         self._scrapers_by_bookstore_id = {}
 
     def update_prices_for_books(self, book_ids: Sequence[int]) -> None:
+        self._scrapers_by_bookstore_id = self._load_scrapers_for_bookstores()
         with self._unit_of_work as uow:
             if not (book_stores_by_book_id := uow.bookstore_repository.get_bookstores_for_books(book_ids)):
                 self._logger.warning("No book stores found for books!")
@@ -170,7 +171,9 @@ class NewPriceUpdateService(PriceUpdateService):
                               bookstore_id,
                               full_url)
 
-                if not (scraper := self._get_scraper_for_bookstore(bookstore_id)):
+                if not (scraper := self._scrapers_by_bookstore_id.get(bookstore_id)):
+                    self._logger.warning(f"No scraper found for bookstore ID {bookstore_id}, skipping price update.")
+                    print(self._scrapers_by_bookstore_id)
                     continue
 
                 price_value = scraper.get_price(full_url)
@@ -197,16 +200,11 @@ class NewPriceUpdateService(PriceUpdateService):
                 self._log_failed_price_update_to_db(
                     book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.CONNECTION_ERROR)
 
-    def _get_scraper_for_bookstore(self, bookstore_id: int) -> BookStoreScraper | None:
-        if scraper := self._scrapers_by_bookstore_id.get(bookstore_id):
-            return scraper
+    def _load_scrapers_for_bookstores(self) -> dict[int, BookStoreScraper]:
+        with self._unit_of_work as uow:
+            bookstores = uow.bookstore_repository.get_list()
 
-        if scraper := self._scraper_service.get_scraper(bookstore_id):
-            self._scrapers_by_bookstore_id[bookstore_id] = scraper
-            return scraper
-
-        self._logger.warning("No scraper found for bookstore ID %s", bookstore_id)
-        return None
+        return {b.id: scraper for b in bookstores if (scraper := self._scraper_service.get_scraper(b.id))}
 
     def _save_new_prices_and_clear_cache(self) -> None:
         if not self._updated_book_prices:
@@ -226,4 +224,3 @@ class NewPriceUpdateService(PriceUpdateService):
             self._cache_key_remover.remove_keys_for_book_and_bookstore(book_id, bookstore_id)
 
         self._updated_book_prices = []
-        self._scrapers_by_bookstore_id.clear()
