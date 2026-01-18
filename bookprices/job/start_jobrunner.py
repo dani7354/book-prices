@@ -12,7 +12,7 @@ from bookprices.job.job.update_prices_new import AllBookPricesUpdateJobNew
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.job.service.image_download import ImageDownloadService
-from bookprices.job.service.price_update import PriceUpdateService, NewPriceUpdateService
+from bookprices.job.service.price_update import NewPriceUpdateService
 from bookprices.job.db.session import JobSessionFactory
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
@@ -164,7 +164,7 @@ def create_bookstore_search_job(config: Config, event_manager: EventManager) -> 
     unit_of_work = UnitOfWork(session_factory)
     scraper_service = BookStoreScraperService(unit_of_work)
 
-    return BookStoreSearchJob(config, db, cache_key_remover, event_manager, scraper_service)
+    return BookStoreSearchJob(config, db, unit_of_work, cache_key_remover, event_manager, scraper_service)
 
 
 def create_delete_prices_job(config: Config) -> DeletePricesJob:

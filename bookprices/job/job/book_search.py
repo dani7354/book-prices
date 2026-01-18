@@ -9,6 +9,7 @@ from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.book import BookNotFoundError
 from bookprices.shared.webscraping.bookstore import BookStoreScraper
@@ -40,11 +41,13 @@ class BookStoreSearchJob(JobBase):
             self,
             config: Config,
             db: Database,
+            unit_of_work: UnitOfWork,
             cache_key_remover: BookPriceKeyRemover,
             event_manager: EventManager,
             bookstore_scraper_service: BookStoreScraperService) -> None:
         super().__init__(config)
         self._db = db
+        self._unit_of_work = unit_of_work
         self._cache_key_remover = cache_key_remover
         self._event_manager = event_manager
         self._bookstore_scraper_service = bookstore_scraper_service
@@ -80,11 +83,16 @@ class BookStoreSearchJob(JobBase):
     def _create_scrapers(self) -> None:
         self._logger.info("Initializing scrapers...")
         self._book_scrapers.clear()
-        for bookstore in self._db.bookstore_db.get_bookstores():
+
+        self._logger.debug("Getting bookstores from database...")
+        with self._unit_of_work as uow:
+            bookstores = uow.bookstore_repository.get_list()
+
+        self._logger.debug(f"Found {len(bookstores)} book stores. Creating scrapers...")
+        for bookstore in bookstores:
             self._book_scrapers[bookstore.id] = self._bookstore_scraper_service.get_scraper(bookstore.id)
 
         self._logger.info(f"{len(self._book_scrapers)} scrapers created for bookstores.")
-
 
     def _get_and_enqueue_next_searches(self, offset: int) -> bool:
         for row in self._db.bookstore_db.get_book_isbn_and_missing_bookstores(offset, self.book_bookstore_batch_size):

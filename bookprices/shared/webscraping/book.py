@@ -27,7 +27,8 @@ class BookScraper(ABC):
     """ Abstract base class for book scraper used for searching for books in a bookstore. """
 
     def __init__(self) -> None:
-        raise NotImplementedError
+        """ Should not be instantiated directly. """
+        pass
 
     @abstractmethod
     def find_book(self, isbn: str) -> SearchResult:
