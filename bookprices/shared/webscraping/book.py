@@ -1,15 +1,10 @@
 import logging
-import threading
 from abc import ABC, abstractmethod
 from collections import Counter
 
-import requests
-from requests import RequestException, Response
 from urllib.parse import urljoin, urlparse
 from typing import ClassVar
-from bs4 import BeautifulSoup
 from dataclasses import dataclass, replace
-from bookprices.shared.webscraping import options
 from bookprices.shared.webscraping.content import HtmlContent
 from bookprices.shared.webscraping.http import HttpClient, HttpResponse
 
