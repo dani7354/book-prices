@@ -3,7 +3,7 @@ from typing import Sequence
 import flask
 from flask import url_for
 
-from bookprices.shared.model.bookstore import BookStore
+from bookprices.shared.db.tables import BookStore
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.bookstore import BookStoreListViewModel, BookStoreListItem, BookStoreEditViewModel
 
@@ -24,9 +24,8 @@ def map_to_bookstore_list(
             ) for bookstore in bookstores])
 
 
-def map_bookstore_edit_view_model(bookstore: BookStore) -> BookStoreEditViewModel:
+def map_bookstore_edit_view_model(bookstore: BookStore, scraper_names: Sequence[str]) -> BookStoreEditViewModel:
     return BookStoreEditViewModel(
-        has_dynamic_content=bookstore.has_dynamically_loaded_content,
         id=bookstore.id,
         name=bookstore.name,
         url=bookstore.url,
@@ -37,12 +36,18 @@ def map_bookstore_edit_view_model(bookstore: BookStore) -> BookStoreEditViewMode
         price_css=bookstore.price_css_selector,
         price_format=bookstore.price_format,
         color_hex=bookstore.color_hex,
+        scraper_id=bookstore.scraper_id,
+        scraper_names=list(scraper_names),
         form_action_url=url_for(Endpoint.BOOKSTORE_EDIT.value, bookstore_id=bookstore.id),
         return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
 
 
 def map_bookstore_edit_view_model_from_form(
-        request: flask.Request, form_action_url: str, return_url: str, bookstore_id=0) -> BookStoreEditViewModel:
+        request: flask.Request,
+        form_action_url: str,
+        return_url: str,
+        scraper_names: Sequence[str],
+        bookstore_id=0) -> BookStoreEditViewModel:
     bookstore_id_from_form = request.form.get(BookStoreEditViewModel.id_field_name) or bookstore_id
     name = request.form.get(BookStoreEditViewModel.name_field_name) or ""
     url = request.form.get(BookStoreEditViewModel.url_field_name) or ""
@@ -53,7 +58,7 @@ def map_bookstore_edit_view_model_from_form(
     price_css = request.form.get(BookStoreEditViewModel.price_css_field_name) or None
     price_format = request.form.get(BookStoreEditViewModel.price_format_field_name) or None
     color_hex = request.form.get(BookStoreEditViewModel.color_hex_field_name) or None
-    has_dynamic_content = bool(request.form.get(BookStoreEditViewModel.has_dynamic_content_field_name)) or False
+    scraper_id = request.form.get(BookStoreEditViewModel.scraper_id_field_name) or None
 
     return BookStoreEditViewModel(
         id=bookstore_id_from_form,
@@ -66,6 +71,7 @@ def map_bookstore_edit_view_model_from_form(
         price_css=price_css,
         price_format=price_format,
         color_hex=color_hex,
-        has_dynamic_content=has_dynamic_content,
+        scraper_id=scraper_id,
+        scraper_names=list(scraper_names),
         form_action_url=form_action_url,
         return_url=return_url)

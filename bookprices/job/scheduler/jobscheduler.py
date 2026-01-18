@@ -50,8 +50,6 @@ class JobScheduler:
 
         schedule.every().day.at("02:00", self.time_zone).do(
             self._send_start_job_request, DeleteUnavailableBooksJob.name)
-        schedule.every().day.at("03:00", self.time_zone).do(
-            self._send_start_job_request, AllBookPricesUpdateJob.name)
         schedule.every().day.at("05:00", self.time_zone).do(
             self._send_start_job_request, WilliamDamBookImportJob.name)
         schedule.every().day.at("06:00", self.time_zone).do(
@@ -60,7 +58,6 @@ class JobScheduler:
             self._send_start_job_request, DeleteImagesJob.name)
         schedule.every().day.at("08:00", self.time_zone).do(
             self._send_start_job_request, DownloadImagesJob.name)
-
         schedule.every().monday.at("10:00", self.time_zone).do(
             self._send_start_job_request, TrimPricesJob.name)
 

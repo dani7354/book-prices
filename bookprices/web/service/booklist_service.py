@@ -23,8 +23,8 @@ class BookListService:
     def get_booklist(self, booklist_id: int, user_id: str) -> BookList | None:
         """ Retrieves a book list by its ID. """
         if not (booklist := self._cache.get(get_booklist_key(booklist_id))):
-            with self._unit_of_work:
-                booklist = self._unit_of_work.booklist_repository.get(booklist_id)
+            with self._unit_of_work as uow:
+                booklist = uow.booklist_repository.get(booklist_id)
                 if booklist:
                     self._cache.set(get_booklist_key(booklist_id), booklist)
 
@@ -37,8 +37,8 @@ class BookListService:
 
     def get_booklists(self, user_id: str) -> list[BookList]:
         if not (booklists := self._cache.get(get_booklists_for_user_key(user_id))):
-            with self._unit_of_work:
-                booklists = self._unit_of_work.booklist_repository.list_for_user(user_id)
+            with self._unit_of_work as uow:
+                booklists = uow.booklist_repository.list_for_user(user_id)
                 if booklists:
                     self._cache.set(get_booklists_for_user_key(user_id), booklists)
 
@@ -60,8 +60,8 @@ class BookListService:
             created=datetime.now(),
             updated=datetime.now())
 
-        with self._unit_of_work:
-            self._unit_of_work.booklist_repository.add(booklist)
+        with self._unit_of_work as uow:
+            uow.booklist_repository.add(booklist)
 
         self._cache.delete(get_booklists_for_user_key(user_id))
         self._logger.info(f"Created new book list for user {user_id}.")
@@ -74,8 +74,8 @@ class BookListService:
         booklist.description = description
         booklist.updated = datetime.now()
 
-        with self._unit_of_work:
-            self._unit_of_work.booklist_repository.update(booklist)
+        with self._unit_of_work as uow:
+            uow.booklist_repository.update(booklist)
 
         self._cache.delete(get_booklists_for_user_key(user_id))
         self._cache.set(get_booklist_key(booklist_id), booklist)
@@ -85,8 +85,8 @@ class BookListService:
         if not (self.get_booklist(booklist_id, user_id)):
             raise BookListNotFoundError(f"Booklist cannot be found or accessed by user {user_id}.")
 
-        with self._unit_of_work:
-            self._unit_of_work.booklist_repository.delete(booklist_id)
+        with self._unit_of_work as uow:
+            uow.booklist_repository.delete(booklist_id)
         self._cache.delete(get_booklists_for_user_key(user_id))
         self._cache.delete(get_booklist_key(booklist_id))
 
@@ -101,12 +101,12 @@ class BookListService:
                 f"User {user_id} failed to access {booklist_id}. Either it does not exist or does not belong to the user.")
             return False
 
-        with self._unit_of_work:
-            if not (_ := self._unit_of_work.book_repository.get(book_id)):
+        with self._unit_of_work as uow:
+            if not (_ := uow.book_repository.get(book_id)):
                 self._logger.error(f"Book with id {book_id} does not exist.")
                 return False
 
-            self._unit_of_work.booklist_repository.add_book_to_booklist(book_id, booklist_id, datetime.now())
+            uow.booklist_repository.add_book_to_booklist(book_id, booklist_id, datetime.now())
             self._cache.delete(get_booklists_for_user_key(user_id))
             self._cache.delete(get_booklist_key(booklist_id))
 
@@ -118,8 +118,8 @@ class BookListService:
                 f"User {user_id} failed to access {booklist_id}. Either it does not exist or does not belong to the user.")
             return False
 
-        with self._unit_of_work:
-            self._unit_of_work.booklist_repository.delete_book_from_booklist(book_id, booklist_id)
+        with self._unit_of_work as uow:
+            uow.booklist_repository.delete_book_from_booklist(book_id, booklist_id)
             self._cache.delete(get_booklists_for_user_key(user_id))
             self._cache.delete(get_booklist_key(booklist_id))
 

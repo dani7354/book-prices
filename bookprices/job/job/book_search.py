@@ -9,7 +9,9 @@ from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
-from bookprices.shared.webscraping.book import BookFinder, BookNotFoundError
+from bookprices.shared.service.scraper_service import BookStoreScraperService
+from bookprices.shared.webscraping.book import BookNotFoundError
+from bookprices.shared.webscraping.bookstore import BookStoreScraper
 
 
 class IsbnSearch(NamedTuple):
@@ -39,12 +41,14 @@ class BookStoreSearchJob(JobBase):
             config: Config,
             db: Database,
             cache_key_remover: BookPriceKeyRemover,
-            event_manager: EventManager) -> None:
+            event_manager: EventManager,
+            bookstore_scraper_service: BookStoreScraperService) -> None:
         super().__init__(config)
         self._db = db
         self._cache_key_remover = cache_key_remover
         self._event_manager = event_manager
-        self._book_searchers = {}
+        self._bookstore_scraper_service = bookstore_scraper_service
+        self._book_scrapers: dict[int, BookStoreScraper] = {}
         self._search_queue = Queue()
         self._results = []
         self._logger = logging.getLogger(self.name)
@@ -52,7 +56,7 @@ class BookStoreSearchJob(JobBase):
     def start(self, **kwargs) -> JobResult:
         try:
             self._logger.info("Starting searching for book availability in bookstores...")
-            self._create_book_finders()
+            self._create_scrapers()
             book_bookstore_offset, book_bookstore_page = 0, 1
             total_searches_count = 0
             while self._get_and_enqueue_next_searches(book_bookstore_offset):
@@ -73,20 +77,13 @@ class BookStoreSearchJob(JobBase):
             self._logger.error(f"Unexpected error: {ex}")
             return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
 
-    def _create_book_finders(self) -> None:
-        self._logger.info("Initializing book searchers...")
-        self._book_searchers.clear()
+    def _create_scrapers(self) -> None:
+        self._logger.info("Initializing scrapers...")
+        self._book_scrapers.clear()
         for bookstore in self._db.bookstore_db.get_bookstores():
-            self._book_searchers[bookstore.id] = BookFinder(
-                bookstore_id=bookstore.id,
-                bookstore_name=bookstore.name,
-                bookstore_url=bookstore.url,
-                search_url=bookstore.search_url,
-                bookstore_isbn_css_selector=bookstore.isbn_css_selector,
-                search_result_css_selector=bookstore.search_result_css_selector,
-                redirects_on_match=not bookstore.search_result_css_selector)
+            self._book_scrapers[bookstore.id] = self._bookstore_scraper_service.get_scraper(bookstore.id)
 
-        self._logger.info(f"{len(self._book_searchers)} book finders created for bookstores.")
+        self._logger.info(f"{len(self._book_scrapers)} scrapers created for bookstores.")
 
 
     def _get_and_enqueue_next_searches(self, offset: int) -> bool:
@@ -107,7 +104,7 @@ class BookStoreSearchJob(JobBase):
             self._logger.info(f"Starting search using {self._thread_count} threads...")
             threads = []
             for _ in range(self._thread_count):
-                thread = Thread(target=self._search_books())
+                thread = Thread(target=self._search_books)
                 threads.append(thread)
                 thread.start()
 
@@ -119,10 +116,10 @@ class BookStoreSearchJob(JobBase):
         while not self._search_queue.empty():
             try:
                 isbn_search = self._search_queue.get()
-                if not (book_finder := self._book_searchers.get(isbn_search.bookstore_id)):
+                if not (scraper := self._book_scrapers.get(isbn_search.bookstore_id)):
                     self._logger.error(f"No book finder found for bookstore id {isbn_search.bookstore_id}.")
                     continue
-                if not (search_result := book_finder.find_url_for_book(isbn_search.book_id, isbn_search.isbn)):
+                if not (search_result := scraper.find_book(book_id=isbn_search.book_id, isbn=isbn_search.isbn)):
                     self._logger.info(
                         f"No search result found for book with id {isbn_search.book_id} "
                         f"and ISBN {isbn_search.isbn} at bookstore {isbn_search.bookstore_id}.")

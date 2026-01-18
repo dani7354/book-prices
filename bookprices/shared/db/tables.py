@@ -46,8 +46,8 @@ class BookStore(BaseModel):
     image_css_selector = Column('ImageCssSelector', String(255), nullable=True)
     isbn_css_selector = Column('IsbnCssSelector', String(255), nullable=True)
     price_format = Column('PriceFormat', String(80), nullable=True)
-    has_dynamically_loaded_content = Column('HasDynamicallyLoadedContent', Boolean, nullable=False)
     color_hex = Column('ColorHex', CHAR(6), nullable=True)
+    scraper_id = Column('ScraperId', String(255), nullable=True)
 
 
 class BookStoreBook(BaseModel):
@@ -57,6 +57,8 @@ class BookStoreBook(BaseModel):
     book_store_id = Column(
         'BookStoreId', Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), primary_key=True)
     url = Column('Url', String(255), nullable=False)
+    book: Mapped[Book] = relationship("Book", uselist=False)
+    book_store: Mapped[BookStore] = relationship("BookStore", uselist=False)
 
 
 class BookList(BaseModel):

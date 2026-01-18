@@ -1,6 +1,6 @@
 import pytest
 import requests
-import shared
+import tests.shared as shared
 from unittest.mock import MagicMock
 
 from bookprices.shared.service.book_image_file_service import BookImageFileService
