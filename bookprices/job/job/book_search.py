@@ -10,7 +10,7 @@ from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.service.scraper_service import BookStoreScraperService
-from bookprices.shared.webscraping.book import BookFinder, BookNotFoundError
+from bookprices.shared.webscraping.book import BookNotFoundError
 from bookprices.shared.webscraping.bookstore import BookStoreScraper
 
 
