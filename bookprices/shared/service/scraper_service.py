@@ -2,7 +2,8 @@ import logging
 
 from bookprices.shared.db.tables import BookStore
 from bookprices.shared.repository.unit_of_work import UnitOfWork
-from bookprices.shared.webscraping.bookstore import BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration
+from bookprices.shared.webscraping.bookstore import BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration, \
+    WilliamDamScraper, SaxoScraper, BogOgIdeScraper
 
 
 class BookStoreScraperService:
@@ -13,6 +14,9 @@ class BookStoreScraperService:
         self._unit_of_work = unit_of_work
         self._scraper_types = {
             StaticBookStoreScraper.get_name(): StaticBookStoreScraper,
+            WilliamDamScraper.get_name(): WilliamDamScraper,
+            SaxoScraper.get_name(): SaxoScraper,
+            BogOgIdeScraper.get_name():BogOgIdeScraper
         }
 
     def list_scrapers(self) -> list[BookStoreScraper]:

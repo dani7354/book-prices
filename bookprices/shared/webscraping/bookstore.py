@@ -2,10 +2,8 @@ import dataclasses
 from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import ClassVar
-from urllib.parse import urlparse, urljoin
 
-from bookprices.shared.webscraping.content import HtmlContent
-from bookprices.shared.webscraping.http import RequestFailedError, HttpClient
+from bookprices.shared.webscraping.book import RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper
 from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper
 
 FALLBACK_PRICE_FORMAT = r".*"
@@ -87,48 +85,68 @@ class StaticBookStoreScraper(BookStoreScraper):
             configuration.bookstore_price_css_selector,
             configuration.bookstore_price_format)
 
+        self._book_scraper = RedirectsToDetailPageBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            configuration.bookstore_isbn_css_selector)
+
     def find_book(self, book_id: int, isbn: str) -> BookSearchResult | None:
-        try:
-            with HttpClient() as http_client:
-                search_url = self._configuration.bookstore_search_url.format(isbn)
-                self._logger.debug(f"Searching for book {book_id} with ISBN {isbn} at {search_url}...")
-                if not (match_url := self._get_match_url(http_client, search_url)):
-                    self._logger.debug(f"No match found for book {book_id} with ISBN {isbn} at {search_url}")
-                    return None
-
-                if not self._match_url_valid(http_client, match_url, isbn):
-                    self._logger.debug(f"URL {match_url} is not valid for book {book_id} with ISBN {isbn}.")
-                    return None
-
-                self._logger.info(f"Found match for book {book_id} with ISBN {isbn} at {match_url}")
-                return BookSearchResult(
-                    book_id=book_id,
-                    bookstore_id=self._configuration.bookstore_id,
-                    url=match_url)
-        except RequestFailedError as ex:
-            self._logger.error(f"HTTP request failed while searching for book {book_id} with ISBN {isbn}: {ex}")
-            return None
-
-    @staticmethod
-    def _get_match_url(client: HttpClient, search_url: str) -> str | None:
-        response = client.get(search_url)
-        return response.url if response.redirected else None
-
-    def _match_url_valid(self, client: HttpClient, match_url: str, isbn: str) -> bool:
-        if isbn in match_url:
-            return True
-
-        full_match_url = urljoin(self._configuration.bookstore_url, urlparse(match_url).path)
-        self._logger.debug(f"Checking if match URL {full_match_url} is valid for ISBN {isbn}...")
-        response = client.get(full_match_url)
-
-        html_content = HtmlContent(response.text)
-        if not (isbn_element := html_content.find_element_text_by_css(self._configuration.bookstore_isbn_css_selector)):
-            return False
-
-        return isbn in isbn_element or html_content.contains_text(isbn)
+        search_result = self._book_scraper.find_book(isbn=isbn)
+        return BookSearchResult(
+                book_id=book_id,
+                bookstore_id=self._configuration.bookstore_id,
+                url=search_result.url) if search_result.success else None
 
     def get_price(self, url: str) -> float:
         return self._price_scraper.get_price(url)
 
 
+class WilliamDamScraper(StaticBookStoreScraper):
+    """ Scraper for WilliamDam.dk bookstore. """
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
+
+
+class SaxoScraper(StaticBookStoreScraper):
+    """ Scraper for Saxo.com bookstore. """
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
+
+
+class BogOgIdeScraper(StaticBookStoreScraper):
+    """ Scraper for Bog & Idé bookstore. """
+
+    def __init__(self, configuration: BookStoreConfiguration) -> None:
+        super().__init__(configuration)
+        self._book_scraper = MatchesInResultListBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            configuration.search_result_css_selector,
+            configuration.bookstore_isbn_css_selector)
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
+
+
+class PlusbogScraper(StaticBookStoreScraper):
+    """ Scraper for Plusbog.dk bookstore. """
+
+    def __init__(self, configuration: BookStoreConfiguration) -> None:
+        super().__init__(configuration)
+        self._book_scraper = MatchesInResultListBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            configuration.search_result_css_selector,
+            configuration.bookstore_isbn_css_selector)
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
