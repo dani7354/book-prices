@@ -104,7 +104,7 @@ class BookStoreSearchJob(JobBase):
             self._logger.info(f"Starting search using {self._thread_count} threads...")
             threads = []
             for _ in range(self._thread_count):
-                thread = Thread(target=self._search_books())
+                thread = Thread(target=self._search_books)
                 threads.append(thread)
                 thread.start()
 
