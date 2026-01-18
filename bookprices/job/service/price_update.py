@@ -17,7 +17,6 @@ from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.bookstore import BookStoreScraper
 from bookprices.shared.webscraping.price import (
     PriceSelectorError, PriceFormatError, PriceNotFoundException, PriceFinderConnectionError, get_price)
-import bookprices.shared.webscraping.bookstore as bs
 
 
 class PriceUpdateService:
@@ -183,15 +182,15 @@ class NewPriceUpdateService(PriceUpdateService):
                               book_store_id=bookstore_id,
                               price=price_value,
                               created=datetime.now()))
-            except bs.PriceSelectorError as ex:
+            except PriceSelectorError as ex:
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
                     book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.PRICE_SELECT_ERROR)
-            except bs.PriceFormatError as ex:
+            except PriceFormatError as ex:
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
                     book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.INVALID_PRICE_FORMAT)
-            except bs.PriceNotFoundException as ex:
+            except PriceNotFoundException as ex:
                 self._logger.error(ex)
                 self._log_failed_price_update_to_db(
                     book_in_store.book_id, book_in_store.book_store_id, FailedUpdateReason.PAGE_NOT_FOUND)
