@@ -8,7 +8,6 @@ from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJo
 from bookprices.job.job.download_images import DownloadImagesJob, DownloadImagesForBooksJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
-from bookprices.job.job.update_prices import AllBookPricesUpdateJob, BookPricesUpdateJob
 from bookprices.job.job.update_prices_new import AllBookPricesUpdateJobNew
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
@@ -175,15 +174,6 @@ def create_delete_prices_job(config: Config) -> DeletePricesJob:
     return DeletePricesJob(config, db, cache_key_remover)
 
 
-def create_all_book_prices_update_job(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJob:
-    db = create_database_container(config)
-    cache_key_remover = create_cache_key_remover(config)
-    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
-    price_update_service = PriceUpdateService(db, cache_key_remover, thread_count)
-
-    return AllBookPricesUpdateJob(config, db, price_update_service, event_manager)
-
-
 def create_all_book_prices_update_job_new(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJobNew:
     db = create_database_container(config)
     session_factory = create_data_session_factory(config)
@@ -194,15 +184,6 @@ def create_all_book_prices_update_job_new(config: Config, event_manager: EventMa
     price_update_service = NewPriceUpdateService(db, cache_key_remover, unit_of_work, scraper_service, thread_count)
 
     return AllBookPricesUpdateJobNew(config, unit_of_work, price_update_service, event_manager)
-
-
-def create_book_price_update_job(config: Config, event_manager: EventManager) -> BookPricesUpdateJob:
-    db = create_database_container(config)
-    cache_key_remover = create_cache_key_remover(config)
-    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
-    price_update_service = PriceUpdateService(db, cache_key_remover,  thread_count)
-
-    return BookPricesUpdateJob(config, price_update_service, event_manager)
 
 
 def create_william_dam_book_import_job(config: Config, event_manager: EventManager) -> WilliamDamBookImportJob:
@@ -228,9 +209,7 @@ def main() -> None:
         create_delete_images_job(config),
         create_bookstore_search_job(config, event_manager),
         create_delete_prices_job(config),
-        create_book_price_update_job(config, event_manager),
         create_all_book_prices_update_job_new(config, event_manager),
-        create_all_book_prices_update_job(config, event_manager),
         create_william_dam_book_import_job(config, event_manager)
     ]
     job_runner = JobRunner(config, jobs, service)

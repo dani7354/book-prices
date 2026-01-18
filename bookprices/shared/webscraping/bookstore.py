@@ -13,18 +13,6 @@ class BookNotFoundError(Exception):
     pass
 
 
-class PriceNotFoundException(Exception):
-    pass
-
-
-class PriceSelectorError(Exception):
-    pass
-
-
-class PriceFormatError(Exception):
-    pass
-
-
 @dataclasses.dataclass(frozen=True)
 class BookSearchResult:
     book_id: int
