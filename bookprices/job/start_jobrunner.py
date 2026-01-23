@@ -8,7 +8,7 @@ from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJo
 from bookprices.job.job.download_images import DownloadImagesJob, DownloadImagesForBooksJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
-from bookprices.job.job.update_prices_new import AllBookPricesUpdateJobNew
+from bookprices.job.job.update_prices import AllBookPricesUpdateJobNew
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.job.service.image_download import ImageDownloadService

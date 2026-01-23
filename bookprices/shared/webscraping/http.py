@@ -1,7 +1,10 @@
 import dataclasses
+from collections import deque
 from enum import StrEnum
+from threading import Lock
 from typing import ClassVar
 from random import getrandbits
+from time import monotonic, sleep
 
 import requests
 from logging import getLogger
@@ -53,6 +56,9 @@ class HttpClient:
             self._logger.error(f"HTTP GET request to {url} failed: {e}")
             raise RequestFailedError from e
 
+    def close_session(self) -> None:
+        self._session.close()
+
     def __enter__(self) -> "HttpClient":
         return self
 
@@ -79,3 +85,36 @@ class HttpClient:
         ff_version = getrandbits(3) + 140
 
         return f"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{ff_version}.0.0.0 Safari/537.36"
+
+
+class RateLimiter:
+    """ Rate limiter for use with HTTP requests. """
+    _default_sleep_time: ClassVar[float] = 0.05
+
+    def __init__(self, request_count: int, seconds: int) -> None:
+        self._request_count = request_count
+        self._seconds = seconds
+        self._request_timestamps: deque[float] = deque()
+        self._lock = Lock()
+        self._logger = getLogger(self.__class__.__name__)
+
+    def wait_if_needed(self) -> None:
+        while True:
+            with self._lock:
+                now = monotonic()
+                self._remove_expired_timestamps(now)
+
+                if len(self._request_timestamps) < self._request_count:
+                    self._request_timestamps.append(now)
+                    return
+
+                earliest = self._request_timestamps[0]
+                wait_time = self._seconds - (now - earliest)
+
+            sleeping_time = max(wait_time, self._default_sleep_time)
+            self._logger.debug(f"Rate limit hit! Sleeping for {sleeping_time} seconds...")
+            sleep(sleeping_time)
+
+    def _remove_expired_timestamps(self, now: float) -> None:
+        while self._request_timestamps and (now - self._request_timestamps[0]) >= self._seconds:
+            self._request_timestamps.popleft()

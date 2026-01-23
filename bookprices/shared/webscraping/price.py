@@ -8,7 +8,7 @@ from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
 from bookprices.shared.webscraping.content import HtmlContent
-from bookprices.shared.webscraping.http import HttpClient, RequestFailedError
+from bookprices.shared.webscraping.http import HttpClient, RequestFailedError, RateLimiter
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -72,6 +72,24 @@ class StaticHtmlPriceScraper(PriceScraper):
         except ValueError as ex:
             self._logger.error(f"Failed to parse value as float: {price_match.group()}")
             raise PriceFormatError from ex
+
+
+class RateLimitedStaticHtmlPriceScraper(StaticHtmlPriceScraper):
+    """ StaticHtmlPriceScraper extended with rate limiting between requests. """
+
+    def __init__(
+            self,
+            price_css_selector: str,
+            price_format: str | None,
+            max_requests: int,
+            period_seconds: int) -> None:
+        super().__init__(price_css_selector, price_format)
+        self._rate_limiter = RateLimiter(max_requests, period_seconds)
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    def get_price(self, url: str) -> float:
+        self._rate_limiter.wait_if_needed()
+        return super().get_price(url)
 
 
 def _parse_price(response_content: str, css_path: str, price_format: Optional[str]) -> float:
