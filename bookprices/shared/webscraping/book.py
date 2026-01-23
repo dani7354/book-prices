@@ -97,6 +97,7 @@ class RateLimitedRedirectsToDetailPageBookScraper(RedirectsToDetailPageBookScrap
             period_seconds: int) -> None:
         super().__init__(bookstore_id, bookstore_url, search_url, isbn_css_selector)
         self._rate_limiter = RateLimiter(max_requests, period_seconds)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def find_book(self, isbn: str) -> SearchResult:
         self._rate_limiter.wait_if_needed()
