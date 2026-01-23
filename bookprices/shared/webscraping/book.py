@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse
 from typing import ClassVar
 from dataclasses import dataclass, replace
 from bookprices.shared.webscraping.content import HtmlContent
-from bookprices.shared.webscraping.http import HttpClient, HttpResponse
+from bookprices.shared.webscraping.http import HttpClient, HttpResponse, RateLimiter
 
 REDIRECTED_PERMANENT = 301
 REDIRECTED_TEMPORARY = 302
@@ -82,6 +82,25 @@ class RedirectsToDetailPageBookScraper(BookScraper):
             return True
 
         return False
+
+
+class RateLimitedRedirectsToDetailPageBookScraper(RedirectsToDetailPageBookScraper):
+    """ Book scraper for bookstores that redirect to the book detail page on search, with rate limiting. """
+
+    def __init__(
+            self,
+            bookstore_id: int,
+            bookstore_url: str,
+            search_url: str,
+            isbn_css_selector: str,
+            max_requests: int,
+            period_seconds: int) -> None:
+        super().__init__(bookstore_id, bookstore_url, search_url, isbn_css_selector)
+        self._rate_limiter = RateLimiter(max_requests, period_seconds)
+
+    def find_book(self, isbn: str) -> SearchResult:
+        self._rate_limiter.wait_if_needed()
+        return super().find_book(isbn)
 
 
 class MatchesInResultListBookScraper(BookScraper):

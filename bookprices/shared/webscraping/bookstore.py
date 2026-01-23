@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import ClassVar
 
-from bookprices.shared.webscraping.book import RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper
-from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper
+from bookprices.shared.webscraping.book import RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, \
+    RateLimitedRedirectsToDetailPageBookScraper
+from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -92,6 +93,24 @@ class StaticBookStoreScraper(BookStoreScraper):
 
 class WilliamDamScraper(StaticBookStoreScraper):
     """ Scraper for WilliamDam.dk bookstore. """
+    _max_requests_per_period: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 2
+
+    def __init__(self, configuration: BookStoreConfiguration) -> None:
+        super().__init__(configuration)
+        self._book_scraper = RateLimitedRedirectsToDetailPageBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            configuration.bookstore_isbn_css_selector,
+            self._max_requests_per_period,
+            self._period_seconds)
+
+        self._price_scraper = RateLimitedStaticHtmlPriceScraper(
+            configuration.bookstore_price_css_selector,
+            configuration.bookstore_price_format,
+            self._max_requests_per_period,
+            self._period_seconds)
 
     @classmethod
     def get_name(cls) -> str:

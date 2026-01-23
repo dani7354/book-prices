@@ -16,7 +16,7 @@ class BookStoreScraperService:
             StaticBookStoreScraper.get_name(): StaticBookStoreScraper,
             WilliamDamScraper.get_name(): WilliamDamScraper,
             SaxoScraper.get_name(): SaxoScraper,
-            BogOgIdeScraper.get_name():BogOgIdeScraper
+            BogOgIdeScraper.get_name(): BogOgIdeScraper
         }
 
     def list_scrapers(self) -> list[BookStoreScraper]:
