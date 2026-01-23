@@ -148,6 +148,7 @@ CREATE TABLE `BookStoreBook` (
   `BookId` mediumint unsigned NOT NULL,
   `BookStoreId` mediumint unsigned NOT NULL,
   `Url` varchar(255) NOT NULL,
+  `Created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`BookId`,`BookStoreId`),
   KEY `BookStoreId` (`BookStoreId`),
   CONSTRAINT `BookStoreBook_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
@@ -229,4 +230,4 @@ CREATE TABLE `User` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-18 16:09:05
+-- Dump completed on 2026-01-23 19:07:29
