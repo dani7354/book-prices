@@ -103,6 +103,10 @@ class RateLimitedRedirectsToDetailPageBookScraper(RedirectsToDetailPageBookScrap
         self._rate_limiter.wait_if_needed()
         return super().find_book(isbn)
 
+    def _is_match_url_valid(self, match_url: str, isbn: str) -> bool:
+        self._rate_limiter.wait_if_needed()
+        return super()._is_match_url_valid(match_url, isbn)
+
 
 class MatchesInResultListBookScraper(BookScraper):
     """ Book scraper for bookstores that list search results in a result list. """

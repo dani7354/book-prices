@@ -75,7 +75,7 @@ class StaticHtmlPriceScraper(PriceScraper):
 
 
 class RateLimitedStaticHtmlPriceScraper(StaticHtmlPriceScraper):
-    """ StatisHtmlPriceScraper extended with rate limiting between requests. """
+    """ StaticHtmlPriceScraper extended with rate limiting between requests. """
 
     def __init__(
             self,
