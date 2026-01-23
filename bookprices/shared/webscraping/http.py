@@ -57,10 +57,7 @@ class HttpClient:
             raise RequestFailedError from e
 
     def close_session(self) -> None:
-        try:
-            self._session.close()
-        except Exception as e:
-            self._logger.error(f"Failed to close HTTP session: {e}")
+        self._session.close()
 
     def __enter__(self) -> "HttpClient":
         return self
