@@ -85,7 +85,7 @@ class RedirectsToDetailPageBookScraper(BookScraper):
 
 
 class RateLimitedRedirectsToDetailPageBookScraper(RedirectsToDetailPageBookScraper):
-    """ Book scraper for bookstores that redirect to the book detail page on search, with rate limiting. """
+    """ Book scraper for bookstores that redirect to the book detail page on search with rate limiting. """
 
     def __init__(
             self,

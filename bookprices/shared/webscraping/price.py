@@ -74,7 +74,7 @@ class StaticHtmlPriceScraper(PriceScraper):
             raise PriceFormatError from ex
 
 
-class RateLimitedStaticHtmlPriceScraper(PriceScraper):
+class RateLimitedStaticHtmlPriceScraper(StaticHtmlPriceScraper):
     """ StatisHtmlPriceScraper extended with rate limiting between requests. """
 
     def __init__(
@@ -83,14 +83,13 @@ class RateLimitedStaticHtmlPriceScraper(PriceScraper):
             price_format: str | None,
             max_requests: int,
             period_seconds: int) -> None:
-        super().__init__()
+        super().__init__(price_css_selector, price_format)
         self._rate_limiter = RateLimiter(max_requests, period_seconds)
-        self._scraper = StaticHtmlPriceScraper(price_css_selector, price_format)
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def get_price(self, url: str) -> float:
         self._rate_limiter.wait_if_needed()
-        return self._scraper.get_price(url)
+        return super().get_price(url)
 
 
 def _parse_price(response_content: str, css_path: str, price_format: Optional[str]) -> float:
