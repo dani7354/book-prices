@@ -160,7 +160,8 @@ class MatchesInResultListBookScraper(BookScraper):
 
     def  _is_match_url_valid(self, isbn: str, match_url: str) -> bool:
         with HttpClient() as http_client:
-            response = http_client.get(match_url)
+            full_url = urljoin(self._bookstore_url, urlparse(match_url).path)
+            response = http_client.get(full_url)
             if response.redirected:
                 self._logger.warning(f"Match URL {match_url} redirected to {response.url}.")
 
@@ -171,3 +172,33 @@ class MatchesInResultListBookScraper(BookScraper):
             return False
 
         return isbn in str(isbn_element)
+
+
+class RateLimitedMatchesInResultListBookScraper(MatchesInResultListBookScraper):
+    """ Book scraper for bookstores that list search results in a result list with rate limiting. """
+
+    def __init__(
+            self,
+            bookstore_id: int,
+            bookstore_url: str,
+            search_url: str,
+            search_result_css_selector: str,
+            isbn_css_selector: str,
+            max_requests: int,
+            period_seconds: int) -> None:
+        super().__init__(
+            bookstore_id,
+            bookstore_url,
+            search_url,
+            search_result_css_selector,
+            isbn_css_selector)
+        self._rate_limiter = RateLimiter(max_requests, period_seconds)
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    def find_book(self, isbn: str) -> SearchResult:
+        self._rate_limiter.wait_if_needed()
+        return super().find_book(isbn)
+
+    def _is_match_url_valid(self, isbn: str, match_url: str) -> bool:
+        self._rate_limiter.wait_if_needed()
+        return super()._is_match_url_valid(isbn, match_url)
