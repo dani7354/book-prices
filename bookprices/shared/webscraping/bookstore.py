@@ -179,3 +179,21 @@ class ThiemersScraper(StaticBookStoreScraper):
     @classmethod
     def get_name(cls) -> str:
         return cls.__name__
+
+
+class GuccaScraper(StaticBookStoreScraper):
+    """ Scraper for Thiemers Magasin bookstore. """
+    def __init__(self, configuration: BookStoreConfiguration) -> None:
+        super().__init__(configuration)
+        self._book_scraper = RateLimitedMatchesInResultListBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            configuration.search_result_css_selector,
+            configuration.bookstore_isbn_css_selector,
+            max_requests=2,
+            period_seconds=1)
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
