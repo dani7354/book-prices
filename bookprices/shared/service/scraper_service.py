@@ -3,7 +3,7 @@ import logging
 from bookprices.shared.db.tables import BookStore
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.webscraping.bookstore import BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration, \
-    WilliamDamScraper, SaxoScraper, BogOgIdeScraper, PlusbogScraper, ThiemersScraper
+    WilliamDamScraper, SaxoScraper, BogOgIdeScraper, PlusbogScraper, ThiemersScraper, GuccaScraper
 
 
 class BookStoreScraperService:
@@ -17,8 +17,9 @@ class BookStoreScraperService:
             WilliamDamScraper.get_name(): WilliamDamScraper,
             SaxoScraper.get_name(): SaxoScraper,
             BogOgIdeScraper.get_name(): BogOgIdeScraper,
-            PlusbogScraper.get_name(): PlusbogScraper,
-            ThiemersScraper.get_name(): ThiemersScraper
+            # PlusbogScraper.get_name(): PlusbogScraper,
+            ThiemersScraper.get_name(): ThiemersScraper,
+            GuccaScraper.get_name(): GuccaScraper,
         }
 
     def list_scrapers(self) -> list[BookStoreScraper]:
