@@ -88,7 +88,6 @@ class PriceUpdateService:
 
                 if not (scraper := self._scrapers_by_bookstore_id.get(bookstore_id)):
                     self._logger.warning(f"No scraper found for bookstore ID {bookstore_id}, skipping price update.")
-                    print(self._scrapers_by_bookstore_id)
                     continue
 
                 price_value = scraper.get_price(full_url)
