@@ -5,7 +5,9 @@ from typing import ClassVar
 
 from bookprices.shared.webscraping.book import RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, \
     RateLimitedRedirectsToDetailPageBookScraper, RateLimitedMatchesInResultListBookScraper
-from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper
+from bookprices.shared.webscraping.currency import CurrencyConverter
+from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, \
+    GuccaStaticHtmlPriceScraper
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -185,8 +187,6 @@ class ThiemersScraper(StaticBookStoreScraper):
 
 
 class GuccaScraper(StaticBookStoreScraper):
-    """ Scraper for Gucca.dk bookstore. """
-
     _max_requests_per_period: ClassVar[int] = 1
     _period_seconds: ClassVar[int] = 2
 
@@ -201,7 +201,7 @@ class GuccaScraper(StaticBookStoreScraper):
             max_requests=self._max_requests_per_period,
             period_seconds=self._period_seconds)
 
-        self._price_scraper = RateLimitedStaticHtmlPriceScraper(
+        self._price_scraper = GuccaStaticHtmlPriceScraper(
             configuration.bookstore_price_css_selector,
             configuration.bookstore_price_format,
             self._max_requests_per_period,
