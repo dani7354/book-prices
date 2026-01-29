@@ -1,11 +1,6 @@
 import logging
 import re
-import requests
-import bookprices.shared.webscraping.options as options
 from abc import ABC, abstractmethod
-from typing import Optional
-from requests.exceptions import HTTPError
-from bs4 import BeautifulSoup
 
 from bookprices.shared.webscraping.content import HtmlContent
 from bookprices.shared.webscraping.currency import CurrencyConverter
@@ -75,8 +70,6 @@ class StaticHtmlPriceScraper(PriceScraper):
             raise PriceFormatError from ex
 
 
-
-
 class RateLimitedStaticHtmlPriceScraper(StaticHtmlPriceScraper):
     """ StaticHtmlPriceScraper extended with rate limiting between requests. """
 
@@ -125,38 +118,3 @@ class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
     @staticmethod
     def price_in_sek(price_text: str) -> bool:
         return "SEK" in price_text
-
-
-def _parse_price(response_content: str, css_path: str, price_format: Optional[str]) -> float:
-    if not price_format:
-        price_format = FALLBACK_PRICE_FORMAT
-
-    content_bs = BeautifulSoup(response_content, options.BS_HTML_PARSER)
-    if not (price_html := content_bs.select_one(css_path)):
-        raise PriceSelectorError(f"No match for {css_path} in the response body!")
-
-    if not (price_format_match := re.search(price_format, price_html.get_text())):
-        raise PriceSelectorError(f"No match for the price format {price_format}")
-
-    try:
-        price_value = float(price_format_match.group().replace(",", "."))
-    except ValueError:
-        raise PriceFormatError(f"Could not convert the price text to a float: {price_format_match[0]}!")
-
-    return price_value
-
-
-def get_price(url: str, css_selector: str, price_format: Optional[str]) -> float:
-    try:
-        response = requests.get(url, allow_redirects=False)
-        response.raise_for_status()
-        if response.status_code in (301, 302):
-            raise PriceNotFoundException(
-                f"Price not found {url}: Redirected to {response.headers['Location']} ({response.status_code})")
-        price = _parse_price(response.content.decode(), css_selector, price_format)
-
-        return price
-    except ConnectionError as ex:
-        raise PriceFinderConnectionError(f"Something went wrong while trying to reach {url}: {ex}")
-    except HTTPError as ex:
-        raise PriceNotFoundException(f"Page not found {url}: {ex}")

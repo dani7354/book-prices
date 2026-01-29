@@ -2,26 +2,26 @@ import logging
 from typing import ClassVar
 
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.job.service.price_update import NewPriceUpdateService
+from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 
 
-class AllBookPricesUpdateJobNew(JobBase):
+class AllBookPricesUpdateJob(JobBase):
     """ Updates prices for all books in the database. """
 
     batch_size: ClassVar[int] = 500
     min_updates_per_thread: ClassVar[int] = 5
 
-    name: ClassVar[str] = "AllBookPricesUpdateJobNew"
+    name: ClassVar[str] = "AllBookPricesUpdateJob"
 
     def __init__(
             self,
             config: Config,
             unit_of_work: UnitOfWork,
-            price_update_service: NewPriceUpdateService,
+            price_update_service: PriceUpdateService,
             event_manager: EventManager) -> None:
         super().__init__(config)
         self._unit_of_work = unit_of_work

@@ -2,8 +2,9 @@ import logging
 
 from bookprices.shared.db.tables import BookStore
 from bookprices.shared.repository.unit_of_work import UnitOfWork
-from bookprices.shared.webscraping.bookstore import BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration, \
-    WilliamDamScraper, SaxoScraper, BogOgIdeScraper, PlusbogScraper, ThiemersScraper, GuccaScraper
+from bookprices.shared.webscraping.bookstore import (
+    BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration, WilliamDamScraper, SaxoScraper, BogOgIdeScraper,
+    PlusbogScraper, ThiemersScraper, GuccaScraper)
 
 
 class BookStoreScraperService:
@@ -28,7 +29,6 @@ class BookStoreScraperService:
 
         return [scraper for bookstore in bookstores if (scraper := self._create_scraper_for_bookstore(bookstore))]
 
-
     def get_scraper(self, bookstore_id: int) -> BookStoreScraper | None:
         with self._unit_of_work as uow:
             if not (bookstore := uow.bookstore_repository.get(bookstore_id)):
@@ -41,8 +41,7 @@ class BookStoreScraperService:
         return list(self._scraper_types.keys())
 
     def _create_scraper_for_bookstore(self, bookstore: BookStore) -> BookStoreScraper | None:
-        scraper_class = self._scraper_types.get(bookstore.scraper_id)
-        if not scraper_class:
+        if not (scraper_class := self._scraper_types.get(bookstore.scraper_id)):
             self._logger.warning(f"No scraper found for bookstore {bookstore.name}")
             return None
 
