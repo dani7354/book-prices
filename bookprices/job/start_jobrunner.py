@@ -1,18 +1,17 @@
 import logging
 
 from bookprices.job.job.base import DEFAULT_THREAD_COUNT
-from bookprices.job.job.book_search import BookStoreSearchJob
 from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob, DownloadImagesForBooksJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
-from bookprices.job.job.update_prices import AllBookPricesUpdateJobNew
+from bookprices.job.job.update_prices import AllBookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.job.service.image_download import ImageDownloadService
-from bookprices.job.service.price_update import NewPriceUpdateService
+from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.job.db.session import JobSessionFactory
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
@@ -96,7 +95,6 @@ def setup_event_manager(config: Config) -> EventManager:
 
     books_imported_event = Event(str(BookPricesEvents.BOOKS_IMPORTED))
     books_imported_event.add_listener(StartJobListener(job_service, DownloadImagesJob.name))
-    book_created_event.add_listener(StartJobListener(job_service, BookStoreSearchJob.name))
 
     book_deleted_event = Event(str(BookPricesEvents.BOOKS_DELETED))
     book_deleted_event.add_listener(StartJobListener(job_service, DeleteImagesJob.name))
@@ -157,16 +155,6 @@ def create_delete_images_job(config: Config) -> DeleteImagesJob:
     return DeleteImagesJob(config, db, book_image_file_service)
 
 
-def create_bookstore_search_job(config: Config, event_manager: EventManager) -> BookStoreSearchJob:
-    db = create_database_container(config)
-    cache_key_remover = create_cache_key_remover(config)
-    session_factory = create_data_session_factory(config)
-    unit_of_work = UnitOfWork(session_factory)
-    scraper_service = BookStoreScraperService(unit_of_work)
-
-    return BookStoreSearchJob(config, db, unit_of_work, cache_key_remover, event_manager, scraper_service)
-
-
 def create_delete_prices_job(config: Config) -> DeletePricesJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
@@ -174,16 +162,16 @@ def create_delete_prices_job(config: Config) -> DeletePricesJob:
     return DeletePricesJob(config, db, cache_key_remover)
 
 
-def create_all_book_prices_update_job_new(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJobNew:
+def create_all_book_prices_update_job(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJob:
     db = create_database_container(config)
     session_factory = create_data_session_factory(config)
     cache_key_remover = create_cache_key_remover(config)
     unit_of_work = UnitOfWork(session_factory)
     scraper_service = BookStoreScraperService(unit_of_work)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
-    price_update_service = NewPriceUpdateService(db, cache_key_remover, unit_of_work, scraper_service, thread_count)
+    price_update_service = PriceUpdateService(db, cache_key_remover, unit_of_work, scraper_service, thread_count)
 
-    return AllBookPricesUpdateJobNew(config, unit_of_work, price_update_service, event_manager)
+    return AllBookPricesUpdateJob(config, unit_of_work, price_update_service, event_manager)
 
 
 def create_william_dam_book_import_job(config: Config, event_manager: EventManager) -> WilliamDamBookImportJob:
@@ -207,9 +195,8 @@ def main() -> None:
         create_download_images_job(config),
         create_delete_unavailable_books_job(config, event_manager),
         create_delete_images_job(config),
-        create_bookstore_search_job(config, event_manager),
         create_delete_prices_job(config),
-        create_all_book_prices_update_job_new(config, event_manager),
+        create_all_book_prices_update_job(config, event_manager),
         create_william_dam_book_import_job(config, event_manager)
     ]
     job_runner = JobRunner(config, jobs, service)

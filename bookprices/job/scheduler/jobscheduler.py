@@ -10,7 +10,7 @@ from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
-from bookprices.job.job.update_prices import AllBookPricesUpdateJobNew
+from bookprices.job.job.update_prices import AllBookPricesUpdateJob
 from bookprices.shared.service.job_service import (
     JobService, JobSchemaFields, JobRunPriority, CreationFailedError, JobSourceUnavailableError)
 from bookprices.job.job.trim_prices import TrimPricesJob
@@ -61,7 +61,7 @@ class JobScheduler:
         schedule.every().monday.at("10:00", self.time_zone).do(
             self._send_start_job_request, TrimPricesJob.name)
         schedule.every().day.at("11:00", self.time_zone).do(
-            self._send_start_job_request, AllBookPricesUpdateJobNew.name)
+            self._send_start_job_request, AllBookPricesUpdateJob.name)
 
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")
