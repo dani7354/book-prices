@@ -41,8 +41,7 @@ class BookStoreScraperService:
         return list(self._scraper_types.keys())
 
     def _create_scraper_for_bookstore(self, bookstore: BookStore) -> BookStoreScraper | None:
-        scraper_class = self._scraper_types.get(bookstore.scraper_id)
-        if not scraper_class:
+        if not (scraper_class := self._scraper_types.get(bookstore.scraper_id)):
             self._logger.warning(f"No scraper found for bookstore {bookstore.name}")
             return None
 
