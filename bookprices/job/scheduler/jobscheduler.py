@@ -63,7 +63,6 @@ class JobScheduler:
         schedule.every().day.at("11:00", self.time_zone).do(
             self._send_start_job_request, AllBookPricesUpdateJobNew.name)
 
-
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")
         jobs = self._job_service.get_job_list()
