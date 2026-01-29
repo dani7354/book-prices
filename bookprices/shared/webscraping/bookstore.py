@@ -165,6 +165,9 @@ class PlusbogScraper(StaticBookStoreScraper):
 
 class ThiemersScraper(StaticBookStoreScraper):
     """ Scraper for Thiemers Magasin bookstore. """
+    _max_requests_per_period: ClassVar[int] = 2
+    _period_seconds: ClassVar[int] = 1
+
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
         self._book_scraper = RateLimitedMatchesInResultListBookScraper(
@@ -173,8 +176,8 @@ class ThiemersScraper(StaticBookStoreScraper):
             configuration.bookstore_search_url,
             configuration.search_result_css_selector,
             configuration.bookstore_isbn_css_selector,
-            max_requests=2,
-            period_seconds=1)
+            max_requests=self._max_requests_per_period,
+            period_seconds=self._period_seconds)
 
     @classmethod
     def get_name(cls) -> str:
@@ -183,6 +186,10 @@ class ThiemersScraper(StaticBookStoreScraper):
 
 class GuccaScraper(StaticBookStoreScraper):
     """ Scraper for Gucca.dk bookstore. """
+
+    _max_requests_per_period: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 2
+
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
         self._book_scraper = RateLimitedMatchesInResultListBookScraper(
@@ -191,8 +198,14 @@ class GuccaScraper(StaticBookStoreScraper):
             configuration.bookstore_search_url,
             configuration.search_result_css_selector,
             configuration.bookstore_isbn_css_selector,
-            max_requests=1,
-            period_seconds=2)
+            max_requests=self._max_requests_per_period,
+            period_seconds=self._period_seconds)
+
+        self._price_scraper = RateLimitedStaticHtmlPriceScraper(
+            configuration.bookstore_price_css_selector,
+            configuration.bookstore_price_format,
+            self._max_requests_per_period,
+            self._period_seconds)
 
     @classmethod
     def get_name(cls) -> str:
