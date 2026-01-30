@@ -1,6 +1,7 @@
 import logging
 
 from bookprices.job.job.base import DEFAULT_THREAD_COUNT
+from bookprices.job.job.book_search import BookStoreSearchJob
 from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
@@ -114,6 +115,22 @@ def setup_event_manager(config: Config) -> EventManager:
     return event_manager
 
 
+def create_book_search_job(config: Config, event_manager: EventManager) -> BookStoreSearchJob:
+    db = create_database_container(config)
+    session_factory = create_data_session_factory(config)
+    cache_key_remover = create_cache_key_remover(config)
+    unit_of_work = UnitOfWork(session_factory)
+    bookstore_scraper_service = BookStoreScraperService(unit_of_work)
+
+    return BookStoreSearchJob(
+        config,
+        db,
+        unit_of_work,
+        cache_key_remover,
+        event_manager,
+        bookstore_scraper_service)
+
+
 def create_trim_prices_job(config: Config) -> TrimPricesJob:
     db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
@@ -197,6 +214,7 @@ def main() -> None:
         create_delete_images_job(config),
         create_delete_prices_job(config),
         create_all_book_prices_update_job(config, event_manager),
+        create_book_search_job(config, event_manager),
         create_william_dam_book_import_job(config, event_manager)
     ]
     job_runner = JobRunner(config, jobs, service)
