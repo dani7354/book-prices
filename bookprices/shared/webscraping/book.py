@@ -1,4 +1,5 @@
 import logging
+import json
 from abc import ABC, abstractmethod
 from collections import Counter
 
@@ -202,3 +203,62 @@ class RateLimitedMatchesInResultListBookScraper(MatchesInResultListBookScraper):
     def _is_match_url_valid(self, isbn: str, match_url: str) -> bool:
         self._rate_limiter.wait_if_needed()
         return super()._is_match_url_valid(isbn, match_url)
+
+
+class PlusbogBookScraper(BookScraper):
+
+    _min_html_response_length: ClassVar[int] = 8
+
+    _headers_for_search: ClassVar[dict[str, str]] = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    def __init__(
+            self,
+            bookstore_id: int,
+            bookstore_url: str ,
+            search_url: str,
+            search_result_css_selector: str,
+            max_requests: int,
+            period_seconds: int) -> None:
+        super().__init__()
+        self._bookstore_id = bookstore_id
+        self._bookstore_url = bookstore_url
+        self._search_url = search_url
+        self._search_result_css_selector = search_result_css_selector
+        self._rate_limiter = RateLimiter(max_requests, period_seconds)
+
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    def find_book(self, isbn: str) -> SearchResult:
+        self._rate_limiter.wait_if_needed()
+        response = self._post_search(isbn)
+        if not (match_url := self._parse_match_url(response)):
+            return SearchResult(bookstore_id=self._bookstore_id, url=None, success=False)
+
+        return SearchResult(bookstore_id=self._bookstore_id, url=match_url, success=True)
+
+    def _post_search(self, isbn: str) -> HttpResponse:
+        with HttpClient(headers=self._headers_for_search) as http_client:
+            response = http_client.post(self._search_url, self._create_form_data(isbn))
+            return response
+
+    def _parse_match_url(self, response: HttpResponse) -> str | None:
+        response_json = json.loads(response.text)
+        html_str = response_json.get("products", "")
+        if len(html_str) < self._min_html_response_length:
+            return None
+
+        html_content = HtmlContent(html_str)
+        return html_content.find_element_and_get_attribute_value(
+            self._search_result_css_selector, "href")
+
+    @staticmethod
+    def _create_form_data(isbn: str) -> dict[str, str]:
+        return {
+            "input": isbn,
+            "pageIndex": 0,
+            "isInitialPage": "false",
+            "filtersPreExists": "true",
+            "needAutoScroll": "false"
+        }

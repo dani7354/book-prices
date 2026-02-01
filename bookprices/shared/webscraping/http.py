@@ -56,6 +56,22 @@ class HttpClient:
             self._logger.error(f"HTTP GET request to {url} failed: {e}")
             raise RequestFailedError from e
 
+    def post(self, url: str, payload: dict) -> HttpResponse:
+        try:
+            response = self._session.post(url, payload, timeout=self._timeout_seconds)
+            response.raise_for_status()
+            redirected = response.history != []
+
+            return HttpResponse(
+                redirected=redirected,
+                status_code=response.status_code,
+                text=response.text,
+                url=response.url
+            )
+        except requests.RequestException as e:
+            self._logger.error(f"HTTP POST request to {url} failed: {e}")
+            raise RequestFailedError from e
+
     def close_session(self) -> None:
         self._session.close()
 
