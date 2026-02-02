@@ -3,11 +3,12 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import ClassVar
 
-from bookprices.shared.webscraping.book import RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, \
-    RateLimitedRedirectsToDetailPageBookScraper, RateLimitedMatchesInResultListBookScraper
-from bookprices.shared.webscraping.currency import CurrencyConverter
-from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, \
-    GuccaStaticHtmlPriceScraper
+from bookprices.shared.webscraping.book import (
+    RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, RateLimitedRedirectsToDetailPageBookScraper,
+    RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper)
+from bookprices.shared.webscraping.http import RateLimiter
+from bookprices.shared.webscraping.price import (
+    PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, GuccaStaticHtmlPriceScraper)
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -145,20 +146,19 @@ class BogOgIdeScraper(StaticBookStoreScraper):
 
 
 class PlusbogScraper(StaticBookStoreScraper):
-    """ Scraper for Plusbog.dk bookstore. TODO: needs work! (POST search) """
+    """ Scraper for Plusbog.dk bookstore. """
     _max_requests_per_period: ClassVar[int] = 1
-    _period_seconds: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 2
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
-        self._book_scraper = RateLimitedMatchesInResultListBookScraper(
+        self._rate_limiter = RateLimiter(self._max_requests_per_period, self._period_seconds)
+        self._book_scraper = PlusbogBookScraper(
             configuration.bookstore_id,
             configuration.bookstore_url,
             configuration.bookstore_search_url,
             configuration.search_result_css_selector,
-            configuration.bookstore_isbn_css_selector,
-            self._max_requests_per_period,
-            self._period_seconds)
+            self._rate_limiter)
 
     @classmethod
     def get_name(cls) -> str:
