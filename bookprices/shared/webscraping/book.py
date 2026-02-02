@@ -216,7 +216,7 @@ class PlusbogBookScraper(BookScraper):
     def __init__(
             self,
             bookstore_id: int,
-            bookstore_url: str ,
+            bookstore_url: str,
             search_url: str,
             search_result_css_selector: str,
             rate_limiter: RateLimiter) -> None:
