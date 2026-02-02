@@ -3,12 +3,12 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import ClassVar
 
-from bookprices.shared.webscraping.book import RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, \
-    RateLimitedRedirectsToDetailPageBookScraper, RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper
-from bookprices.shared.webscraping.currency import CurrencyConverter
+from bookprices.shared.webscraping.book import (
+    RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, RateLimitedRedirectsToDetailPageBookScraper,
+    RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper)
 from bookprices.shared.webscraping.http import RateLimiter
-from bookprices.shared.webscraping.price import PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, \
-    GuccaStaticHtmlPriceScraper
+from bookprices.shared.webscraping.price import (
+    PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, GuccaStaticHtmlPriceScraper)
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -148,7 +148,7 @@ class BogOgIdeScraper(StaticBookStoreScraper):
 class PlusbogScraper(StaticBookStoreScraper):
     """ Scraper for Plusbog.dk bookstore. """
     _max_requests_per_period: ClassVar[int] = 1
-    _period_seconds: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 2
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)

@@ -18,7 +18,7 @@ class BookStoreScraperService:
             WilliamDamScraper.get_name(): WilliamDamScraper,
             SaxoScraper.get_name(): SaxoScraper,
             BogOgIdeScraper.get_name(): BogOgIdeScraper,
-            # PlusbogScraper.get_name(): PlusbogScraper,
+            PlusbogScraper.get_name(): PlusbogScraper,
             ThiemersScraper.get_name(): ThiemersScraper,
             GuccaScraper.get_name(): GuccaScraper,
         }
