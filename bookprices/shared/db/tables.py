@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Boolean, CHAR, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Boolean, CHAR, TIMESTAMP, Double
 from sqlalchemy.orm import DeclarativeBase, relationship, Mapped
 
 
@@ -125,3 +125,11 @@ class User(BaseModel):
     image_url = Column('ImageUrl', String(255), nullable=True)
     access_level = Column('AccessLevel', Integer, nullable=False, default=1)
     booklist_id = Column('BookListId', Integer, ForeignKey('BookList.Id', ondelete='SET NULL'), nullable=True)
+
+
+class Currency(BaseModel):
+    __tablename__ = 'Currency'
+    id = Column('Id', Integer, primary_key=True, autoincrement=True)
+    code = Column('Code', String(3), nullable=False)
+    rate_to_dkk = Column('RateToDKK', Double(precision=5), nullable=False)
+    updated = Column('Updated', TIMESTAMP, nullable=True)
