@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from bookprices.shared.db.tables import Currency
@@ -10,7 +12,7 @@ def currency_repository(data_session) -> CurrencyRepository:
 
 
 def test_add_or_update_adds_currency(currency_repository: CurrencyRepository) -> None:
-    currency = Currency(code="USD", rate_to_dkk=623.90, description="US Dollar")
+    currency = Currency(code="USD", rate_to_dkk=623.90, description="US Dollar", updated=datetime.now())
     currency_repository.add_or_update_all([currency])
     currency_repository._session.commit()
 
@@ -25,14 +27,15 @@ def test_add_or_update_adds_currency(currency_repository: CurrencyRepository) ->
 def test_add_or_update_updates_exising_currencies(currency_repository: CurrencyRepository) -> None:
     usd_currency_code = "USD"
     currencies = [
-        Currency(code=usd_currency_code, rate_to_dkk=623.90, description="US Dollar"),
-        Currency(code="SEK", rate_to_dkk=70.10, description="Svenske kroner")
+        Currency(code=usd_currency_code, rate_to_dkk=623.90, description="US Dollar", updated=datetime.now()),
+        Currency(code="SEK", rate_to_dkk=70.10, description="Svenske kroner", updated=datetime.now())
     ]
     currency_repository.add(currencies[0])
     currency_repository.add(currencies[1])
     currency_repository._session.commit()
 
-    updated_currency = Currency(code=usd_currency_code, rate_to_dkk=666.66, description="US Dollar")
+    updated_currency = Currency(
+        code=usd_currency_code, rate_to_dkk=666.66, description="US Dollar", updated=datetime.now())
     currency_repository.add_or_update_all([updated_currency])
 
     retrieved_currency = currency_repository.get_by_code(usd_currency_code)
