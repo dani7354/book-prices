@@ -72,6 +72,9 @@ class CurrencyApiClient:
 
                 exchange_rates.append(
                     CurrencyExchangeRate(currency_code=code, rate_to_dkk=rate, description=description))
+
+            if not exchange_rates:
+                raise ResponseParsingError("No currency exchange rates parsed from response content")
         except (ElementTree.ParseError, ValueError) as e:
             raise ResponseParsingError("Failed to parse currency API response") from e
 
