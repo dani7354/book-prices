@@ -131,5 +131,6 @@ class Currency(BaseModel):
     __tablename__ = 'Currency'
     id = Column('Id', Integer, primary_key=True, autoincrement=True)
     code = Column('Code', String(3), nullable=False)
-    rate_to_dkk = Column('RateToDKK', Double(precision=5), nullable=False)
-    updated = Column('Updated', TIMESTAMP, nullable=True)
+    description = Column('Description', String(255), nullable=False)
+    rate_to_dkk = Column('RateToDKK', Double(), nullable=False)
+    updated = Column('Updated', TIMESTAMP, nullable=False)

@@ -8,12 +8,14 @@ from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJo
 from bookprices.job.job.download_images import DownloadImagesJob, DownloadImagesForBooksJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
+from bookprices.job.job.update_currencies import UpdateCurrenciesJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.job.db.session import JobSessionFactory
+from bookprices.shared.api.currency import CurrencyApiClient
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
@@ -26,6 +28,7 @@ from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.event.listener import StartJobListener
 from bookprices.shared.log import setup_logging
 from bookprices.shared.repository.unit_of_work import UnitOfWork
+from bookprices.shared.service.currency_service import CurrencyService
 from bookprices.shared.service.job_service import JobService
 from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.image import ImageDownloader
@@ -198,6 +201,14 @@ def create_william_dam_book_import_job(config: Config, event_manager: EventManag
     return WilliamDamBookImportJob(config, db, cache_key_remover, event_manager)
 
 
+def create_update_currencies_job(config: Config) -> UpdateCurrenciesJob:
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
+    api_client = CurrencyApiClient()
+
+    return UpdateCurrenciesJob(config, CurrencyService(unit_of_work, api_client))
+
+
 def main() -> None:
     config = loader.load_from_env()
     setup_logging(config, PROGRAM_NAME)
@@ -215,7 +226,8 @@ def main() -> None:
         create_delete_prices_job(config),
         create_all_book_prices_update_job(config, event_manager),
         create_book_search_job(config, event_manager),
-        create_william_dam_book_import_job(config, event_manager)
+        create_william_dam_book_import_job(config, event_manager),
+        create_update_currencies_job(config),
     ]
     job_runner = JobRunner(config, jobs, service)
     job_runner.start()
