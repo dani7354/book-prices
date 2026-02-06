@@ -1,11 +1,12 @@
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from bookprices.shared.db.tables import Currency
 from bookprices.shared.repository.base import RepositoryBase
 
 
 class CurrencyRepository(RepositoryBase[Currency]):
-    def __init__(self, session) -> None:
+    def __init__(self, session: Session) -> None:
         super().__init__(session)
 
     @property

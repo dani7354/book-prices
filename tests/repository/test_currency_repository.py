@@ -27,7 +27,7 @@ def test_add_or_update_adds_currency(currency_repository: CurrencyRepository) ->
     assert retrieved_currency.description == "US Dollar"
 
 
-def test_add_or_update_updates_exising_currencies(currency_repository: CurrencyRepository) -> None:
+def test_add_or_update_updates_existing_currencies(currency_repository: CurrencyRepository) -> None:
     usd_currency_code = "USD"
     currencies = [
         Currency(code=usd_currency_code, rate_to_dkk=623.90, description="US Dollar", updated=datetime.now()),

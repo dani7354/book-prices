@@ -130,7 +130,7 @@ class User(BaseModel):
 class Currency(BaseModel):
     __tablename__ = 'Currency'
     id = Column('Id', Integer, primary_key=True, autoincrement=True)
-    code = Column('Code', String(3), nullable=False)
+    code = Column('Code', String(3), unique=True,  nullable=False)
     description = Column('Description', String(255), nullable=False)
     rate_to_dkk = Column('RateToDKK', Double(), nullable=False)
     updated = Column('Updated', TIMESTAMP, nullable=False)

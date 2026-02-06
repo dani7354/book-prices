@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Tuple, Sequence
 
 from sqlalchemy import select, and_, outerjoin
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, Session
 
 from bookprices.shared.db.tables import BookStore, BookStoreBook, Book
 from bookprices.shared.repository.base import RepositoryBase
@@ -10,7 +10,7 @@ from bookprices.shared.repository.base import RepositoryBase
 
 class BookStoreRepository(RepositoryBase[BookStore]):
 
-    def __init__(self, session) -> None:
+    def __init__(self, session: Session) -> None:
         super().__init__(session)
 
     @property
