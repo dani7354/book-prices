@@ -1,5 +1,5 @@
 import dataclasses
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from enum import IntEnum
 
 from bookprices.shared.config.config import Config
@@ -19,7 +19,7 @@ class JobResult:
     error_message: Exception | None = None
 
 
-class JobBase:
+class JobBase(ABC):
 
     def __init__(self, config: Config) -> None:
         self.config = config
