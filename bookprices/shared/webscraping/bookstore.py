@@ -6,6 +6,7 @@ from typing import ClassVar
 from bookprices.shared.webscraping.book import (
     RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, RateLimitedRedirectsToDetailPageBookScraper,
     RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper)
+from bookprices.shared.webscraping.currency import CurrencyConverter
 from bookprices.shared.webscraping.http import RateLimiter
 from bookprices.shared.webscraping.price import (
     PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, GuccaStaticHtmlPriceScraper)
@@ -34,6 +35,7 @@ class BookStoreConfiguration:
     bookstore_price_format: str | None
     bookstore_isbn_css_selector: str | None
     search_result_css_selector: str | None
+    currency_converter: CurrencyConverter | None = None
 
 
 class BookStoreScraper(ABC):

@@ -14,6 +14,14 @@ class CurrencyService:
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
+    def get_rate(self, currency_code: str) -> float | None:
+        with self._unit_of_work as uow:
+            if not (currency := uow.currency_repository.get_by_code(currency_code)):
+                self._logger.warning(f"Currency with code {currency_code} not found.")
+                return None
+
+        return currency.rate_to_dkk
+
     def update_rates(self) -> None:
         self._logger.info("Updating currency rates...")
         currencies_to_update = self._api_client.get_exchange_rates()

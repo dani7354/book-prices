@@ -92,9 +92,14 @@ class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
     """ Price scraper for Gucca.dk bookstore. """
 
     def __init__(
-            self, price_css_selector: str, price_format: str | None, max_requests: int, period_seconds: int) -> None:
+            self,
+            price_css_selector: str,
+            price_format: str | None,
+            max_requests: int,
+            period_seconds: int,
+            currency_converter: CurrencyConverter) -> None:
         super().__init__(price_css_selector, price_format, max_requests, period_seconds)
-        self._currency_converter = CurrencyConverter()
+        self._currency_converter = currency_converter
 
     def _parse_price(self, response_text: str) -> float:
         html_content = HtmlContent(response_text)
