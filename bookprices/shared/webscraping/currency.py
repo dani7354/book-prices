@@ -9,4 +9,4 @@ class CurrencyConverter:
         if not (rate := self._currency_service.get_rate(currency)):
             raise ValueError(f"Unsupported currency: {currency}")
 
-        return round(amount * rate, 2)
+        return amount * rate / 100
