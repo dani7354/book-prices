@@ -111,7 +111,7 @@ CREATE TABLE `BookPrice` (
   KEY `Created` (`Created`),
   CONSTRAINT `BookPrice_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `BookPrice_ibfk_2` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=339017 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=339682 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,7 +134,7 @@ CREATE TABLE `BookStore` (
   `ColorHex` char(6) DEFAULT NULL,
   `ScraperId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -171,6 +171,24 @@ CREATE TABLE `BookStoreSitemap` (
   KEY `BookStoreId` (`BookStoreId`),
   CONSTRAINT `BookStoreSitemap_ibfk_1` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `Currency`
+--
+
+DROP TABLE IF EXISTS `Currency`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Currency` (
+  `Id` mediumint unsigned NOT NULL AUTO_INCREMENT,
+  `Code` char(3) DEFAULT NULL,
+  `Description` varchar(255) NOT NULL,
+  `RateToDKK` double(10,5) DEFAULT NULL,
+  `Updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `Code` (`Code`)
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -230,4 +248,4 @@ CREATE TABLE `User` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-23 19:07:29
+-- Dump completed on 2026-02-06  6:08:35
