@@ -40,6 +40,7 @@ def test_add_or_update_updates_exising_currencies(currency_repository: CurrencyR
     updated_currency = Currency(
         code=usd_currency_code, rate_to_dkk=666.66, description="US Dollar", updated=datetime.now())
     currency_repository.add_or_update_all([updated_currency])
+    currency_repository._session.commit()
 
     retrieved_currency = currency_repository.get_by_code(usd_currency_code)
 
