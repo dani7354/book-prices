@@ -70,8 +70,7 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         self._session.bulk_save_objects(book_store_entries)
 
     def add_book_to_bookstore(self, book_id: int, bookstore_id: int, url: str) -> None:
-        book_store = BookStoreBook(book_id=book_id, book_store_id=bookstore_id, url=url)
-        self._session.add(book_store)
+        self._session.add(BookStoreBook(book_id=book_id, book_store_id=bookstore_id, url=url))
 
     def update(self, entity: BookStore) -> None:
         if not (existing_entity := self._session.get(BookStore, entity.id)):
@@ -89,6 +88,16 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         existing_entity.scraper_id = entity.scraper_id
 
         self._session.merge(existing_entity)
+
+    def add_book_to_bookstore_if_not_exists(self, book_id: int, bookstore_id: int, url: str) -> None:
+        existing_entry = (self._session.execute(
+            select(BookStoreBook)
+            .filter(BookStoreBook.book_id == book_id, BookStoreBook.book_store_id == bookstore_id)).scalar())
+
+        if existing_entry:
+            return
+
+        self.add_book_to_bookstore(book_id, bookstore_id, url)
 
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int) -> None:
         book_store = (self._session.execute(

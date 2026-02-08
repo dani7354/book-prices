@@ -195,10 +195,10 @@ def create_all_book_prices_update_job(config: Config, event_manager: EventManage
 
 
 def create_william_dam_book_import_job(config: Config, event_manager: EventManager) -> WilliamDamBookImportJob:
-    db = create_database_container(config)
+    unit_of_work = UnitOfWork(create_data_session_factory(config))
     cache_key_remover = create_cache_key_remover(config)
 
-    return WilliamDamBookImportJob(config, db, cache_key_remover, event_manager)
+    return WilliamDamBookImportJob(config, unit_of_work, cache_key_remover, event_manager)
 
 
 def create_update_currencies_job(config: Config) -> UpdateCurrenciesJob:
