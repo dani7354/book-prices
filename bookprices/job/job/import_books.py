@@ -1,9 +1,8 @@
+import datetime
 import logging
 from urllib.parse import urlparse
 
-import requests
 import queue
-from bs4 import BeautifulSoup
 from threading import Thread
 from typing import ClassVar, NamedTuple
 
@@ -12,11 +11,13 @@ from requests import RequestException
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
-from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
-from bookprices.shared.model.book import Book
+from bookprices.shared.db.tables import Book
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.validation import isbn as isbn_validator
+from bookprices.shared.webscraping.content import HtmlContent
+from bookprices.shared.webscraping.http import RateLimiter, HttpClient
 
 
 class NewBook(NamedTuple):
@@ -34,19 +35,24 @@ class WilliamDamBookImportJob(JobBase):
     _author_css: ClassVar[str] = "a.manufacturer-link"
     _bookstore_id: ClassVar[int] = 2
 
+    _period_seconds: ClassVar[int] = 1
+    _request_count: ClassVar[int] = 1
+
+
     def __init__(
             self,
             config: Config,
-            db: Database,
+            unit_of_work: UnitOfWork,
             cache_key_remover: BookPriceKeyRemover,
             event_manager: EventManager) -> None:
         super().__init__(config)
-        self._db = db
+        self._unit_of_work = unit_of_work
         self._cache_key_remover = cache_key_remover
         self._event_manager = event_manager
         self._book_url_queue = queue.Queue()
         self._book_list_url_queue = queue.Queue()
         self._new_books = []
+        self._rate_limiter = RateLimiter(self._request_count, self._period_seconds)
         self._logger = logging.getLogger(self.__class__.__name__)
 
         self._valid_book_formats = {
@@ -57,7 +63,7 @@ class WilliamDamBookImportJob(JobBase):
             self._logger.info("Getting book urls...")
             self._enqueue_urls_for_book_list_pages(
                 "https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={page}",
-                500)
+                250)
 
             if self._book_list_url_queue.empty():
                 self._logger.info("No book list urls found!")
@@ -115,11 +121,12 @@ class WilliamDamBookImportJob(JobBase):
         while not self._book_list_url_queue.empty():
             try:
                 book_list_url = self._book_list_url_queue.get()
-                book_list_response = requests.get(book_list_url)
-                book_list_response.raise_for_status()
-                book_list_content_bs = BeautifulSoup(book_list_response.content.decode(), "html.parser")
-                for url_tag in book_list_content_bs.select(self._book_url_css):
-                    self._book_url_queue.put(url_tag["href"])
+                with HttpClient() as http_client:
+                    self._rate_limiter.wait_if_needed()
+                    book_list_response = http_client.get(book_list_url)
+                book_list_content_bs = HtmlContent(book_list_response.text)
+                for url in book_list_content_bs.find_elements_by_css_and_get_attribute_values(self._book_url_css, "href"):
+                    self._book_url_queue.put(url)
             except RequestException as ex:
                 self._logger.error(ex)
 
@@ -127,9 +134,10 @@ class WilliamDamBookImportJob(JobBase):
         while not self._book_url_queue.empty():
             try:
                 book_url = self._book_url_queue.get()
-                book_response = requests.get(book_url)
-                book_response.raise_for_status()
-                book = self._parse_book(book_response.content.decode())
+                with HttpClient() as http_client:
+                    self._rate_limiter.wait_if_needed()
+                    book_response = http_client.get(book_url)
+                book = self._parse_book(book_response.text)
                 if self._is_book_valid(book):
                     logging.debug(f"Found valid book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})")
                     self._new_books.append(NewBook(book=book, url=urlparse(book_url).path))
@@ -138,7 +146,8 @@ class WilliamDamBookImportJob(JobBase):
 
     def _create_or_update_books(self) -> None:
         created_count, updated_count = 0, 0
-        existing_books_isbn = {b.isbn: b for b in self._db.book_db.get_books()}
+        with self._unit_of_work as uow:
+            existing_books_isbn = uow.book_repository.list_books_by_isbn()
         for book, url in self._new_books:
             try:
                 if existing_book := existing_books_isbn.get(book.isbn):
@@ -152,18 +161,20 @@ class WilliamDamBookImportJob(JobBase):
                                         image_url=existing_book.image_url,
                                         created=existing_book.created)
 
-                    self._db.book_db.update_book(updated_book)
+                    with self._unit_of_work as uow:
+                        uow.book_repository.update(updated_book)
                     self._cache_key_remover.remove_keys_for_book(updated_book.id)
                     self._cache_key_remover.remove_key_for_authors()
                     updated_count += 1
                 else:
                     self._logger.debug(f"Saving book with ISBN {book.isbn}")
-                    book_id = self._db.book_db.create_book(book)
+                    with self._unit_of_work as uow:
+                        book_id = uow.book_repository.create(book)
                     self._cache_key_remover.remove_key_for_authors()
                     self._cache_key_remover.remove_keys_for_book_and_bookstore(book_id, self._bookstore_id)
                     created_count += 1
-
-                self._db.bookstore_db.create_bookstore_for_book_if_not_exists(book_id, self._bookstore_id, url)
+                with self._unit_of_work as uow:
+                    uow.bookstore_repository.add_book_to_bookstore_if_not_exists(book_id, self._bookstore_id, url)
             except Exception as ex:
                 self._logger.error(f"Error while inserting book: {book.title}, {book.author}, {book.isbn}")
                 self._logger.error(ex)
@@ -171,34 +182,34 @@ class WilliamDamBookImportJob(JobBase):
         logging.info(f"{updated_count} book(s) updated!")
 
     def _parse_book(self, data: str) -> Book:
-        data_bs = BeautifulSoup(data, "html.parser")
+        html_content = HtmlContent(data)
         title, author, isbn, format_ = (None, None, None, None)
 
-        title = self._parse_title(data_bs)
-        author_tag = data_bs.select_one(self._author_css)
-        if author_tag:
-            author = author_tag.get_text().strip()
+        title = self._parse_title(html_content)
+        if author := html_content.find_element_text_by_css(self._author_css):
+            author = author.strip()
 
-        for li in data_bs.select(self._book_details_list_css):
-            all_text = li.get_text()
-            if "ISBN-13" in all_text:
-                isbn = li.select_one("span.detail-value").get_text().strip()
-            if "Format" in all_text:
-                format_value = li.select_one("span.detail-value").get_text().strip()
-                if format_value in self._valid_book_formats:
-                    format_ = format_value
+        for element in html_content.find_elements_by_css(self._book_details_list_css):
+            if "ISBN-13" in element:
+                if isbn := HtmlContent(element).find_element_text_by_css("span.detail-value").strip():
+                    isbn = isbn.strip()
+            if "Format" in element:
+                if format_text := HtmlContent(element).find_element_text_by_css("span.detail-value").strip():
+                    if format_text in self._valid_book_formats:
+                        format_ = format_text
 
-        return Book(0, isbn, title, author, format_, None)
+        return Book(isbn=isbn, title=title, author=author, format=format_, created=datetime.datetime.now())
 
-    def _parse_title(self, data_bs: BeautifulSoup) -> str | None:
-        if not (title_tag := data_bs.select_one(self._title_css)):
+    def _parse_title(self, content: HtmlContent) -> str | None:
+        if not (title_element := content.find_element_by_css(self._title_css)):
             return None
-        title = title_tag.get_text()
-        if span_tag := title_tag.select_one("span"):
-            span_text = span_tag.get_text()
-            title = title.replace(span_text, "")
 
-        return title.strip() if title else None
+        title_content = HtmlContent(title_element)
+        title_text = content.find_element_text_by_css(self._title_css)
+        if span_text := title_content.find_element_text_by_css("span"):
+            title_text = title_text.replace(span_text, "")
+
+        return title_text.strip() if title_text else None
 
     def _is_book_valid(self, book: Book) -> bool:
         self._logger.debug(f"Validating book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})...")

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
 from urllib.parse import urljoin
 from bookprices.shared.model.book import Book
@@ -36,7 +37,7 @@ class BookStoreBookPrice:
     book_store_name: str
     url: str
     price: float
-    created: str
+    created: datetime | None
 
 
 @dataclass(frozen=True)

@@ -6,12 +6,30 @@ from bs4 import BeautifulSoup
 class HtmlContent:
     _html_parser: ClassVar[str] = "html.parser"
 
-    def __init__(self, html_content):
+    def __init__(self, html_content: str) -> None:
         self._html_content_bs = BeautifulSoup(html_content, self._html_parser)
+
+    def find_elements_by_css_and_get_attribute_values(self, css_selector: str, attribute_name: str) -> list[str]:
+        return [
+            match.get(attribute_name)
+            for match in self._html_content_bs.select(css_selector)
+            if match.has_attr(attribute_name)]
+
+    def find_elements_by_css_and_get_texts(self, css_selector: str) -> list[str]:
+        return [
+            match.get_text()
+            for match in self._html_content_bs.select(css_selector)]
 
     def find_element_text_by_css(self, css_selector: str) -> str | None:
         match = self._html_content_bs.select_one(css_selector)
         return match.get_text() if match else None
+
+    def find_element_by_css(self, css_selector) -> str | None:
+        match = self._html_content_bs.select_one(css_selector)
+        return str(match) if match else None
+
+    def find_elements_by_css(self, css_selector) -> list[str]:
+        return [str(match) for match in self._html_content_bs.select(css_selector)]
 
     def find_element_and_get_attribute_value(self, css_selector: str, attribute_name: str) -> str | None:
         match = self._html_content_bs.select_one(css_selector)

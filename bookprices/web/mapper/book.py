@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Optional
 from flask import url_for
 from bookprices.shared.model.book import Book
@@ -25,7 +25,11 @@ from bookprices.web.viewmodels.book import (
     BookDetailsViewModel, BookStoreViewModel, CreateBookViewModel)
 from bookprices.web.viewmodels.page import IndexViewModel
 
+DATE_FORMAT = "%d-%m-%Y"
+
 PRICE_NONE_TEXT = "-"
+PRICE_UPDATED_YESTERDAY_TEXT = "i går"
+PRICE_UPDATED_TODAY_TEXT = "i dag"
 PRICE_CREATED_NONE_TEXT = "Pris ikke hentet"
 AUTHOR_DEFAULT_OPTION_TEXT = "Alle forfattere"
 
@@ -33,6 +37,16 @@ AUTHOR_DEFAULT_OPTION_TEXT = "Alle forfattere"
 def _add_ref_to_bookstore_url(url: str) -> str:
     url_stripped = url.rstrip("/")
     return f"{url_stripped}?ref={SITE_HOSTNAME}"
+
+
+def _get_created_text(created: datetime) -> str:
+    today = date.today()
+    if created.date() == today:
+        return PRICE_UPDATED_TODAY_TEXT
+    elif created.date() == today - timedelta(days=1):
+        return PRICE_UPDATED_YESTERDAY_TEXT
+    else:
+        return created.strftime(DATE_FORMAT)
 
 
 def _create_url(page_number: int,
@@ -286,7 +300,8 @@ def map_book_details(book: Book,
     for bp in book_prices:
         is_price_available = bp.price is not None
         price_str = bp.price if is_price_available else PRICE_NONE_TEXT
-        created_str = bp.created if is_price_available else PRICE_CREATED_NONE_TEXT
+        created_str = _get_created_text(bp.created) if is_price_available else PRICE_CREATED_NONE_TEXT
+        url_with_ref = _add_ref_to_bookstore_url(bp.url)
         price_history_url = _create_url(page,
                                         endpoint=Endpoint.BOOK_PRICE_HISTORY.value,
                                         book_id=book.id,
@@ -296,13 +311,15 @@ def map_book_details(book: Book,
                                            ORDER_BY_URL_PARAMETER: order_by.name,
                                            DESCENDING_URL_PARAMETER: descending})
 
-        book_price_view_models.append(BookPriceForStoreViewModel(bp.book_store_id,
-                                                                 bp.book_store_name,
-                                                                 _add_ref_to_bookstore_url(bp.url),
-                                                                 price_history_url,
-                                                                 price_str,
-                                                                 created_str,
-                                                                 is_price_available))
+        book_price_view_models.append(
+            BookPriceForStoreViewModel(
+                bp.book_store_id,
+                bp.book_store_name,
+                url_with_ref,
+                price_history_url,
+                price_str,
+                created_str,
+                is_price_available))
 
     image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
     book.image_url = os.path.join(BOOK_IMAGES_BASE_URL, image)
