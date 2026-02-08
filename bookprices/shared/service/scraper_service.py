@@ -1,10 +1,13 @@
 import logging
 
+from bookprices.shared.api.currency import CurrencyApiClient
 from bookprices.shared.db.tables import BookStore
 from bookprices.shared.repository.unit_of_work import UnitOfWork
+from bookprices.shared.service.currency_service import CurrencyService
 from bookprices.shared.webscraping.bookstore import (
     BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration, WilliamDamScraper, SaxoScraper, BogOgIdeScraper,
     PlusbogScraper, ThiemersScraper, GuccaScraper)
+from bookprices.shared.webscraping.currency import CurrencyConverter
 
 
 class BookStoreScraperService:
@@ -45,6 +48,7 @@ class BookStoreScraperService:
             self._logger.warning(f"No scraper found for bookstore {bookstore.name}")
             return None
 
+        currency_converter = CurrencyConverter(CurrencyService(self._unit_of_work, CurrencyApiClient()))
         configuration = BookStoreConfiguration(
             bookstore_id=bookstore.id,
             bookstore_name=bookstore.name,
@@ -53,6 +57,7 @@ class BookStoreScraperService:
             bookstore_price_css_selector=bookstore.price_css_selector,
             bookstore_price_format=bookstore.price_format,
             bookstore_isbn_css_selector=bookstore.isbn_css_selector,
-            search_result_css_selector=bookstore.search_result_css_selector)
+            search_result_css_selector=bookstore.search_result_css_selector,
+            currency_converter=currency_converter)
 
         return scraper_class(configuration)

@@ -1,6 +1,7 @@
 import logging
 import re
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 from bookprices.shared.webscraping.content import HtmlContent
 from bookprices.shared.webscraping.currency import CurrencyConverter
@@ -90,11 +91,17 @@ class RateLimitedStaticHtmlPriceScraper(StaticHtmlPriceScraper):
 
 class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
     """ Price scraper for Gucca.dk bookstore. """
+    _sek_currency_code: ClassVar[str] = "SEK"
 
     def __init__(
-            self, price_css_selector: str, price_format: str | None, max_requests: int, period_seconds: int) -> None:
+            self,
+            price_css_selector: str,
+            price_format: str | None,
+            max_requests: int,
+            period_seconds: int,
+            currency_converter: CurrencyConverter) -> None:
         super().__init__(price_css_selector, price_format, max_requests, period_seconds)
-        self._currency_converter = CurrencyConverter()
+        self._currency_converter = currency_converter
 
     def _parse_price(self, response_text: str) -> float:
         html_content = HtmlContent(response_text)
@@ -108,13 +115,13 @@ class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
         try:
             price_value = float(price_match.group().replace(",", "."))
             if self.price_in_sek(price_text):
-                price_value = self._currency_converter.convert_to_dkk(price_value, "SEK")
+                price_value = self._currency_converter.convert_to_dkk(price_value, self._sek_currency_code)
 
             return price_value
         except ValueError as ex:
             self._logger.error(f"Failed to parse value as float: {price_match.group()}")
             raise PriceFormatError from ex
 
-    @staticmethod
-    def price_in_sek(price_text: str) -> bool:
-        return "SEK" in price_text
+    @classmethod
+    def price_in_sek(cls, price_text: str) -> bool:
+        return cls._sek_currency_code in price_text
