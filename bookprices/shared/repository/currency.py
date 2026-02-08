@@ -14,9 +14,10 @@ class CurrencyRepository(RepositoryBase[Currency]):
         return Currency
 
     def get_by_code(self, code: str) -> Currency | None:
-        currency = self._session.execute(select(Currency).filter_by(code=code)).scalar_one_or_none()
-        self._session.expunge_all()
+        if not (currency := self._session.execute(select(Currency).filter_by(code=code)).scalar_one_or_none()):
+            return None
 
+        self._session.expunge(currency)
         return currency
 
     def add_or_update(self, entity: Currency) -> None:
