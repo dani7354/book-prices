@@ -10,12 +10,11 @@ from bookprices.shared.db.tables import BaseModel
 
 class FakeSessionFactory(SessionFactory):
 
-    def __init__(self, session):
+    def __init__(self, session) -> None:
         self._session = session
 
-    @contextmanager
-    def create_session(self):
-        yield self._session
+    def create_session(self) -> Session:
+        return self._session
 
     def create_scoped_session(self) -> Session:
         return self._session
@@ -33,5 +32,5 @@ def data_session():
 
 
 @pytest.fixture
-def session_factory(data_session):
+def session_factory(data_session) -> SessionFactory:
     return FakeSessionFactory(data_session)
