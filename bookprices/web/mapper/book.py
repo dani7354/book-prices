@@ -40,9 +40,10 @@ def _add_ref_to_bookstore_url(url: str) -> str:
 
 
 def _get_created_text(created: datetime) -> str:
-    if created.date() == date.today():
+    today = date.today()
+    if created.date() == today:
         return PRICE_UPDATED_TODAY_TEXT
-    elif created.date() == date.today() - timedelta(days=1):
+    elif created.date() == today - timedelta(days=1):
         return PRICE_UPDATED_YESTERDAY_TEXT
     else:
         return created.strftime(DATE_FORMAT)
