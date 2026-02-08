@@ -37,7 +37,7 @@ class BookStoreBookPrice:
     book_store_name: str
     url: str
     price: float
-    created: datetime
+    created: datetime | None
 
 
 @dataclass(frozen=True)

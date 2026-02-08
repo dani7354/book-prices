@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session, scoped_session
+from sqlalchemy.orm import Session
 
 from bookprices.shared.repository.book import BookRepository
 from bookprices.shared.repository.booklist import BookListRepository
