@@ -153,13 +153,17 @@ class WilliamDamBookImportJob(JobBase):
                 if existing_book := existing_books_isbn.get(book.isbn):
                     self._logger.debug(f"Updating book with ISBN {book.isbn}")
                     book_id = existing_book.id
-                    updated_book = Book(id=existing_book.id,
+                    updated_book = Book(id=book_id,
                                         isbn=existing_book.isbn,
                                         title=book.title,
                                         author=book.author,
                                         format=book.format,
                                         image_url=existing_book.image_url,
                                         created=existing_book.created)
+
+                    if not self.book_needs_update(existing_book, updated_book):
+                        self._logger.debug(f"No update needed for book with ISBN {book.isbn} (id {book_id})")
+                        continue
 
                     with self._unit_of_work as uow:
                         uow.book_repository.update(updated_book)
@@ -214,3 +218,9 @@ class WilliamDamBookImportJob(JobBase):
     def _is_book_valid(self, book: Book) -> bool:
         self._logger.debug(f"Validating book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})...")
         return book.author and book.title and isbn_validator.check_isbn13(book.isbn) and book.format
+
+    @staticmethod
+    def book_needs_update(existing_book: Book, new_book: Book) -> bool:
+        return (existing_book.title != new_book.title or
+                existing_book.author != new_book.author or
+                existing_book.format != new_book.format)
