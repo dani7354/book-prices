@@ -6,8 +6,8 @@ from collections import Counter
 from bookprices.job.job.base import JobExitStatus, JobBase
 from bookprices.job.runner.service import RunnerJobService, JobRun
 from bookprices.shared.config.config import Config
-from bookprices.shared.service.job_service import UpdateFailedError, JobRunStatus, FailedToGetJobRunsError, \
-    JobSourceUnavailableError
+from bookprices.shared.service.job_service import (
+    UpdateFailedError, JobRunStatus, FailedToGetJobRunsError, JobSourceUnavailableError)
 
 
 class JobRunner:
