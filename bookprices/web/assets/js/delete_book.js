@@ -12,9 +12,8 @@ $(document).ready(function () {
         }
     });
 
-    let btnsDeleteBookFromBookStore = document.querySelectorAll(".btn-delete-book-from-bookstore");
-    for (let i = 0; i < btnsDeleteBookFromBookStore.length; i++) {
-        btnsDeleteBookFromBookStore[i].addEventListener("click", (e) => {
+    for (let button of document.querySelectorAll(".btn-delete-book-from-bookstore")) {
+        button.addEventListener("click", (e) => {
             e.preventDefault();
             if (confirm("Er du sikker på at du vil slette bogen fra boghandlen?")) {
                 let bookId = $(e.target).data("book-id");
