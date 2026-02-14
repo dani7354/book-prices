@@ -124,7 +124,6 @@ function getJobRuns(jobId) {
                     data[jobRunsFieldName],
                     data["translations"]
                 );
-                toggleSpinnerInJobRunContainer(false);
             },
             "error" : function (xhr) {
                 showAlert(xhr.responseJSON[messageFieldName], "danger", msgContainer);

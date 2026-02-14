@@ -70,7 +70,13 @@ class SearchViewModel:
 
 @dataclass(frozen=True)
 class BookDetailsViewModel:
-    book: Book
+    id: int
+    title: str
+    author: str
+    isbn: str
+    format: str
+    created: str
+    image_url: str
     book_prices: list[BookPriceForStoreViewModel]
     return_url: str
     author_search_url: str

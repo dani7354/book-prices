@@ -16,14 +16,14 @@
     {% if current_user.is_authenticated %}
     <div class="col-sm-4 text-end">
         {% if not view_model.book_on_current_booklist %}
-          <a class="btn btn-primary btn-add-to-booklist" href="" data-book-id="{{ view_model.book.id }}">
+          <a class="btn btn-primary btn-add-to-booklist" href="" data-book-id="{{ view_model.id }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
                 <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5z"/>
                 <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/>
             </svg>
           </a>
         {% else %}
-          <a class="btn btn-danger btn-remove-from-booklist" href="" data-book-id="{{ view_model.book.id }}">
+          <a class="btn btn-danger btn-remove-from-booklist" href="" data-book-id="{{ view_model.id }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
                 <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708"/>
                 <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
@@ -31,32 +31,32 @@
           </a>
         {% endif %}
         {% if view_model.show_edit_and_delete_buttons %}
-        <a class="btn btn-primary" href="{{ url_for('book.edit', book_id=view_model.book.id) }}">Rediger</a>
-        <a id="btn-delete-book" class="btn btn-danger" data-book-id="{{ view_model.book.id }}" href="">Slet</a>
+        <a class="btn btn-primary" href="{{ url_for('book.edit', book_id=view_model.id) }}">Rediger</a>
+        <a id="btn-delete-book" class="btn btn-danger" data-book-id="{{ view_model.id }}" href="">Slet</a>
         {% endif %}
     </div>
     {% endif %}
 </div>
 
 <h3 class="pb-4">
-    {{ view_model.book.title }}
-    <small class="text-muted">af <a class="link-secondary" href="{{ view_model.author_search_url }}">{{ view_model.book.author }}</a></small>
+    {{ view_model.title }}
+    <small class="text-muted">af <a class="link-secondary" href="{{ view_model.author_search_url }}">{{ view_model.author }}</a></small>
 </h3>
 <div class="container pb-4">
     <div class="row">
         <div class="col-sm-4 pb-4">
-            {% if view_model.book.image_url %}
+            {% if view_model.image_url %}
             <div class="text-center">
-                <img src="{{ view_model.book.image_url }}" class="img-fluid rounded" alt="{{ view_model.book.title }}">
+                <img src="{{ view_model.image_url }}" class="img-fluid rounded" alt="{{ view_model.title }}">
             </div>
             {% endif %}
         </div>
         <div class="col-sm-8 text-left">
-            <p><strong>Titel:</strong> {{ view_model.book.title }}</p>
-            <p><strong>Forfatter(e):</strong> {{ view_model.book.author }}</p>
-            <p><strong>Format:</strong> {{ view_model.book.format }}</p>
-            <p><strong>ISBN:</strong> {{ view_model.book.isbn }}</p>
-            <p><strong>Hentet: </strong> {{ view_model.book.created }}</p>
+            <p><strong>Titel:</strong> {{ view_model.title }}</p>
+            <p><strong>Forfatter(e):</strong> {{ view_model.author }}</p>
+            <p><strong>Format:</strong> {{ view_model.format }}</p>
+            <p><strong>ISBN:</strong> {{ view_model.isbn }}</p>
+            <p><strong>Hentet: </strong> {{ view_model.created }}</p>
         </div>
     </div>
 </div>
@@ -87,8 +87,8 @@
                 {% endif %}
                 <a class="btn btn-secondary mb-1" target="_blank" rel="noopener" href="{{ p.url }}">Link</a>
                 {% if view_model.show_edit_and_delete_buttons %}
-                <a id="btn-delete-book-from-bookstore" class="btn btn-danger mb-1"
-                   data-book-id="{{ view_model.book.id }}" data-bookstore-id="{{ p.book_store_id }}" href="">Slet</a>
+                <a class="btn btn-danger mb-1 btn-delete-book-from-bookstore"
+                   data-book-id="{{ view_model.id }}" data-bookstore-id="{{ p.book_store_id }}" href="">Slet</a>
                 {% endif %}
             </td>
         </tr>
@@ -102,7 +102,7 @@
 
 {% if view_model.book_prices %}
 <h4>Prisudvikling</h4>
-<div id="chart" data-book="{{ view_model.book.id }}"></div>
+<div id="chart" data-book="{{ view_model.id }}"></div>
 <script src="{{ url_for('static', filename='js/price_chart.js') }}"
         integrity="{{ sri_attribute_values['price_chart_js'] }}"></script>
 <script src="{{ url_for('static', filename='js/book.js') }}"
@@ -112,8 +112,7 @@
 {% endif %}
 
 {% if view_model.show_edit_and_delete_buttons %}
-<script src="{{ url_for('static', filename='js/delete_book.js') }}"
-        integrity="{{ sri_attribute_values['delete_book_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/delete_book.js') }}"></script>
 {% endif %}
 
 <noscript>Venligst aktivér JavaScript i din browser</noscript>
