@@ -322,7 +322,8 @@ def map_book_details(book: Book,
                 is_price_available))
 
     image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
-    book.image_url = os.path.join(BOOK_IMAGES_BASE_URL, image)
+    image_url = os.path.join(BOOK_IMAGES_BASE_URL, image)
+    created_formated = book.created.strftime(DATE_FORMAT)
 
     return_url = _create_return_url_for_book_details(
         endpoint=return_endpoint,
@@ -338,14 +339,21 @@ def map_book_details(book: Book,
                                     endpoint=Endpoint.BOOK_SEARCH.value,
                                     **{AUTHOR_URL_PARAMETER: book.author})
 
-    return BookDetailsViewModel(book,
-                                book_price_view_models,
-                                return_url,
-                                author_search_url,
-                                page,
-                                search_phrase,
-                                user_can_edit_and_delete,
-                                booklist_active and on_current_booklist)
+    return BookDetailsViewModel(
+        id=book.id,
+        title=book.title,
+        author=book.author,
+        isbn=book.isbn,
+        format=book.format,
+        created=created_formated,
+        image_url=image_url,
+        book_prices=book_price_view_models,
+        return_url=return_url,
+        author_search_url=author_search_url,
+        page=page,
+        search_phrase=search_phrase,
+        show_edit_and_delete_buttons=user_can_edit_and_delete,
+        book_on_current_booklist=booklist_active and on_current_booklist)
 
 
 def map_price_history(book_in_book_store: BookInBookStore,
