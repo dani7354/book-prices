@@ -5,6 +5,7 @@ const inputPriority = $("#input-priority");
 const inputVersion = $("#input-version");
 const inputJobId = $("#input-job-id");
 const divErrorMessage = $("#div-error-message");
+const textArguments = $("#text-arguments");
 const textErrorMessage = $("#text-error-message");
 const jobRunSaveBtn = $("#btn-job-run-save");
 
@@ -50,6 +51,7 @@ function hideModal(event) {
     inputJobId.val("");
     divErrorMessage.hide();
     textErrorMessage.text("");
+    textArguments.text("");
     inputPriority.removeAttr("disabled");
     jobRunSaveBtn.attr("class", "btn btn-primary");
 }
@@ -123,6 +125,7 @@ function sendJobRunForm(event) {
     let form = $(event.target);
     let url = form.attr("action");
     let data = form.serialize();
+    console.log(data);
     data += `&csrf_token=${$(csrfTokenNodeId).val()}`;
     $.ajax(url, {
         "method": "POST",

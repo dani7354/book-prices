@@ -323,8 +323,7 @@ def map_book_details(book: Book,
 
     image = book.image_url if book.image_url else BOOK_FALLBACK_IMAGE_NAME
     image_url = os.path.join(BOOK_IMAGES_BASE_URL, image)
-    created_formated = book.created.strftime(DATE_FORMAT)
-
+    created_formatted = book.created.strftime(DATE_FORMAT)
     return_url = _create_return_url_for_book_details(
         endpoint=return_endpoint,
         page=page,
@@ -345,7 +344,7 @@ def map_book_details(book: Book,
         author=book.author,
         isbn=book.isbn,
         format=book.format,
-        created=created_formated,
+        created=created_formatted,
         image_url=image_url,
         book_prices=book_price_view_models,
         return_url=return_url,
