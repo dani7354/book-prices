@@ -5,7 +5,9 @@ const inputPriority = $("#input-priority");
 const inputVersion = $("#input-version");
 const inputJobId = $("#input-job-id");
 const divErrorMessage = $("#div-error-message");
+const textArguments = $("#text-arguments");
 const textErrorMessage = $("#text-error-message");
+const jobRunSaveBtn = $("#btn-job-run-save");
 
 
 const jobIdInput = "job-id";
@@ -28,12 +30,15 @@ function toggleSpinnerInJobRunModal(showSpinner) {
     }
 }
 
-function loadPriorityOptions(priorities) {
-    $.each(priorities, (value, translation) => {
+function loadPriorityOptions(responseData) {
+    let priorities = responseData[prioritiesFieldName];
+    let translations = responseData[translationsFieldName];
+
+    $.each(priorities, (i, priority) => {
         inputPriority.append(
             $("<option></option>")
-                .attr("value", value)
-                .text(translation)
+                .attr("value", priority)
+                .text(translations[priority])
         );
     });
 }
@@ -46,6 +51,9 @@ function hideModal(event) {
     inputJobId.val("");
     divErrorMessage.hide();
     textErrorMessage.text("");
+    textArguments.text("");
+    inputPriority.removeAttr("disabled");
+    jobRunSaveBtn.attr("class", "btn btn-primary");
 }
 
 function loadJobRunModal(event) {
@@ -63,7 +71,8 @@ function loadJobRunModal(event) {
             "method": "GET",
             "dataType": "json",
             "success": function (data) {
-                loadPriorityOptions(data[prioritiesFieldName]);
+                loadPriorityOptions(data);
+
                 inputJobId.val(jobId);
                 toggleSpinnerInJobRunModal(false);
                 jobRunModalForm.attr("action", data[formActionUrlFieldName]);
@@ -83,8 +92,13 @@ function loadJobRunModal(event) {
             "method": "GET",
             "dataType": "json",
             "success": function (data) {
-                loadPriorityOptions(data[prioritiesFieldName]);
+                loadPriorityOptions(data);
+
                 inputPriority.val(data[priorityFieldName]);
+                if (!data[canEditFieldName]) {
+                    inputPriority.attr("disabled", "disabled");
+                    jobRunSaveBtn.attr("class", "btn btn-primary disabled");
+                }
                 inputJobId.val(jobId);
                 inputVersion.val(data[versionFieldName]);
 
@@ -111,6 +125,7 @@ function sendJobRunForm(event) {
     let form = $(event.target);
     let url = form.attr("action");
     let data = form.serialize();
+    console.log(data);
     data += `&csrf_token=${$(csrfTokenNodeId).val()}`;
     $.ajax(url, {
         "method": "POST",

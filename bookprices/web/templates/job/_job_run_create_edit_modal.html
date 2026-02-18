@@ -17,8 +17,8 @@
             </select>
           </div>
           <div class="mb-3">
-            <label for="message-text" class="col-form-label">Argumenter:</label>
-            <textarea class="form-control" id="message-text" disabled></textarea>
+            <label for="text-arguments" class="col-form-label">Argumenter:</label>
+            <textarea id="text-arguments" name="arguments" class="form-control"></textarea>
           </div>
           <div id="div-error-message" class="mb-3" style="display: none;">
             <label for="text-error-message" class="col-form-label">Fejlbesked:</label>
@@ -26,12 +26,11 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
-            <button type="submit" class="btn btn-primary">Gem</button>
+            <button id="btn-job-run-save" type="submit" class="btn btn-primary">Gem</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/job_run_modal.js') }}"
-        integrity="{{ sri_attribute_values['job_run_modal_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/job_run_modal.js') }}"> </script>

@@ -1,5 +1,5 @@
 import logging
-from enum import Enum
+from enum import StrEnum
 from requests.exceptions import HTTPError
 
 from bookprices.shared.api.error import ApiUnavailableError
@@ -32,7 +32,7 @@ class JobSourceUnavailableError(Exception):
     pass
 
 
-class JobSchemaFields(Enum):
+class JobSchemaFields(StrEnum):
     ID = "id"
     JOB_ID = "jobId"
     NAME = "name"
@@ -41,7 +41,7 @@ class JobSchemaFields(Enum):
     VERSION = "version"
 
 
-class JobRunSchemaFields(Enum):
+class JobRunSchemaFields(StrEnum):
     ID = "id"
     JOB_NAME = "jobName"
     JOB_RUN_ID = "jobRunId"
@@ -55,26 +55,26 @@ class JobRunSchemaFields(Enum):
     VERSION = "version"
 
 
-class JobRunArgumentSchemaFields(Enum):
+class JobRunArgumentSchemaFields(StrEnum):
     NAME = "name"
     TYPE = "type"
     VALUES = "values"
 
 
-class JobRunArgumentType(Enum):
+class JobRunArgumentType(StrEnum):
     STRING = "str"
     INTEGER = "int"
     BOOLEAN = "bool"
 
 
-class JobRunStatus(Enum):
+class JobRunStatus(StrEnum):
     COMPLETED = "Completed"
     FAILED = "Failed"
     PENDING = "Pending"
     RUNNING = "Running"
 
 
-class JobRunPriority(Enum):
+class JobRunPriority(StrEnum):
     HIGH = "High"
     NORMAL = "Normal"
     LOW = "Low"

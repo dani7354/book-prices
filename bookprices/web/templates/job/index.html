@@ -8,7 +8,7 @@
 {% include "common/_noscript_alert.html" %}
 {% include "job/_job_run_create_edit_modal.html" %}
 
-<script src="{{ url_for('static', filename='js/job_common.js') }}" integrity="{{ sri_attribute_values['job_common_js'] }}"></script>
-<script src="{{ url_for('static', filename='js/job.js') }}" integrity="{{ sri_attribute_values['job_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/job_common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/job.js') }}"></script>
 
 {% endblock %}

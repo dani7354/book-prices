@@ -1,7 +1,6 @@
 const baseUrl = "/book";
 const redirectUrl = "/search";
 const btnDeleteBook = $("#btn-delete-book");
-const btnDeleteBookFromBookStore = $("#btn-delete-book-from-bookstore");
 
 
 $(document).ready(function () {
@@ -13,14 +12,16 @@ $(document).ready(function () {
         }
     });
 
-    btnDeleteBookFromBookStore.on("click", function (e){
-        e.preventDefault();
-        if (confirm("Er du sikker på at du vil slette bogen fra boghandlen?")) {
-            let bookId = $(e.target).data("book-id");
-            let bookStoreId = $(e.target).data("bookstore-id");
-            deleteBookFromBookStore(bookId, bookStoreId);
-        }
-    });
+    for (let button of document.querySelectorAll(".btn-delete-book-from-bookstore")) {
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (confirm("Er du sikker på at du vil slette bogen fra boghandlen?")) {
+                let bookId = $(e.target).data("book-id");
+                let bookStoreId = $(e.target).data("bookstore-id");
+                deleteBookFromBookStore(bookId, bookStoreId);
+            }
+        });
+    }
 });
 
 function deleteBook(bookId) {
