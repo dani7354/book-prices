@@ -3,9 +3,7 @@ import string
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from sqlalchemy.sql.coercions import cls
-
-from bookprices.shared.service.job_service import JobRunArgumentType
+from bookprices.shared.service.job_service import JobRunArgumentType, JobRunArgumentSchemaFields
 
 
 @dataclass(frozen=False)
@@ -28,6 +26,16 @@ class JobRunArgumentsParsingResult:
     def errors_messages(self) -> list[str]:
         return [error for parsed_argument in self.arguments for error in parsed_argument.errors]
 
+    def get_result_dict(self) -> list[dict[str, str | list[str | int | bool]]]:
+        return [
+            {
+                JobRunArgumentSchemaFields.NAME: argument.name,
+                JobRunArgumentSchemaFields.TYPE: str(argument.type.value) if argument.type else None,
+                JobRunArgumentSchemaFields.VALUES: [str(v) for v in argument.values]
+            }
+            for argument in self.arguments
+        ]
+
 
 class JobRunArgumentParser:
     """ Parser for job run arguments in POST request (form). Format: <name>:<type>:<value1>,<value2>,... """
@@ -35,38 +43,52 @@ class JobRunArgumentParser:
     _arguments_delimiter: ClassVar[str] = os.linesep
     _name_values_delimiter: ClassVar[str] = ":"
     _values_delimiter: ClassVar[str] = ","
-    _values_valid_chars: ClassVar[str] = string.ascii_letters + string.digits
+    _invalid_char_replacement: ClassVar[str] = "_"
+    _values_valid_chars: ClassVar[set[str]] = set(string.ascii_letters + string.digits)
 
+    def __init__(self) -> None:
+        pass
 
-    @classmethod
-    def parse_arguments(cls, arguments_str: str) -> JobRunArgumentsParsingResult:
+    def parse_arguments(self, arguments_str: str) -> JobRunArgumentsParsingResult:
         if not arguments_str:
             return JobRunArgumentsParsingResult(arguments=[])
 
-        argument_strs = arguments_str.split(cls._arguments_delimiter)
-        parsed_arguments = [argument for a in argument_strs if (argument := cls.parse_argument(a))]
+        argument_strs = arguments_str.split(self._arguments_delimiter)
+        parsed_arguments = [self._parse_argument(a) for a in argument_strs]
 
         return JobRunArgumentsParsingResult(arguments=parsed_arguments)
 
-    @classmethod
-    def parse_argument(cls, argument_str: str) -> ParsedJobRunArgumentResult:
+    def create_arguments_str(self, arguments: list[tuple[str, str, list[str | int | bool]]]) -> str:
+        argument_strs = []
+        for name, value_type, values in arguments:
+            values_str = self._values_delimiter.join(str(v) for v in values)
+            argument_strs.append(f"{name}{self._name_values_delimiter}{value_type}{self._name_values_delimiter}{values_str}")
+
+        return self._arguments_delimiter.join(argument_strs)
+
+    def _parse_argument(self, argument_str: str) -> ParsedJobRunArgumentResult:
         parsed_job_run_argument_result = ParsedJobRunArgumentResult()
         try:
-            name, value_type, values_str = argument_str.split(cls._name_values_delimiter, cls._argument_str_tuple_size)
-            if cls._is_name_valid(name):
+            name, value_type, values_str = argument_str.split(self._name_values_delimiter, self._argument_str_tuple_size)
+            if self._is_name_valid(name):
                 parsed_job_run_argument_result.name = name
             else:
-                parsed_job_run_argument_result.errors.append(f"Invalid argument name: {name}")
+                parsed_job_run_argument_result.errors.append(
+                    f"Invalid argument name: {self._sanitise_for_output(name)}")
 
-            if argument_type := cls._parse_type(value_type):
+            if argument_type := self._parse_type(value_type):
                 parsed_job_run_argument_result.type = argument_type
             else:
-                parsed_job_run_argument_result.errors.append(f"Invalid argument type: {value_type}")
+                parsed_job_run_argument_result.errors.append(
+                    f"Invalid argument type: {self._sanitise_for_output(value_type)}")
 
-            if (values := values_str.split(cls._values_delimiter)) and all(cls._are_chars_valid(value) for value in values):
-                parsed_job_run_argument_result.values = cls._parse_values(values, argument_type)
+            if values := values_str.split(self._values_delimiter):
+                success, parsed_values = self._parse_values(values, argument_type)
+                parsed_job_run_argument_result.values = parsed_values
+                parsed_job_run_argument_result.errors.append("Failed to parse one or more values!") if not success else None
             else:
-                parsed_job_run_argument_result.errors.append(f"Invalid characters or missing values for argument {name}")
+                parsed_job_run_argument_result.errors.append(
+                    f"Invalid characters or missing values for argument {self._sanitise_for_output(name)}")
         except ValueError as e:
             parsed_job_run_argument_result.errors.append(f"Invalid argument format. Error: {e}")
 
@@ -83,16 +105,21 @@ class JobRunArgumentParser:
         except ValueError:
             return None
 
-    @classmethod
-    def _parse_values(cls, values: list[str], value_type: JobRunArgumentType) -> list[str | int | bool]:
-        parsed_values = []
+    def _parse_values(
+            self,
+            values: list[str],
+            value_type: JobRunArgumentType) -> tuple[bool, list[str | int | bool]]:
+        errors, parsed_values = [], []
+        success = any(values)
         for value in values:
-            if not cls._are_chars_valid(value):
-                continue
-            if (parsed_value := cls._parse_value(value, value_type)) is not None:
+            if not self._are_chars_valid(value):
+                success = False
+            if (parsed_value := self._parse_value(value, value_type)) is not None:
                 parsed_values.append(parsed_value)
+            else:
+                success = False
 
-        return parsed_values
+        return success, parsed_values
 
     @classmethod
     def _parse_value(cls, value_str, argument_type: JobRunArgumentType) -> str | int | bool | None:
@@ -106,6 +133,10 @@ class JobRunArgumentParser:
     @classmethod
     def _are_chars_valid(cls, value_str: str) -> bool:
         return all(char in cls._values_valid_chars for char in value_str)
+
+    @classmethod
+    def _sanitise_for_output(cls, value: str) -> str:
+        return "".join([c if c in cls._values_valid_chars else cls._invalid_char_replacement for c in value])
 
     @staticmethod
     def _parse_value_int(value_str: str) -> int | None:

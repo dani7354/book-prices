@@ -5,10 +5,11 @@ from typing import Self
 from flask import url_for
 
 from bookprices.shared.service.job_service import JobRunStatus, JobRunSchemaFields, JobRunArgumentSchemaFields
+from bookprices.web.service.job_run_argument_parser import JobRunArgumentParser
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
-from bookprices.web.viewmodels.job_run import JobRunListItem, JobRunListViewModel, JobRunEditViewModel, JobRunArgument, \
-    JobRunPriority, JobRunCreateViewModel
+from bookprices.web.viewmodels.job_run import (
+    JobRunListItem, JobRunListViewModel, JobRunEditViewModel, JobRunPriority, JobRunCreateViewModel)
 
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 JOB_RUN_PRIORITY_TRANSLATIONS = {
@@ -93,12 +94,20 @@ def map_job_run_create_view_model(job_id: str) -> JobRunCreateViewModel:
 
 
 def map_job_run_edit_view_model(job_run_json: dict) -> JobRunEditViewModel:
+    job_run_argument_parser = JobRunArgumentParser()
+    arguments = [
+        (arg[JobRunArgumentSchemaFields.NAME],
+         arg[JobRunArgumentSchemaFields.TYPE],
+         arg[JobRunArgumentSchemaFields.VALUES]) for arg in job_run_json[JobRunSchemaFields.ARGUMENTS]]
+
+    arguments_edit_string = job_run_argument_parser.create_arguments_str(arguments)
     editable = job_run_json[JobRunSchemaFields.STATUS] == JobRunStatus.PENDING.value
     return JobRunEditViewModel(
         id=job_run_json[JobRunSchemaFields.ID],
         job_id=job_run_json[JobRunSchemaFields.JOB_ID],
         can_edit=editable,
         status=job_run_json[JobRunSchemaFields.STATUS],
+        arguments=arguments_edit_string,
         priority=job_run_json[JobRunSchemaFields.PRIORITY],
         created=datetime.fromisoformat(job_run_json[JobRunSchemaFields.CREATED]).strftime(DATE_FORMAT),
         updated=datetime.fromisoformat(job_run_json[JobRunSchemaFields.UPDATED]).strftime(DATE_FORMAT),
@@ -106,12 +115,6 @@ def map_job_run_edit_view_model(job_run_json: dict) -> JobRunEditViewModel:
         form_action_url=url_for(Endpoint.JOB_UPDATE_JOB_RUN.value, job_run_id=job_run_json[JobRunSchemaFields.JOB_ID]),
         error_message=job_run_json[JobRunSchemaFields.ERROR_MESSAGE],
         priorities=_get_job_run_priorities(),
-        arguments=[
-            JobRunArgument(
-                name=arg[JobRunArgumentSchemaFields.NAME],
-                type=arg[JobRunArgumentSchemaFields.TYPE],
-                values=arg[JobRunArgumentSchemaFields.VALUES])
-                   for arg in job_run_json[JobRunSchemaFields.ARGUMENTS]],
         translations=JOB_RUN_PRIORITY_TRANSLATIONS)
 
 

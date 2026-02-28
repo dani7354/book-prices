@@ -6,11 +6,11 @@ from requests.exceptions import HTTPError
 from requests.status_codes import codes
 
 from bookprices.shared.api.error import retry_on_connection_error
-from bookprices.shared.db.api import ApiKeyDb
-from bookprices.shared.model.api import ApiKey
+from bookprices.shared.db.tables import ApiKey
 from enum import Enum
 from typing import ClassVar, Callable
 
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 
 logger = logging.getLogger(__name__)
 
@@ -45,12 +45,12 @@ class JobApiClient:
     request_timeout: ClassVar[int] = 10
 
     def __init__(
-            self, base_url: str, api_username: str, api_password: str, client_name: str, api_key_db: ApiKeyDb) -> None:
+            self, base_url: str, api_username: str, api_password: str, client_name: str, unit_of_work: UnitOfWork) -> None:
         self._base_url = base_url
         self._api_username = api_username
         self._api_password = api_password
         self._client_name = client_name
-        self._api_key_db = api_key_db
+        self._unit_of_work = unit_of_work
         self._api_key = None
 
     def get(self, endpoint: str) -> dict:
@@ -187,23 +187,22 @@ class JobApiClient:
     def _ensure_api_is_set(self) -> None:
         if self._api_key:
             return
-        if not (api_key := self._api_key_db.get_api_key(self._client_name)):
-            self._refresh_api_key()
-            api_key = self._api_key_db.get_api_key(self._client_name)
+        with self._unit_of_work as uow:
+            if not (api_key := uow.api_key_repository.get_by_name(self._client_name)):
+                self._refresh_api_key()
+                api_key = uow.api_key_repository.get_by_name(self._client_name)
         self._api_key = api_key.api_key
 
     def _add_or_update_api_key_in_db(self, api_key: str) -> None:
-        if old_api_key := self._api_key_db.get_api_key(self._client_name):
-            logger.info("Updating Job API key for user %s...", self._api_username)
-            old_api_key.api_key = api_key
-            self._api_key_db.update_api_key(old_api_key)
-        else:
-            logger.info("Adding Job API key for user %s to database...", self._api_username)
-            self._api_key_db.add_api_key(ApiKey(
-                id=None,
-                api_name=self._client_name,
-                api_user=self._api_username,
-                api_key=api_key))
+        with self._unit_of_work as uow:
+            if old_api_key := uow.api_key_repository.get_by_name(self._client_name):
+                logger.info("Updating Job API key for user %s...", self._api_username)
+                old_api_key.api_key = api_key
+                uow.api_key_repository.update(old_api_key)
+            else:
+                logger.info("Adding Job API key for user %s to database...", self._api_username)
+                uow.api_key_repository.add(
+                    ApiKey(api_name=self._client_name, api_user=self._api_username, api_key=api_key))
 
     @staticmethod
     def _decode_json_response(response: requests.Response) -> dict | None:

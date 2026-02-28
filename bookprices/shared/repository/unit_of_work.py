@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from bookprices.shared.repository.api_key import ApiKeyRepository
 from bookprices.shared.repository.book import BookRepository
 from bookprices.shared.repository.booklist import BookListRepository
 from bookprices.shared.repository.bookprice import BookPriceRepository
@@ -17,6 +18,7 @@ class UnitOfWork:
         self.bookstore_repository: BookStoreRepository | None = None
         self.bookprice_repository: BookPriceRepository | None = None
         self.currency_repository: CurrencyRepository | None = None
+        self.api_key_repository: ApiKeyRepository | None = None
 
     def __enter__(self) -> "UnitOfWork":
         try:
@@ -26,6 +28,7 @@ class UnitOfWork:
             self.bookstore_repository = BookStoreRepository(self._session)
             self.bookprice_repository = BookPriceRepository(self._session)
             self.currency_repository = CurrencyRepository(self._session)
+            self.api_key_repository = ApiKeyRepository(self._session)
             return self
         except Exception:
             if self._session:

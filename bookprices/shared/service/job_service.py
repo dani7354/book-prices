@@ -172,13 +172,14 @@ class JobService:
             logger.error(f"Failed to create job with name {name}. Error: {e}")
             raise CreationFailedError(f"Job with name {name} could not be created.")
 
-    def create_job_run(self, job_id: str, priority: str) -> None:
+    def create_job_run(self, job_id: str, priority: str, arguments: list[dict[str, str | list[str]]]) -> None:
         try:
             self._job_api_client.post(
                 Endpoint.JOB_RUNS.value,
                 data={
                     JobRunSchemaFields.JOB_ID.value: job_id,
-                    JobRunSchemaFields.PRIORITY.value: priority})
+                    JobRunSchemaFields.PRIORITY.value: priority,
+                    JobRunSchemaFields.ARGUMENTS: arguments})
         except ApiUnavailableError as e:
             logger.error(f"Job API is unavailable. Failed to create job run for job with id {job_id}.")
             raise JobSourceUnavailableError from e
@@ -209,15 +210,27 @@ class JobService:
             logger.error(f"Failed to update job with id {job_id}. Error: {e}")
             raise UpdateFailedError(f"Job with id {job_id} could not be updated.")
 
-    def update_job_run(self, job_id: str, job_run_id: str, priority: str, version: str) -> None:
+    def update_job_run(
+            self,
+            job_id: str,
+            job_run_id: str,
+            priority: str,
+            version: str,
+            arguments: list[dict[str, str | list[str]]]) -> None:
         try:
+            data = {
+                JobRunSchemaFields.JOB_RUN_ID: job_run_id,
+                JobRunSchemaFields.JOB_ID: job_id,
+                JobRunSchemaFields.PRIORITY: priority,
+                JobRunSchemaFields.VERSION: version,
+            }
+
+            if arguments:
+                data[JobRunSchemaFields.ARGUMENTS] = arguments
+
             self._job_api_client.patch(
                 Endpoint.get_job_run_url(job_run_id),
-                data={
-                    JobRunSchemaFields.JOB_RUN_ID.value: job_run_id,
-                    JobRunSchemaFields.JOB_ID.value: job_id,
-                    JobRunSchemaFields.PRIORITY.value: priority,
-                    JobRunSchemaFields.VERSION.value: version})
+                data=data)
         except ApiUnavailableError as e:
             logger.error(f"Job API is unavailable. Failed to update job run with id {job_run_id}.")
             raise JobSourceUnavailableError from e

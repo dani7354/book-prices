@@ -87,7 +87,7 @@ class BookListBook(BaseModel):
         primary_key=True)
     created = Column('Created', DateTime, nullable=False)
 
-    booklist: Mapped[BookList] = relationship("BookList", uselist=False)
+    booklist: Mapped[BookList] = relationship("BookList", uselist=False, overlaps="books")
     book: Mapped[Book] = relationship("Book", uselist=False)
 
 

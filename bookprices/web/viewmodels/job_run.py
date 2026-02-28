@@ -55,6 +55,7 @@ class JobRunEditViewModel:
     job_id_field_name: ClassVar[str] = "job_id"
     priority_field_name: ClassVar[str] = "priority"
     version_field_name: ClassVar[str] = "version"
+    arguments_field_name: ClassVar[str] = "arguments"
 
     id: str
     job_id: str
@@ -65,7 +66,7 @@ class JobRunEditViewModel:
     updated: str
     version: str
     form_action_url: str
+    arguments: str | None = None
     error_message: str | None = None
     priorities: list[str] = field(default_factory=list)
-    arguments: list[JobRunArgument] = field(default_factory=list)
     translations: dict[str, str] = field(default_factory=dict)
