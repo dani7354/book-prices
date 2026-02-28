@@ -109,7 +109,7 @@ class JobRunArgumentParser:
             self,
             values: list[str],
             value_type: JobRunArgumentType) -> tuple[bool, list[str | int | bool]]:
-        errors, parsed_values = [], []
+        parsed_values = []
         success = any(values)
         for value in values:
             if not self._are_chars_valid(value):
