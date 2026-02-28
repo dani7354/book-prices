@@ -177,7 +177,7 @@ def update_job_run(job_run_id: str) -> tuple[Response, int]:
 
     try:
         if not job_id or not job_service.get_job_run(job_run_id):
-            return jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
+            return jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
 
         job_service.update_job_run(job_id, job_run_id, priority, version, job_run_arguments.get_result_dict())
         return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel opdateret!"}), HttpStatusCode.OK
@@ -215,7 +215,7 @@ def job_run_list() -> tuple[Response, int]:
 @require_job_manager
 def job_run(job_run_id: str) -> tuple[Response, int]:
     if not (job_run_json := job_service.get_job_run(job_run_id)):
-        return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}),
+        return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel blev ikke fundet"}),
                 HttpStatusCode.NOT_FOUND)
 
     job_run_view_model = map_job_run_edit_view_model(job_run_json)
@@ -242,7 +242,7 @@ def delete(job_id: str) -> tuple[Response, int]:
 def delete_job_run(job_run_id: str) -> tuple[Response, int]:
     try:
         if not job_service.get_job_run(job_run_id):
-            return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}),
+            return (jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel blev ikke fundet"}),
                     HttpStatusCode.BAD_REQUEST)
 
         job_service.delete_job_run(job_run_id)
