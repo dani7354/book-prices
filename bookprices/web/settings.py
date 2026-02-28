@@ -61,9 +61,9 @@ SRI_ATTRIBUTE_VALUES = {
     "book_js": ("sha256-ksumcu4R2xURc6vKSeMzzP9YTz3y2lVvhTzUoKzM9+Y= "
                 "sha384-HyrFTCYmUdoLpv+cbiY1xutb3nWahLHn4QQZBq9EBpjGtYhbBMZrso3hsVfeN3Ln "
                 "sha512-+UjqPHpLx52FfgXAWO6sc70sn/MJ/MwgvO854kVyx2P4wG0zDwIwiAJaLeyxCUw74xQz4iI8Fl2O6M/gtw9aBg=="),
-    "delete_book_js": ("sha256-AIfsCGXJzClcfQzpYC/Lr9qjsmvx48b3CQgZkDN29VU= "
-                       "sha384-xmaDaVKu+2JW3BW7+E5CQao565H1LcFVaksrPQiFDOiXh26MRkSvT3OEMADmcIDU "
-                       "sha512-Shy8W4MwvOvGAU84JxASTUynjvw15jIQgPSVD0ydCiG6T9uPap5Ohtnn4RUe65dmDHBLCpKuFzAAXJuTpaAo/Q=="),
+    "delete_book_js": ("sha256-rc/EghmUsJTeGWqZjNUVh31+yWvvlZg6UvfO9eIW2jU= "
+                       "sha384-97TLazC8XXvVc9bL3oGyuDMZN6EasB7rA9CVFM+70F8xFfpaa11WRRxp4foUdRb+ "
+                       "sha512-JrdjS2l91SE9LIxuCpwVtHg3YPwB+ZJ1Mu7SL66zTSkBHAddu8R9XifzLMW82qXQ15lGS20JQxfPJEKxGO1Oyg=="),
     "edit_book_js": ("sha256-jMZ9rYmqFeNXDIO3IofnMmq8jx0wlqif1l6FwHJfT0Y= "
                      "sha384-a1D9decWOBd2taUpa4o0X1pTkjDIO8houWhltI/CKds5dOZv+0zQ+pKuxzvmD57d "
                      "sha512-l3MTEvUs1vKHQ8NVWaZhUZaugmWx/+IFaPvxdFuUvNdhy0VLJLBuAltHehLaXuKMH210AxgnfEwGpm9De7D17A=="),
@@ -88,15 +88,15 @@ SRI_ATTRIBUTE_VALUES = {
     "job_js": ("sha256-rWaJ0ejh0Bf9ppZlXxhFqxF6sQ3c0NUQFswEfkGCdO4= "
                "sha384-1UmwrFcVNAAqsH5t7OE+q0ouA+fCHNK2ee57Ts6CuNyA6zBktZG9WsyuTpmS3NCJ "
                "sha512-VV0Nec3Q4VRwJ6epRhp+ci/2U1gJ8w8Hdoxx36xSgJUE3MO688a2wki633CdF6hfSInnGs11XcDBUp48vKWlnw=="),
-    "job_run_js": ("sha256-dzHGVg7PDzfXt3E5CbkEoBKonNm138IQzQG7CNbBWXE= "
-                   "sha384-U8UteYjyRxY1qQpBKnQyP7XsPHaREbD9LD1qPlMnMjUKifYtXQwUsPrldTY7UF8l "
-                   "sha512-JjWA5y98IUQjyPbryCz7oEBv+lYCMcjoVJPnG4o1fsRYb9CO2ppGWnSaCnmmjXP//yS0XqO2aF8Eqby4BE9oYA=="),
-    "job_common_js": ("sha256-gYkCb1U4rklPflQzazqBxREfHORqt3a6qjlFncweHmc= "
-                      "sha384-edtar1CZDwvBCghJzixGSJGe9PTJRkOFqnMvdMbf/bquB+O9krn1g0w4CsmOzrsU "
-                      "sha512-fSSNYDVZzXIP/pSzGRxeXAgDwQttx/SzPmHFgQ2C9yOXuBYjDeP8Vg8Ku6Wbo0IcugBDOO+0qZ6FLlTFoZDvwQ=="),
-    "job_run_modal_js": ("sha256-mWSWhUYXMU8ml3ueC2EDBABRLTHOeBXKa57GCEtFxB4= "
-                         "sha384-e96AaRmLQhoFTx4SewulM+/l2rqlFU1Mh/vfDMeM5rWXW7Ig59PVOMSQFmAMmQTm "
-                         "sha512-TXmOaHNuWUPoyD5oDfVYdHbzhyPg9CsFdF24WubycLTGQqSV+31LD9GXk9AijUfbZnUQRVc+gAqkT0AmhH96VA=="),
+    "job_run_js": ("sha256-XjeLtJMtzILgcVs7RtLCuTOfB7DA5p1C0wH/TLyMF2s= "
+                   "sha384-vfjnisrN8ky3VPSP8p4sEvyrUgVnSeQSeRL8Z+3Tj2MExQ0NaSTh5Mug1i38GMlx "
+                   "sha512-sOdBTOrBusi4ETcXS0NJqutsT8a/jsLklFg9ekFGh/alMfzLpR1hUab9VjJVO96tf2H1wZj7G28cHuxU+DoJPA=="),
+    "job_common_js": ("sha256-3yArWocEBdrv3hP96AlWlZUx7VQhQyGNfHgmux/BaPo= "
+                      "sha384-/XTkOjVK8SzglbNXb9iAkZLxHufYgKSAg8jSCrmb2wxzJi2+Pc8YwwtX9RZg5pQp "
+                      "sha512-DZOHMPNe5CnCbc6ySWLNHXyOios+rdsim8/nm0liJr92UL4WpxRIvBxSn0s9BaiikfyVSKvvcTwQ8u/3dtgRiQ=="),
+    "job_run_modal_js": ("sha256-qqDYu1QZg87FzX6/ekjkFM2W6fb6oPIbK6UJifGF7YQ= "
+                         "sha384-KL4cgz12hHnSnZlKw3UPph7QYpj7w0YuC/kzYmvelVL3DDyB8EbFIt2mV8T1Xm6A "
+                         "sha512-tw4NsFMStptS++QnuH7/NhWfECaMK1RnLTiIcTmQLc7ylaluyQ8I9m/EVgCf1tphSb0hF9jI25dAppMdlGksJQ=="),
     "booklist_js": ("sha256-4PtKdpYTfI8TKFcg4q5byRLTJvsY4pTm1WCByYGzmz0= "
                     "sha384-o95Ap2cF9cZ3cAVagHKwir7XYexWMiWYpM+DhIJSJkPbfmSSep/+Yujd5svASQaG "
                     "sha512-eWGmXEENOyMI6L0U7ui5Qa+/IW1L9yhxLJVw6YFC7DWpXhau0Y7eN+8e4JTMsfYGAvxGSgDRbLJPTSsBTRXB4Q=="),
