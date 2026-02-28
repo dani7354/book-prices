@@ -61,8 +61,10 @@ def oauth2callback() -> Response | tuple[Response, int]:
     if not (state := session.get(SessionKey.STATE.value)):
         abort(HttpStatusCode.BAD_REQUEST, "State not found in session")
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        GOOGLE_CLIENT_SECRETS_FILE, scopes=GOOGLE_API_SCOPES, state=state)
-    flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
+        GOOGLE_CLIENT_SECRETS_FILE,
+        scopes=GOOGLE_API_SCOPES,
+        state=state,
+        redirect_uri=url_for("auth.oauth2callback", _external=True))
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
     flow.fetch_token(authorization_response=request.url)
