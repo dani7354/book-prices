@@ -46,9 +46,6 @@ class JobRunArgumentParser:
     _invalid_char_replacement: ClassVar[str] = "_"
     _values_valid_chars: ClassVar[set[str]] = set(string.ascii_letters + string.digits)
 
-    def __init__(self) -> None:
-        pass
-
     def parse_arguments(self, arguments_str: str) -> JobRunArgumentsParsingResult:
         if not arguments_str:
             return JobRunArgumentsParsingResult(arguments=[])
