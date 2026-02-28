@@ -53,6 +53,7 @@ function hideModal(event) {
     textErrorMessage.text("");
     textArguments.text("");
     inputPriority.removeAttr("disabled");
+    textArguments.removeAttr("disabled");
     jobRunSaveBtn.attr("class", "btn btn-primary");
 }
 
@@ -95,8 +96,10 @@ function loadJobRunModal(event) {
                 loadPriorityOptions(data);
 
                 inputPriority.val(data[priorityFieldName]);
+                textArguments.text(data[argumentsFieldName])
                 if (!data[canEditFieldName]) {
                     inputPriority.attr("disabled", "disabled");
+                    textArguments.attr("disabled", "disabled");
                     jobRunSaveBtn.attr("class", "btn btn-primary disabled");
                 }
                 inputJobId.val(jobId);
