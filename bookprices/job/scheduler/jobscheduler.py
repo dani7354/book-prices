@@ -82,6 +82,6 @@ class JobScheduler:
                 self._logger.warning(f"Job {job_name} not available")
                 return
             self._logger.info(f"Creating job run for {job_name}...")
-            self._job_service.create_job_run(job_id, self.job_run_priority)
+            self._job_service.create_job_run(job_id, self.job_run_priority, [])
         except CreationFailedError as ex:
             self._logger.error(f"Error while creating job run for {job_name}: {ex}")
