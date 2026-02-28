@@ -75,9 +75,9 @@ class JobRunStatus(StrEnum):
 
 
 class JobRunPriority(StrEnum):
-    HIGH = "High"
-    NORMAL = "Normal"
     LOW = "Low"
+    NORMAL = "Normal"
+    HIGH = "High"
 
 
 class JobService:

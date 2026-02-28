@@ -9,5 +9,7 @@
 <button type="button" id="btn-create-job-run" class="btn btn-primary" data-bs-toggle="modal"
         data-bs-target="#job-run-modal">Opret</button>
 
-<script src="{{ url_for('static', filename='js/job_common.js') }}"></script>
-<script src="{{ url_for('static', filename='js/job_run.js') }}"></script>
+<script src="{{ url_for('static', filename='js/job_common.js') }}"
+        integrity="{{ sri_attribute_values['job_common_js'] }}"></script>
+<script src="{{ url_for('static', filename='js/job_run.js') }}"
+        integrity="{{ sri_attribute_values['job_run_js'] }}"></script>
