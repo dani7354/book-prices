@@ -47,4 +47,4 @@ def not_found_api(error) -> tuple[Response, int]:
 
 def internal_server_error_api(error) -> tuple[Response, int]:
     logger.error(error)
-    return jsonify({"error_message": error}), HttpStatusCode.INTERNAL_SERVER_ERROR
+    return jsonify({"error_message": str(error)}), HttpStatusCode.INTERNAL_SERVER_ERROR
