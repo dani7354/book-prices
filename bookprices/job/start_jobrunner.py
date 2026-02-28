@@ -21,7 +21,6 @@ from bookprices.shared.cache.client import RedisClient
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config import loader
 from bookprices.shared.config.config import Config
-from bookprices.shared.db.api import ApiKeyDb
 from bookprices.shared.db.database import Database
 from bookprices.shared.event.base import EventManager, Event
 from bookprices.shared.event.enum import BookPricesEvents
@@ -62,19 +61,12 @@ def create_cache_key_remover(config: Config) -> BookPriceKeyRemover:
 
 
 def create_job_api_client(config: Config) -> JobApiClient:
-    api_key_db = ApiKeyDb(
-        config.database.db_host,
-        config.database.db_port,
-        config.database.db_user,
-        config.database.db_password,
-        config.database.db_name)
-
     api_client = JobApiClient(
         config.job_api.base_url,
         config.job_api.api_username,
         config.job_api.api_password,
         JOB_API_CLIENT_ID,
-        api_key_db)
+        UnitOfWork(JobSessionFactory(config)))
 
     return api_client
 

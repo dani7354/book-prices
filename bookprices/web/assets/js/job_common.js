@@ -8,6 +8,9 @@ const priorityFieldName = "priority";
 const prioritiesFieldName = "priorities";
 const versionFieldName = "version";
 const errorMessageFieldName = "error_message";
+const canEditFieldName = "can_edit";
+const translationsFieldName = "translations";
+const argumentsFieldName = "arguments";
 
 
 function showAlert(message, alertType, container) {

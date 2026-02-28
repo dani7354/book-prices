@@ -4,9 +4,9 @@ from typing import ClassVar
 
 
 class JobRunPriority(StrEnum):
-    HIGH = "High"
-    NORMAL = "Normal"
     LOW = "Low"
+    NORMAL = "Normal"
+    HIGH = "High"
 
     @classmethod
     def get_values(cls) -> list[str]:
@@ -18,6 +18,7 @@ class JobRunListItem:
     id: str
     created: str
     updated: str
+    elapsed: str
     status: str
     priority: str
     status_color: str
@@ -44,7 +45,9 @@ class JobRunCreateViewModel:
 
     form_action_url: str
     job_id: str
-    priorities: dict[str, str] = field(default_factory=dict)
+    priorities: list[str] = field(default_factory=list)
+    translations: dict[str, str] = field(default_factory=dict)
+
 
 
 @dataclass(frozen=True)
@@ -52,15 +55,18 @@ class JobRunEditViewModel:
     job_id_field_name: ClassVar[str] = "job_id"
     priority_field_name: ClassVar[str] = "priority"
     version_field_name: ClassVar[str] = "version"
+    arguments_field_name: ClassVar[str] = "arguments"
 
     id: str
     job_id: str
+    can_edit: bool
     status: str
     priority: str
     created: str
     updated: str
     version: str
     form_action_url: str
+    arguments: str | None = None
     error_message: str | None = None
-    priorities: dict[str, str] = field(default_factory=dict)
-    arguments: list[JobRunArgument] = field(default_factory=list)
+    priorities: list[str] = field(default_factory=list)
+    translations: dict[str, str] = field(default_factory=dict)

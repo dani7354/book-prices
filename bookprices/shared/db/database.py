@@ -1,4 +1,3 @@
-from bookprices.shared.db.api import ApiKeyDb
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.db.bookstore import BookStoreDb
 from bookprices.shared.db.bookprice import BookPriceDb
@@ -48,10 +47,3 @@ class Database:
                 self.db_user,
                 self.db_password,
                 self.db_name)
-
-        self.api_key_db = ApiKeyDb(
-            self.db_host,
-            self.db_port,
-            self.db_user,
-            self.db_password,
-            self.db_name)
