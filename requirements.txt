@@ -8,7 +8,7 @@ flask-login
 redis
 pytest
 google-auth
-google-auth-oauthlib
+google-auth-oauthlib==1.2.4
 google-auth-httplib2
 google-api-python-client
 sqlalchemy
