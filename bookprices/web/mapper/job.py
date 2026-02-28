@@ -112,7 +112,7 @@ def map_job_run_edit_view_model(job_run_json: dict) -> JobRunEditViewModel:
         created=datetime.fromisoformat(job_run_json[JobRunSchemaFields.CREATED]).strftime(DATE_FORMAT),
         updated=datetime.fromisoformat(job_run_json[JobRunSchemaFields.UPDATED]).strftime(DATE_FORMAT),
         version=job_run_json[JobRunSchemaFields.VERSION],
-        form_action_url=url_for(Endpoint.JOB_UPDATE_JOB_RUN.value, job_run_id=job_run_json[JobRunSchemaFields.JOB_ID]),
+        form_action_url=url_for(Endpoint.JOB_UPDATE_JOB_RUN.value, job_run_id=job_run_json[JobRunSchemaFields.ID]),
         error_message=job_run_json[JobRunSchemaFields.ERROR_MESSAGE],
         priorities=_get_job_run_priorities(),
         translations=JOB_RUN_PRIORITY_TRANSLATIONS)

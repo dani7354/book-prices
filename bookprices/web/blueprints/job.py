@@ -179,7 +179,7 @@ def update_job_run(job_run_id: str) -> tuple[Response, int]:
         if not job_id or not job_service.get_job_run(job_run_id):
             return jsonify({MESSAGE_FIELD_NAME: f"Jobkørsel med id {job_run_id} blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
 
-        job_service.update_job_run(job_id, job_run_id, priority, version, job_run_arguments.arguments)
+        job_service.update_job_run(job_id, job_run_id, priority, version, job_run_arguments.get_result_dict())
         return jsonify({MESSAGE_FIELD_NAME: "Jobkørsel opdateret!"}), HttpStatusCode.OK
     except UpdateFailedError as ex:
         return jsonify({MESSAGE_FIELD_NAME: str(ex)}), HttpStatusCode.BAD_REQUEST
