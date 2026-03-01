@@ -25,6 +25,8 @@ from bookprices.web.viewmodels.book import (
     BookDetailsViewModel, BookStoreViewModel, CreateBookViewModel)
 from bookprices.web.viewmodels.page import IndexViewModel
 
+
+PRICE_DECIMAL_FORMAT = ".2f"
 DATE_FORMAT = "%d-%m-%Y"
 
 PRICE_NONE_TEXT = "-"
@@ -299,7 +301,7 @@ def map_book_details(book: Book,
     book_price_view_models = []
     for bp in book_prices:
         is_price_available = bp.price is not None
-        price_str = bp.price if is_price_available else PRICE_NONE_TEXT
+        price_str = f"{bp.price:{PRICE_DECIMAL_FORMAT}}" if is_price_available else PRICE_NONE_TEXT
         created_str = _get_created_text(bp.created) if is_price_available else PRICE_CREATED_NONE_TEXT
         url_with_ref = _add_ref_to_bookstore_url(bp.url)
         price_history_url = _create_url(page,
