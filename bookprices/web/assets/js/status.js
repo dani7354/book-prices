@@ -2,6 +2,7 @@ const timePeriodSelect = $("#timeperiod-select");
 const failedPriceUpdatesContainer = $("#failed-price-updates-container");
 const bookImportCountsContainer = $("#book-import-counts-container");
 const bookPriceCountsContainer = $("#book-price-counts-container");
+const priceUpdatesContainer = $("#book-prices-updated-container");
 
 const baseUrl = "/status";
 
@@ -123,14 +124,44 @@ function getBookPriceCounts() {
     });
 }
 
+function getUpdatedPricesForBookStores(){
+    let selectedTimePeriodDays = encodeURIComponent(timePeriodSelect.val());
+    let url = `${baseUrl}/updated-prices?days=${selectedTimePeriodDays}`;
+    $.ajax(url, {
+            "method" : "GET",
+            "dataType": "json",
+            "success" : function (data, status, xhr) {
+                let title = data["table"]["title"];
+                let columns = data["table"]["columns"];
+                let rows = data["table"]["rows"];
+                let translations = data["translations"];
+                let headingId = "book-prices-updated-heading";
+                initializeTable(
+                    priceUpdatesContainer,
+                    title,
+                    columns,
+                    rows,
+                    translations,
+                    headingId);
+            },
+            "error" : function (error) {
+                console.log(error);
+            }
+    });
+
+}
+
+
 $(document).ready(() => {
     getFailedPriceUpdates();
     getBookImportCounts();
     getBookPriceCounts();
+    getUpdatedPricesForBookStores();
 
     timePeriodSelect.on("change", () => {
         getFailedPriceUpdates();
         getBookImportCounts();
         getBookPriceCounts();
+        getUpdatedPricesForBookStores();
     });
 });

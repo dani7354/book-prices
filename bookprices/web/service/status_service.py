@@ -62,7 +62,7 @@ class StatusService:
             })
 
         columns.extend(rows[0].keys() if rows else [])
-        table_response = TableResponse(title="Opdaterede priser", columns=columns, rows=rows)
+        table_response = TableResponse(title="Prisopdateringer for boghandlere", columns=columns, rows=rows)
 
         return UpdatedPricesForBookStoreResponse(translations=translations, table=table_response)
 
