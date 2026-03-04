@@ -1,10 +1,11 @@
 from collections import defaultdict
+from datetime import datetime, timedelta
 from typing import Tuple, Sequence
 
-from sqlalchemy import select, and_, outerjoin
+from sqlalchemy import select, and_, outerjoin, func, case
 from sqlalchemy.orm import joinedload, Session
 
-from bookprices.shared.db.tables import BookStore, BookStoreBook, Book
+from bookprices.shared.db.tables import BookStore, BookStoreBook, Book, BookPrice
 from bookprices.shared.repository.base import RepositoryBase
 
 
@@ -109,3 +110,26 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         if not book_store:
             raise ValueError(f"BookStore entry for book id {book_id} and bookstore id {bookstore_id} doesn't exist.")
         self._session.delete(book_store)
+
+    def get_bookstores_with_updated_prices_percentage(self, date_from: datetime) -> list[tuple[int, str, int, int, float]]:
+        updated_prices = func.count(case((BookPrice.created >= date_from, 1)))
+        book_count = func.count(BookStoreBook.book_store_id)
+        updated_percentage = func.round((updated_prices * 100.0) / book_count, 4)
+        stmt = (
+            select(
+                BookStore.id,
+                BookStore.name,
+                book_count,
+                updated_prices,
+                updated_percentage,
+            )
+            .join(BookStoreBook, BookStoreBook.book_store_id == BookStore.id)
+            .join(
+                BookPrice,
+                (BookPrice.book_store_id == BookStoreBook.book_store_id)
+                & (BookPrice.book_id == BookStoreBook.book_id))
+            .group_by(BookStoreBook.book_store_id)
+            .order_by(updated_percentage.desc())
+        )
+
+        return [(row[0], row[1], row[2], row[3], row[4]) for row in self._session.execute(stmt).all()]
