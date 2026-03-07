@@ -40,31 +40,31 @@ class StatusService:
         failed_update_counts = []
         if cached_failed_counts := self._cache.get(cache_key):
             failed_update_counts = cached_failed_counts
-        with self._unit_of_work as uow:
-            if source_failed_count := uow.failed_price_update_repository.get_failed_update_count_by_reason(date_from):
-                self._cache.set(
-                    get_failed_count_by_reason_key(date_from), source_failed_count, timeout=CacheTtlOption.MEDIUM.value)
-                failed_update_counts = source_failed_count
+        else:
+            with self._unit_of_work as uow:
+                if source_failed_count := uow.failed_price_update_repository.get_failed_update_count_by_reason(date_from):
+                    self._cache.set(
+                        get_failed_count_by_reason_key(date_from), source_failed_count, timeout=CacheTtlOption.MEDIUM.value)
+                    failed_update_counts = source_failed_count
 
         return self._create_failed_price_updates_response(failed_update_counts)
 
     def _create_failed_price_updates_response(self, failed_price_updates: list[tuple[str, int]]) -> FailedPriceUpdatesResponse:
         unique_columns = {str(TableColumn.BOOK_STORE)}
-        rows_by_bookstore = defaultdict(dict)
+        rows_by_bookstore_id = defaultdict(dict)
         for bookstore_id, bookstore_name, reason, count in failed_price_updates:
-            rows_by_bookstore[bookstore_name][TableColumn.BOOK_STORE] = bookstore_name
+            rows_by_bookstore_id[bookstore_id][TableColumn.BOOK_STORE] = bookstore_name
             if reason:
-                rows_by_bookstore[bookstore_name][reason] = count
+                rows_by_bookstore_id[bookstore_id][reason] = count
                 unique_columns.add(reason)
 
-        for row in rows_by_bookstore.values():
+        for row in rows_by_bookstore_id.values():
             for column in unique_columns:
                 if column not in row:
                     row[column] = 0
 
-        rows = list(rows_by_bookstore.values())
+        rows = list(rows_by_bookstore_id.values())
         columns = sorted(unique_columns, reverse=True)
-
         translations = self._get_translations_for_columns(columns)
         table_response = TableResponse(title="Fejlede prisopdateringer", columns=columns, rows=rows)
 

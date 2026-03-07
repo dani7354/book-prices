@@ -19,5 +19,6 @@
 <div id="book-price-counts-container" class="mt-4"></div>
 
 
-<script src="{{ url_for('static', filename='js/status.js') }}"></script>
+<script src="{{ url_for('static', filename='js/status.js') }}"
+        integrity="{{ sri_attribute_values['status_js'] }}"></script>
 {% endblock %}
