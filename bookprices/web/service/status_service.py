@@ -63,7 +63,7 @@ class StatusService:
                     row[column] = 0
 
         rows = list(rows_by_bookstore.values())
-        columns = sorted(list(unique_columns), reverse=True)
+        columns = sorted(unique_columns, reverse=True)
 
         translations = self._get_translations_for_columns(columns)
         table_response = TableResponse(title="Fejlede prisopdateringer", columns=columns, rows=rows)
