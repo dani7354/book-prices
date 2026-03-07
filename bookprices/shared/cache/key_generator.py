@@ -62,6 +62,11 @@ def get_price_count_key(date_from: datetime) -> str:
     return f"price_count_{date_from_str}"
 
 
+def get_price_count_by_bookstore_key(date_from: datetime) -> str:
+    date_from_str = date_from.strftime(KEY_DATE_FORMAT)
+    return f"price_count_by_bookstore_{date_from_str}"
+
+
 def get_booklists_for_user_key(user_id: str) -> str:
     return f"booklists_{user_id}"
 

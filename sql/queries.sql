@@ -45,4 +45,19 @@ FROM Book b
 INNER JOIN BookStoreBook bsb ON b.Id = bsb.BookId
 INNER JOIN BookStore bs ON bsb.BookStoreId = bs.Id
 WHERE b.Created >= @FromDate
+GROUP BY bsb.BookStoreId;
+
+
+-- Get price update count for bookstores
+SET @EarliestDate  = '2025-03-02';
+
+SELECT
+    bs.Name AS BookStoreName,
+    COUNT(1) AS BookCount,
+    COUNT(CASE WHEN bp.Created >= @EarliestDate THEN 1 END) AS UpdatedPrices,
+    (IF(0, 0, ROUND(COUNT(CASE WHEN bp.Created >= @EarliestDate THEN 1 END) * 100.0 / COUNT(1), 2))) AS UpdatedPercentage
+FROM BookStore bs
+INNER JOIN BookStoreBook bsb ON bsb.BookStoreId = bs.Id
+INNER JOIN BookPrice bp ON bp.BookStoreId = bsb.BookStoreId AND bp.BookId = bsb.BookId
 GROUP BY bsb.BookStoreId
+ORDER BY UpdatedPercentage DESC;
