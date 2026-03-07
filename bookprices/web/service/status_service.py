@@ -3,7 +3,6 @@ from enum import StrEnum
 
 from flask_caching import Cache
 from datetime import timedelta, datetime
-from bookprices.shared.db.database import Database
 from bookprices.shared.cache.key_generator import (
     get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key, get_price_count_by_bookstore_key)
 from bookprices.shared.repository.unit_of_work import UnitOfWork
@@ -30,6 +29,7 @@ class StatusService:
         self._translations: dict[str, str] = {
             TableColumn.BOOK_STORE: "Boghandler",
             TableColumn.PRICE_COUNT: "Priser",
+            TableColumn.BOOK_COUNT: "Bøger",
             TableColumn.UPDATED_PRICES: "Prisopdateringer",
             TableColumn.UPDATED_PERCENTAGE: "Opdateringsprocent",
         }
