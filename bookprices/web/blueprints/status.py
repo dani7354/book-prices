@@ -68,9 +68,9 @@ def book_price_counts() -> tuple[Response, int]:
     return jsonify(price_counts), HttpStatusCode.OK
 
 
+@status_blueprint.route("/updated-prices", methods=[HttpMethod.GET])
 @login_required
 @require_admin
-@status_blueprint.route("/updated-prices", methods=[HttpMethod.GET])
 def updated_prices() -> tuple[Response, int]:
     status_service = _create_status_service()
     timeperiod_options = status_service.get_timeperiod_options()
