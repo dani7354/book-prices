@@ -40,10 +40,3 @@ class Database:
             self.db_user,
             self.db_password,
             self.db_name)
-
-        self.status_db = StatusDb(
-                self.db_host,
-                self.db_port,
-                self.db_user,
-                self.db_password,
-                self.db_name)

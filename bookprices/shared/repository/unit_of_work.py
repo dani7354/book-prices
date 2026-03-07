@@ -7,6 +7,7 @@ from bookprices.shared.repository.bookprice import BookPriceRepository
 from bookprices.shared.repository.bookstore import BookStoreRepository
 from bookprices.shared.db.data_session import SessionFactory
 from bookprices.shared.repository.currency import CurrencyRepository
+from bookprices.shared.repository.failed_price_update import FailedPriceUpdateRepository
 
 
 class UnitOfWork:
@@ -19,6 +20,7 @@ class UnitOfWork:
         self.bookprice_repository: BookPriceRepository | None = None
         self.currency_repository: CurrencyRepository | None = None
         self.api_key_repository: ApiKeyRepository | None = None
+        self.failed_price_update_repository: FailedPriceUpdateRepository | None = None
 
     def __enter__(self) -> "UnitOfWork":
         try:
@@ -29,6 +31,7 @@ class UnitOfWork:
             self.bookprice_repository = BookPriceRepository(self._session)
             self.currency_repository = CurrencyRepository(self._session)
             self.api_key_repository = ApiKeyRepository(self._session)
+            self.failed_price_update_repository = FailedPriceUpdateRepository(self._session)
             return self
         except Exception:
             if self._session:

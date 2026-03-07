@@ -57,6 +57,7 @@ class BookStoreBook(BaseModel):
     book_store_id = Column(
         'BookStoreId', Integer, ForeignKey('BookStore.Id', ondelete='CASCADE'), primary_key=True)
     url = Column('Url', String(255), nullable=False)
+    created = Column('Created', DateTime, nullable=False)
     book: Mapped[Book] = relationship("Book", uselist=False)
     book_store: Mapped[BookStore] = relationship("BookStore", uselist=False)
 

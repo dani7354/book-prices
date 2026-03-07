@@ -1,72 +1,151 @@
+from enum import StrEnum
+
 from flask_caching import Cache
 from datetime import timedelta, datetime
 from bookprices.shared.db.database import Database
-from bookprices.shared.model.status import FailedPriceUpdateCountByReason, BookImportCount, PriceCount
 from bookprices.shared.cache.key_generator import (
-    get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key)
+    get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key, get_price_count_by_bookstore_key)
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.web.shared.enum import CacheTtlOption
-from bookprices.web.viewmodels.status import TimePeriodSelectOption, UpdatedPricesForBookStoreResponse, TableResponse
+from bookprices.web.viewmodels.status import (
+    TimePeriodSelectOption, UpdatedPricesForBookStoreResponse, TableResponse, PriceCountsResponse,
+    BookImportCountsResponse, FailedPriceUpdatesResponse)
+
+
+class TableColumn(StrEnum):
+    BOOK_STORE = "book_store"
+    BOOK_COUNT = "book_count"
+    UPDATED_PRICES = "updated_prices"
+    UPDATED_PERCENTAGE = "updated_percentage"
+    PRICE_COUNT = "price_count"
 
 
 class StatusService:
     """ Service for getting status information for the site dashboard. """
 
-    def __init__(self, db: Database, unit_of_work: UnitOfWork, cache: Cache) -> None:
-        self._db = db
+    def __init__(self, unit_of_work: UnitOfWork, cache: Cache) -> None:
         self._unit_of_work = unit_of_work
         self._cache = cache
+        self._translations: dict[str, str] = {
+            TableColumn.BOOK_STORE: "Boghandler",
+            TableColumn.PRICE_COUNT: "Priser",
+            TableColumn.UPDATED_PRICES: "Prisopdateringer",
+            TableColumn.UPDATED_PERCENTAGE: "Opdateringsprocent",
+        }
 
-    def get_failed_price_updates_by_bookstore(self, days: int) -> list[FailedPriceUpdateCountByReason]:
+    def get_failed_price_updates_by_bookstore(self, days: int) -> FailedPriceUpdatesResponse:
         date_from = datetime.now() - timedelta(days=days)
-        if failed_counts := self._cache.get(get_failed_count_by_reason_key(date_from)):
-            return failed_counts
-        if failed_count := self._db.status_db.get_failed_price_update_count_by_reason(date_from):
-            self._cache.set(
-                get_failed_count_by_reason_key(date_from), failed_count, timeout=CacheTtlOption.MEDIUM.value)
+        cache_key = get_failed_count_by_reason_key(date_from)
+        failed_update_counts = []
+        if cached_failed_counts := self._cache.get(cache_key):
+            failed_update_counts = cached_failed_counts
+        with self._unit_of_work as uow:
+            if source_failed_count := uow.failed_price_update_repository.get_failed_update_count_by_reason(date_from):
+                self._cache.set(
+                    get_failed_count_by_reason_key(date_from), source_failed_count, timeout=CacheTtlOption.MEDIUM.value)
+                failed_update_counts = source_failed_count
 
-        return failed_count
+        return self._create_failed_price_updates_response(failed_update_counts)
 
-    def get_book_import_count_by_bookstore(self, days: int) -> list[BookImportCount]:
+    def _create_failed_price_updates_response(self, failed_price_updates: list[tuple[str, int]]) -> FailedPriceUpdatesResponse:
+        rows = []
+        for reason, count in failed_price_updates:
+            rows.append({
+                TableColumn.BOOK_STORE: reason,
+                TableColumn.PRICE_COUNT: str(count)})
+
+        columns = list(rows[0].keys() if rows else [])
+        translations = self._get_translations_for_columns(columns)
+        table_response = TableResponse(title="Fejlede prisopdateringer", columns=columns, rows=rows)
+
+        return FailedPriceUpdatesResponse(table=table_response, translations=translations)
+
+    def get_book_import_count_by_bookstore(self, days: int) -> BookImportCountsResponse:
         date_from = datetime.now() - timedelta(days=days)
-        if import_counts := self._cache.get(get_book_import_count_key(date_from)):
-            return import_counts
-        if import_counts := self._db.status_db.get_book_import_count_by_bookstore(date_from):
-            self._cache.set(get_book_import_count_key(date_from), import_counts, timeout=CacheTtlOption.MEDIUM.value)
+        cache_key = get_book_import_count_key(date_from)
+        import_counts = []
+        if cached_import_counts := self._cache.get(cache_key):
+            import_counts = cached_import_counts
+        else:
+            with self._unit_of_work as uow:
+                if source_import_counts := uow.bookstore_repository.get_book_import_count_by_bookstore(date_from):
+                    self._cache.set(cache_key, source_import_counts, timeout=CacheTtlOption.SHORT)
+                    import_counts = source_import_counts
 
-        return import_counts
+        return self._create_book_import_count_response(import_counts)
 
-    def get_price_count_by_bookstore(self, days: int) -> list[PriceCount]:
+    def _create_book_import_count_response(self, import_counts: list[tuple[int, str, int]]) -> BookImportCountsResponse:
+        rows = [{TableColumn.BOOK_STORE: bookstore_name, TableColumn.BOOK_COUNT: str(count)}
+                for _, bookstore_name, count in import_counts]
+
+        columns = list(rows[0].keys() if rows else [])
+        translations = self._get_translations_for_columns(columns)
+        table = TableResponse(title="Importerede bøger", columns=columns, rows=rows)
+
+        return BookImportCountsResponse(table=table, translations=translations)
+
+    def get_price_count_by_bookstore(self, days: int) -> PriceCountsResponse:
         date_from = datetime.now() - timedelta(days=days)
         cache_key = get_price_count_key(date_from)
-        if price_counts := self._cache.get(cache_key):
-            return price_counts
-        if price_counts := self._db.status_db.get_price_count_by_bookstore(date_from):
-            self._cache.set(cache_key, price_counts, timeout=CacheTtlOption.MEDIUM.value)
+        price_counts = []
+        if cached_price_counts := self._cache.get(cache_key):
+            price_counts = cached_price_counts
+        else:
+            with self._unit_of_work as uow:
+                if source_price_counts := uow.bookprice_repository.get_price_count_by_bookstore(date_from):
+                    self._cache.set(cache_key, source_price_counts, timeout=CacheTtlOption.SHORT)
+                    price_counts = source_price_counts
 
-        return price_counts
+        return self._create_price_count_by_bookstore_response(price_counts)
 
-    def get_updated_prices_by_for_bookstores(self, days: int) -> UpdatedPricesForBookStoreResponse:
-        with self._unit_of_work as uow:
-            date_from = datetime.now() - timedelta(days=days)
-            updated_prices = uow.bookstore_repository.get_bookstores_with_updated_prices_percentage(date_from)
-
-        columns, rows = [], []
-        translations = {}
-        for bookstore_id, bookstore_name, book_count, updated_prices, updated_percentage in updated_prices:
+    def _create_price_count_by_bookstore_response(self, price_counts: list[tuple[int, str, int]]) -> PriceCountsResponse:
+        rows = []
+        for bookstore_id, bookstore_name, count in price_counts:
             rows.append({
-                "book_store": bookstore_name,
-                "book_count": book_count,
-                "updated_prices": updated_prices,
-                "updated_percentage": f"{updated_percentage:.2f}%"
+                TableColumn.BOOK_STORE: bookstore_name,
+                TableColumn.PRICE_COUNT: str(count)})
+
+        columns = list(rows[0].keys() if rows else [])
+        translations = self._get_translations_for_columns(columns)
+        table = TableResponse(title="Opdaterede priser", columns=columns, rows=rows)
+
+        return PriceCountsResponse(table=table, translations=translations)
+
+    def get_updated_prices_for_bookstores(self, days: int) -> UpdatedPricesForBookStoreResponse:
+        date_from = datetime.now() - timedelta(days=days)
+        cache_key = get_price_count_by_bookstore_key(date_from)
+        price_counts_for_bookstore = []
+        if cached_price_counts_for_bookstore := self._cache.get(cache_key):
+            price_counts_for_bookstore = cached_price_counts_for_bookstore
+        else:
+            with self._unit_of_work as uow:
+                if (source_price_counts_for_bookstore := uow.
+                        bookstore_repository.get_bookstores_with_updated_prices_percentage(date_from)):
+                    self._cache.set(cache_key, source_price_counts_for_bookstore, timeout=CacheTtlOption.SHORT)
+                    price_counts_for_bookstore = source_price_counts_for_bookstore
+
+        return self._create_updated_prices_for_bookstore_response(price_counts_for_bookstore)
+
+    def _create_updated_prices_for_bookstore_response(
+            self,
+            updated_prices_for_bookstore: list[tuple[int, str, int, int, float]]) -> UpdatedPricesForBookStoreResponse:
+        rows = []
+        for bookstore_id, bookstore_name, book_count, updated_prices_count, updated_percentage in updated_prices_for_bookstore:
+            rows.append({
+                TableColumn.BOOK_STORE: bookstore_name,
+                TableColumn.BOOK_COUNT: book_count,
+                TableColumn.UPDATED_PRICES: updated_prices_count,
+                TableColumn.UPDATED_PERCENTAGE: f"{updated_percentage:.2f}%"
             })
 
-        columns.extend(rows[0].keys() if rows else [])
+        columns = list(rows[0].keys() if rows else [])
+        translations = self._get_translations_for_columns(columns)
         table_response = TableResponse(title="Prisopdateringer for boghandlere", columns=columns, rows=rows)
 
         return UpdatedPricesForBookStoreResponse(translations=translations, table=table_response)
 
-
+    def _get_translations_for_columns(self, columns: list[str]) -> dict[str, str]:
+        return {column: self._translations.get(column, column) for column in columns}
 
     @staticmethod
     def get_timeperiod_options() -> list[TimePeriodSelectOption]:
@@ -80,4 +159,3 @@ class StatusService:
         ]
 
         return timeperiod_options
-

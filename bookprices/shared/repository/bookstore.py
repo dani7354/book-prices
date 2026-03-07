@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Tuple, Sequence
 
 from sqlalchemy import select, and_, outerjoin, func, case
@@ -111,20 +111,33 @@ class BookStoreRepository(RepositoryBase[BookStore]):
             raise ValueError(f"BookStore entry for book id {book_id} and bookstore id {bookstore_id} doesn't exist.")
         self._session.delete(book_store)
 
-    def get_bookstores_with_updated_prices_percentage(self, date_from: datetime) -> list[tuple[int, str, int, int, float]]:
-        updated_prices = func.count(case((BookPrice.created >= date_from, 1)))
-        book_count = func.count(BookStoreBook.book_store_id)
-        updated_percentage = func.round((updated_prices * 100.0) / book_count, 4)
+    def get_book_import_count_by_bookstore(self, date_from: datetime) -> list[tuple[int, str, int]]:
+        import_count = func.count(case((BookStoreBook.created >= date_from, 1)))
         stmt = (
             select(
                 BookStore.id,
                 BookStore.name,
+                import_count)
+            .outerjoin(BookStoreBook, BookStoreBook.book_store_id == BookStore.id)
+            .group_by(BookStore.id, BookStore.name)
+            .order_by(import_count.desc()))
+
+        return [(row[0], row[1], row[2]) for row in self._session.execute(stmt).all()]
+
+    def get_bookstores_with_updated_prices_percentage(self, date_from: datetime) -> list[tuple[int, str, int, int, float]]:
+        updated_prices = func.count(case((BookPrice.created >= date_from, 1)))
+        book_count = func.count(BookStoreBook.book_id)
+        updated_percentage = func.round((updated_prices * 100.0) / book_count, 4)
+        stmt = (
+            select(
+                func.max(BookStore.id),
+                func.max(BookStore.name),
                 book_count,
                 updated_prices,
                 updated_percentage,
             )
-            .join(BookStoreBook, BookStoreBook.book_store_id == BookStore.id)
-            .join(
+            .outerjoin(BookStoreBook, BookStoreBook.book_store_id == BookStore.id)
+            .outerjoin(
                 BookPrice,
                 (BookPrice.book_store_id == BookStoreBook.book_store_id)
                 & (BookPrice.book_id == BookStoreBook.book_id))
@@ -132,4 +145,4 @@ class BookStoreRepository(RepositoryBase[BookStore]):
             .order_by(updated_percentage.desc())
         )
 
-        return [(row[0], row[1], row[2], row[3], row[4]) for row in self._session.execute(stmt).all()]
+        return [(row[0], row[1], row[2], row[3] or 0, row[4] or 0.0) for row in self._session.execute(stmt).all()]
