@@ -1,7 +1,6 @@
 from bookprices.shared.db.book import BookDb
 from bookprices.shared.db.bookstore import BookStoreDb
 from bookprices.shared.db.bookprice import BookPriceDb
-from bookprices.shared.db.status import StatusDb
 from bookprices.shared.db.user import UserDb
 
 

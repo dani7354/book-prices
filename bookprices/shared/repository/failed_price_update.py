@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case
 from sqlalchemy.orm import Session
 
 from bookprices.shared.db.tables import FailedPriceUpdate, BookStore
@@ -26,13 +26,15 @@ class FailedPriceUpdateRepository(RepositoryBase[FailedPriceUpdate]):
 
         self._session.add(existing_entity)
 
-    def get_failed_update_count_by_reason(self, date_from: datetime) -> list[tuple[str, int]]:
+    def get_failed_update_count_by_reason(self, date_from: datetime) -> list[tuple[int, str, str, int]]:
+        failed_update_count = func.count(case((FailedPriceUpdate.created >= date_from, 1)))
         stmt = (select(
+                BookStore.id,
+                BookStore.name,
                 FailedPriceUpdate.reason,
-                func.count(FailedPriceUpdate.id))
-            .outerjoin(BookStore, FailedPriceUpdate.book_store_id == BookStore.id)
-            .group_by((FailedPriceUpdate.reason, BookStore.id))
-            .where(FailedPriceUpdate.created >= date_from)
-            .order_by(func.count(FailedPriceUpdate.id).desc()))
+                failed_update_count)
+            .outerjoin(FailedPriceUpdate, FailedPriceUpdate.book_store_id == BookStore.id)
+            .group_by(BookStore.id, BookStore.name, FailedPriceUpdate.reason)
+            .order_by(failed_update_count.desc()))
 
-        return [(row[0], row[1]) for row in self._session.execute(stmt).all()]
+        return [(row[0], row[1], row[2], row[3] or 0) for row in self._session.execute(stmt).all()]

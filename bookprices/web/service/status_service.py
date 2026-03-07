@@ -1,3 +1,4 @@
+from collections import defaultdict
 from enum import StrEnum
 
 from flask_caching import Cache
@@ -48,13 +49,22 @@ class StatusService:
         return self._create_failed_price_updates_response(failed_update_counts)
 
     def _create_failed_price_updates_response(self, failed_price_updates: list[tuple[str, int]]) -> FailedPriceUpdatesResponse:
-        rows = []
-        for reason, count in failed_price_updates:
-            rows.append({
-                TableColumn.BOOK_STORE: reason,
-                TableColumn.PRICE_COUNT: str(count)})
+        unique_columns = {str(TableColumn.BOOK_STORE)}
+        rows_by_bookstore = defaultdict(dict)
+        for bookstore_id, bookstore_name, reason, count in failed_price_updates:
+            rows_by_bookstore[bookstore_name][TableColumn.BOOK_STORE] = bookstore_name
+            if reason:
+                rows_by_bookstore[bookstore_name][reason] = count
+                unique_columns.add(reason)
 
-        columns = list(rows[0].keys() if rows else [])
+        for row in rows_by_bookstore.values():
+            for column in unique_columns:
+                if column not in row:
+                    row[column] = 0
+
+        rows = list(rows_by_bookstore.values())
+        columns = sorted(list(unique_columns), reverse=True)
+
         translations = self._get_translations_for_columns(columns)
         table_response = TableResponse(title="Fejlede prisopdateringer", columns=columns, rows=rows)
 
