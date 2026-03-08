@@ -8,7 +8,10 @@ from bookprices.web.settings import MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQ
 
 class WebSessionFactory(SessionFactory):
     def __init__(self) -> None:
-        self.engine = create_engine(f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}")
+        self.engine = create_engine(
+            f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}",
+            connect_args={"connect_timeout": 10},
+            pool_pre_ping=True)
 
     def create_session(self) -> Session:
         session_maker = sessionmaker(bind=self.engine)
