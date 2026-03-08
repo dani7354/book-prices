@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Tuple, Sequence
 
-from sqlalchemy import select, and_, outerjoin, func, case
+from sqlalchemy import select, and_, outerjoin, func, case, distinct
 from sqlalchemy.orm import joinedload, Session
 
 from bookprices.shared.db.tables import BookStore, BookStoreBook, Book, BookPrice
@@ -125,13 +125,15 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         return [(row[0], row[1], row[2]) for row in self._session.execute(stmt).all()]
 
     def get_bookstores_with_updated_prices_percentage(self, date_from: datetime) -> list[tuple[int, str, int, int, float]]:
-        updated_prices = func.count(case((BookPrice.created >= date_from, 1)))
-        book_count = func.count(BookStoreBook.book_id)
+        updated_prices = func.count(
+            distinct(
+                case((BookPrice.created >= date_from, BookStoreBook.book_id))))
+        book_count = func.count(distinct(BookStoreBook.book_id))
         updated_percentage = func.round((updated_prices * 100.0) / book_count, 4)
         stmt = (
             select(
-                func.max(BookStore.id),
-                func.max(BookStore.name),
+                BookStore.id,
+                BookStore.name,
                 book_count,
                 updated_prices,
                 updated_percentage,
@@ -141,7 +143,7 @@ class BookStoreRepository(RepositoryBase[BookStore]):
                 BookPrice,
                 (BookPrice.book_store_id == BookStoreBook.book_store_id)
                 & (BookPrice.book_id == BookStoreBook.book_id))
-            .group_by(BookStoreBook.book_store_id)
+            .group_by(BookStore.id, BookStore.name)
             .order_by(updated_percentage.desc())
         )
 
