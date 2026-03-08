@@ -44,7 +44,7 @@ class StatusService:
             with self._unit_of_work as uow:
                 if source_failed_count := uow.failed_price_update_repository.get_failed_update_count_by_reason(date_from):
                     self._cache.set(
-                        get_failed_count_by_reason_key(date_from), source_failed_count, timeout=CacheTtlOption.MEDIUM.value)
+                        get_failed_count_by_reason_key(date_from), source_failed_count, timeout=CacheTtlOption.SHORT.value)
                     failed_update_counts = source_failed_count
 
         return self._create_failed_price_updates_response(failed_update_counts)
@@ -79,7 +79,7 @@ class StatusService:
         else:
             with self._unit_of_work as uow:
                 if source_import_counts := uow.bookstore_repository.get_book_import_count_by_bookstore(date_from):
-                    self._cache.set(cache_key, source_import_counts, timeout=CacheTtlOption.SHORT)
+                    self._cache.set(cache_key, source_import_counts, timeout=CacheTtlOption.SHORT.value)
                     import_counts = source_import_counts
 
         return self._create_book_import_count_response(import_counts)
@@ -103,7 +103,7 @@ class StatusService:
         else:
             with self._unit_of_work as uow:
                 if source_price_counts := uow.bookprice_repository.get_price_count_by_bookstore(date_from):
-                    self._cache.set(cache_key, source_price_counts, timeout=CacheTtlOption.SHORT)
+                    self._cache.set(cache_key, source_price_counts, timeout=CacheTtlOption.SHORT.value)
                     price_counts = source_price_counts
 
         return self._create_price_count_by_bookstore_response(price_counts)
@@ -131,7 +131,7 @@ class StatusService:
             with self._unit_of_work as uow:
                 if (source_price_counts_for_bookstore := uow.
                         bookstore_repository.get_bookstores_with_updated_prices_percentage(date_from)):
-                    self._cache.set(cache_key, source_price_counts_for_bookstore, timeout=CacheTtlOption.SHORT)
+                    self._cache.set(cache_key, source_price_counts_for_bookstore, timeout=CacheTtlOption.SHORT.value)
                     price_counts_for_bookstore = source_price_counts_for_bookstore
 
         return self._create_updated_prices_for_bookstore_response(price_counts_for_bookstore)
