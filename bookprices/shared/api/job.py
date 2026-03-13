@@ -22,6 +22,7 @@ class Endpoint(Enum):
     JOB = "/api/jobs/{id}"
     JOB_RUNS = "/api/jobruns"
     JOB_RUN = "/api/jobruns/{id}"
+    JOB_RUN_STATISTICS = "/api/statistics/finished-job-runs"
 
     @classmethod
     def get_job_url(cls, job_id: str) -> str:
@@ -38,6 +39,7 @@ class UrlParameter(Enum):
     STATUS = "status"
     SORT_BY = "sortBy"
     SORT_DIRECTION = "sortDirection"
+    DAYS = "days"
 
 
 class JobApiClient:

@@ -6,10 +6,11 @@ from datetime import timedelta, datetime
 from bookprices.shared.cache.key_generator import (
     get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key, get_price_count_by_bookstore_key)
 from bookprices.shared.repository.unit_of_work import UnitOfWork
+from bookprices.shared.service.job_service import JobService, JobRunStatisticsSchemaFields
 from bookprices.web.shared.enum import CacheTtlOption
 from bookprices.web.viewmodels.status import (
     TimePeriodSelectOption, UpdatedPricesForBookStoreResponse, TableResponse, PriceCountsResponse,
-    BookImportCountsResponse, FailedPriceUpdatesResponse)
+    BookImportCountsResponse, FailedPriceUpdatesResponse, JobRunStatisticsResponse)
 
 
 class TableColumn(StrEnum):
@@ -18,13 +19,16 @@ class TableColumn(StrEnum):
     UPDATED_PRICES = "updated_prices"
     UPDATED_PERCENTAGE = "updated_percentage"
     PRICE_COUNT = "price_count"
+    JOB_NAME = "job_name"
+    TOTAL_JOB_RUN_COUNT = "job_run_count"
 
 
 class StatusService:
     """ Service for getting status information for the site dashboard. """
 
-    def __init__(self, unit_of_work: UnitOfWork, cache: Cache) -> None:
+    def __init__(self, unit_of_work: UnitOfWork, job_service: JobService,  cache: Cache) -> None:
         self._unit_of_work = unit_of_work
+        self._job_service = job_service
         self._cache = cache
         self._translations: dict[str, str] = {
             TableColumn.BOOK_STORE: "Boghandler",
@@ -32,6 +36,8 @@ class StatusService:
             TableColumn.BOOK_COUNT: "Bøger",
             TableColumn.UPDATED_PRICES: "Prisopdateringer",
             TableColumn.UPDATED_PERCENTAGE: "Opdateringsprocent",
+            TableColumn.JOB_NAME: "Job",
+            TableColumn.TOTAL_JOB_RUN_COUNT: "Total",
         }
 
     def get_failed_price_updates_by_bookstore(self, days: int) -> FailedPriceUpdatesResponse:
@@ -83,6 +89,11 @@ class StatusService:
                     import_counts = source_import_counts
 
         return self._create_book_import_count_response(import_counts)
+
+    def get_job_run_statistics_by_job(self, days: int) -> JobRunStatisticsResponse:
+        job_run_statistics_json = self._job_service.get_finished_job_runs_statistics(days)
+
+        return self._create_job_run_statistics_response(job_run_statistics_json)
 
     def _create_book_import_count_response(self, import_counts: list[tuple[int, str, int]]) -> BookImportCountsResponse:
         rows = [{TableColumn.BOOK_STORE: bookstore_name, TableColumn.BOOK_COUNT: str(count)}
@@ -154,6 +165,34 @@ class StatusService:
 
         return UpdatedPricesForBookStoreResponse(translations=translations, table=table_response)
 
+    def _create_job_run_statistics_response(self, json: dict):
+        rows = []
+        unique_statuses = set()
+        for job_run in json[JobRunStatisticsSchemaFields.JOB_RUNS]:
+            row = {
+                TableColumn.JOB_NAME: json[JobRunStatisticsSchemaFields.JOB_NAME],
+                TableColumn.TOTAL_JOB_RUN_COUNT: job_run[JobRunStatisticsSchemaFields.TOTAL_JOB_RUN_COUNT]
+            }
+
+            job_run_percentage = json[JobRunStatisticsSchemaFields.PERCENTAGE_BY_STATUS]
+            for status, count in json[JobRunStatisticsSchemaFields.COUNT_BY_STATUS].items():
+                unique_statuses.add(status)
+                percentage = job_run_percentage[status]
+                row[status] = self._format_count_percentage_cell(count, percentage)
+
+            for status in unique_statuses:
+                if status not in row:
+                    row[status] = self._format_count_percentage_cell(0, 0.00)
+
+            rows.append(row)
+
+        columns = list(rows[0].keys() if rows else [])
+        columns.extend(unique_statuses)
+        translations = self._get_translations_for_columns(columns)
+        table_response = TableResponse(title="Jobkørsler", columns=columns, rows=rows)
+
+        return JobRunStatisticsResponse(translations=translations, table=table_response)
+
     def _get_translations_for_columns(self, columns: list[str]) -> dict[str, str]:
         return {column: self._translations.get(column, column) for column in columns}
 
@@ -169,3 +208,7 @@ class StatusService:
         ]
 
         return timeperiod_options
+
+    @staticmethod
+    def _format_count_percentage_cell(count: int, percentage: float) -> str:
+        return f"{count} ({percentage:.2f}%)"

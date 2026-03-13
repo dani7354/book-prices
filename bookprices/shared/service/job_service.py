@@ -80,6 +80,16 @@ class JobRunPriority(StrEnum):
     HIGH = "High"
 
 
+class JobRunStatisticsSchemaFields(StrEnum):
+    JOB_RUNS = "jobRuns"
+    JOB_ID = "jobId"
+    JOB_NAME = "jobName"
+    TOTAL_JOB_RUN_COUNT = "totalJobRunCount"
+    COUNT_BY_STATUS = "jobRunCountByStatus"
+    PERCENTAGE_BY_STATUS = "jobRunPercentageByStatus"
+    GENERATED_AT = "generatedAt"
+
+
 class JobService:
 
     def __init__(self, job_api_client: JobApiClient) -> None:
@@ -257,3 +267,16 @@ class JobService:
         except HTTPError as e:
             logger.error(f"Failed to delete job run with id {job_run_id}. Error: {e}")
             raise DeletionFailedError(f"Job run with id {job_run_id} could not be deleted.")
+
+    def get_finished_job_runs_statistics(self, days: int) -> dict:
+        try:
+            url = f"{Endpoint.JOB_RUN_STATISTICS}?{UrlParameter.DAYS}={days}"
+            job_run_statistics_json = self._job_api_client.get(url)
+
+            return job_run_statistics_json
+        except ApiUnavailableError as e:
+            logger.error(f"Job API is unavailable. Failed to get statistics for finished job runs.")
+            raise JobSourceUnavailableError from e
+        except HTTPError as e:
+            logger.error(f"Failed to get statistics for finished job runs: {e}")
+            raise FailedToGetJobRunsError from e
