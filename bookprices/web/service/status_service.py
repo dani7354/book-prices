@@ -170,12 +170,12 @@ class StatusService:
         unique_statuses = set()
         for job_run in json[JobRunStatisticsSchemaFields.JOB_RUNS]:
             row = {
-                TableColumn.JOB_NAME: json[JobRunStatisticsSchemaFields.JOB_NAME],
+                TableColumn.JOB_NAME: job_run[JobRunStatisticsSchemaFields.JOB_NAME],
                 TableColumn.TOTAL_JOB_RUN_COUNT: job_run[JobRunStatisticsSchemaFields.TOTAL_JOB_RUN_COUNT]
             }
 
-            job_run_percentage = json[JobRunStatisticsSchemaFields.PERCENTAGE_BY_STATUS]
-            for status, count in json[JobRunStatisticsSchemaFields.COUNT_BY_STATUS].items():
+            job_run_percentage = job_run[JobRunStatisticsSchemaFields.PERCENTAGE_BY_STATUS]
+            for status, count in job_run[JobRunStatisticsSchemaFields.COUNT_BY_STATUS].items():
                 unique_statuses.add(status)
                 percentage = job_run_percentage[status]
                 row[status] = self._format_count_percentage_cell(count, percentage)
