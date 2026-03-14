@@ -7,7 +7,7 @@ from requests.status_codes import codes
 
 from bookprices.shared.api.error import retry_on_connection_error
 from bookprices.shared.db.tables import ApiKey
-from enum import Enum
+from enum import StrEnum
 from typing import ClassVar, Callable
 
 from bookprices.shared.repository.unit_of_work import UnitOfWork
@@ -15,8 +15,7 @@ from bookprices.shared.repository.unit_of_work import UnitOfWork
 logger = logging.getLogger(__name__)
 
 
-
-class Endpoint(Enum):
+class Endpoint(StrEnum):
     LOGIN = "/api/auth/login"
     JOBS = "/api/jobs"
     JOB = "/api/jobs/{id}"
@@ -33,7 +32,7 @@ class Endpoint(Enum):
         return cls.JOB_RUN.value.format(id=job_run_id)
 
 
-class UrlParameter(Enum):
+class UrlParameter(StrEnum):
     JOB_ID = "jobId"
     LIMIT = "limit"
     STATUS = "status"
