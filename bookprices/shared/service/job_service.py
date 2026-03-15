@@ -275,7 +275,7 @@ class JobService:
 
             return job_run_statistics_json
         except ApiUnavailableError as e:
-            logger.error(f"Job API is unavailable. Failed to get statistics for finished job runs.")
+            logger.error("Job API is unavailable. Failed to get statistics for finished job runs.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
             logger.error(f"Failed to get statistics for finished job runs: {e}")
