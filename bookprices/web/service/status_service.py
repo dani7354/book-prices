@@ -4,7 +4,8 @@ from enum import StrEnum
 from flask_caching import Cache
 from datetime import timedelta, datetime
 from bookprices.shared.cache.key_generator import (
-    get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key, get_price_count_by_bookstore_key)
+    get_failed_count_by_reason_key, get_book_import_count_key, get_price_count_key, get_price_count_by_bookstore_key,
+    get_job_run_statistics_key)
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.job_service import JobService, JobRunStatisticsSchemaFields
 from bookprices.web.shared.enum import CacheTtlOption
@@ -91,9 +92,17 @@ class StatusService:
         return self._create_book_import_count_response(import_counts)
 
     def get_job_run_statistics_by_job(self, days: int) -> JobRunStatisticsResponse:
-        job_run_statistics_json = self._job_service.get_finished_job_runs_statistics(days)
+        date_from = datetime.now() - timedelta(days=days)
+        cache_key = get_job_run_statistics_key(date_from)
+        if cached_job_run_stats := self._cache.get(cache_key):
+            job_run_stats = cached_job_run_stats
+        else:
 
-        return self._create_job_run_statistics_response(job_run_statistics_json)
+            job_run_stats_source = self._job_service.get_finished_job_runs_statistics(days)
+            self._cache.set(cache_key, job_run_stats_source, timeout=CacheTtlOption.SHORT.value)
+            job_run_stats = job_run_stats_source
+
+        return self._create_job_run_statistics_response(job_run_stats)
 
     def _create_book_import_count_response(self, import_counts: list[tuple[int, str, int]]) -> BookImportCountsResponse:
         rows = [{TableColumn.BOOK_STORE: bookstore_name, TableColumn.BOOK_COUNT: str(count)}
@@ -165,7 +174,7 @@ class StatusService:
 
         return UpdatedPricesForBookStoreResponse(translations=translations, table=table_response)
 
-    def _create_job_run_statistics_response(self, json: dict):
+    def _create_job_run_statistics_response(self, json: dict) -> JobRunStatisticsResponse:
         rows = []
         unique_statuses = set()
         for job_run in json[JobRunStatisticsSchemaFields.JOB_RUNS]:
@@ -187,7 +196,6 @@ class StatusService:
             rows.append(row)
 
         columns = list(rows[0].keys() if rows else [])
-        columns.extend(unique_statuses)
         translations = self._get_translations_for_columns(columns)
         table_response = TableResponse(title="Jobkørsler", columns=columns, rows=rows)
 
