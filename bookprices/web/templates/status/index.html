@@ -2,7 +2,7 @@
 {% set active_page = "status" %}
 {% block content %}
 <h1>Status</h1>
- <div class="col-4">
+<div class="col-4">
      <div class="form-group">
          <label for="timeperiod-select">Vælg tid: </label>
          <select id="timeperiod-select" class="form-select" name="timeperiod" aria-label="Tid">
@@ -11,12 +11,14 @@
              {% endfor %}
         </select>
      </div>
-
  </div>
+
+
 <div id="failed-price-updates-container" class="mt-4"></div>
 <div id="book-import-counts-container" class="mt-4"></div>
 <div id="book-prices-updated-container" class="mt-4"> </div>
 <div id="book-price-counts-container" class="mt-4"></div>
+<div id="finished-job-runs-container" class="mt-4"></div>
 
 
 <script src="{{ url_for('static', filename='js/status.js') }}"

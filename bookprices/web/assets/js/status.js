@@ -3,6 +3,7 @@ const failedPriceUpdatesContainer = $("#failed-price-updates-container");
 const bookImportCountsContainer = $("#book-import-counts-container");
 const bookPriceCountsContainer = $("#book-price-counts-container");
 const priceUpdatesContainer = $("#book-prices-updated-container");
+const finishedJobRunsByJobContainer = $("#finished-job-runs-container");
 
 const baseUrl = "/status";
 
@@ -148,20 +149,47 @@ function getUpdatedPricesForBookStores(){
                 console.log(error);
             }
     });
-
 }
 
+
+function getFinishedJobRunsByJob(){
+    let selectedTimePeriodDays = encodeURIComponent(timePeriodSelect.val());
+    let url = `${baseUrl}/job-run-count-by-job?days=${selectedTimePeriodDays}`;
+    $.ajax(url, {
+            "method" : "GET",
+            "dataType": "json",
+            "success" : function (data, status, xhr) {
+                let title = data["table"]["title"];
+                let columns = data["table"]["columns"];
+                let rows = data["table"]["rows"];
+                let translations = data["translations"];
+                let headingId = "finished-job-runs-heading";
+                initializeTable(
+                    finishedJobRunsByJobContainer,
+                    title,
+                    columns,
+                    rows,
+                    translations,
+                    headingId);
+            },
+            "error" : function (error) {
+                console.log(error);
+            }
+    });
+}
 
 $(document).ready(() => {
     getFailedPriceUpdates();
     getBookImportCounts();
     getBookPriceCounts();
     getUpdatedPricesForBookStores();
+    getFinishedJobRunsByJob();
 
     timePeriodSelect.on("change", () => {
         getFailedPriceUpdates();
         getBookImportCounts();
         getBookPriceCounts();
         getUpdatedPricesForBookStores();
+        getFinishedJobRunsByJob();
     });
 });
