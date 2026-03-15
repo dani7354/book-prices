@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, Response, jsonify, request
 from flask_login import login_required
+
+from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.repository.unit_of_work import UnitOfWork
+from bookprices.shared.service.job_service import JobService
 from bookprices.web.cache.redis import cache
 from bookprices.web.service.auth_service import require_admin
 from bookprices.web.service.csrf import get_csrf_token
@@ -9,7 +12,8 @@ from bookprices.web.shared.db_session import WebSessionFactory
 from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, StatusTemplate
 from bookprices.web.viewmodels.status import IndexViewModel
 from bookprices.web.blueprints.urlhelper import parse_args_for_status_endpoint
-from bookprices.web.settings import TIMEPERIOD_DAYS_URL_PARAMETER
+from bookprices.web.settings import TIMEPERIOD_DAYS_URL_PARAMETER, JOB_API_BASE_URL, JOB_API_USERNAME, JOB_API_PASSWORD, \
+    JOB_API_CLIENT_ID
 
 status_blueprint = Blueprint("status", __name__)
 
@@ -81,5 +85,23 @@ def updated_prices() -> tuple[Response, int]:
     return jsonify(updated_prices_response), HttpStatusCode.OK
 
 
+@status_blueprint.route("/job-run-count-by-job", methods=[HttpMethod.GET])
+@login_required
+@require_admin
+def job_run_count_by_job() -> tuple[Response, int]:
+    status_service = _create_status_service()
+    timeperiod_options = status_service.get_timeperiod_options()
+    args = parse_args_for_status_endpoint(request.args, timeperiod_options[0].days)
+    job_run_count_by_job_response = status_service.get_job_run_statistics_by_job(
+        days=args[TIMEPERIOD_DAYS_URL_PARAMETER])
+
+    return jsonify(job_run_count_by_job_response), HttpStatusCode.OK
+
+
 def _create_status_service() -> StatusService:
-    return StatusService(UnitOfWork(WebSessionFactory()), cache)
+    job_service = JobService(
+        JobApiClient(
+            JOB_API_BASE_URL, JOB_API_USERNAME, JOB_API_PASSWORD, JOB_API_CLIENT_ID,
+            UnitOfWork(WebSessionFactory())))
+
+    return StatusService(UnitOfWork(WebSessionFactory()), job_service, cache)
