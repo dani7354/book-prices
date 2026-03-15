@@ -30,5 +30,6 @@
     </a>
 </div>
 
-<script src="{{ url_for('static', filename='js/booklist.js') }}"></script>
+<script src="{{ url_for('static', filename='js/booklist.js') }}"
+        integrity="{{ sri_attribute_values['booklist_js'] }}"></script>
 {% endblock %}

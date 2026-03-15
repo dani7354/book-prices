@@ -55,9 +55,9 @@ SRI_ATTRIBUTE_VALUES = {
     "search_js": ("sha256-x6jrCBrfzLs34vymj15wO7JYE4dv8+guDsw2gTwLBw4= "
                   "sha384-zMJ85kLYeyaHQm2oOTy8r4EuIf/zjM9KhxZCppMcXBS9m4eXL372gZax+tjMYbhG "
                   "sha512-Z5RQ0pcYZQJlrLNIlEk+0uyUsXLCCOPQj7E6RZRTZGzsguRny81XjfK3PKplLa6Y3yYKFIagzg8j2Ck5HsGehQ=="),
-    "status_js": ("sha256-r9I4N7NTj6kc0RniHSX/uIUP+d9n6hQcVjjC7bt5dYc= "
-                  "sha384-d2gVRfKAWZF7x6nINMrb64n/3lZflPI6wvOk80JxjT5+80GG9fbsJAbIk7rVtLne "
-                  "sha512-YSmICc/jZ/sRumRtP3j5WrDmbuqSU1wxH+PIj7JZL/jnZiJ/H2M24gKLCWU5rNrpVB52VGHeBPZtNpU1rT29XQ=="),
+    "status_js": ("sha256-C3FLOaoTGOEoqpZAkJoyr+rBTt0/G63EzUA7hE07pEY= "
+                  "sha384-yxnh6V5azyqy5wWenG0+u+duzjM3pkSEhqB88tZH7ZSUDHIuWdZeX5bZLyn39GUP "
+                  "sha512-JaU7vtzb6A2UKqu6nRgQbRvlBKBFCU9lZxLtO7Tn54yx0bjpQVnk58lq72odb6TY7sdrI5R9la4qV+ImDXnH5Q=="),
     "book_js": ("sha256-ksumcu4R2xURc6vKSeMzzP9YTz3y2lVvhTzUoKzM9+Y= "
                 "sha384-HyrFTCYmUdoLpv+cbiY1xutb3nWahLHn4QQZBq9EBpjGtYhbBMZrso3hsVfeN3Ln "
                 "sha512-+UjqPHpLx52FfgXAWO6sc70sn/MJ/MwgvO854kVyx2P4wG0zDwIwiAJaLeyxCUw74xQz4iI8Fl2O6M/gtw9aBg=="),

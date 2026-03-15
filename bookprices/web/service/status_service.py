@@ -195,6 +195,7 @@ class StatusService:
 
             rows.append(row)
 
+        rows.sort(key=lambda x: x[TableColumn.TOTAL_JOB_RUN_COUNT], reverse=True)
         columns = list(rows[0].keys() if rows else [])
         translations = self._get_translations_for_columns(columns)
         table_response = TableResponse(title="Jobkørsler", columns=columns, rows=rows)
