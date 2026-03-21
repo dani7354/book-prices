@@ -22,7 +22,7 @@ class BookRepository(RepositoryBase[Book]):
         return entity.id
 
     def update(self, entity: Book) -> None:
-        if not (existing_book := self._session.get(Book, entity.id)):
+        if not (existing_book := super().get(entity.id)):
             raise ValueError(f"Book with id {entity.id} not found.")
 
         existing_book.format = entity.format
