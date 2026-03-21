@@ -8,6 +8,7 @@ from bookprices.shared.service.currency_service import CurrencyService
 
 class UpdateCurrenciesJob(JobBase):
     """ Updates currency exchange rates by fetching the latest data from a public API. """
+
     name: ClassVar[str] = "UpdateCurrenciesJob"
 
     def __init__(self, config: Config, currency_service: CurrencyService) -> None:
