@@ -1,4 +1,5 @@
 import logging
+import traceback
 from queue import Queue
 from typing import ClassVar
 
@@ -6,7 +7,6 @@ from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
-from bookprices.shared.webscraping.image import ImageDownloader
 
 
 class DownloadImagesJob(JobBase):
@@ -38,6 +38,7 @@ class DownloadImagesJob(JobBase):
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
+            self._logger.error(traceback.format_exc())
             return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
 
 

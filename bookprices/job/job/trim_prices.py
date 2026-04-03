@@ -1,3 +1,4 @@
+import traceback
 from typing import ClassVar, Sequence
 from logging import getLogger
 
@@ -41,6 +42,7 @@ class TrimPricesJob(JobBase):
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
+            self._logger.error(traceback.format_exc())
             return JobResult(JobExitStatus.FAILURE, error_message=ex)
 
     def trim_prices_for_book(self, book_id: int) -> None:

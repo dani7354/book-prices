@@ -1,4 +1,5 @@
 import logging
+import traceback
 from urllib.parse import urlparse
 from queue import Queue
 from threading import Thread
@@ -78,6 +79,7 @@ class BookStoreSearchJob(JobBase):
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
+            self._logger.error(traceback.format_exc())
             return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
 
     def _create_scrapers(self) -> None:

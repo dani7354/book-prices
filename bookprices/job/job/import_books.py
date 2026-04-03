@@ -1,5 +1,6 @@
 import datetime
 import logging
+import traceback
 from urllib.parse import urlparse
 
 import queue
@@ -89,6 +90,7 @@ class WilliamDamBookImportJob(JobBase):
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
+            self._logger.error(traceback.format_exc())
             return JobResult(JobExitStatus.FAILURE, error_message=ex)
 
     def _get_book_urls(self) -> None:
@@ -180,8 +182,9 @@ class WilliamDamBookImportJob(JobBase):
                 with self._unit_of_work as uow:
                     uow.bookstore_repository.add_book_to_bookstore_if_not_exists(book_id, self._bookstore_id, url)
             except Exception as ex:
-                self._logger.error(f"Error while inserting book: {book.title}, {book.author}, {book.isbn}")
-                self._logger.error(ex)
+                self._logger.error(f"Error while inserting book: {book.title}, {book.author}, {book.isbn}: {ex}")
+                self._logger.error(traceback.format_exc())
+
         logging.info(f"{created_count} new book(s) saved!")
         logging.info(f"{updated_count} book(s) updated!")
 
