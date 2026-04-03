@@ -33,6 +33,7 @@ def main() -> None:
     except Exception as ex:
         logger.error(ex)
         logger.error(traceback.format_exc())
+        raise SystemExit(1) from ex
 
 
 if __name__ == "__main__":
