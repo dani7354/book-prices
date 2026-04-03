@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 from bookprices.job.db.session import JobSessionFactory
 from bookprices.job.scheduler.jobscheduler import JobScheduler
 from bookprices.shared.api.job import JobApiClient
@@ -10,19 +13,26 @@ JOB_API_CLIENT_ID = "JobApiJobScheduler"
 PROGRAM_NAME = "JobScheduler"
 
 
-def main() -> None:
-    config = loader.load_from_env()
-    setup_logging(config, PROGRAM_NAME)
-    job_api_client = JobApiClient(
-        config.job_api.base_url,
-        config.job_api.api_username,
-        config.job_api.api_password,
-        JOB_API_CLIENT_ID,
-        UnitOfWork(JobSessionFactory(config)))
+logger = logging.getLogger(PROGRAM_NAME)
 
-    job_service = JobService(job_api_client)
-    job_scheduler = JobScheduler(job_service)
-    job_scheduler.start()
+
+def main() -> None:
+    try:
+        config = loader.load_from_env()
+        setup_logging(config, PROGRAM_NAME)
+        job_api_client = JobApiClient(
+            config.job_api.base_url,
+            config.job_api.api_username,
+            config.job_api.api_password,
+            JOB_API_CLIENT_ID,
+            UnitOfWork(JobSessionFactory(config)))
+
+        job_service = JobService(job_api_client)
+        job_scheduler = JobScheduler(job_service)
+        job_scheduler.start()
+    except Exception as ex:
+        logger.error(ex)
+        logger.error(traceback.format_exc())
 
 
 if __name__ == "__main__":

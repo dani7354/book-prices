@@ -1,5 +1,6 @@
 import logging
 import time
+import traceback
 from threading import Thread
 from typing import ClassVar
 
@@ -24,7 +25,7 @@ class JobScheduler:
     def __init__(self, job_service: JobService) -> None:
         self._job_service = job_service
         self._logger = logging.getLogger(__name__)
-        self._available_jobs = {}
+        self._available_jobs: dict[str, int] = {}
 
     def start(self) -> None:
         self._logger.info("Starting job scheduler...")
@@ -40,9 +41,11 @@ class JobScheduler:
                 running = False
             except JobSourceUnavailableError as e:
                 self._logger.error(f"Job API is unavailable: {e}. Exiting...")
+                self._logger.error(traceback.format_exc())
                 running = False
             except Exception as ex:
                 self._logger.error(f"Error while sending start request: {ex}")
+                self._logger.error(traceback.format_exc())
 
         self._logger.info("Job scheduler stopped.")
 

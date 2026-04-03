@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from bookprices.job.job.base import DEFAULT_THREAD_COUNT
 from bookprices.job.job.book_search import BookStoreSearchJob
@@ -37,6 +38,9 @@ from bookprices.shared.db.data_session import SessionFactory
 THREAD_COUNT = 8
 JOB_API_CLIENT_ID = "JobApiJobRunner"
 PROGRAM_NAME = "JobRunner"
+
+
+logger = logging.getLogger(PROGRAM_NAME)
 
 
 def create_database_container(config: Config) -> Database:
@@ -202,27 +206,31 @@ def create_update_currencies_job(config: Config) -> UpdateCurrenciesJob:
 
 
 def main() -> None:
-    config = loader.load_from_env()
-    setup_logging(config, PROGRAM_NAME)
-    logging.info("Config loaded successfully. Logging setup.")
+    try:
+        config = loader.load_from_env()
+        setup_logging(config, PROGRAM_NAME)
+        logging.info("Config loaded successfully. Logging setup.")
 
-    logging.info("Setting up required services and job instances...")
-    event_manager = setup_event_manager(config)
-    job_api_client = create_job_api_client(config)
-    service = RunnerJobService(job_api_client)
-    jobs = [
-        create_trim_prices_job(config),
-        create_download_images_job(config),
-        create_delete_unavailable_books_job(config, event_manager),
-        create_delete_images_job(config),
-        create_delete_prices_job(config),
-        create_all_book_prices_update_job(config, event_manager),
-        create_book_search_job(config, event_manager),
-        create_william_dam_book_import_job(config, event_manager),
-        create_update_currencies_job(config),
-    ]
-    job_runner = JobRunner(config, jobs, service)
-    job_runner.start()
+        logging.info("Setting up required services and job instances...")
+        event_manager = setup_event_manager(config)
+        job_api_client = create_job_api_client(config)
+        service = RunnerJobService(job_api_client)
+        jobs = [
+            create_trim_prices_job(config),
+            create_download_images_job(config),
+            create_delete_unavailable_books_job(config, event_manager),
+            create_delete_images_job(config),
+            create_delete_prices_job(config),
+            create_all_book_prices_update_job(config, event_manager),
+            create_book_search_job(config, event_manager),
+            create_william_dam_book_import_job(config, event_manager),
+            create_update_currencies_job(config),
+        ]
+        job_runner = JobRunner(config, jobs, service)
+        job_runner.start()
+    except Exception as ex:
+        logger.error(ex)
+        logger.error(traceback.format_exc())
 
 
 if __name__ == "__main__":

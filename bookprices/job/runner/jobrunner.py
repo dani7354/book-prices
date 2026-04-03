@@ -1,4 +1,5 @@
 import time
+import traceback
 from logging import getLogger
 from typing import ClassVar, Sequence
 from collections import Counter
@@ -40,6 +41,7 @@ class JobRunner:
                 running = False
             except Exception as e:
                 self._logger.error(f"Unexpected error: {e}")
+                self._logger.error(traceback.format_exc())
 
     def run_job(self, job_run: JobRun) -> None:
         job = self._jobs.get(job_run.job_name)
