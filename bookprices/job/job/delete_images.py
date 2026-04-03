@@ -1,5 +1,5 @@
 import logging
-import os
+import traceback
 from typing import ClassVar
 
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
@@ -41,6 +41,7 @@ class DeleteImagesJob(JobBase):
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
+            self._logger.error(traceback.format_exc())
             return JobResult(JobExitStatus.FAILURE, error_message=ex)
 
     def _get_image_filenames_from_db(self) -> set[str]:
