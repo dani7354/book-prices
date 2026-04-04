@@ -6,7 +6,7 @@ from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.currency_service import CurrencyService
 from bookprices.shared.webscraping.bookstore import (
     BookStoreScraper, StaticBookStoreScraper, BookStoreConfiguration, WilliamDamScraper, SaxoScraper, BogOgIdeScraper,
-    PlusbogScraper, ThiemersScraper, GuccaScraper, CSalgScraper, IMusicScraper)
+    PlusbogScraper, GuccaScraper, CSalgScraper, IMusicScraper, AcademicBooksScraper, DinBoghandelScraper)
 from bookprices.shared.webscraping.currency import CurrencyConverter
 
 
@@ -22,10 +22,11 @@ class BookStoreScraperService:
             SaxoScraper.get_name(): SaxoScraper,
             BogOgIdeScraper.get_name(): BogOgIdeScraper,
             PlusbogScraper.get_name(): PlusbogScraper,
-            ThiemersScraper.get_name(): ThiemersScraper,
             GuccaScraper.get_name(): GuccaScraper,
             CSalgScraper.get_name(): CSalgScraper,
             IMusicScraper.get_name(): IMusicScraper,
+            AcademicBooksScraper.get_name(): AcademicBooksScraper,
+            DinBoghandelScraper.get_name(): DinBoghandelScraper,
         }
 
     def list_scrapers(self) -> list[BookStoreScraper]:
