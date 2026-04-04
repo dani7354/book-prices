@@ -258,6 +258,7 @@ class PlusbogBookScraper(BookScraper):
         if not (match_url := html_content.find_element_and_get_attribute_value(
                 self._search_result_css_selector, "href")):
             self._logger.debug("Match url not found in HTML.")
+            return None
 
         self._logger.debug(f"Found match url: {match_url}")
         return urlparse(match_url).path
@@ -267,7 +268,7 @@ class PlusbogBookScraper(BookScraper):
         return match_url.endswith(isbn)
 
     @staticmethod
-    def _create_form_data(isbn: str) -> dict[str, str]:
+    def _create_form_data(isbn: str) -> dict[str, str | int]:
         return {
             "input": isbn,
             "pageIndex": 0,

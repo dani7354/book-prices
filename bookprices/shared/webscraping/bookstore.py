@@ -65,11 +65,6 @@ class StaticBookStoreScraper(BookStoreScraper):
     This scraper assumes that the bookstore website does not load dynamic content via JavaScript and
     that the request is redirected to the book detail page when searching for a book by ISBN
     """
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
-
     _price_format_fallback: ClassVar[str] = FALLBACK_PRICE_FORMAT
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
@@ -95,6 +90,10 @@ class StaticBookStoreScraper(BookStoreScraper):
     def get_price(self, url: str) -> float:
         return self._price_scraper.get_price(url)
 
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
+
 
 class WilliamDamScraper(StaticBookStoreScraper):
     """ Scraper for WilliamDam.dk bookstore. """
@@ -117,17 +116,10 @@ class WilliamDamScraper(StaticBookStoreScraper):
             self._max_requests_per_period,
             self._period_seconds)
 
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
-
 
 class SaxoScraper(StaticBookStoreScraper):
     """ Scraper for Saxo.com bookstore. """
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
+    pass
 
 
 class BogOgIdeScraper(StaticBookStoreScraper):
@@ -141,10 +133,6 @@ class BogOgIdeScraper(StaticBookStoreScraper):
             configuration.bookstore_search_url,
             configuration.search_result_css_selector,
             configuration.bookstore_isbn_css_selector)
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
 
 
 class PlusbogScraper(StaticBookStoreScraper):
@@ -161,31 +149,6 @@ class PlusbogScraper(StaticBookStoreScraper):
             configuration.bookstore_search_url,
             configuration.search_result_css_selector,
             self._rate_limiter)
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
-
-
-class ThiemersScraper(StaticBookStoreScraper):
-    """ Scraper for Thiemers Magasin bookstore. """
-    _max_requests_per_period: ClassVar[int] = 2
-    _period_seconds: ClassVar[int] = 1
-
-    def __init__(self, configuration: BookStoreConfiguration) -> None:
-        super().__init__(configuration)
-        self._book_scraper = RateLimitedMatchesInResultListBookScraper(
-            configuration.bookstore_id,
-            configuration.bookstore_url,
-            configuration.bookstore_search_url,
-            configuration.search_result_css_selector,
-            configuration.bookstore_isbn_css_selector,
-            max_requests=self._max_requests_per_period,
-            period_seconds=self._period_seconds)
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
 
 
 class GuccaScraper(StaticBookStoreScraper):
@@ -211,10 +174,6 @@ class GuccaScraper(StaticBookStoreScraper):
             self._period_seconds,
             configuration.currency_converter)
 
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
-
 
 class CSalgScraper(StaticBookStoreScraper):
     """ Scraper for computersalg.dk bookstore. """
@@ -232,10 +191,6 @@ class CSalgScraper(StaticBookStoreScraper):
             max_requests=self._max_requests_per_period,
             period_seconds=self._period_seconds)
 
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
-
 
 class IMusicScraper(StaticBookStoreScraper):
     """ Scraper for imusic.dk bookstore. """
@@ -248,6 +203,39 @@ class IMusicScraper(StaticBookStoreScraper):
             configuration.bookstore_id,
             configuration.bookstore_url,
             configuration.bookstore_search_url,
+            configuration.bookstore_isbn_css_selector,
+            max_requests=self._max_requests_per_period,
+            period_seconds=self._period_seconds)
+
+
+class AcademicBooksScraper(StaticBookStoreScraper):
+    """ Scraper for academicbooks.dk bookstore. """
+    _max_requests_per_period: ClassVar[int] = 3
+    _period_seconds: ClassVar[int] = 1
+
+    def  __init__(self, configuration: BookStoreConfiguration) -> None:
+        super().__init__(configuration)
+        self._book_scraper = RateLimitedRedirectsToDetailPageBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            configuration.bookstore_isbn_css_selector,
+            max_requests=self._max_requests_per_period,
+            period_seconds=self._period_seconds)
+
+
+class DinBoghandelScraper(StaticBookStoreScraper):
+    """ Scraper for dinboghandel.dk bookstore. """
+    _max_requests_per_period: ClassVar[int] = 3
+    _period_seconds: ClassVar[int] = 1
+
+    def __init__(self, configuration: BookStoreConfiguration) -> None:
+        super().__init__(configuration)
+        self._book_scraper = RateLimitedMatchesInResultListBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            configuration.search_result_css_selector,
             configuration.bookstore_isbn_css_selector,
             max_requests=self._max_requests_per_period,
             period_seconds=self._period_seconds)
