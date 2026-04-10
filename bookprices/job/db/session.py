@@ -12,9 +12,12 @@ class JobSessionFactory(SessionFactory):
             f"{config.database.db_host}/{config.database.db_name}", pool_pre_ping=True)
 
     def create_session(self) -> Session:
-        session_maker = sessionmaker(bind=self.engine)
+        session_maker = self._create_session_maker()
         return session_maker()
 
     def create_scoped_session(self) -> Session:
-        session_maker = sessionmaker(bind=self.engine)
+        session_maker = self._create_session_maker()
         return scoped_session(session_maker)()
+
+    def _create_session_maker(self) -> sessionmaker:
+        return sessionmaker(bind=self.engine, expire_on_commit=False)
