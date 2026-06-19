@@ -48,6 +48,7 @@ class BookStore(BaseModel):
     price_format = Column('PriceFormat', String(80), nullable=True)
     color_hex = Column('ColorHex', CHAR(6), nullable=True)
     scraper_id = Column('ScraperId', String(255), nullable=True)
+    api_key = Column("ApiKey", String(255), nullable=True)
 
 
 class BookStoreBook(BaseModel):

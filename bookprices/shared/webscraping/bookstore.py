@@ -5,7 +5,7 @@ from typing import ClassVar
 
 from bookprices.shared.webscraping.book import (
     RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, RateLimitedRedirectsToDetailPageBookScraper,
-    RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper)
+    RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper, BogOgIdeBookScraper)
 from bookprices.shared.webscraping.currency import CurrencyConverter
 from bookprices.shared.webscraping.http import RateLimiter
 from bookprices.shared.webscraping.price import (
@@ -35,6 +35,7 @@ class BookStoreConfiguration:
     bookstore_price_format: str | None
     bookstore_isbn_css_selector: str | None
     search_result_css_selector: str | None
+    bookstore_api_key: str | None
     currency_converter: CurrencyConverter
 
 
@@ -129,14 +130,12 @@ class BogOgIdeScraper(StaticBookStoreScraper):
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
-        self._book_scraper = RateLimitedMatchesInResultListBookScraper(
+        self._rate_limiter = RateLimiter(self._max_requests_per_period, self._period_seconds)
+        self._book_scraper = BogOgIdeBookScraper(
             configuration.bookstore_id,
             configuration.bookstore_url,
             configuration.bookstore_search_url,
-            configuration.search_result_css_selector,
-            configuration.bookstore_isbn_css_selector,
-            max_requests=self._max_requests_per_period,
-            period_seconds=self._period_seconds)
+            rate_limiter=self._rate_limiter)
 
 
 class PlusbogScraper(StaticBookStoreScraper):

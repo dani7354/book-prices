@@ -61,6 +61,7 @@ class BookStoreScraperService:
             bookstore_price_format=bookstore.price_format,
             bookstore_isbn_css_selector=bookstore.isbn_css_selector,
             search_result_css_selector=bookstore.search_result_css_selector,
+            bookstore_api_key=bookstore.api_key,
             currency_converter=currency_converter)
 
         return scraper_class(configuration)
