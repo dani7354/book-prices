@@ -181,8 +181,8 @@ class GuccaScraper(StaticBookStoreScraper):
 
 class CSalgScraper(StaticBookStoreScraper):
     """ Scraper for computersalg.dk bookstore. """
-    _max_requests_per_period: ClassVar[int] = 2
-    _period_seconds: ClassVar[int] = 1
+    _max_requests_per_period: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 2
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
@@ -198,8 +198,8 @@ class CSalgScraper(StaticBookStoreScraper):
 
 class IMusicScraper(StaticBookStoreScraper):
     """ Scraper for imusic.dk bookstore. """
-    _max_requests_per_period: ClassVar[int] = 2
-    _period_seconds: ClassVar[int] = 1
+    _max_requests_per_period: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 3
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
@@ -214,7 +214,7 @@ class IMusicScraper(StaticBookStoreScraper):
 
 class AcademicBooksScraper(StaticBookStoreScraper):
     """ Scraper for academicbooks.dk bookstore. """
-    _max_requests_per_period: ClassVar[int] = 3
+    _max_requests_per_period: ClassVar[int] = 2
     _period_seconds: ClassVar[int] = 1
 
     def  __init__(self, configuration: BookStoreConfiguration) -> None:
@@ -231,7 +231,7 @@ class AcademicBooksScraper(StaticBookStoreScraper):
 
 class DinBoghandelScraper(StaticBookStoreScraper):
     """ Scraper for dinboghandel.dk bookstore. """
-    _max_requests_per_period: ClassVar[int] = 3
+    _max_requests_per_period: ClassVar[int] = 2
     _period_seconds: ClassVar[int] = 1
 
     def __init__(self, configuration: BookStoreConfiguration) -> None:
