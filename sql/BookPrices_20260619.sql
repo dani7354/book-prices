@@ -51,7 +51,7 @@ CREATE TABLE `Book` (
   UNIQUE KEY `Isbn` (`Isbn`),
   KEY `Title` (`Title`),
   KEY `Author` (`Author`)
-) ENGINE=InnoDB AUTO_INCREMENT=6766 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+ ) ENGINE=InnoDB AUTO_INCREMENT=9338 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -111,7 +111,7 @@ CREATE TABLE `BookPrice` (
   KEY `Created` (`Created`),
   CONSTRAINT `BookPrice_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `BookPrice_ibfk_2` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=339682 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=386559 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,8 +133,9 @@ CREATE TABLE `BookStore` (
   `PriceFormat` varchar(80) DEFAULT NULL,
   `ColorHex` char(6) DEFAULT NULL,
   `ScraperId` varchar(255) DEFAULT NULL,
+  `ApiKey` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -210,7 +211,7 @@ CREATE TABLE `FailedPriceUpdate` (
   KEY `Created` (`Created`),
   CONSTRAINT `PriceUpdateFailed_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `PriceUpdateFailed_ibfk_2` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=58934 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60142 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -248,4 +249,4 @@ CREATE TABLE `User` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-06  6:08:35
+-- Dump completed on 2026-06-19 22:00:49

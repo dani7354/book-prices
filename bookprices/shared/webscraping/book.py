@@ -276,3 +276,234 @@ class PlusbogBookScraper(BookScraper):
             "filtersPreExists": "true",
             "needAutoScroll": "false"
         }
+
+
+class BogOgIdeBookScraper(BookScraper):
+    """ Custom book scraper for store. Uses POST request to external API. """
+    _json_responses_key: ClassVar[str] = "responses"
+    _json_results_key: ClassVar[str] = "results"
+    _json_product_id_key: ClassVar[str] = "productId"
+    _json_shopify_handle_key: ClassVar[str] = "bogogide.myshopify.com_ShopifyHandle"
+    _json_data_key: ClassVar[str] = "data"
+    _json_value_key: ClassVar[str] = "value"
+
+    _products_url_part: ClassVar[str] = "products"
+
+    def __init__(
+            self,
+            bookstore_id: int,
+            bookstore_url: str,
+            search_url: str,
+            search_result_css_selector: str,
+            api_key: str,
+            rate_limiter: RateLimiter) -> None:
+        super().__init__()
+        self._bookstore_id = bookstore_id
+        self._bookstore_url = bookstore_url
+        self._search_url = search_url
+        self._search_result_css_selector = search_result_css_selector
+        self._rate_limiter = rate_limiter
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+        self._headers_for_search = {
+            "Accept": "*/*",
+            "Authorization": api_key,
+            "Content-Type": "application/json",
+            "Origin": bookstore_url,
+            "Referer": bookstore_url,
+            "Sec-CH-UA-Platform": "Linux",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "cross-site",
+            "Sec-GPC": "1",
+            "X-Relewise-Version": "client@2.23.1"
+        }
+
+    def find_book(self, isbn: str) -> SearchResult:
+        self._rate_limiter.wait_if_needed()
+        response = self._send_post(isbn)
+
+        search_result = SearchResult(bookstore_id=self._bookstore_id, url=None, success=False)
+        if not (match_url := self._parse_match_url(response, isbn)):
+            return search_result
+
+        if not self._is_match_url_valid(match_url, isbn):
+            return search_result
+
+        return replace(search_result, url=match_url, success=True)
+
+    def _send_post(self, isbn: str):
+        with HttpClient(headers=self._headers_for_search) as http_client:
+            response = http_client.post(self._search_url, payload=self._create_json_payload(isbn))
+            self._logger.debug(f"Sent POST request to {self._search_url} with payload for ISBN {isbn}. Response status code: {response.status_code}")
+            return response
+
+    def _parse_match_url(self, response: HttpResponse, isbn: str) -> str | None:
+        response_json = json.loads(response.text)
+        for search_response in response_json.get(self._json_responses_key, []):
+            if not (search_results := search_response.get(self._json_results_key)):
+                self._logger.debug("Key %s not found in response!", self._json_results_key)
+                return None
+
+            for result in search_results:
+                if not (data_obj := result.get(self._json_data_key)):
+                    continue
+
+                if shopify_handle_obj := data_obj.get(self._json_shopify_handle_key):
+                    book_url = shopify_handle_obj[self._json_value_key]
+                    match_url = f"/{self._products_url_part}/{book_url}"
+                    self._logger.debug("Found match url for book %s in bookstore %s", isbn, match_url)
+                    return urljoin(self._bookstore_url, match_url)
+
+        return None
+
+    @staticmethod
+    def _is_match_url_valid(match_url: str, isbn: str) -> bool:
+        with HttpClient() as http_client:
+            response = http_client.get(match_url)
+            html_content = HtmlContent(response.text)
+
+            return html_content.contains_text(isbn)
+
+    @staticmethod
+    def _create_json_payload(isbn: str) ->  str:
+        payload = {
+        "$type": "Relewise.Client.Requests.Search.SearchRequestCollection, Relewise.Client",
+          "currency": {
+            "value": "DKK"
+          },
+          "language": {
+            "value": "da"
+          },
+          "displayedAtLocation": "Search page",
+          "user": {
+            "Classifications": {
+              "Country": "DK"
+            },
+            "Identifiers": {},
+            "Data": {}
+          },
+          "filters": None,
+          "postFilters": None,
+          "relevanceModifiers": None,
+          "requests": [
+            {
+              "$type": "Relewise.Client.Requests.Search.ProductSearchRequest, Relewise.Client",
+              "currency": {
+                "value": "DKK"
+              },
+              "language": {
+                "value": "da"
+              },
+              "displayedAtLocation": "Search page",
+              "user": {
+                "Classifications": {
+                  "Country": "DK"
+                },
+                "Identifiers": {},
+                "Data": {}
+              },
+              "filters": None,
+              "postFilters": None,
+              "relevanceModifiers": None,
+              "take": 24,
+              "skip": 0,
+              "term": isbn,
+              "facets": {
+                "items": [
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.number_of_participants",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.age",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.publisher",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.series_name_reference",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.author",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.brand",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.PriceRangeFacet, Relewise.Client",
+                    "field": "SalesPrice",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.global_binding",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.language",
+                    "selected": None
+                  },
+                  {
+                    "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.ProductDataStringValueFacet, Relewise.Client",
+                    "field": "Data",
+                    "key": "bogogide.myshopify.com_pim.purchasing_group",
+                    "selected": None
+                  }
+                ],
+                "$type": "Relewise.Client.DataTypes.Search.Facets.Queries.FacetQuery, Relewise.Client"
+              },
+              "settings": {
+                "$type": "Relewise.Client.Requests.Search.Settings.ProductSearchSettings, Relewise.Client",
+                "recommendations": {},
+                "selectedProductProperties": {
+                  "displayName": "true",
+                  "dataKeys": [
+                    "IsAvailable",
+                    "Tags",
+                    "bogogide.myshopify.com_ShopifyHandle",
+                    "bogogide.myshopify.com_ImageUrls",
+                    "bogogide.myshopify.com_pim.author",
+                    "bogogide.myshopify.com_pim.global_binding",
+                    "bogogide.myshopify.com_pim.language",
+                    "bogogide.myshopify.com_pim.badges",
+                    "bogogide.myshopify.com_pim.book",
+                    "bogogide.myshopify.com_custom.kobslogik",
+                    "bogogide.myshopify.com_judgeme.review_widget_data"
+                  ],
+                  "pricing": "true"
+                },
+                "selectedVariantProperties": {
+                  "dataKeys": [
+                    "bogogide.myshopify.com_ShopifyVariantId"
+                  ]
+                },
+                "explodedVariants": 1
+              },
+              "sorting": None,
+              "retailMedia": None
+            }
+          ]
+        }
+
+        return json.dumps(payload)

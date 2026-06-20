@@ -37,6 +37,7 @@ class BookStoreEditViewModel:
     price_format_field_name: ClassVar[str] = "price-format"
     color_hex_field_name: ClassVar[str] = "color-hex"
     scraper_id_field_name: ClassVar[str] = "scraper-id"
+    api_key_field_name: ClassVar[str] = "api-key"
 
     name_min_length: ClassVar[int] = 1
     name_max_length: ClassVar[int] = 255
@@ -58,6 +59,8 @@ class BookStoreEditViewModel:
     color_hex_max_length: ClassVar[int] = 6
     scraper_id_min_length: ClassVar[int] = 1
     scraper_id_max_length: ClassVar[int] = 255
+    api_key_min_length: ClassVar[int] = 1
+    api_key_max_length: ClassVar[int] = 255
 
     id: int
     name: str
@@ -70,6 +73,7 @@ class BookStoreEditViewModel:
     price_format: str | None
     color_hex: str | None
     scraper_id: str | None
+    api_key: str | None
     form_action_url: str
     return_url: str
     scraper_names: list[str]
@@ -152,6 +156,13 @@ class BookStoreEditViewModel:
             self.errors[self.scraper_id_field_name].append(
                 max_length_exceeded("Scraper", self.scraper_id_max_length))
 
+        if not length_equals_or_longer_than(self.api_key, self.api_key_min_length, allow_none=True):
+            self.errors[self.api_key_field_name].append(
+                min_length_not_met("ApiKey", self.api_key_min_length))
+        elif not length_equals_or_shorter_than(self.api_key, self.api_key_max_length, allow_none=True):
+            self.errors[self.api_key_field_name].append(
+                max_length_exceeded("ApiKey", self.api_key_max_length))
+
     @staticmethod
     def empty(form_action_url: str, return_url: str, scraper_names: Sequence[str]) -> "BookStoreEditViewModel":
         return BookStoreEditViewModel(
@@ -166,6 +177,7 @@ class BookStoreEditViewModel:
             price_format=None,
             color_hex=None,
             scraper_id=None,
+            api_key=None,
             form_action_url=form_action_url,
             return_url=return_url,
             scraper_names=list(scraper_names))

@@ -36,7 +36,8 @@ class BookStoreService:
                price_css: str | None,
                price_format: str | None,
                color_hex: str | None,
-               scraper_id: str | None) -> None:
+               scraper_id: str | None,
+               api_key: str | None) -> None:
         bookstore = self._create_bookstore(
             name=name,
             url=url,
@@ -47,7 +48,8 @@ class BookStoreService:
             price_css=price_css,
             price_format=price_format,
             color_hex=color_hex,
-            scraper_id=scraper_id)
+            scraper_id=scraper_id,
+            api_key=api_key)
 
         with self._unit_of_work as uow:
             uow.bookstore_repository.add(bookstore)
@@ -65,7 +67,8 @@ class BookStoreService:
             price_css: str | None,
             price_format: str | None,
             color_hex: str | None,
-            scraper_id: str | None) -> None:
+            scraper_id: str | None,
+            api_key: str | None) -> None:
         bookstore = self._create_bookstore(
             bookstore_id=bookstore_id,
             name=name,
@@ -77,7 +80,8 @@ class BookStoreService:
             price_css=price_css,
             price_format=price_format,
             color_hex=color_hex,
-            scraper_id=scraper_id)
+            scraper_id=scraper_id,
+            api_key=api_key)
 
         with self._unit_of_work as uow:
             uow.bookstore_repository.update(bookstore)
@@ -102,6 +106,7 @@ class BookStoreService:
             price_format: str | None,
             color_hex: str | None,
             scraper_id: str | None,
+            api_key: str | None,
             bookstore_id: int = 0) -> BookStore:
         return BookStore(
             id=bookstore_id,
@@ -114,4 +119,5 @@ class BookStoreService:
             price_css_selector=price_css,
             price_format=price_format,
             color_hex=color_hex.lower() if color_hex else None,
-            scraper_id=scraper_id)
+            scraper_id=scraper_id,
+            api_key=api_key)
