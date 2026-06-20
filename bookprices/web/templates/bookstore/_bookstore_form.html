@@ -129,7 +129,7 @@
                minlength="{{ view_model.api_key_min_length }}" maxlength="{{ view_model.api_key_max_length }}"
                id="{{ view_model.api_key_field_name }}"
                value="{{ view_model.api_key if view_model.api_key else '' }}">
-        {% if view_model.color_hex_field_name in errors %}
+        {% if view_model.api_key_field_name in errors %}
             {% for error in errors[view_model.color_hex_field_name] %}
                 <span id="api-key-error" class="form-text text-danger">{{ error }}</span>
             {% endfor %}
