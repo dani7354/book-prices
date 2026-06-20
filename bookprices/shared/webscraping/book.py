@@ -352,7 +352,7 @@ class BogOgIdeBookScraper(BookScraper):
                 if shopify_handle_obj := data_obj.get(self._json_shopify_handle_key):
                     book_url = shopify_handle_obj[self._json_value_key]
                     match_url = f"/{self._products_url_part}/{book_url}"
-                    self._logger.debug(f"Found match url for book %s in bookstore %s", isbn, match_url)
+                    self._logger.debug("Found match url for book %s in bookstore %s", isbn, match_url)
                     return urljoin(self._bookstore_url, match_url)
 
         return None
