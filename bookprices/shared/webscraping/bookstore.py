@@ -4,7 +4,7 @@ from logging import getLogger
 from typing import ClassVar
 
 from bookprices.shared.webscraping.book import (
-    RedirectsToDetailPageBookScraper, MatchesInResultListBookScraper, RateLimitedRedirectsToDetailPageBookScraper,
+    RedirectsToDetailPageBookScraper, RateLimitedRedirectsToDetailPageBookScraper,
     RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper, BogOgIdeBookScraper)
 from bookprices.shared.webscraping.currency import CurrencyConverter
 from bookprices.shared.webscraping.http import RateLimiter
@@ -135,6 +135,8 @@ class BogOgIdeScraper(StaticBookStoreScraper):
             configuration.bookstore_id,
             configuration.bookstore_url,
             configuration.bookstore_search_url,
+            configuration.search_result_css_selector,
+            configuration.bookstore_api_key,
             rate_limiter=self._rate_limiter)
 
 

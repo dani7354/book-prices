@@ -87,6 +87,7 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         existing_entity.price_format = entity.price_format
         existing_entity.color_hex = entity.color_hex
         existing_entity.scraper_id = entity.scraper_id
+        existing_entity.api_key = entity.api_key
 
         self._session.merge(existing_entity)
 

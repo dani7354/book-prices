@@ -69,7 +69,8 @@ def create() -> str | Response:
             price_css=view_model.price_css,
             price_format=view_model.price_format,
             color_hex=view_model.color_hex,
-            scraper_id=view_model.scraper_id)
+            scraper_id=view_model.scraper_id,
+            api_key=view_model.api_key)
 
         return redirect(url_for(Endpoint.BOOKSTORE_INDEX.value))
 
@@ -112,7 +113,8 @@ def edit(bookstore_id: int) -> str | Response:
                 price_css=view_model.price_css,
                 price_format=view_model.price_format,
                 color_hex=view_model.color_hex,
-                scraper_id=view_model.scraper_id)
+                scraper_id=view_model.scraper_id,
+                api_key=view_model.api_key)
 
             return redirect(url_for(Endpoint.BOOKSTORE_INDEX.value))
 

@@ -37,6 +37,7 @@ def map_bookstore_edit_view_model(bookstore: BookStore, scraper_names: Sequence[
         price_format=bookstore.price_format,
         color_hex=bookstore.color_hex,
         scraper_id=bookstore.scraper_id,
+        api_key=bookstore.api_key,
         scraper_names=list(scraper_names),
         form_action_url=url_for(Endpoint.BOOKSTORE_EDIT.value, bookstore_id=bookstore.id),
         return_url=url_for(Endpoint.BOOKSTORE_INDEX.value))
@@ -59,6 +60,7 @@ def map_bookstore_edit_view_model_from_form(
     price_format = request.form.get(BookStoreEditViewModel.price_format_field_name) or None
     color_hex = request.form.get(BookStoreEditViewModel.color_hex_field_name) or None
     scraper_id = request.form.get(BookStoreEditViewModel.scraper_id_field_name) or None
+    api_key = request.form.get(BookStoreEditViewModel.api_key_field_name) or None
 
     return BookStoreEditViewModel(
         id=bookstore_id_from_form,
@@ -72,6 +74,7 @@ def map_bookstore_edit_view_model_from_form(
         price_format=price_format,
         color_hex=color_hex,
         scraper_id=scraper_id,
+        api_key=api_key,
         scraper_names=list(scraper_names),
         form_action_url=form_action_url,
         return_url=return_url)

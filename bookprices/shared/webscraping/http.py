@@ -1,4 +1,5 @@
 import dataclasses
+import json
 from collections import deque
 from enum import StrEnum
 from threading import Lock
@@ -53,12 +54,12 @@ class HttpClient:
                 url=response.url
             )
         except requests.RequestException as e:
-            self._logger.error(f"HTTP GET request to {url} failed: {e}")
+            self._logger.exception(f"HTTP GET request to {url} failed: {e}")
             raise RequestFailedError from e
 
     def post(self, url: str, payload: dict) -> HttpResponse:
         try:
-            response = self._session.post(url, payload, timeout=self._timeout_seconds)
+            response = self._session.post(url, json.dumps(payload), timeout=self._timeout_seconds)
             response.raise_for_status()
             redirected = response.history != []
 
@@ -69,7 +70,7 @@ class HttpClient:
                 url=response.url
             )
         except requests.RequestException as e:
-            self._logger.error(f"HTTP POST request to {url} failed: {e}")
+            self._logger.exception(f"HTTP POST request to {url} failed: {e}")
             raise RequestFailedError from e
 
     def close_session(self) -> None:
