@@ -159,7 +159,7 @@ class BookStoreEditViewModel:
         if not length_equals_or_longer_than(self.api_key, self.api_key_min_length, allow_none=True):
             self.errors[self.api_key_field_name].append(
                 min_length_not_met("ApiKey", self.api_key_min_length))
-        elif not length_equals_or_shorter_than(self.scraper_id, self.api_key_max_length, allow_none=True):
+        elif not length_equals_or_shorter_than(self.api_key, self.api_key_max_length, allow_none=True):
             self.errors[self.api_key_field_name].append(
                 max_length_exceeded("ApiKey", self.api_key_max_length))
 
