@@ -57,9 +57,9 @@ class HttpClient:
             self._logger.exception(f"HTTP GET request to {url} failed: {e}")
             raise RequestFailedError from e
 
-    def post(self, url: str, payload: dict) -> HttpResponse:
+    def post(self, url: str, payload: dict | str) -> HttpResponse:
         try:
-            response = self._session.post(url, json.dumps(payload), timeout=self._timeout_seconds)
+            response = self._session.post(url, payload, timeout=self._timeout_seconds)
             response.raise_for_status()
             redirected = response.history != []
 

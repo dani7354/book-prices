@@ -366,7 +366,7 @@ class BogOgIdeBookScraper(BookScraper):
             return html_content.contains_text(isbn)
 
     @staticmethod
-    def _create_json_payload(isbn: str) ->  dict:
+    def _create_json_payload(isbn: str) ->  str:
         payload = {
         "$type": "Relewise.Client.Requests.Search.SearchRequestCollection, Relewise.Client",
           "currency": {
@@ -506,4 +506,4 @@ class BogOgIdeBookScraper(BookScraper):
           ]
         }
 
-        return payload
+        return json.dumps(payload)
