@@ -1,169 +1,81 @@
 import logging
 import traceback
-from urllib.parse import urlparse
-from queue import Queue
-from threading import Thread
 from typing import NamedTuple, ClassVar
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.shared.cache.key_remover import BookPriceKeyRemover
+from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
 from bookprices.shared.config.config import Config
-from bookprices.shared.db.database import Database
-from bookprices.shared.event.base import EventManager
-from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.repository.unit_of_work import UnitOfWork
-from bookprices.shared.service.scraper_service import BookStoreScraperService
-from bookprices.shared.webscraping.book import BookNotFoundError
-from bookprices.shared.webscraping.bookstore import BookStoreScraper
 
 
-class IsbnSearch(NamedTuple):
-    """ Used for holding a search for a book in a bookstore. """
-    bookstore_id: int
-    book_id: int
-    isbn: str
-
-
-class BookStoreBookUrl(NamedTuple):
-    """ Used for holding a found book store url for a book before it is written to database. """
-    book_id: int
-    bookstore_id: int
-    url: str
-
-
-class BookStoreSearchJob(JobBase):
-    """ Searches for new books in known bookstores."""
+class SearchAllMissingBooksInBookStoresJob(JobBase):
+    """ Searches for all new books in available bookstores."""
 
     book_bookstore_batch_size: ClassVar[int] = 500
-    min_searches_per_thread: ClassVar[int] = 5
 
-    name: ClassVar[str] = "BookStoreSearchJob"
+    name: ClassVar[str] = "SearchAllMissingBooksInBookStoresJob"
 
     def __init__(
             self,
             config: Config,
-            db: Database,
             unit_of_work: UnitOfWork,
-            cache_key_remover: BookPriceKeyRemover,
-            event_manager: EventManager,
-            bookstore_scraper_service: BookStoreScraperService) -> None:
+            bookstore_search_service: BookStoreSearchService) -> None:
         super().__init__(config)
-        self._db = db
         self._unit_of_work = unit_of_work
-        self._cache_key_remover = cache_key_remover
-        self._event_manager = event_manager
-        self._bookstore_scraper_service = bookstore_scraper_service
-        self._book_scrapers: dict[int, BookStoreScraper] = {}
-        self._search_queue = Queue()
-        self._results = []
+        self._bookstore_search_service = bookstore_search_service
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
         try:
             self._logger.info("Starting searching for book availability in bookstores...")
-            self._create_scrapers()
             book_bookstore_offset, book_bookstore_page = 0, 1
             total_searches_count = 0
-            while self._get_and_enqueue_next_searches(book_bookstore_offset):
-                searches_count_for_batch = self._search_queue.qsize()
-                self._logger.info(f"Searches to process {searches_count_for_batch} in this batch...")
-                total_searches_count += searches_count_for_batch
 
-                self._start_search()
-                self._save_new_urls_and_clear_cache()
-
+            while next_searches := self._get_and_enqueue_next_searches(book_bookstore_offset):
+                next_searches_count = len(next_searches)
+                self._logger.info(f"Searches to process {next_searches_count} in this batch...")
+                self._bookstore_search_service.search_and_save_books_in_bookstores(next_searches)
+                total_searches_count += next_searches_count
                 book_bookstore_page += 1
                 book_bookstore_offset = (book_bookstore_page - 1) * self.book_bookstore_batch_size
 
             self._logger.info(f"Total searches_processed: {total_searches_count}")
-            self._event_manager.trigger_event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
             return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
 
-    def _create_scrapers(self) -> None:
-        self._logger.info("Initializing scrapers...")
-        self._book_scrapers.clear()
-
-        self._logger.debug("Getting bookstores from database...")
+    def _get_and_enqueue_next_searches(self, offset: int) -> list[IsbnSearch]:
         with self._unit_of_work as uow:
-            bookstores = uow.bookstore_repository.get_list()
+            books_and_missing_stores = uow.bookstore_repository.get_book_isbn_and_missing_bookstores(
+                offset, self.book_bookstore_batch_size)
 
-        self._logger.debug(f"Found {len(bookstores)} book stores. Creating scrapers...")
-        for bookstore in bookstores:
-            self._book_scrapers[bookstore.id] = self._bookstore_scraper_service.get_scraper(bookstore.id)
+        return [
+            IsbnSearch(
+                book_id=row["BookId"],
+                bookstore_id=row["BookStoreId"],
+                isbn=row["Isbn"])
+            for row in books_and_missing_stores]
 
-        self._logger.info(f"{len(self._book_scrapers)} scrapers created for bookstores.")
 
-    def _get_and_enqueue_next_searches(self, offset: int) -> bool:
-        for row in self._db.bookstore_db.get_book_isbn_and_missing_bookstores(offset, self.book_bookstore_batch_size):
-            self._search_queue.put(
-                IsbnSearch(book_id=row["BookId"], bookstore_id=row["BookStoreId"], isbn=row["Isbn"]))
+class SearchSelectedBooksInBookStoresJob(JobBase):
+    """ Job for searching for specific books only. Ids given as arguments """
 
-        return not self._search_queue.empty()
+    name: ClassVar[str] = "SearchSelectedBooksInBookStoresJob"
 
-    def _start_search(self) -> None:
-        if self._search_queue.empty():
-            self._logger.info("No searches to process!")
-            return
-        elif self._search_queue.qsize() / self._thread_count < self.min_searches_per_thread:
-            self._logger.info("Starting search using single thread...")
-            self._search_books()
-        else:
-            self._logger.info(f"Starting search using {self._thread_count} threads...")
-            threads = []
-            for _ in range(self._thread_count):
-                thread = Thread(target=self._search_books)
-                threads.append(thread)
-                thread.start()
+    def __init__(
+            self,
+            config: Config,
+            bookstore_search_service: BookStoreSearchService) -> None:
+        super().__init__(config)
+        self._bookstore_search_service = bookstore_search_service
+        self._logger = logging.getLogger(self.name)
 
-            [t.join() for t in threads]
+    def start(self, **kwargs) -> JobResult:
+        if not kwargs:
+            self._logger.info("No book ids given as argument, nothing to search for...")
+            return JobResult(exit_status=JobExitStatus.SUCCESS)
 
-        self._logger.info("Finished search!")
+        book_ids = kwargs.get("book_ids", []) # todo
+        return JobResult(exit_status=JobExitStatus.SUCCESS)
 
-    def _search_books(self) -> None:
-        while not self._search_queue.empty():
-            try:
-                isbn_search = self._search_queue.get()
-                if not (scraper := self._book_scrapers.get(isbn_search.bookstore_id)):
-                    self._logger.error(f"No book finder found for bookstore id {isbn_search.bookstore_id}.")
-                    continue
-                if not (search_result := scraper.find_book(book_id=isbn_search.book_id, isbn=isbn_search.isbn)):
-                    self._logger.info(
-                        f"No search result found for book with id {isbn_search.book_id} "
-                        f"and ISBN {isbn_search.isbn} at bookstore {isbn_search.bookstore_id}.")
-                    continue
-                self._logger.info(
-                    f"Found book with id {isbn_search.book_id} at {search_result.url} "
-                    f"(bookstore {isbn_search.bookstore_id})")
-                self._results.append(
-                    BookStoreBookUrl(
-                        book_id=search_result.book_id,
-                        bookstore_id=search_result.bookstore_id,
-                        url=urlparse(search_result.url).path))
-            except BookNotFoundError:
-                continue
-            except Exception as ex:
-                self._logger.error(ex)
-
-    def _save_new_urls_and_clear_cache(self) -> None:
-        result_count = len(self._results)
-        if not result_count:
-            self._logger.info("No search results to save!")
-            return
-
-        self._logger.info(f"Saving {result_count} search results...")
-        self._db.bookstore_db.create_bookstores_for_books(self._results)
-        self._logger.debug(f"Saved {result_count} search results to database!")
-
-        self._logger.debug("Removing cache keys for affected books and bookstores...")
-        self._remove_cache_for_affected_books_and_bookstores()
-
-        self._logger.debug("Removing results from list...")
-        self._results = []
-
-    def _remove_cache_for_affected_books_and_bookstores(self) -> None:
-        for result in self._results:
-            self._cache_key_remover.remove_keys_for_book(result.book_id)
-            self._cache_key_remover.remove_keys_for_book_and_bookstore(result.book_id, result.bookstore_id)

@@ -6,7 +6,7 @@ from typing import ClassVar
 
 import schedule
 
-from bookprices.job.job.book_search import BookStoreSearchJob
+from bookprices.job.job.book_search import SearchAllMissingBooksInBookStoresJob
 from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadImagesJob
@@ -57,7 +57,7 @@ class JobScheduler:
         schedule.every().day.at("05:00", self.time_zone).do(
             self._send_start_job_request, WilliamDamBookImportJob.name)
         schedule.every().day.at("06:00", self.time_zone).do(
-            self._send_start_job_request, BookStoreSearchJob.name)
+            self._send_start_job_request, SearchAllMissingBooksInBookStoresJob.name)
         schedule.every().day.at("07:00", self.time_zone).do(
             self._send_start_job_request, DeleteImagesJob.name)
         schedule.every().day.at("08:00", self.time_zone).do(

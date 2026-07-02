@@ -2,7 +2,7 @@ import logging
 import traceback
 
 from bookprices.job.job.base import DEFAULT_THREAD_COUNT
-from bookprices.job.job.book_search import BookStoreSearchJob
+from bookprices.job.job.book_search import SearchAllMissingBooksInBookStoresJob
 from bookprices.job.job.delete_images import DeleteImagesJob
 from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
@@ -114,14 +114,14 @@ def setup_event_manager(config: Config) -> EventManager:
     return event_manager
 
 
-def create_book_search_job(config: Config, event_manager: EventManager) -> BookStoreSearchJob:
+def create_book_search_job(config: Config, event_manager: EventManager) -> SearchAllMissingBooksInBookStoresJob:
     db = create_database_container(config)
     session_factory = create_data_session_factory(config)
     cache_key_remover = create_cache_key_remover(config)
     unit_of_work = UnitOfWork(session_factory)
     bookstore_scraper_service = BookStoreScraperService(unit_of_work)
 
-    return BookStoreSearchJob(
+    return SearchAllMissingBooksInBookStoresJob(
         config,
         db,
         unit_of_work,
