@@ -66,8 +66,6 @@ class JobScheduler:
             self._send_start_job_request, UpdateCurrenciesJob.name)
         schedule.every().monday.at("10:00", self.time_zone).do(
             self._send_start_job_request, TrimPricesJob.name)
-        schedule.every().day.at("11:00", self.time_zone).do(
-            self._send_start_job_request, AllBookPricesUpdateJob.name)
 
     def _set_available_jobs(self):
         self._logger.debug("Getting available jobs...")

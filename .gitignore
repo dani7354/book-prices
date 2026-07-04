@@ -46,5 +46,6 @@ google_client_secrets.json
 *.log
 *.env
 !*.example
+query_sandbox.py
 
 !sql/insert_book_with_prices.sql

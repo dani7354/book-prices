@@ -33,7 +33,9 @@ class BookStoreScraperService:
         with self._unit_of_work as uow:
             bookstores = uow.bookstore_repository.get_list()
 
-        return [scraper for bookstore in bookstores if (scraper := self._create_scraper_for_bookstore(bookstore))]
+        return [
+            scraper for bookstore in bookstores
+            if (scraper := self._create_scraper_for_bookstore(bookstore)) is not None]
 
     def get_scraper(self, bookstore_id: int) -> BookStoreScraper | None:
         with self._unit_of_work as uow:

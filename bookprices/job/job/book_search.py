@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import NamedTuple, ClassVar
+from typing import ClassVar, Sequence
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
 from bookprices.shared.config.config import Config
@@ -60,22 +60,49 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
 
 class SearchSelectedBooksInBookStoresJob(JobBase):
     """ Job for searching for specific books only. Ids given as arguments """
+    _book_ids_arg_key: ClassVar[str] = "book_ids"
 
     name: ClassVar[str] = "SearchSelectedBooksInBookStoresJob"
 
     def __init__(
             self,
             config: Config,
+            unit_of_work: UnitOfWork,
             bookstore_search_service: BookStoreSearchService) -> None:
         super().__init__(config)
+        self._unit_of_work = unit_of_work
         self._bookstore_search_service = bookstore_search_service
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        if not kwargs:
-            self._logger.info("No book ids given as argument, nothing to search for...")
-            return JobResult(exit_status=JobExitStatus.SUCCESS)
+        if not (book_ids := kwargs.get(self._book_ids_arg_key)):
+            self._logger.error(f"No book ids provided for job {self.name}.")
+            return JobResult(exit_status=JobExitStatus.FAILURE)
 
-        book_ids = kwargs.get("book_ids", []) # todo
+        if not isinstance(book_ids, list):
+            self._logger.error("Invalid argument: book_ids is not a list!")
+            return JobResult(exit_status=JobExitStatus.FAILURE)
+
+        isbn_searches = self._get_isbn_searches(book_ids)
+        self._bookstore_search_service.search_and_save_books_in_bookstores(isbn_searches)
+
         return JobResult(exit_status=JobExitStatus.SUCCESS)
 
+    def _get_isbn_searches(self, book_ids: Sequence) -> list[IsbnSearch]:
+        valid_book_ids = []
+        for i, book_id in enumerate(book_ids):
+            if type(book_id) is not int:
+                self._logger.warning(f"Book at index {i} is not an integer. Skipping...")
+                continue
+
+            valid_book_ids.append(book_id)
+        with self._unit_of_work as uow:
+            isbn_numbers_missing_in_stores = uow.bookstore_repository.get_selected_books_and_missing_bookstores(
+                valid_book_ids)
+
+        return [
+            IsbnSearch(
+                book_id=row["BookId"],
+                bookstore_id=row["BookStoreId"],
+                isbn=row["Isbn"])
+            for row in isbn_numbers_missing_in_stores]
