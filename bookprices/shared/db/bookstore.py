@@ -19,82 +19,6 @@ class BookStoreDb(BaseDb):
 
                 return [self._map_bookstore(row) for row in cursor]
 
-    def get_bookstore(self, bookstore_id: int) -> BookStore | None:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
-                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "IsbnCssSelector, ColorHex, ScraperId "
-                         "FROM BookStore "
-                         "WHERE Id = %s")
-                cursor.execute(query, (bookstore_id,))
-
-                return self._map_bookstore(row) if (row := cursor.fetchone()) else None
-
-    def create_bookstore(self, bookstore: BookStore) -> None:
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
-                query = ("INSERT INTO BookStore (Name, Url, SearchUrl, "
-                         "SearchResultCssSelector, PriceCssSelector, "
-                         "ImageCssSelector, IsbnCssSelector, PriceFormat, "
-                         "ColorHex, ScraperId) "
-                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
-                cursor.execute(query, (bookstore.name,
-                                       bookstore.url,
-                                       bookstore.search_url,
-                                       bookstore.search_result_css_selector,
-                                       bookstore.price_css_selector,
-                                       bookstore.image_css_selector,
-                                       bookstore.isbn_css_selector,
-                                       bookstore.price_format,
-                                       bookstore.color_hex,
-                                       bookstore.scraper_id))
-                con.commit()
-
-    def update_bookstore(self, bookstore: BookStore) -> BookStore:
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
-                query = ("UPDATE BookStore "
-                         "SET Name = %s, Url = %s, SearchUrl = %s, "
-                         "SearchResultCssSelector = %s, PriceCssSelector = %s, "
-                         "ImageCssSelector = %s, IsbnCssSelector = %s, "
-                         "PriceFormat = %s, ScraperId = %s, "
-                         "ColorHex = %s "
-                         "WHERE Id = %s")
-                cursor.execute(query, (bookstore.name,
-                                       bookstore.url,
-                                       bookstore.search_url,
-                                       bookstore.search_result_css_selector,
-                                       bookstore.price_css_selector,
-                                       bookstore.image_css_selector,
-                                       bookstore.isbn_css_selector,
-                                       bookstore.price_format,
-                                       bookstore.scraper_id,
-                                       bookstore.color_hex,
-                                       bookstore.id))
-                con.commit()
-
-                return self.get_bookstore(bookstore.id)
-
-    def delete_bookstore(self, bookstore_id: int) -> None:
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
-                query = "DELETE FROM BookStore WHERE Id = %s"
-                cursor.execute(query, (bookstore_id,))
-                con.commit()
-
-    def get_missing_bookstores(self, book_id: int) -> list:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id as BookStoreId, Name as BookStoreName, PriceCssSelector, PriceFormat, "
-                         "Url as BookStoreUrl, SearchUrl, SearchResultCssSelector, ImageCssSelector, "
-                         "IsbnCssSelector, ColorHex, ScraperId "
-                         "FROM BookStore "
-                         "WHERE Id NOT IN (SELECT BookStoreId FROM BookStoreBook WHERE BookId = %s)")
-                cursor.execute(query, (book_id,))
-
-                return [self._map_bookstore(row) for row in cursor]
-
     def get_book_isbn_and_missing_bookstores(self, offset: int, limit: int) -> list[dict[str, Any]]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
@@ -110,22 +34,6 @@ class BookStoreDb(BaseDb):
                 cursor.execute(query, (limit, offset))
 
                 return cursor.fetchall()
-
-    def create_bookstores_for_books(self, bookstores_for_books: list[tuple[int, int, str]]) -> None:
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
-                query = ("INSERT INTO BookStoreBook (BookId, BookStoreId, Url) "
-                         "VALUES (%s, %s, %s)")
-                cursor.executemany(query, bookstores_for_books)
-                con.commit()
-
-    def create_bookstore_for_book_if_not_exists(self, book_id: int, bookstore_id: int, url: str) -> None:
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
-                query = ("INSERT IGNORE INTO BookStoreBook (BookId, BookStoreId, Url) "
-                         "VALUES (%s, %s, %s)")
-                cursor.execute(query, (book_id, bookstore_id, url))
-                con.commit()
 
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int):
         with self.get_connection() as con:
