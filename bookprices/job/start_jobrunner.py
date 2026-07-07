@@ -120,9 +120,10 @@ def create_bookstore_search_service(config: Config, event_manager: EventManager)
     cache_key_remover = create_cache_key_remover(config)
     unit_of_work = UnitOfWork(session_factory)
     bookstore_scraper_service = BookStoreScraperService(unit_of_work)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
 
     bookstore_search_service = BookStoreSearchService(
-        unit_of_work, cache_key_remover, event_manager, bookstore_scraper_service, THREAD_COUNT)
+        unit_of_work, cache_key_remover, event_manager, bookstore_scraper_service, thread_count)
 
     return bookstore_search_service
 
@@ -133,7 +134,7 @@ def create_all_missing_books_search_job(
     unit_of_work = UnitOfWork(session_factory)
     bookstore_search_service = create_bookstore_search_service(config, event_manager)
 
-    return SearchAllMissingBooksInBookStoresJob(config, unit_of_work, bookstore_search_service)
+    return SearchAllMissingBooksInBookStoresJob(config, unit_of_work, event_manager, bookstore_search_service)
 
 
 def create_selected_missing_books_search_job(
@@ -142,7 +143,7 @@ def create_selected_missing_books_search_job(
     unit_of_work = UnitOfWork(session_factory)
     bookstore_search_service = create_bookstore_search_service(config, event_manager)
 
-    return SearchSelectedBooksInBookStoresJob(config, unit_of_work, bookstore_search_service)
+    return SearchSelectedBooksInBookStoresJob(config, unit_of_work, event_manager, bookstore_search_service)
 
 
 def create_trim_prices_job(config: Config) -> TrimPricesJob:

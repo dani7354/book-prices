@@ -73,9 +73,11 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
             self,
             config: Config,
             unit_of_work: UnitOfWork,
+            event_manager: EventManager,
             bookstore_search_service: BookStoreSearchService) -> None:
         super().__init__(config)
         self._unit_of_work = unit_of_work
+        self._event_manager = event_manager
         self._bookstore_search_service = bookstore_search_service
         self._logger = logging.getLogger(self.name)
 
