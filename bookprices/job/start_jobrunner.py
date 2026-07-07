@@ -238,7 +238,6 @@ def main() -> None:
             create_delete_images_job(config),
             create_delete_prices_job(config),
             create_all_book_prices_update_job(config, event_manager),
-            create_all_missing_books_search_job(config, event_manager),
             create_william_dam_book_import_job(config, event_manager),
             create_update_currencies_job(config),
             create_selected_missing_books_search_job(config, event_manager),
