@@ -62,13 +62,6 @@ class BookStoreRepository(RepositoryBase[BookStore]):
 
             return missing_bookstores_by_book_id_isbn_and_id
 
-    def add_books_to_bookstores(self, bookstores_for_books: Tuple[int, int, str]):
-        book_store_entries = [
-            BookStoreBook(book_id=book_id, book_store_id=bookstore_id, url=url)
-            for book_id, bookstore_id, url in bookstores_for_books
-        ]
-        self._session.bulk_save_objects(book_store_entries)
-
     def add_book_to_bookstore(self, book_id: int, bookstore_id: int, url: str) -> None:
         self._session.add(BookStoreBook(book_id=book_id, book_store_id=bookstore_id, url=url))
 

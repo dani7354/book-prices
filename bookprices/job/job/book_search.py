@@ -4,6 +4,8 @@ from typing import ClassVar, Sequence
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
 from bookprices.shared.config.config import Config
+from bookprices.shared.event.base import EventManager
+from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 
 
@@ -18,9 +20,11 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
             self,
             config: Config,
             unit_of_work: UnitOfWork,
+            event_manager: EventManager,
             bookstore_search_service: BookStoreSearchService) -> None:
         super().__init__(config)
         self._unit_of_work = unit_of_work
+        self._event_manager = event_manager
         self._bookstore_search_service = bookstore_search_service
         self._logger = logging.getLogger(self.name)
 
@@ -38,6 +42,7 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
                 book_bookstore_page += 1
                 book_bookstore_offset = (book_bookstore_page - 1) * self.book_bookstore_batch_size
 
+            self._event_manager.trigger_event(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED)
             self._logger.info(f"Total searches_processed: {total_searches_count}")
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:

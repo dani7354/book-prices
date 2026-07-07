@@ -52,8 +52,6 @@ class BookStoreSearchService:
         self._start_search()
         self._save_new_urls_and_clear_cache()
 
-        self._event_manager.trigger_event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
-
     def _create_scrapers(self) -> None:
         self._logger.info("Initializing scrapers...")
         self._book_scrapers.clear()

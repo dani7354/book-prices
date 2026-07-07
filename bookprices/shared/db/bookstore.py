@@ -19,22 +19,6 @@ class BookStoreDb(BaseDb):
 
                 return [self._map_bookstore(row) for row in cursor]
 
-    def get_book_isbn_and_missing_bookstores(self, offset: int, limit: int) -> list[dict[str, Any]]:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT b.Id as BookId, b.Isbn, bs.Id as BookStoreId, bs.SearchUrl, bs.SearchResultCssSelector, "
-                         "bs.IsbnCssSelector, bs.Url, bs.ColorHex, bs.ScraperId "
-                         "FROM Book b "
-                         "CROSS JOIN BookStore bs "
-                         "LEFT JOIN BookStoreBook bsb ON bsb.BookId = b.Id AND bsb.BookStoreId = bs.Id "
-                         "WHERE bsb.BookId IS NULL AND bsb.BookStoreId IS NULL AND bs.SearchUrl IS NOT NULL "
-                         "ORDER BY b.Id DESC "
-                         "LIMIT %s OFFSET %s;")
-
-                cursor.execute(query, (limit, offset))
-
-                return cursor.fetchall()
-
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int):
         with self.get_connection() as con:
             with con.cursor() as cursor:
