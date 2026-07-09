@@ -253,14 +253,6 @@ class BookDb(BaseDb):
 
                 return books[0] if len(books) > 0 else None
 
-    def get_book_count(self) -> int:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = "SELECT COUNT(*) as BookCount FROM Book;"
-                cursor.execute(query)
-                for row in cursor:
-                    return row["BookCount"]
-
     def get_book_by_isbn(self, book_isbn: str) -> Book:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:

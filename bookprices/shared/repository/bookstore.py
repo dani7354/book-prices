@@ -1,8 +1,8 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Tuple, Sequence
+from typing import Tuple, Sequence, Any
 
-from sqlalchemy import select, and_, outerjoin, func, case, distinct
+from sqlalchemy import select, and_, outerjoin, func, case, distinct, true, Row
 from sqlalchemy.orm import joinedload, Session
 
 from bookprices.shared.db.tables import BookStore, BookStoreBook, Book, BookPrice
@@ -62,14 +62,6 @@ class BookStoreRepository(RepositoryBase[BookStore]):
 
             return missing_bookstores_by_book_id_isbn_and_id
 
-    def add_books_to_bookstores(self, bookstores_for_books: Tuple[int, int, str]):
-        """ Creating multiple BookStoreBook row tuple argument order: (book_id, bookstore_id, url) """
-        book_store_entries = [
-            BookStoreBook(book_id=book_id, book_store_id=bookstore_id, url=url)
-            for book_id, bookstore_id, url in bookstores_for_books
-        ]
-        self._session.bulk_save_objects(book_store_entries)
-
     def add_book_to_bookstore(self, book_id: int, bookstore_id: int, url: str) -> None:
         self._session.add(BookStoreBook(book_id=book_id, book_store_id=bookstore_id, url=url))
 
@@ -100,6 +92,13 @@ class BookStoreRepository(RepositoryBase[BookStore]):
             return
 
         self.add_book_to_bookstore(book_id, bookstore_id, url)
+
+    def add_books_to_bookstores(self, bookstores_for_books: Sequence[Tuple[int, int, str]]) -> None:
+        book_store_entries = [
+            BookStoreBook(book_id=book_id, book_store_id=bookstore_id, url=url)
+            for book_id, bookstore_id, url in bookstores_for_books
+        ]
+        self._session.bulk_save_objects(book_store_entries)
 
     def delete_book_from_bookstore(self, book_id: int, bookstore_id: int) -> None:
         book_store = (self._session.execute(
@@ -149,3 +148,68 @@ class BookStoreRepository(RepositoryBase[BookStore]):
         )
 
         return [(row[0], row[1], row[2], row[3] or 0, row[4] or 0.0) for row in self._session.execute(stmt).all()]
+
+    def get_book_isbn_and_missing_bookstores(self, offset: int, limit: int) -> list[dict[str, Any]]:
+        base_query = self._get_base_query_for_isbn_and_missing_bookstores()
+        stmt = (base_query.order_by(Book.id.desc())).limit(limit).offset(offset)
+
+        rows = self._session.execute(stmt).all()
+        mapped_rows = self._map_rows_for_isbn_and_missing_bookstores(rows)
+
+        return mapped_rows
+
+    def get_selected_books_and_missing_bookstores(self, book_ids: Sequence[int]) -> list[dict[str, Any]]:
+        base_query = self._get_base_query_for_isbn_and_missing_bookstores()
+        stmt = (base_query.where(Book.id.in_(book_ids)).order_by(Book.id.desc()))
+
+        rows = self._session.execute(stmt).all()
+        mapped_rows = self._map_rows_for_isbn_and_missing_bookstores(rows)
+
+        return mapped_rows
+
+    @staticmethod
+    def _get_base_query_for_isbn_and_missing_bookstores():
+        return (
+            select(
+                Book.id.label("BookId"),
+                Book.isbn,
+                BookStore.id.label("BookStoreId"),
+                BookStore.search_url,
+                BookStore.search_result_css_selector,
+                BookStore.isbn_css_selector,
+                BookStore.url,
+                BookStore.color_hex,
+                BookStore.scraper_id
+            )
+            .select_from(Book)
+            .join(BookStore, true())
+            .outerjoin(
+                BookStoreBook,
+                and_(
+                    BookStoreBook.book_id == Book.id,
+                    BookStoreBook.book_store_id == BookStore.id
+                )
+            )
+            .where(
+                BookStoreBook.book_id.is_(None),
+                BookStoreBook.book_store_id.is_(None),
+                BookStore.search_url.is_not(None)
+            )
+        )
+
+    @staticmethod
+    def _map_rows_for_isbn_and_missing_bookstores(rows: Sequence[Row]) -> list[dict[str, Any]]:
+        return [
+            {
+                "BookId": row[0],
+                "Isbn": row[1],
+                "BookStoreId": row[2],
+                "SearchUrl": row[3],
+                "SearchResultCssSelector": row[4],
+                "IsbnCssSelector": row[5],
+                "Url": row[6],
+                "ColorHex": row[7],
+                "ScraperId": row[8]
+            }
+            for row in rows
+        ]

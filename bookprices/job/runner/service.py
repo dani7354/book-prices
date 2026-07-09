@@ -114,7 +114,7 @@ class RunnerJobService:
             job_name=job_run_json[JobRunSchemaFields.JOB_NAME.value],
             priority=job_run_json[JobRunSchemaFields.PRIORITY.value],
             status=job_run_json[JobRunSchemaFields.STATUS.value],
-            arguments=[],  # self._map_job_run_arguments_to_dto(job_run_json[JobRunSchemaFields.ARGUMENTS.value]),
+            arguments=self._map_job_run_arguments_to_dto(job_run_json[JobRunSchemaFields.ARGUMENTS.value]),
             updated=job_run_json[JobRunSchemaFields.UPDATED.value],
             created=job_run_json[JobRunSchemaFields.CREATED.value],
             version=job_run_json[JobRunSchemaFields.VERSION.value],

@@ -32,14 +32,6 @@ class BookPriceDb(BaseDb):
                                        failed_price_update.created))
                 con.commit()
 
-    def delete_prices_older_than(self, earliest_date: date):
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("DELETE FROM BookPrice "
-                         "WHERE Created < %s")
-                cursor.execute(query, (str(earliest_date),))
-                con.commit()
-
     def delete_prices(self, ids: list[int]) -> None:
         with self.get_connection() as con:
             ids_format_string = ",".join(["%s"] * len(ids))
@@ -154,23 +146,6 @@ class BookPriceDb(BaseDb):
                                                                      row["Price"],
                                                                      row["Created"]))
                 return prices_by_bookstores
-
-    def get_book_ids_with_oldest_prices(self, limit: int) -> set[int]:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT bsb.BookId, bsb.BookStoreId, MAX(bp.Created) as Created "
-                         "FROM BookStoreBook bsb "
-                         "LEFT JOIN BookPrice bp ON bp.BookId = bsb.BookId AND bp.BookStoreId = bsb.BookStoreId "
-                         "GROUP BY BookId, BookStoreId "
-                         "ORDER BY Created "
-                         "LIMIT %s;")
-
-                cursor.execute(query, (limit,))
-                book_ids = set()
-                for row in cursor:
-                    book_ids.add(row["BookId"])
-
-                return book_ids
 
     def get_failed_price_update_counts(self, min_count: int) -> list[FailedPriceUpdateCount]:
         with self.get_connection() as con:
