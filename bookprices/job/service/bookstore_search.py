@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.event.base import EventManager
-from bookprices.shared.event.enum import BookPricesEvents
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.bookstore import BookStoreScraper, BookNotFoundError
@@ -33,12 +32,10 @@ class BookStoreSearchService:
             self,
             unit_of_work: UnitOfWork,
             cache_key_remover: BookPriceKeyRemover,
-            event_manager: EventManager,
             bookstore_scraper_service: BookStoreScraperService,
             thread_count: int) -> None:
         self._unit_of_work = unit_of_work
         self._cache_key_remover = cache_key_remover
-        self._event_manager = event_manager
         self._bookstore_scraper_service = bookstore_scraper_service
         self._thread_count = thread_count
         self._book_scrapers: dict[int, BookStoreScraper] = {}
@@ -109,8 +106,8 @@ class BookStoreSearchService:
                 continue
             except Exception as ex:
                 self._logger.error(ex)
-        else:
-            self._logger.info("All searches in queue processed!")
+
+        self._logger.info("All searches in queue processed!")
 
     def _save_new_urls_and_clear_cache(self) -> None:
         result_count = len(self._results)
