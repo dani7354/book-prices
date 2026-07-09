@@ -93,6 +93,10 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
         isbn_searches = self._get_isbn_searches(book_ids)
         self._bookstore_search_service.search_and_save_books_in_bookstores(isbn_searches)
 
+        self._event_manager.trigger_event(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED, args=book_ids)
+
+        self._logger.info(f"Search completed for {len(isbn_searches)} books in bookstores.")
+
         return JobResult(exit_status=JobExitStatus.SUCCESS)
 
     def _get_isbn_searches(self, book_ids: Sequence) -> list[IsbnSearch]:
