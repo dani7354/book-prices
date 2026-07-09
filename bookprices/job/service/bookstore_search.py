@@ -87,9 +87,8 @@ class BookStoreSearchService:
         self._logger.info("Finished search!")
 
     def _search_books(self) -> None:
-        while not self._search_queue.empty():
+        while isbn_search := self._search_queue.get():
             try:
-                isbn_search = self._search_queue.get()
                 if not (scraper := self._book_scrapers.get(isbn_search.bookstore_id)):
                     self._logger.error(f"No book finder found for bookstore id {isbn_search.bookstore_id}.")
                     continue
@@ -110,6 +109,8 @@ class BookStoreSearchService:
                 continue
             except Exception as ex:
                 self._logger.error(ex)
+        else:
+            self._logger.info("All searches in queue processed!")
 
     def _save_new_urls_and_clear_cache(self) -> None:
         result_count = len(self._results)
