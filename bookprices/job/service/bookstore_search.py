@@ -4,8 +4,9 @@ from threading import Thread
 from typing import Sequence, NamedTuple
 from urllib.parse import urlparse
 
+from queue import Empty
+
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
-from bookprices.shared.event.base import EventManager
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.bookstore import BookStoreScraper, BookNotFoundError
@@ -84,7 +85,7 @@ class BookStoreSearchService:
         self._logger.info("Finished search!")
 
     def _search_books(self) -> None:
-        while isbn_search := self._search_queue.get():
+        while isbn_search := self._get_next_search():
             try:
                 if not (scraper := self._book_scrapers.get(isbn_search.bookstore_id)):
                     self._logger.error(f"No book finder found for bookstore id {isbn_search.bookstore_id}.")
@@ -134,3 +135,9 @@ class BookStoreSearchService:
     def _fill_queue(self, searches: Sequence[IsbnSearch]) -> None:
         for search in searches:
             self._search_queue.put(search)
+
+    def _get_next_search(self) -> IsbnSearch | None:
+        try:
+            return self._search_queue.get_nowait()
+        except Empty:
+            return None

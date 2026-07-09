@@ -65,7 +65,7 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
 
 class SearchSelectedBooksInBookStoresJob(JobBase):
     """ Job for searching for specific books only. Ids given as arguments """
-    _book_ids_arg_key: ClassVar[str] = "book_ids"
+    _book_ids_arg_key: ClassVar[str] = "bookids"
 
     name: ClassVar[str] = "SearchSelectedBooksInBookStoresJob"
 
