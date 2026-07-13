@@ -8,29 +8,6 @@ from bookprices.shared.model.error import FailedPriceUpdate, FailedUpdateReason,
 
 
 class BookPriceDb(BaseDb):
-    def create_prices(self, book_prices: list):
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
-                price_rows = [(price.book.id,
-                               price.book_store.id,
-                               str(price.price),
-                               price.created) for price in book_prices]
-
-                query = ("INSERT INTO BookPrice (BookId, BookStoreId, Price, Created) "
-                         "VALUES (%s, %s, %s, %s)")
-                cursor.executemany(query, price_rows)
-                con.commit()
-
-    def create_failed_price_update(self, failed_price_update: FailedPriceUpdate):
-        with self.get_connection() as con:
-            with con.cursor() as cursor:
-                query = ("INSERT INTO FailedPriceUpdate (BookId, BookStoreId, Reason, Created) "
-                         "VALUES (%s, %s, %s, %s)")
-                cursor.execute(query, (failed_price_update.book_id,
-                                       failed_price_update.bookstore_id,
-                                       failed_price_update.reason.value,
-                                       failed_price_update.created))
-                con.commit()
 
     def delete_prices(self, ids: list[int]) -> None:
         with self.get_connection() as con:

@@ -2,6 +2,7 @@ import logging
 import traceback
 from typing import ClassVar, Sequence
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
+from bookprices.job.job.enum import ArgumentName
 from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
@@ -65,7 +66,6 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
 
 class SearchSelectedBooksInBookStoresJob(JobBase):
     """ Job for searching for specific books only. Ids given as arguments """
-    _book_ids_arg_key: ClassVar[str] = "bookids"
 
     name: ClassVar[str] = "SearchSelectedBooksInBookStoresJob"
 
@@ -82,7 +82,7 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        if not (book_ids := kwargs.get(self._book_ids_arg_key)):
+        if not (book_ids := kwargs.get(ArgumentName.BOOK_IDS)):
             self._logger.error(f"No book ids provided for job {self.name}.")
             return JobResult(exit_status=JobExitStatus.FAILURE)
 

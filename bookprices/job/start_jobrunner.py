@@ -10,7 +10,7 @@ from bookprices.job.job.download_images import DownloadImagesJob, DownloadImages
 from bookprices.job.job.import_books import WilliamDamBookImportJob
 from bookprices.job.job.trim_prices import TrimPricesJob
 from bookprices.job.job.update_currencies import UpdateCurrenciesJob
-from bookprices.job.job.update_prices import AllBookPricesUpdateJob
+from bookprices.job.job.update_prices import AllBookPricesUpdateJob, SelectedBookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
 from bookprices.job.service.bookstore_search import BookStoreSearchService
@@ -195,15 +195,26 @@ def create_delete_prices_job(config: Config) -> DeletePricesJob:
 
 
 def create_all_book_prices_update_job(config: Config, event_manager: EventManager) -> AllBookPricesUpdateJob:
-    db = create_database_container(config)
     session_factory = create_data_session_factory(config)
     cache_key_remover = create_cache_key_remover(config)
     unit_of_work = UnitOfWork(session_factory)
     scraper_service = BookStoreScraperService(unit_of_work)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
-    price_update_service = PriceUpdateService(db, cache_key_remover, unit_of_work, scraper_service, thread_count)
+    price_update_service = PriceUpdateService(cache_key_remover, unit_of_work, scraper_service, thread_count)
 
     return AllBookPricesUpdateJob(config, unit_of_work, price_update_service, event_manager)
+
+
+def create_selected_book_prices_update_job(config: Config, event_manager: EventManager) -> SelectedBookPricesUpdateJob:
+    session_factory = create_data_session_factory(config)
+    cache_key_remover = create_cache_key_remover(config)
+    unit_of_work = UnitOfWork(session_factory)
+    scraper_service = BookStoreScraperService(unit_of_work)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
+    price_update_service = PriceUpdateService(
+        cache_key_remover, unit_of_work, scraper_service, thread_count)
+
+    return SelectedBookPricesUpdateJob(config, price_update_service, event_manager)
 
 
 def create_william_dam_book_import_job(config: Config, event_manager: EventManager) -> WilliamDamBookImportJob:
@@ -238,6 +249,7 @@ def main() -> None:
             create_delete_images_job(config),
             create_delete_prices_job(config),
             create_all_book_prices_update_job(config, event_manager),
+            create_selected_book_prices_update_job(config, event_manager),
             create_william_dam_book_import_job(config, event_manager),
             create_update_currencies_job(config),
             create_selected_missing_books_search_job(config, event_manager),

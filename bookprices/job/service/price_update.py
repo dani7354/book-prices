@@ -1,15 +1,15 @@
 import logging
 from datetime import datetime
-from queue import Queue
+from queue import Queue, Empty
 from threading import Thread
 from typing import Sequence, ClassVar
 from urllib.parse import urljoin
 
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
-from bookprices.shared.db.database import Database
 from bookprices.shared.db.tables import BookStoreBook
 import bookprices.shared.db.tables as tables
-from bookprices.shared.model.error import FailedPriceUpdate, FailedUpdateReason
+from bookprices.shared.db.tables import FailedPriceUpdate
+from bookprices.shared.model.error import FailedUpdateReason
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.scraper_service import BookStoreScraperService
 from bookprices.shared.webscraping.bookstore import BookStoreScraper
@@ -23,12 +23,10 @@ class PriceUpdateService:
 
     def __init__(
             self,
-            db: Database,
             cache_key_remover: BookPriceKeyRemover,
             unit_of_work: UnitOfWork,
             scraper_service: BookStoreScraperService,
             thread_count: int) -> None:
-        self._db = db
         self._cache_key_remover = cache_key_remover
         self._thread_count = thread_count
         self._book_stores_queue = Queue()
@@ -71,9 +69,8 @@ class PriceUpdateService:
             [t.join() for t in threads]
 
     def _get_updated_prices_for_books(self) -> None:
-        while not self._book_stores_queue.empty():
-            book_stores_for_book = self._book_stores_queue.get()
-            self._get_prices_for_book(book_stores_for_book)
+        while bookstores_for_book := self.get_next_enqueued_bookstores():
+            self._get_prices_for_book(bookstores_for_book)
 
     def _get_prices_for_book(self, book_stores: list[BookStoreBook]) -> None:
         for book_in_store in book_stores:
@@ -118,7 +115,7 @@ class PriceUpdateService:
         with self._unit_of_work as uow:
             bookstores = uow.bookstore_repository.get_list()
 
-        return {b.id: scraper for b in bookstores if (scraper := self._scraper_service.get_scraper(b.id))}
+        return {b.id: scraper for b in bookstores if (scraper := self._scraper_service.get_scraper(b.id)) is not None}
 
     def _save_new_prices_and_clear_cache(self) -> None:
         if not self._updated_book_prices:
@@ -139,6 +136,18 @@ class PriceUpdateService:
 
         self._updated_book_prices = []
 
-    def _log_failed_price_update_to_db(self, book_id: int, bookstore_id: int, reason: FailedUpdateReason):
-        self._db.bookprice_db.create_failed_price_update(
-            FailedPriceUpdate(None, book_id, bookstore_id, reason, datetime.now()))
+    def _log_failed_price_update_to_db(self, book_id: int, bookstore_id: int, reason: FailedUpdateReason) -> None:
+        with self._unit_of_work as uow:
+            failed_price_update = FailedPriceUpdate(
+                book_id=book_id,
+                book_store_id=bookstore_id,
+                reason=str(reason),
+                created=datetime.now())
+
+            uow.failed_price_update_repository.add(failed_price_update)
+
+    def get_next_enqueued_bookstores(self) -> list[BookStoreBook] | None:
+        try:
+            return self._book_stores_queue.get_nowait()
+        except Empty:
+            return None
