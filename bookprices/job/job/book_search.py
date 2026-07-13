@@ -2,7 +2,7 @@ import logging
 import traceback
 from typing import ClassVar, Sequence
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.job.job.enum import ArgumentName
+from bookprices.job.service.enum import ArgumentName
 from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager

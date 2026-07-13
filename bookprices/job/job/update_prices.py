@@ -3,7 +3,7 @@ import traceback
 from typing import ClassVar
 
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.job.job.enum import ArgumentName
+from bookprices.job.service.enum import ArgumentName
 from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
@@ -69,7 +69,7 @@ class  SelectedBookPricesUpdateJob(JobBase):
         super().__init__(config)
         self._price_update_service = price_update_services
         self._event_manager = event_manager
-        self._logger = logging.getLogger(self.__class__.name)
+        self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
         try:

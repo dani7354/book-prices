@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from queue import Queue, Empty
-from threading import Thread
+from threading import Thread, Lock
 from typing import Sequence, ClassVar
 from urllib.parse import urljoin
 
@@ -34,6 +34,7 @@ class PriceUpdateService:
         self._scraper_service = scraper_service
         self._updated_book_prices: list[tables.BookPrice] = []
         self._scrapers_by_bookstore_id = {}
+        self._unit_of_work_lock = Lock()
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def update_prices_for_books(self, book_ids: Sequence[int]) -> None:
@@ -69,7 +70,7 @@ class PriceUpdateService:
             [t.join() for t in threads]
 
     def _get_updated_prices_for_books(self) -> None:
-        while bookstores_for_book := self.get_next_enqueued_bookstores():
+        while (bookstores_for_book := self.get_next_enqueued_bookstores()) is not None:
             self._get_prices_for_book(bookstores_for_book)
 
     def _get_prices_for_book(self, book_stores: list[BookStoreBook]) -> None:
@@ -137,14 +138,15 @@ class PriceUpdateService:
         self._updated_book_prices = []
 
     def _log_failed_price_update_to_db(self, book_id: int, bookstore_id: int, reason: FailedUpdateReason) -> None:
-        with self._unit_of_work as uow:
-            failed_price_update = FailedPriceUpdate(
-                book_id=book_id,
-                book_store_id=bookstore_id,
-                reason=str(reason),
-                created=datetime.now())
+        with self._unit_of_work_lock:
+            with self._unit_of_work as uow:
+                failed_price_update = FailedPriceUpdate(
+                    book_id=book_id,
+                    book_store_id=bookstore_id,
+                    reason=str(reason),
+                    created=datetime.now())
 
-            uow.failed_price_update_repository.add(failed_price_update)
+                uow.failed_price_update_repository.add(failed_price_update)
 
     def get_next_enqueued_bookstores(self) -> list[BookStoreBook] | None:
         try:
