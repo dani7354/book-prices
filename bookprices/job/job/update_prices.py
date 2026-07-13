@@ -3,7 +3,7 @@ import traceback
 from typing import ClassVar
 
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.job.service.enum import ArgumentName
+from bookprices.job.service.enum import JobRunArgumentName
 from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
@@ -73,7 +73,7 @@ class  SelectedBookPricesUpdateJob(JobBase):
 
     def start(self, **kwargs) -> JobResult:
         try:
-            if not (book_ids := kwargs.get(ArgumentName.BOOK_IDS)):
+            if not (book_ids := kwargs.get(JobRunArgumentName.BOOK_IDS)):
                 self._logger.error(f"No book ids given for {self.name}!")
                 return JobResult(JobExitStatus.FAILURE, error_message=ValueError("No book ids given!"))
 
@@ -81,7 +81,7 @@ class  SelectedBookPricesUpdateJob(JobBase):
                 self._logger.error("Invalid arguments: book_ids is not a list of integers!")
                 return JobResult(
                     exit_status=JobExitStatus.FAILURE,
-                    error_message=ValueError(f"Invalid argument type for {ArgumentName.BOOK_IDS}"))
+                    error_message=ValueError(f"Invalid argument type for {JobRunArgumentName.BOOK_IDS}"))
 
             book_id_count = len(book_ids)
             self._logger.info(f"Updating prices for {book_id_count} books...")

@@ -1,6 +1,6 @@
 from enum import StrEnum
 
 
-class ArgumentName(StrEnum):
+class JobRunArgumentName(StrEnum):
     BOOK_IDS = "bookids"
 

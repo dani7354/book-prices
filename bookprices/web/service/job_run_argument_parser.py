@@ -20,7 +20,7 @@ class JobRunArgumentsParsingResult:
 
     @property
     def success(self) -> bool:
-        return self.arguments and not any(parsed_argument.errors for parsed_argument in self.arguments)
+        return self.arguments is not None and not any(parsed_argument.errors for parsed_argument in self.arguments)
 
     @property
     def errors_messages(self) -> list[str]:
