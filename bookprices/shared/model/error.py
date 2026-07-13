@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 
-class FailedUpdateReason(Enum):
+class FailedUpdateReason(StrEnum):
     CONNECTION_ERROR = "CONNECTION_ERROR"
     PAGE_NOT_FOUND = "PAGE_NOT_FOUND"
     INVALID_PRICE_FORMAT = "INVALID_PRICE_FORMAT"
