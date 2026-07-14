@@ -4,7 +4,7 @@ from queue import Queue
 from typing import ClassVar
 
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.job.service.enum import JobRunArgumentName
+from bookprices.job.service.argument_service import JobRunArgumentName, JobRunArgumentService
 from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
@@ -48,23 +48,23 @@ class DownloadSelectedImagesForBooksJob(JobBase):
 
     name: ClassVar[str] = "DownloadSelectedImagesForBooksJob"
 
-    def __init__(self, config: Config, db: Database, download_image_service: ImageDownloadService) -> None:
+    def __init__(
+            self,
+            config: Config,
+            argument_service: JobRunArgumentService,
+            db: Database,
+            download_image_service: ImageDownloadService) -> None:
         super().__init__(config)
+        self._argument_service = argument_service
         self._db = db
         self._download_image_service = download_image_service
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
         try:
-            if not (book_ids := kwargs.get(JobRunArgumentName.BOOK_IDS)):
-                self._logger.error(f"No book ids given for {self.name}!")
-                return JobResult(JobExitStatus.FAILURE, error_message=ValueError("No book ids given!"))
-
-            if not (isinstance(book_ids, list)) or not all(isinstance(book_id, int) for book_id in book_ids):
-                self._logger.error("Invalid arguments: book_ids is not a list of integers!")
-                return JobResult(
-                    exit_status=JobExitStatus.FAILURE,
-                    error_message=ValueError(f"Invalid argument type for {JobRunArgumentName.BOOK_IDS}"))
+            if not (book_ids := self._argument_service.parse_argument(kwargs, JobRunArgumentName.BOOK_IDS)):
+                self._logger.error(f"Failed to parse book ids for {self.name}!")
+                return JobResult(JobExitStatus.FAILURE)
 
             self._logger.info(f"Downloading images for books {book_ids}...")
             self._download_image_service.download_images_for_books(book_ids)

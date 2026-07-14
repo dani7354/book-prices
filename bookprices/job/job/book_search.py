@@ -3,6 +3,8 @@ import traceback
 from typing import ClassVar, Sequence
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.job.service.enum import JobRunArgumentName
+
+from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
 from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
@@ -20,6 +22,7 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
     def __init__(
             self,
             config: Config,
+            argument_service: JobRunArgumentService,
             unit_of_work: UnitOfWork,
             event_manager: EventManager,
             bookstore_search_service: BookStoreSearchService) -> None:
@@ -72,23 +75,21 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
     def __init__(
             self,
             config: Config,
+            argument_service: JobRunArgumentService,
             unit_of_work: UnitOfWork,
             event_manager: EventManager,
             bookstore_search_service: BookStoreSearchService) -> None:
         super().__init__(config)
+        self._argument_service = argument_service
         self._unit_of_work = unit_of_work
         self._event_manager = event_manager
         self._bookstore_search_service = bookstore_search_service
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        if not (book_ids := kwargs.get(JobRunArgumentName.BOOK_IDS)):
-            self._logger.error(f"No book ids provided for job {self.name}.")
-            return JobResult(exit_status=JobExitStatus.FAILURE)
-
-        if not isinstance(book_ids, list):
-            self._logger.error("Invalid argument: book_ids is not a list!")
-            return JobResult(exit_status=JobExitStatus.FAILURE)
+        if not (book_ids := self._argument_service.parse_argument(kwargs, JobRunArgumentName.BOOK_IDS)):
+            self._logger.error("Failed to parse arguments")
+            return JobResult(JobExitStatus.FAILURE)
 
         isbn_searches = self._get_isbn_searches(book_ids)
         self._bookstore_search_service.search_and_save_books_in_bookstores(isbn_searches)
