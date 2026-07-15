@@ -2,7 +2,6 @@ import logging
 import traceback
 from typing import ClassVar, Sequence
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
-from bookprices.job.service.enum import JobRunArgumentName
 
 from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
 from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
@@ -22,7 +21,6 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
     def __init__(
             self,
             config: Config,
-            argument_service: JobRunArgumentService,
             unit_of_work: UnitOfWork,
             event_manager: EventManager,
             bookstore_search_service: BookStoreSearchService) -> None:

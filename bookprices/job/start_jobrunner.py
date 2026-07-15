@@ -13,6 +13,7 @@ from bookprices.job.job.update_currencies import UpdateCurrenciesJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob, SelectedBookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
 from bookprices.job.runner.service import RunnerJobService
+from bookprices.job.service.argument_service import JobRunArgumentService
 from bookprices.job.service.bookstore_search import BookStoreSearchService
 from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.job.service.price_update import PriceUpdateService
@@ -139,11 +140,13 @@ def create_all_missing_books_search_job(
 
 def create_selected_missing_books_search_job(
         config: Config, event_manager: EventManager) -> SearchSelectedBooksInBookStoresJob:
+    argument_service = JobRunArgumentService()
     session_factory = create_data_session_factory(config)
     unit_of_work = UnitOfWork(session_factory)
     bookstore_search_service = create_bookstore_search_service(config)
 
-    return SearchSelectedBooksInBookStoresJob(config, unit_of_work, event_manager, bookstore_search_service)
+    return SearchSelectedBooksInBookStoresJob(
+        config, argument_service, unit_of_work, event_manager, bookstore_search_service)
 
 
 def create_trim_prices_job(config: Config) -> TrimPricesJob:
@@ -164,13 +167,14 @@ def create_download_all_missing_images_for_books_job(config: Config) -> Download
 
 
 def create_download_selected_images_for_books_job(config: Config) -> DownloadSelectedImagesForBooksJob:
+    argument_service = JobRunArgumentService()
     db = create_database_container(config)
     book_image_file_service = BookImageFileService(config.imgdir)
     image_downloader = ImageDownloader(book_image_file_service, config.imgdir)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
     image_download_service = ImageDownloadService(db, image_downloader, thread_count)
 
-    return DownloadSelectedImagesForBooksJob(config, db, image_download_service)
+    return DownloadSelectedImagesForBooksJob(config, argument_service, db, image_download_service)
 
 
 def create_delete_unavailable_books_job(config: Config, event_manager: EventManager) -> DeleteUnavailableBooksJob:
@@ -206,6 +210,7 @@ def create_all_book_prices_update_job(config: Config, event_manager: EventManage
 
 
 def create_selected_book_prices_update_job(config: Config, event_manager: EventManager) -> SelectedBookPricesUpdateJob:
+    argument_service = JobRunArgumentService()
     session_factory = create_data_session_factory(config)
     cache_key_remover = create_cache_key_remover(config)
     unit_of_work = UnitOfWork(session_factory)
@@ -214,7 +219,7 @@ def create_selected_book_prices_update_job(config: Config, event_manager: EventM
     price_update_service = PriceUpdateService(
         cache_key_remover, unit_of_work, scraper_service, thread_count)
 
-    return SelectedBookPricesUpdateJob(config, price_update_service, event_manager)
+    return SelectedBookPricesUpdateJob(config, argument_service, price_update_service, event_manager)
 
 
 def create_william_dam_book_import_job(config: Config, event_manager: EventManager) -> WilliamDamBookImportJob:
