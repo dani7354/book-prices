@@ -10,7 +10,7 @@ from bookprices.shared.service.job_service import JobRunArgumentType, JobRunArgu
 class ParsedJobRunArgumentResult:
     name: str = ""
     type: JobRunArgumentType | None = None
-    values: list[str] | list[int] | list[bool] = field(default_factory=list)
+    values: list = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
 
@@ -28,7 +28,7 @@ class JobRunArgumentsParsingResult:
     def errors_messages(self) -> list[str]:
         return [error for parsed_argument in self.arguments for error in parsed_argument.errors]
 
-    def get_result_dict(self) -> list[dict[str, str | list[str | int | bool]]]:
+    def get_result_dict(self) -> list[dict]:
         return [
             {
                 JobRunArgumentSchemaFields.NAME: argument.name,
@@ -48,7 +48,7 @@ class JobRunArgumentParser:
     _invalid_char_replacement: ClassVar[str] = "_"
     _values_valid_chars: ClassVar[set[str]] = set(string.ascii_letters + string.digits)
 
-    def parse_arguments(self, arguments_str: str) -> JobRunArgumentsParsingResult:
+    def parse_arguments(self, arguments_str: str | None) -> JobRunArgumentsParsingResult:
         if not arguments_str:
             return JobRunArgumentsParsingResult(arguments=[])
 
@@ -75,7 +75,7 @@ class JobRunArgumentParser:
                 parsed_job_run_argument_result.errors.append(
                     f"Invalid argument name: {self._sanitise_for_output(name)}")
 
-            if argument_type := self._parse_type(value_type):
+            if (argument_type := self._parse_type(value_type)) is not None:
                 parsed_job_run_argument_result.type = argument_type
             else:
                 parsed_job_run_argument_result.errors.append(
@@ -83,7 +83,7 @@ class JobRunArgumentParser:
 
             if values := values_str.split(self._values_delimiter):
                 success, parsed_values = self._parse_values(values, argument_type)
-                parsed_job_run_argument_result.values = parsed_values
+                parsed_job_run_argument_result.values = parsed_values or []
                 parsed_job_run_argument_result.errors.append("Failed to parse one or more values!") if not success else None
             else:
                 parsed_job_run_argument_result.errors.append(

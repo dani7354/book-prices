@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, ClassVar, Iterable
 
+from bookprices.shared.service.job_service import JobRunArgumentSchemaFields
+
 
 class JobRunArgumentName(StrEnum):
     BOOK_IDS = "bookids"
@@ -44,3 +46,19 @@ class JobRunArgumentService:
                 return None
 
         return argument_value
+
+    def create_job_run_payload(self, kwargs: dict[str, Any | Iterable], argument_names: list[JobRunArgumentName]) -> list:
+        arguments_payload = []
+        for name in argument_names:
+            if not (arg_values := self.parse_argument(kwargs, name)):
+                continue
+
+            arguments_payload.append({
+                JobRunArgumentSchemaFields.NAME: name,
+                JobRunArgumentSchemaFields.TYPE: str(self._argument_name_to_type_map[name].argument_type.__name__),
+                JobRunArgumentSchemaFields.VALUES: arg_values
+            })
+
+        return arguments_payload
+
+

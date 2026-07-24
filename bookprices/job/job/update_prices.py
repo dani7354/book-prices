@@ -85,7 +85,9 @@ class  SelectedBookPricesUpdateJob(JobBase):
             self._price_update_service.update_prices_for_books(book_ids)
             self._logger.info(f"Finished updating prices for {book_id_count} books.")
 
-            self._event_manager.trigger_event(str(BookPricesEvents.BOOK_PRICES_UPDATED), book_ids=book_ids)
+            self._event_manager.trigger_event(
+                str(BookPricesEvents.BOOK_PRICES_UPDATED),
+                kwargs={JobRunArgumentName.BOOK_IDS: book_ids})
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:

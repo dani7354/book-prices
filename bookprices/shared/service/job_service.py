@@ -156,7 +156,7 @@ class JobService:
             job_runs = self._job_api_client.get(url)
             return job_runs
         except ApiUnavailableError as e:
-            logger.error(f"Failed to get job runs for job with id {job_id}. API is unavailable.")
+            logger.error(f"Failed to get job runs. API is unavailable.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
             logger.error(f"Failed to get job runs. Error: {e}")
@@ -182,7 +182,7 @@ class JobService:
             logger.error(f"Failed to create job with name {name}. Error: {e}")
             raise CreationFailedError(f"Job with name {name} could not be created.")
 
-    def create_job_run(self, job_id: str, priority: str, arguments: list[dict[str, str | list[str]]]) -> None:
+    def create_job_run(self, job_id: str, priority: str, arguments) -> None:
         try:
             self._job_api_client.post(
                 Endpoint.JOB_RUNS.value,
@@ -228,7 +228,7 @@ class JobService:
             version: str,
             arguments: list[dict[str, str | list[str]]]) -> None:
         try:
-            data = {
+            data: dict[str, str | list[dict[str, str | list[str]]]] = {
                 JobRunSchemaFields.JOB_RUN_ID: job_run_id,
                 JobRunSchemaFields.JOB_ID: job_id,
                 JobRunSchemaFields.PRIORITY: priority,

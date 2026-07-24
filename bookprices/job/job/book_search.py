@@ -91,8 +91,11 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
 
         isbn_searches = self._get_isbn_searches(book_ids)
         self._bookstore_search_service.search_and_save_books_in_bookstores(isbn_searches)
+        valid_book_ids = [search.book_id for search in isbn_searches]
 
-        self._event_manager.trigger_event(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED, args=book_ids)
+        self._event_manager.trigger_event(
+            event_name=BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED,
+            kwargs={JobRunArgumentName.BOOK_IDS: valid_book_ids})
 
         self._logger.info(f"Search completed for {len(isbn_searches)} books in bookstores.")
 

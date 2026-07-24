@@ -1,7 +1,7 @@
 import pytest
 
 from bookprices.shared.service.job_service import JobRunArgumentType
-from bookprices.web.service.job_run_argument_parser import JobRunArgumentParser
+from bookprices.shared.service.job_run_argument_parser import JobRunArgumentParser
 
 
 @pytest.fixture
