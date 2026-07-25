@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, ClassVar, Iterable
+from typing import ClassVar
 
 from bookprices.shared.service.job_service import JobRunArgumentSchemaFields
 
@@ -29,7 +29,7 @@ class JobRunArgumentService:
                 name=JobRunArgumentName.BOOK_IDS, argument_type=int, is_list=True)
         }
 
-    def parse_argument(self, kwargs: dict[str, Any | Iterable], name: JobRunArgumentName):
+    def parse_argument(self, name: JobRunArgumentName, **kwargs):
         if not (argument_value := kwargs.get(name)):
             self._logger.error("Argument %s not in dictionary.", name)
             return None
@@ -47,16 +47,18 @@ class JobRunArgumentService:
 
         return argument_value
 
-    def create_job_run_payload(self, kwargs: dict[str, Any | Iterable], argument_names: list[JobRunArgumentName]) -> list:
+    def create_job_run_payload(self, argument_names: list[JobRunArgumentName], **kwargs) -> list:
         arguments_payload = []
         for name in argument_names:
-            if not (arg_values := self.parse_argument(kwargs, name)):
+            if not (arg_values := self.parse_argument(name, **kwargs)):
                 continue
 
+            arg_values_str_arr = [str(v) for v in arg_values] if isinstance(arg_values, list) else [arg_values]
+            print(arg_values_str_arr)
             arguments_payload.append({
                 JobRunArgumentSchemaFields.NAME: name,
                 JobRunArgumentSchemaFields.TYPE: str(self._argument_name_to_type_map[name].argument_type.__name__),
-                JobRunArgumentSchemaFields.VALUES: arg_values
+                JobRunArgumentSchemaFields.VALUES: arg_values_str_arr
             })
 
         return arguments_payload

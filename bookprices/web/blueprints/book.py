@@ -2,11 +2,18 @@ import flask_login
 from werkzeug.local import LocalProxy
 import bookprices.web.mapper.book as bookmapper
 from flask import Blueprint, abort, request, render_template, Response, redirect, url_for, current_app, jsonify
+
+from bookprices.job.job.book_search import SearchSelectedBooksInBookStoresJob
+from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
+from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.db import database
+from bookprices.shared.event.enum import BookPricesEvents
+from bookprices.shared.event.listener import StartJobListener
 from bookprices.shared.model.book import Book
 from bookprices.shared.model.user import UserAccessLevel
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.book_image_file_service import BookImageFileService
+from bookprices.shared.service.job_service import JobService
 from bookprices.web.blueprints.urlhelper import parse_args_for_search
 from bookprices.web.mapper.book import map_from_create_view_model
 from bookprices.web.service.auth_service import require_admin, AuthService
@@ -16,17 +23,37 @@ from bookprices.web.service.csrf import get_csrf_token
 from bookprices.web.settings import (
     PAGE_URL_PARAMETER, SEARCH_URL_PARAMETER, AUTHOR_URL_PARAMETER, ORDER_BY_URL_PARAMETER, DESCENDING_URL_PARAMETER,
     MYSQL_USER, MYSQL_PORT, MYSQL_HOST, MYSQL_DATABASE, MYSQL_PASSWORD, BOOK_PAGESIZE, BOOK_IMAGE_FILE_PATH,
-    BOOK_IMAGES_BASE_URL, BOOKLIST_ID_URL_PARAMETER)
+    BOOK_IMAGES_BASE_URL, BOOKLIST_ID_URL_PARAMETER, JOB_API_BASE_URL, JOB_API_CLIENT_ID, JOB_API_PASSWORD,
+    JOB_API_USERNAME)
 from bookprices.web.cache.redis import cache
 from bookprices.web.shared.db_session import WebSessionFactory
 from bookprices.web.shared.enum import HttpStatusCode, HttpMethod, BookTemplate, Endpoint
 from bookprices.web.viewmodels.book import CreateBookViewModel
-
+from bookprices.shared.event.base import EventManager, Event
 
 logger = LocalProxy(lambda: current_app.logger)
 book_blueprint = Blueprint("book", __name__)
 db = database.Database(MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 book_service = BookService(db, cache)
+
+
+def _create_event_manager() -> EventManager:
+    uow = UnitOfWork(WebSessionFactory())
+    job_api_client = JobApiClient(
+        base_url=JOB_API_BASE_URL,
+        api_username=JOB_API_USERNAME,
+        api_password=JOB_API_PASSWORD,
+        client_name=JOB_API_CLIENT_ID,
+        unit_of_work=uow)
+
+    job_service = JobService(job_api_client=job_api_client)
+    book_created_event = Event(str(BookPricesEvents.BOOK_CREATED))
+    book_created_event.add_listener(
+        StartJobListener(job_service, JobRunArgumentService(), SearchSelectedBooksInBookStoresJob.name))
+
+    events = {book_created_event.name: book_created_event}
+
+    return EventManager(events)
 
 
 @book_blueprint.context_processor
@@ -148,6 +175,9 @@ def create() -> str | Response:
                  title=view_model.title,
                  author=view_model.author,
                  format=view_model.format))
+
+        event_manager = _create_event_manager()
+        event_manager.trigger_event(str(BookPricesEvents.BOOK_CREATED), **{JobRunArgumentName.BOOK_IDS: [book_id]})
 
         return redirect(url_for(Endpoint.BOOK.value, book_id=book_id))
 

@@ -62,7 +62,7 @@ class DownloadSelectedImagesForBooksJob(JobBase):
 
     def start(self, **kwargs) -> JobResult:
         try:
-            if not (book_ids := self._argument_service.parse_argument(kwargs, JobRunArgumentName.BOOK_IDS)):
+            if not (book_ids := self._argument_service.parse_argument(JobRunArgumentName.BOOK_IDS, **kwargs)):
                 self._logger.error(f"Failed to parse book ids for {self.name}!")
                 return JobResult(JobExitStatus.FAILURE)
 

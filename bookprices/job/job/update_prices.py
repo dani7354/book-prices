@@ -76,7 +76,7 @@ class  SelectedBookPricesUpdateJob(JobBase):
 
     def start(self, **kwargs) -> JobResult:
         try:
-            if not (book_ids := self._argument_service.parse_argument(kwargs, JobRunArgumentName.BOOK_IDS)):
+            if not (book_ids := self._argument_service.parse_argument(JobRunArgumentName.BOOK_IDS, **kwargs)):
                 self._logger.error("Failed to parse arguments")
                 return JobResult(JobExitStatus.FAILURE)
 
@@ -87,7 +87,7 @@ class  SelectedBookPricesUpdateJob(JobBase):
 
             self._event_manager.trigger_event(
                 str(BookPricesEvents.BOOK_PRICES_UPDATED),
-                kwargs={JobRunArgumentName.BOOK_IDS: book_ids})
+                **{JobRunArgumentName.BOOK_IDS: book_ids})
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:

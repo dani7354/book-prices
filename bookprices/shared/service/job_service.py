@@ -140,7 +140,7 @@ class JobService:
             except ApiUnavailableError as e:
                 raise JobSourceUnavailableError from e
             except HTTPError as e:
-                logger.error(f"Failed to get job runs for job with id {job_id}. Error: {e}")
+                logger.exception(f"Failed to get job runs for job with id {job_id}. Error: {e}")
 
         return job_runs_by_job_id
 
@@ -156,10 +156,10 @@ class JobService:
             job_runs = self._job_api_client.get(url)
             return job_runs
         except ApiUnavailableError as e:
-            logger.error(f"Failed to get job runs. API is unavailable.")
+            logger.exception(f"Failed to get job runs. API is unavailable.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to get job runs. Error: {e}")
+            logger.exception(f"Failed to get job runs. Error: {e}")
             raise FailedToGetJobRunsError("Failed to get job runs.")
 
     def create_job(self, name: str, description: str, is_active: bool) -> None:
@@ -176,10 +176,10 @@ class JobService:
                     JobSchemaFields.DESCRIPTION.value: description,
                     JobSchemaFields.IS_ACTIVE.value: is_active})
         except ApiUnavailableError as e:
-            logger.error(f"Job API is unavailable. Failed to create job with name {name}.")
+            logger.exception(f"Job API is unavailable. Failed to create job with name {name}.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to create job with name {name}. Error: {e}")
+            logger.exception(f"Failed to create job with name {name}. Error: {e}")
             raise CreationFailedError(f"Job with name {name} could not be created.")
 
     def create_job_run(self, job_id: str, priority: str, arguments) -> None:
@@ -191,10 +191,10 @@ class JobService:
                     JobRunSchemaFields.PRIORITY.value: priority,
                     JobRunSchemaFields.ARGUMENTS: arguments})
         except ApiUnavailableError as e:
-            logger.error(f"Job API is unavailable. Failed to create job run for job with id {job_id}.")
+            logger.exception(f"Job API is unavailable. Failed to create job run for job with id {job_id}.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to create job run for job with id {job_id}. Error: {e}")
+            logger.exception(f"Failed to create job run for job with id {job_id}. Error: {e}")
             raise CreationFailedError(f"Job run for job with id {job_id} could not be created.")
 
     def update_job(self, job_id: str, name: str, description: str, version: str, is_active: bool) -> None:
@@ -214,10 +214,10 @@ class JobService:
                     JobSchemaFields.VERSION.value: version,
                     JobSchemaFields.IS_ACTIVE.value: is_active})
         except ApiUnavailableError as e:
-            logger.error(f"Job API is unavailable. Failed to update job with id {job_id}.")
+            logger.exception(f"Job API is unavailable. Failed to update job with id {job_id}.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to update job with id {job_id}. Error: {e}")
+            logger.exception(f"Failed to update job with id {job_id}. Error: {e}")
             raise UpdateFailedError(f"Job with id {job_id} could not be updated.")
 
     def update_job_run(
@@ -242,30 +242,30 @@ class JobService:
                 Endpoint.get_job_run_url(job_run_id),
                 data=data)
         except ApiUnavailableError as e:
-            logger.error(f"Job API is unavailable. Failed to update job run with id {job_run_id}.")
+            logger.exception(f"Job API is unavailable. Failed to update job run with id {job_run_id}.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to update job run with id {job_run_id}. Error: {e}")
-            raise CreationFailedError(f"Job run with id {job_run_id} could not be updated.")
+            logger.exception(f"Failed to update job run with id {job_run_id}. Error: {e}")
+            raise UpdateFailedError(f"Job run with id {job_run_id} could not be updated.")
 
     def delete_job(self, job_id: str) -> None:
         try:
             self._job_api_client.delete(Endpoint.get_job_url(job_id))
         except ApiUnavailableError as e:
-            logger.error(f"Job API is unavailable. Failed to delete job with id {job_id}.")
+            logger.exception(f"Job API is unavailable. Failed to delete job with id {job_id}.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to delete job with id {job_id}. Error: {e}")
+            logger.exception(f"Failed to delete job with id {job_id}. Error: {e}")
             raise DeletionFailedError(f"Job with id {job_id} could not be deleted.")
 
     def delete_job_run(self, job_run_id: str) -> None:
         try:
             self._job_api_client.delete(Endpoint.get_job_run_url(job_run_id))
         except ApiUnavailableError as e:
-            logger.error(f"Job API is unavailable. Failed to delete job run with id {job_run_id}.")
+            logger.exception(f"Job API is unavailable. Failed to delete job run with id {job_run_id}.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to delete job run with id {job_run_id}. Error: {e}")
+            logger.exception(f"Failed to delete job run with id {job_run_id}. Error: {e}")
             raise DeletionFailedError(f"Job run with id {job_run_id} could not be deleted.")
 
     def get_finished_job_runs_statistics(self, days: int) -> dict:
@@ -275,8 +275,8 @@ class JobService:
 
             return job_run_statistics_json
         except ApiUnavailableError as e:
-            logger.error("Job API is unavailable. Failed to get statistics for finished job runs.")
+            logger.exception("Job API is unavailable. Failed to get statistics for finished job runs.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
-            logger.error(f"Failed to get statistics for finished job runs: {e}")
+            logger.exception(f"Failed to get statistics for finished job runs: {e}")
             raise FailedToGetJobRunsError from e

@@ -92,20 +92,24 @@ def setup_event_manager(config: Config) -> EventManager:
     job_run_argument_service = JobRunArgumentService()
 
     prices_updated_event = Event(str(BookPricesEvents.BOOK_PRICES_UPDATED))
-    prices_updated_event.add_listener(StartJobListener(job_service, job_run_argument_service, TrimPricesJob.name))
 
     book_created_event = Event(str(BookPricesEvents.BOOK_CREATED))
+    book_created_event.add_listener(
+        StartJobListener(job_service, job_run_argument_service, SearchSelectedBooksInBookStoresJob.name))
 
     books_imported_event = Event(str(BookPricesEvents.BOOKS_IMPORTED))
-    books_imported_event.add_listener(StartJobListener(
-        job_service, job_run_argument_service, DownloadAllMissingImagesForBooksJob.name))
+    books_imported_event.add_listener(
+        StartJobListener(job_service, job_run_argument_service, SearchSelectedBooksInBookStoresJob.name))
 
     book_deleted_event = Event(str(BookPricesEvents.BOOKS_DELETED))
     book_deleted_event.add_listener(StartJobListener(job_service, job_run_argument_service, DeleteImagesJob.name))
 
     books_found_in_stores = Event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
     books_found_in_stores.add_listener(
-        StartJobListener(job_service, job_run_argument_service, DownloadAllMissingImagesForBooksJob.name))
+        StartJobListener(job_service, job_run_argument_service, DownloadSelectedImagesForBooksJob.name))
+
+    books_found_in_stores.add_listener(
+        StartJobListener(job_service, job_run_argument_service, SelectedBookPricesUpdateJob.name))
 
     events = {
         prices_updated_event.name: prices_updated_event,

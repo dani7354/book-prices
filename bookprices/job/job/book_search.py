@@ -85,17 +85,17 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        if not (book_ids := self._argument_service.parse_argument(kwargs, JobRunArgumentName.BOOK_IDS)):
+        if not (book_ids := self._argument_service.parse_argument(JobRunArgumentName.BOOK_IDS, **kwargs)):
             self._logger.error("Failed to parse arguments")
             return JobResult(JobExitStatus.FAILURE)
 
         isbn_searches = self._get_isbn_searches(book_ids)
         self._bookstore_search_service.search_and_save_books_in_bookstores(isbn_searches)
-        valid_book_ids = [search.book_id for search in isbn_searches]
+        unique_valid_book_ids = set(search.book_id for search in isbn_searches)
 
         self._event_manager.trigger_event(
             event_name=BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED,
-            kwargs={JobRunArgumentName.BOOK_IDS: valid_book_ids})
+            **{JobRunArgumentName.BOOK_IDS: list(unique_valid_book_ids)})
 
         self._logger.info(f"Search completed for {len(isbn_searches)} books in bookstores.")
 

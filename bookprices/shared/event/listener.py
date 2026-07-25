@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
 from bookprices.shared.event.base import Listener
@@ -22,11 +23,11 @@ class StartJobListener(Listener):
 
             if kwargs:
                 arguments = self._job_run_argument_service.create_job_run_payload(
-                    kwargs,
-                    argument_names=[JobRunArgumentName.BOOK_IDS])
+                    [JobRunArgumentName.BOOK_IDS], **kwargs)
             else:
                 arguments = []
 
             self._job_service.create_job_run(job_id=job["id"], priority=JobRunPriority.HIGH.value, arguments=arguments)
         except CreationFailedError as ex:
             self._logger.error(f"Error while creating job run for {self._job_name}: {ex}")
+            self._logger.error(traceback.format_exc())
