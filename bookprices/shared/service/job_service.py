@@ -156,7 +156,7 @@ class JobService:
             job_runs = self._job_api_client.get(url)
             return job_runs
         except ApiUnavailableError as e:
-            logger.exception(f"Failed to get job runs. API is unavailable.")
+            logger.exception("Failed to get job runs. API is unavailable.")
             raise JobSourceUnavailableError from e
         except HTTPError as e:
             logger.exception(f"Failed to get job runs. Error: {e}")

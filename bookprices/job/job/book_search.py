@@ -92,7 +92,7 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
 
         isbn_searches = self._get_isbn_searches(book_ids)
         self._bookstore_search_service.search_and_save_books_in_bookstores(isbn_searches)
-        unique_valid_book_ids = set(search.book_id for search in isbn_searches)
+        unique_valid_book_ids = {search.book_id for search in isbn_searches}
 
         self._event_manager.trigger_event(
             event_name=BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED,
