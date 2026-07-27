@@ -6,6 +6,7 @@ from typing import ClassVar
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 from bookprices.job.service.argument_service import JobRunArgumentName, JobRunArgumentService
 from bookprices.job.service.image_download import ImageDownloadService
+from bookprices.job.shared.error_message import FAILED_TO_PARSE_ARGUMENTS
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
 
@@ -40,7 +41,7 @@ class DownloadAllMissingImagesForBooksJob(JobBase):
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
-            return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(exit_status=JobExitStatus.FAILURE, error=ex)
 
 
 class DownloadSelectedImagesForBooksJob(JobBase):
@@ -64,7 +65,7 @@ class DownloadSelectedImagesForBooksJob(JobBase):
         try:
             if not (book_ids := self._argument_service.parse_argument(JobRunArgumentName.BOOK_IDS, **kwargs)):
                 self._logger.error(f"Failed to parse book ids for {self.name}!")
-                return JobResult(JobExitStatus.FAILURE)
+                return JobResult(JobExitStatus.FAILURE, error=ValueError(FAILED_TO_PARSE_ARGUMENTS))
 
             self._logger.info(f"Downloading images for books {book_ids}...")
             self._download_image_service.download_images_for_books(book_ids)
@@ -74,4 +75,4 @@ class DownloadSelectedImagesForBooksJob(JobBase):
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
-            return JobResult(JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(JobExitStatus.FAILURE, error=ex)

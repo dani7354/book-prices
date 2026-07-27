@@ -3,7 +3,8 @@ import traceback
 
 from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
 from bookprices.shared.event.base import Listener
-from bookprices.shared.service.job_service import JobService, JobRunPriority, CreationFailedError
+from bookprices.shared.service.job_service import JobService, JobRunPriority, CreationFailedError, \
+    JobSourceUnavailableError
 
 
 class StartJobListener(Listener):
@@ -28,6 +29,5 @@ class StartJobListener(Listener):
                 arguments = []
 
             self._job_service.create_job_run(job_id=job["id"], priority=JobRunPriority.HIGH.value, arguments=arguments)
-        except CreationFailedError as ex:
-            self._logger.error(f"Error while creating job run for {self._job_name}: {ex}")
-            self._logger.error(traceback.format_exc())
+        except (CreationFailedError, JobSourceUnavailableError) as ex:
+            self._logger.exception(f"Error while creating job run for {self._job_name}: {ex}")

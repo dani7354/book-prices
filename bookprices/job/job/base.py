@@ -16,7 +16,7 @@ class JobExitStatus(IntEnum):
 @dataclasses.dataclass(frozen=True)
 class JobResult:
     exit_status: JobExitStatus
-    error_message: Exception | None = None
+    error: Exception | None = None
 
 
 class JobBase(ABC):

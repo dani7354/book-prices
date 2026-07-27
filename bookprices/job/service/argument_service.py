@@ -31,13 +31,16 @@ class JobRunArgumentService:
 
     def parse_argument(self, name: JobRunArgumentName, **kwargs):
         if not (argument_value := kwargs.get(name)):
-            self._logger.error("Argument %s not in dictionary.", name)
+            self._logger.error(f"Argument {name} not in dictionary.")
             return None
 
         type_info = self._argument_name_to_type_map[name]
         if type_info.is_list:
-            if (not isinstance(argument_value, list)
-                    and not all(isinstance(v, type_info.argument_type) for v in argument_value)):
+            if not isinstance(argument_value, list):
+                self._logger.error(f"Argument {name} is not a list.")
+                return None
+
+            if not all(isinstance(v, type_info.argument_type) for v in argument_value):
                 self._logger.error(self._invalid_argument_type_error_msg.format(name=name))
                 return None
         else:
@@ -53,8 +56,7 @@ class JobRunArgumentService:
             if not (arg_values := self.parse_argument(name, **kwargs)):
                 continue
 
-            arg_values_str_arr = [str(v) for v in arg_values] if isinstance(arg_values, list) else [arg_values]
-            print(arg_values_str_arr)
+            arg_values_str_arr = [str(v) for v in arg_values] if isinstance(arg_values, list) else [str(arg_values)]
             arguments_payload.append({
                 JobRunArgumentSchemaFields.NAME: name,
                 JobRunArgumentSchemaFields.TYPE: str(self._argument_name_to_type_map[name].argument_type.__name__),

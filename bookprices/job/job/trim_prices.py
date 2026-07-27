@@ -43,7 +43,7 @@ class TrimPricesJob(JobBase):
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
-            return JobResult(JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(JobExitStatus.FAILURE, error=ex)
 
     def trim_prices_for_book(self, book_id: int) -> None:
         book = self._db.book_db.get_book(book_id)

@@ -91,7 +91,7 @@ class WilliamDamBookImportJob(JobBase):
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
-            return JobResult(JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(JobExitStatus.FAILURE, error=ex)
 
     def _get_book_urls(self) -> None:
         self._logger.info(
