@@ -10,6 +10,7 @@ from typing import ClassVar, NamedTuple
 from requests import RequestException
 
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
+from bookprices.job.service.argument_service import JobRunArgumentName
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
@@ -52,7 +53,8 @@ class WilliamDamBookImportJob(JobBase):
         self._event_manager = event_manager
         self._book_url_queue = queue.Queue()
         self._book_list_url_queue = queue.Queue()
-        self._new_books = []
+        self._found_books = []
+        self._added_book_ids = []
         self._rate_limiter = RateLimiter(self._request_count, self._period_seconds)
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -77,7 +79,7 @@ class WilliamDamBookImportJob(JobBase):
 
             self._logger.info(f"Importing books from {self._book_url_queue.qsize()} URLs")
             self._get_new_books()
-            if not self._new_books:
+            if not self._found_books:
                 self._logger.info("No new books found!")
                 return JobResult(JobExitStatus.SUCCESS)
 
@@ -85,13 +87,20 @@ class WilliamDamBookImportJob(JobBase):
             self._create_or_update_books()
             logging.info("Done!")
 
-            self._event_manager.trigger_event(str(BookPricesEvents.BOOKS_IMPORTED))
+            self._event_manager.trigger_event(
+                str(BookPricesEvents.BOOKS_IMPORTED),
+                **{JobRunArgumentName.BOOK_IDS: self._added_book_ids})
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
             return JobResult(JobExitStatus.FAILURE, error=ex)
+        finally:
+            self._added_book_ids.clear()
+            self._found_books.clear()
+            self._book_url_queue = queue.Queue()
+            self._book_list_url_queue = queue.Queue()
 
     def _get_book_urls(self) -> None:
         self._logger.info(
@@ -117,7 +126,7 @@ class WilliamDamBookImportJob(JobBase):
             t.start()
 
         [t.join() for t in threads]
-        logging.debug(f"{len(self._new_books)} books found!")
+        logging.debug(f"{len(self._found_books)} books found!")
 
     def _get_next_book_urls_from_list(self) -> None:
         while not self._book_list_url_queue.empty():
@@ -142,15 +151,15 @@ class WilliamDamBookImportJob(JobBase):
                 book = self._parse_book(book_response.text)
                 if self._is_book_valid(book):
                     logging.debug(f"Found valid book: {book.title} ({book.format}) by {book.author} (ISBN-13: {book.isbn})")
-                    self._new_books.append(NewBook(book=book, url=urlparse(book_url).path))
+                    self._found_books.append(NewBook(book=book, url=urlparse(book_url).path))
             except (RequestException, ValueError, KeyError) as ex:
                 self._logger.error(ex)
 
     def _create_or_update_books(self) -> None:
-        created_count, updated_count = 0, 0
+        updated_count = 0
         with self._unit_of_work as uow:
             existing_books_isbn = uow.book_repository.list_books_by_isbn()
-        for book, url in self._new_books:
+        for book, url in self._found_books:
             try:
                 if existing_book := existing_books_isbn.get(book.isbn):
                     self._logger.debug(f"Updating book with ISBN {book.isbn}")
@@ -178,14 +187,14 @@ class WilliamDamBookImportJob(JobBase):
                         book_id = uow.book_repository.create(book)
                     self._cache_key_remover.remove_key_for_authors()
                     self._cache_key_remover.remove_keys_for_book_and_bookstore(book_id, self._bookstore_id)
-                    created_count += 1
+                    self._added_book_ids.append(book_id)
                 with self._unit_of_work as uow:
                     uow.bookstore_repository.add_book_to_bookstore_if_not_exists(book_id, self._bookstore_id, url)
             except Exception as ex:
                 self._logger.error(f"Error while inserting book: {book.title}, {book.author}, {book.isbn}: {ex}")
                 self._logger.error(traceback.format_exc())
 
-        logging.info(f"{created_count} new book(s) saved!")
+        logging.info(f"{len(self._added_book_ids)} new book(s) saved!")
         logging.info(f"{updated_count} book(s) updated!")
 
     def _parse_book(self, data: str) -> Book:
