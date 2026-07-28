@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 
 from sqlalchemy import func, select, case
@@ -21,6 +22,9 @@ class BookPriceRepository(RepositoryBase[BookPrice]):
     def add_prices(self, entities: list[BookPrice]) -> None:
         self._session.bulk_save_objects(entities)
 
+    def delete_prices(self, ids: list[int]) -> None:
+        self._session.query(BookPrice).filter(BookPrice.id.in_(ids)).delete(synchronize_session=False)
+
     def get_price_count_by_bookstore(self, from_date: datetime) -> list[tuple[int, str, int]]:
         price_count = func.count(case((BookPrice.created >= from_date, 1)))
         stmt = (
@@ -30,3 +34,27 @@ class BookPriceRepository(RepositoryBase[BookPrice]):
                    .order_by(price_count.desc()))
 
         return [(row[0], row[1], row[2]) for row in self._session.execute(stmt).all()]
+
+    def get_prices_for_book_by_bookstore_id(self, book_id: int) -> dict[int, list[tuple[int, int, int, float, datetime]]]:
+        latest_prices = (
+            select(func.max(BookPrice.id).label("id"))
+            .where(BookPrice.book_id == book_id)
+            .group_by(func.date(BookPrice.created), BookPrice.book_store_id)
+            .cte("latest_prices"))
+
+        stmt = (
+            select(
+                BookPrice.id,
+                BookPrice.book_id,
+                BookPrice.book_store_id,
+                BookPrice.price,
+                func.date(BookPrice.created).label("created"))
+            .join(latest_prices, BookPrice.id == latest_prices.c.id)
+            .order_by(func.date(BookPrice.created).desc())
+        )
+
+        prices_by_bookstore_id = defaultdict(list)
+        for row in self._session.execute(stmt).all():
+            prices_by_bookstore_id[row[2]].append((row[0], row[1], row[2], row[3], row[4]))
+
+        return prices_by_bookstore_id

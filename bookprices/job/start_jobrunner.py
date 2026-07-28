@@ -8,7 +8,7 @@ from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadAllMissingImagesForBooksJob, DownloadSelectedImagesForBooksJob
 from bookprices.job.job.import_books import WilliamDamBookImportJob
-from bookprices.job.job.trim_prices import TrimPricesJob
+from bookprices.job.job.trim_prices import TrimAllPricesJob, TrimSelectedPricesJob
 from bookprices.job.job.update_currencies import UpdateCurrenciesJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob, SelectedBookPricesUpdateJob
 from bookprices.job.runner.jobrunner import JobRunner
@@ -18,6 +18,7 @@ from bookprices.job.service.bookstore_search import BookStoreSearchService
 from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.job.service.price_update import PriceUpdateService
 from bookprices.job.db.session import JobSessionFactory
+from bookprices.job.service.trim_prices_service import TrimPricesService
 from bookprices.shared.api.currency import CurrencyApiClient
 from bookprices.shared.api.job import JobApiClient
 from bookprices.shared.cache.client import RedisClient
@@ -92,6 +93,8 @@ def setup_event_manager(config: Config) -> EventManager:
     job_run_argument_service = JobRunArgumentService()
 
     prices_updated_event = Event(str(BookPricesEvents.BOOK_PRICES_UPDATED))
+    prices_updated_event.add_listener(
+        StartJobListener(job_service, job_run_argument_service, TrimSelectedPricesJob.name))
 
     book_created_event = Event(str(BookPricesEvents.BOOK_CREATED))
     book_created_event.add_listener(
@@ -156,11 +159,23 @@ def create_selected_missing_books_search_job(
         config, argument_service, unit_of_work, event_manager, bookstore_search_service)
 
 
-def create_trim_prices_job(config: Config) -> TrimPricesJob:
-    db = create_database_container(config)
+def create_trim_all_prices_job(config: Config) -> TrimAllPricesJob:
     cache_key_remover = create_cache_key_remover(config)
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
+    trim_prices_service = TrimPricesService(unit_of_work, cache_key_remover)
 
-    return TrimPricesJob(config, cache_key_remover, db)
+    return TrimAllPricesJob(config, cache_key_remover, unit_of_work, trim_prices_service)
+
+
+def create_trim_selected_prices_job(config: Config) -> TrimSelectedPricesJob:
+    cache_key_remover = create_cache_key_remover(config)
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
+    trim_prices_service = TrimPricesService(unit_of_work, cache_key_remover)
+    argument_service = JobRunArgumentService()
+
+    return TrimSelectedPricesJob(config, trim_prices_service, argument_service, cache_key_remover)
 
 
 def create_download_all_missing_images_for_books_job(config: Config) -> DownloadAllMissingImagesForBooksJob:
@@ -255,7 +270,8 @@ def main() -> None:
         job_api_client = create_job_api_client(config)
         service = RunnerJobService(job_api_client)
         jobs = [
-            create_trim_prices_job(config),
+            create_trim_all_prices_job(config),
+            create_trim_selected_prices_job(config),
             create_download_all_missing_images_for_books_job(config),
             create_download_selected_images_for_books_job(config),
             create_delete_unavailable_books_job(config, event_manager),

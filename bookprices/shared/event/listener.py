@@ -1,10 +1,9 @@
 import logging
-import traceback
 
 from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
 from bookprices.shared.event.base import Listener
-from bookprices.shared.service.job_service import JobService, JobRunPriority, CreationFailedError, \
-    JobSourceUnavailableError
+from bookprices.shared.service.job_service import (JobService, JobRunPriority, CreationFailedError,
+    JobSourceUnavailableError)
 
 
 class StartJobListener(Listener):
