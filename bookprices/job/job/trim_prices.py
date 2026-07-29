@@ -1,81 +1,92 @@
-import traceback
-from typing import ClassVar, Sequence
+import logging
+from typing import ClassVar
 from logging import getLogger
 
 from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
+from bookprices.job.service.argument_service import JobRunArgumentName, JobRunArgumentService
+from bookprices.job.service.trim_prices_service import TrimPricesService
+from bookprices.job.shared.error_message import FAILED_TO_PARSE_ARGUMENTS
 from bookprices.shared.cache.key_remover import BookPriceKeyRemover
 from bookprices.shared.config.config import Config
-from bookprices.shared.db.database import Database
-from bookprices.shared.model.bookprice import BookPrice
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 
 
-class TrimPricesJob(JobBase):
+class TrimAllPricesJob(JobBase):
     """
-    Trims prices for books in the database. It removes duplicate prices for saving disk space and improving performance.
+    Trims prices for all books in the database.
+    It removes duplicate prices for saving disk space and improving performance.
     """
 
     book_ids_batch_size: ClassVar[int] = 500
-    min_prices_to_keep: ClassVar[int] = 10
 
-    name: ClassVar[str] = "TrimPricesJob"
+
+    name: ClassVar[str] = "TrimAllPricesJob"
 
     def __init__(
             self,
             config: Config,
             cache_key_remover: BookPriceKeyRemover,
-            bookprice_db: Database) -> None:
+            unit_of_work: UnitOfWork,
+            trim_prices_service: TrimPricesService) -> None:
         super().__init__(config)
         self._cache_key_remover = cache_key_remover
-        self._db = bookprice_db
+        self._unit_of_work = unit_of_work
+        self._trim_prices_service = trim_prices_service
         self._logger = getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
         try:
             book_ids_offset, book_id_page = 0, 1
-            while book_ids := self._db.book_db.get_next_book_ids(book_ids_offset, self.book_ids_batch_size):
+            while book_ids := self._list_book_ids(book_ids_offset, self.book_ids_batch_size):
                 for book_id in book_ids:
-                    self.trim_prices_for_book(book_id)
+                    self._trim_prices_service.trim_prices_for_book(book_id)
 
                 book_id_page += 1
                 book_ids_offset = (book_id_page - 1) * self.book_ids_batch_size
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
-            self._logger.error(f"Unexpected error: {ex}")
-            self._logger.error(traceback.format_exc())
-            return JobResult(JobExitStatus.FAILURE, error_message=ex)
+            self._logger.exception(f"Unexpected error: {ex}")
+            return JobResult(JobExitStatus.FAILURE, error=ex)
 
-    def trim_prices_for_book(self, book_id: int) -> None:
-        book = self._db.book_db.get_book(book_id)
-        book_prices_by_book_store = self._db.bookprice_db.get_all_book_prices(book)
-        for book_store, prices in book_prices_by_book_store.items():
-            self._logger.info(f"Trimming prices for book {book_id} and store {book_store.id}...")
-            prices_to_delete = self.get_prices_to_remove(prices)
-            if not prices_to_delete:
-                self._logger.debug(f"No prices to delete for book {book_id} and store {book_store.id}")
-                continue
+    def _list_book_ids(self, offset: int, limit: int) -> list[int]:
+        with self._unit_of_work as uow:
+            return uow.book_repository.list_book_ids(offset, limit)
 
-            self._logger.info(
-                f"Deleting {len(prices_to_delete)} prices for book {book_id} and store {book_store.id}...")
-            self._db.bookprice_db.delete_prices([price.id for price in prices_to_delete])
-            self._cache_key_remover.remove_keys_for_book(book_id)
-            self._cache_key_remover.remove_keys_for_book_and_bookstore(book_id, book_store.id)
 
-    def get_prices_to_remove(self, prices: Sequence[BookPrice]) -> list[BookPrice]:
-        prices_to_delete = []
-        if len(prices) <= self.min_prices_to_keep:
-            return prices_to_delete
+class TrimSelectedPricesJob(JobBase):
+    """
+    Trims prices for selected books in the database.
+    It removes duplicate prices for saving disk space and improving performance. Book ids given as argument.
+    """
 
-        last_price = None
-        total_prices_count, index = len(prices), 0
-        while total_prices_count - len(prices_to_delete) > self.min_prices_to_keep and index < total_prices_count:
-            price = prices[index]
-            if last_price is None:
-                last_price = price
-            elif price.price == last_price.price:
-                prices_to_delete.append(price)
-            else:
-                last_price = price
-            index += 1
+    name: ClassVar[str] = "TrimSelectedPricesJob"
 
-        return prices_to_delete
+    def __init__(
+            self,
+            config: Config,
+            trim_prices_service: TrimPricesService,
+            argument_service: JobRunArgumentService,
+            cache_key_remover: BookPriceKeyRemover):
+        super().__init__(config)
+        self._trim_prices_service = trim_prices_service
+        self._argument_service = argument_service
+        self._cache_key_remover = cache_key_remover
+        self._logger = logging.getLogger(self.name)
+
+    def start(self, **kwargs) -> JobResult:
+        try:
+            if not (book_ids := self._argument_service.parse_argument(JobRunArgumentName.BOOK_IDS, **kwargs)):
+                self._logger.error(f"Failed to parse book ids for {self.name}!")
+                return JobResult(JobExitStatus.FAILURE, error=ValueError(FAILED_TO_PARSE_ARGUMENTS))
+
+            self._logger.info(f"Trimming prices for {len(book_ids)} books...")
+            for book_id in book_ids:
+                self._trim_prices_service.trim_prices_for_book(book_id)
+
+            self._logger.info("Finished trimming prices for selected books!")
+
+            return JobResult(JobExitStatus.SUCCESS)
+        except Exception as ex:
+            self._logger.exception(f"Unexpected error: {ex}")
+            return JobResult(JobExitStatus.FAILURE, error=ex)

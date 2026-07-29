@@ -15,7 +15,7 @@ from bookprices.job.job.update_currencies import UpdateCurrenciesJob
 from bookprices.job.job.update_prices import AllBookPricesUpdateJob
 from bookprices.shared.service.job_service import (
     JobService, JobSchemaFields, JobRunPriority, CreationFailedError, JobSourceUnavailableError)
-from bookprices.job.job.trim_prices import TrimPricesJob
+from bookprices.job.job.trim_prices import TrimAllPricesJob
 
 
 class JobScheduler:
@@ -65,7 +65,7 @@ class JobScheduler:
         schedule.every().day.at("09:00", self.time_zone).do(
             self._send_start_job_request, UpdateCurrenciesJob.name)
         schedule.every().monday.at("10:00", self.time_zone).do(
-            self._send_start_job_request, TrimPricesJob.name)
+            self._send_start_job_request, TrimAllPricesJob.name)
         schedule.every().day.at("10:15", self.time_zone).do(
             self._send_start_job_request, AllBookPricesUpdateJob.name)
 

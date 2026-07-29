@@ -6,6 +6,7 @@ from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 
 from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
 from bookprices.job.service.price_update import PriceUpdateService
+from bookprices.job.shared.error_message import FAILED_TO_PARSE_ARGUMENTS
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
@@ -50,7 +51,7 @@ class AllBookPricesUpdateJob(JobBase):
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
-            return JobResult(JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(JobExitStatus.FAILURE, error=ex)
 
     def _get_next_book_ids(self, offset: int, limit: int) -> list[int]:
         with self._unit_of_work as uow:
@@ -76,18 +77,20 @@ class  SelectedBookPricesUpdateJob(JobBase):
 
     def start(self, **kwargs) -> JobResult:
         try:
-            if not (book_ids := self._argument_service.parse_argument(kwargs, JobRunArgumentName.BOOK_IDS)):
-                self._logger.error("Failed to parse arguments")
-                return JobResult(JobExitStatus.FAILURE)
+            if not (book_ids := self._argument_service.parse_argument(JobRunArgumentName.BOOK_IDS, **kwargs)):
+                self._logger.error(FAILED_TO_PARSE_ARGUMENTS)
+                return JobResult(JobExitStatus.FAILURE, error=ValueError(FAILED_TO_PARSE_ARGUMENTS))
 
             book_id_count = len(book_ids)
             self._logger.info(f"Updating prices for {book_id_count} books...")
             self._price_update_service.update_prices_for_books(book_ids)
             self._logger.info(f"Finished updating prices for {book_id_count} books.")
 
-            self._event_manager.trigger_event(str(BookPricesEvents.BOOK_PRICES_UPDATED), book_ids=book_ids)
+            self._event_manager.trigger_event(
+                str(BookPricesEvents.BOOK_PRICES_UPDATED),
+                **{JobRunArgumentName.BOOK_IDS: book_ids})
 
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.exception(ex)
-            return JobResult(JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(JobExitStatus.FAILURE, error=ex)

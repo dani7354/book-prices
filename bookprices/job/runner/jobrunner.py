@@ -1,5 +1,4 @@
 import time
-import traceback
 from logging import getLogger
 from typing import ClassVar, Sequence
 from collections import Counter
@@ -40,8 +39,7 @@ class JobRunner:
                 self._logger.error(f"Job API is unavailable: {e}. Exiting...")
                 running = False
             except Exception as e:
-                self._logger.error(f"Unexpected error: {e}")
-                self._logger.error(traceback.format_exc())
+                self._logger.exception(f"Unexpected error: {e}")
 
     def run_job(self, job_run: JobRun) -> None:
         job = self._jobs.get(job_run.job_name)
@@ -69,7 +67,7 @@ class JobRunner:
                 self._try_set_job_run_status(job_run, status=JobRunStatus.COMPLETED.value)
             else:
                 self._try_set_job_run_status(
-                    job_run, status=JobRunStatus.FAILED.value, error_message=str(result.error_message))
+                    job_run, status=JobRunStatus.FAILED.value, error_message=str(result.error))
         except Exception as e:
             self._logger.error(f"Failed to run job {job_run.job_name}: {e}")
             if not self._try_set_job_run_status(job_run, status=JobRunStatus.FAILED.value, error_message=str(e)[:500]):

@@ -13,7 +13,7 @@ from bookprices.web.mapper.job import (
     map_job_list, map_job_edit_view_model, map_job_run_list, map_job_run_edit_view_model, map_job_run_create_view_model)
 from bookprices.web.service.auth_service import require_job_manager
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.service.job_run_argument_parser import JobRunArgumentParser
+from bookprices.shared.service.job_run_argument_parser import JobRunArgumentParser
 from bookprices.web.settings import (
     MYSQL_HOST,
     MYSQL_PORT,

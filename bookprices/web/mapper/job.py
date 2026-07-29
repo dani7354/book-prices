@@ -5,7 +5,7 @@ from typing import Self
 from flask import url_for
 
 from bookprices.shared.service.job_service import JobRunStatus, JobRunSchemaFields, JobRunArgumentSchemaFields
-from bookprices.web.service.job_run_argument_parser import JobRunArgumentParser
+from bookprices.shared.service.job_run_argument_parser import JobRunArgumentParser
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
 from bookprices.web.viewmodels.job_run import (

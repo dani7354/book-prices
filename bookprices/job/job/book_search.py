@@ -5,6 +5,7 @@ from bookprices.job.job.base import JobBase, JobResult, JobExitStatus
 
 from bookprices.job.service.argument_service import JobRunArgumentService, JobRunArgumentName
 from bookprices.job.service.bookstore_search import IsbnSearch, BookStoreSearchService
+from bookprices.job.shared.error_message import FAILED_TO_PARSE_ARGUMENTS
 from bookprices.shared.config.config import Config
 from bookprices.shared.event.base import EventManager
 from bookprices.shared.event.enum import BookPricesEvents
@@ -50,7 +51,7 @@ class SearchAllMissingBooksInBookStoresJob(JobBase):
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
-            return JobResult(exit_status=JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(exit_status=JobExitStatus.FAILURE, error=ex)
 
     def _get_and_enqueue_next_searches(self, offset: int) -> list[IsbnSearch]:
         with self._unit_of_work as uow:
@@ -85,14 +86,17 @@ class SearchSelectedBooksInBookStoresJob(JobBase):
         self._logger = logging.getLogger(self.name)
 
     def start(self, **kwargs) -> JobResult:
-        if not (book_ids := self._argument_service.parse_argument(kwargs, JobRunArgumentName.BOOK_IDS)):
-            self._logger.error("Failed to parse arguments")
-            return JobResult(JobExitStatus.FAILURE)
+        if not (book_ids := self._argument_service.parse_argument(JobRunArgumentName.BOOK_IDS, **kwargs)):
+            self._logger.error(FAILED_TO_PARSE_ARGUMENTS)
+            return JobResult(JobExitStatus.FAILURE, error=ValueError(FAILED_TO_PARSE_ARGUMENTS))
 
         isbn_searches = self._get_isbn_searches(book_ids)
         self._bookstore_search_service.search_and_save_books_in_bookstores(isbn_searches)
+        unique_valid_book_ids = {search.book_id for search in isbn_searches}
 
-        self._event_manager.trigger_event(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED, args=book_ids)
+        self._event_manager.trigger_event(
+            event_name=BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED,
+            **{JobRunArgumentName.BOOK_IDS: list(unique_valid_book_ids)})
 
         self._logger.info(f"Search completed for {len(isbn_searches)} books in bookstores.")
 

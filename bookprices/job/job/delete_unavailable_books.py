@@ -59,7 +59,7 @@ class DeleteUnavailableBooksJob(JobBase):
         except Exception as ex:
             self._logger.error(f"Unexpected error: {ex}")
             self._logger.error(traceback.format_exc())
-            return JobResult(JobExitStatus.FAILURE, error_message=ex)
+            return JobResult(JobExitStatus.FAILURE, error=ex)
 
     def _is_book_unavailable(self, failed_update_count: FailedPriceUpdateCount) -> bool:
         if failed_update_count.count < self.failed_update_limit:
