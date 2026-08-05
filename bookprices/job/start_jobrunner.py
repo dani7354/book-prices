@@ -180,8 +180,10 @@ def create_trim_selected_prices_job(config: Config) -> TrimSelectedPricesJob:
 
 def create_download_all_missing_images_for_books_job(config: Config) -> DownloadAllMissingImagesForBooksJob:
     db = create_database_container(config)
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
     book_image_file_service = BookImageFileService(config.imgdir)
-    image_downloader = ImageDownloader(book_image_file_service, config.imgdir)
+    image_downloader = ImageDownloader(book_image_file_service, unit_of_work, config.imgdir)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
     image_download_service = ImageDownloadService(db, image_downloader, thread_count)
 
@@ -191,8 +193,10 @@ def create_download_all_missing_images_for_books_job(config: Config) -> Download
 def create_download_selected_images_for_books_job(config: Config) -> DownloadSelectedImagesForBooksJob:
     argument_service = JobRunArgumentService()
     db = create_database_container(config)
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
     book_image_file_service = BookImageFileService(config.imgdir)
-    image_downloader = ImageDownloader(book_image_file_service, config.imgdir)
+    image_downloader = ImageDownloader(book_image_file_service, unit_of_work, config.imgdir)
     thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
     image_download_service = ImageDownloadService(db, image_downloader, thread_count)
 

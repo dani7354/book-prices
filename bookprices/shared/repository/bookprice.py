@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import func, select, case
+from sqlalchemy import func, select, case, delete
 from sqlalchemy.orm import Session
 
 from bookprices.shared.db.tables import BookPrice, BookStore
@@ -23,7 +23,7 @@ class BookPriceRepository(RepositoryBase[BookPrice]):
         self._session.bulk_save_objects(entities)
 
     def delete_prices(self, ids: list[int]) -> None:
-        self._session.query(BookPrice).filter(BookPrice.id.in_(ids)).delete(synchronize_session=False)
+        self._session.execute(delete(BookPrice).where(BookPrice.id.in_(ids)))
 
     def get_price_count_by_bookstore(self, from_date: datetime) -> list[tuple[int, str, int]]:
         price_count = func.count(case((BookPrice.created >= from_date, 1)))
