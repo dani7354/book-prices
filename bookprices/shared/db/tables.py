@@ -136,3 +136,9 @@ class Currency(BaseModel):
     description = Column('Description', String(255), nullable=False)
     rate_to_dkk = Column('RateToDKK', Double(), nullable=False)
     updated = Column('Updated', TIMESTAMP, nullable=False)
+
+
+class ExcludedBookImage(BaseModel):
+    __tablename__ = 'ExcludedBookImage'
+    hash = Column('Hash', String(64), nullable=False, primary_key=True)
+    reason = Column('Reason', String(255), nullable=False)

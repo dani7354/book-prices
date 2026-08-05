@@ -1,10 +1,15 @@
+import logging
+
 import requests
 import bookprices.shared.webscraping.options as options
 from typing import Mapping
+from hashlib import sha256
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from requests.exceptions import HTTPError
 from urllib.parse import urlparse, urljoin
+
+from bookprices.shared.repository.excluded_book_image import ExcludedBookImageRepository
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 
 
@@ -28,32 +33,37 @@ class ImageSource:
 
 
 class ImageDownloader:
-    def __init__(self, book_image_file_service: BookImageFileService, location: str):
+
+    def __init__(
+            self,
+            book_image_file_service: BookImageFileService,
+            excluded_book_image_repository: ExcludedBookImageRepository,
+            location: str):
         self._location = location
         self._book_image_file_service = book_image_file_service
+        self._excluded_book_image_repository = excluded_book_image_repository
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._file_extensions = {"image/jpg": ".jpg",
                                  "image/jpeg": ".jpeg",
                                  "image/png": ".png",
                                  "image/bmp": ".bmp"}
 
-    def download_image(self, image_source: ImageSource) -> str:
-        image_url = self._get_image_url_from_page(image_source)
-        valid_url = self._get_valid_url(image_url, image_source)
-        image_filename = self._get_image(image_source.new_image_filename, valid_url)
-
-        return image_filename
-
-    def _get_image(self, filename_base: str, url: str) -> str:
+    def download_image(self, image_source: ImageSource) -> str | None:
         try:
-            image_response = requests.get(url)
-            image_response.raise_for_status()
-            image_file_name = self._get_image_name(filename_base, image_response.headers)
-            self._book_image_file_service.save_image(image_file_name, image_response.content)
-        except HTTPError as ex:
-            raise ImageNotDownloadedException(f"Failed to download image from {url}: {ex}")
+            image_url = self._get_image_url_from_page(image_source)
+            valid_url = self._get_valid_url(image_url, image_source)
+            image_bytes, headers = self._get_image_from_url(valid_url)
 
-        return image_file_name
+            image_hash = sha256(image_bytes).hexdigest()
+            if self._excluded_book_image_repository.is_book_image_excluded(image_hash):
+                return None
 
+            image_filename = self._get_image_name(image_source.new_image_filename, headers)
+            self._book_image_file_service.save_image(image_filename, image_bytes)
+
+            return image_filename
+        except FileExistsError as ex:
+            self._logger.warning(f"Image already exists: {ex}")
     def _get_image_name(self, filename_base: str, headers: Mapping[str, str]) -> str:
         try:
             content_type = headers["Content-Type"]
@@ -87,3 +97,12 @@ class ImageDownloader:
         except KeyError as ex:
             raise ImageNotDownloadedException(f"Failed to parse url from HTML element {image_source.image_css_selector}: "
                                               f"{ex}")
+
+    @staticmethod
+    def _get_image_from_url(url: str) -> tuple[bytes, dict[str, str]]:
+        try:
+            image_response = requests.get(url)
+            image_response.raise_for_status()
+            return image_response.content, dict(image_response.headers)
+        except HTTPError as ex:
+            raise ImageNotDownloadedException(f"Failed to download image from {url}: {ex}")
