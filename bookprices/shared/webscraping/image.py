@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from requests.exceptions import HTTPError
 from urllib.parse import urlparse, urljoin
 
-from bookprices.shared.repository.excluded_book_image import ExcludedBookImageRepository
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 
 
@@ -37,11 +37,11 @@ class ImageDownloader:
     def __init__(
             self,
             book_image_file_service: BookImageFileService,
-            excluded_book_image_repository: ExcludedBookImageRepository,
+            unit_of_work: UnitOfWork,
             location: str):
         self._location = location
         self._book_image_file_service = book_image_file_service
-        self._excluded_book_image_repository = excluded_book_image_repository
+        self._unit_of_work = unit_of_work
         self._logger = logging.getLogger(self.__class__.__name__)
         self._file_extensions = {"image/jpg": ".jpg",
                                  "image/jpeg": ".jpeg",
@@ -54,8 +54,8 @@ class ImageDownloader:
             valid_url = self._get_valid_url(image_url, image_source)
             image_bytes, headers = self._get_image_from_url(valid_url)
 
-            image_hash = sha256(image_bytes).hexdigest()
-            if self._excluded_book_image_repository.is_book_image_excluded(image_hash):
+            if not self._image_not_excluded(image_bytes):
+                self._logger.warning(f"Image for book with id {image_source.book_id} is excluded, skipping...")
                 return None
 
             image_filename = self._get_image_name(image_source.new_image_filename, headers)
@@ -64,6 +64,12 @@ class ImageDownloader:
             return image_filename
         except FileExistsError as ex:
             self._logger.warning(f"Image already exists: {ex}")
+
+    def _image_not_excluded(self, image_bytes: bytes) -> bool:
+        image_hash = sha256(image_bytes).hexdigest()
+        with self._unit_of_work as uow:
+            return not uow.excluded_book_image_repository.is_book_image_excluded(image_hash)
+
     def _get_image_name(self, filename_base: str, headers: Mapping[str, str]) -> str:
         try:
             content_type = headers["Content-Type"]
