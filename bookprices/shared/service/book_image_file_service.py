@@ -1,5 +1,6 @@
 import os
 from typing import ClassVar
+from hashlib import sha256
 
 
 class BookImageFileService:
@@ -19,9 +20,20 @@ class BookImageFileService:
 
         return sorted(images)
 
+    def get_image_hash(self, image_name: str) -> str:
+        image_bytes = self.read_image(image_name)
+        return sha256(image_bytes).hexdigest()
+
+    def read_image(self, image_name: str) -> bytes:
+        if not self.image_exists(image_name):
+            raise FileNotFoundError(f"Image {image_name} does not exist at {self._image_directory}")
+        image_path = self.get_image_path(image_name)
+        with open(image_path, 'rb') as image_file:
+            return image_file.read()
+
     def save_image(self, image_name: str, image_data: bytes) -> None:
         image_path = self.get_image_path(image_name)
-        if self.image_exists(image_path):
+        if self.image_exists(image_name):
             raise FileExistsError(f"Image {image_name} already exists at {image_path}")
         with open(image_path, 'wb') as image_file:
             image_file.write(image_data)
@@ -33,5 +45,5 @@ class BookImageFileService:
         os.remove(image_path)
 
     def image_exists(self, image_name: str) -> bool:
-        image_path = os.path.join(self._image_directory, image_name)
+        image_path = self.get_image_path(image_name)
         return os.path.isfile(image_path)

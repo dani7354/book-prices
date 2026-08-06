@@ -66,7 +66,7 @@ class ImageDownloader:
             self._logger.warning(f"Image already exists: {ex}")
 
     def _image_not_excluded(self, image_bytes: bytes) -> bool:
-        image_hash = sha256(image_bytes).hexdigest()
+        image_hash = sha256(image_bytes).hexdigest()  # TODO: Move to helper class
         with self._unit_of_work as uow:
             return not uow.excluded_book_image_repository.is_book_image_excluded(image_hash)
 

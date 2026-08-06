@@ -28,6 +28,7 @@ class BookRepository(RepositoryBase[Book]):
         existing_book.format = entity.format
         existing_book.title = entity.title
         existing_book.author = entity.author
+        existing_book.image_url = entity.image_url
 
         self._session.merge(existing_book)
 
@@ -49,6 +50,19 @@ class BookRepository(RepositoryBase[Book]):
         self._session.expunge_all()
 
         return list(book_ids)
+
+    def list_books_with_image(self, offset: int, limit: int) -> list[Book]:
+        books = (self._session.execute(
+            select(Book)
+            .where(Book.image_url.isnot(None))
+            .order_by(Book.id)
+            .offset(offset)
+            .limit(limit))
+                    .scalars()
+                    .all())
+        self._session.expunge_all()
+
+        return list(books)
 
     def list_books_by_isbn(self) -> dict[str, Book]:
         books = (self._session.execute(select(Book)).scalars().all())
