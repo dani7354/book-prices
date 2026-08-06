@@ -51,7 +51,7 @@ CREATE TABLE `Book` (
   UNIQUE KEY `Isbn` (`Isbn`),
   KEY `Title` (`Title`),
   KEY `Author` (`Author`)
- ) ENGINE=InnoDB AUTO_INCREMENT=9338 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9433 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -111,7 +111,7 @@ CREATE TABLE `BookPrice` (
   KEY `Created` (`Created`),
   CONSTRAINT `BookPrice_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `BookPrice_ibfk_2` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=386559 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=389002 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -193,6 +193,20 @@ CREATE TABLE `Currency` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `ExcludedBookImage`
+--
+
+DROP TABLE IF EXISTS `ExcludedBookImage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ExcludedBookImage` (
+  `Hash` char(64) NOT NULL,
+  `Reason` varchar(255) NOT NULL,
+  PRIMARY KEY (`Hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `FailedPriceUpdate`
 --
 
@@ -211,7 +225,7 @@ CREATE TABLE `FailedPriceUpdate` (
   KEY `Created` (`Created`),
   CONSTRAINT `PriceUpdateFailed_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `Book` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `PriceUpdateFailed_ibfk_2` FOREIGN KEY (`BookStoreId`) REFERENCES `BookStore` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=60142 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60985 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,4 +263,4 @@ CREATE TABLE `User` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-19 22:00:49
+-- Dump completed on 2026-08-05 21:15:09
