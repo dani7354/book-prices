@@ -11,7 +11,7 @@ class HtmlContent:
 
     def find_elements_by_css_and_get_attribute_values(self, css_selector: str, attribute_name: str) -> list[str]:
         return [
-            match.get(attribute_name)
+            str(match.get(attribute_name))
             for match in self._html_content_bs.select(css_selector)
             if match.has_attr(attribute_name)]
 
@@ -33,7 +33,7 @@ class HtmlContent:
 
     def find_element_and_get_attribute_value(self, css_selector: str, attribute_name: str) -> str | None:
         match = self._html_content_bs.select_one(css_selector)
-        return match.get(attribute_name) if match and match.has_attr(attribute_name) else None
+        return str(match.get(attribute_name)) if match and match.has_attr(attribute_name) else None
 
     def contains_text(self, text: str) -> bool:
         return text.lower() in self._html_content_bs.text.lower()

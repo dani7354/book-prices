@@ -3,7 +3,7 @@ import traceback
 
 from bookprices.job.job.base import DEFAULT_THREAD_COUNT
 from bookprices.job.job.book_search import SearchAllMissingBooksInBookStoresJob, SearchSelectedBooksInBookStoresJob
-from bookprices.job.job.delete_images import DeleteImagesJob
+from bookprices.job.job.delete_images import DeleteUnusedBookImagesJob, DeleteExcludedBookImagesJob
 from bookprices.job.job.delete_prices import DeletePricesJob
 from bookprices.job.job.delete_unavailable_books import DeleteUnavailableBooksJob
 from bookprices.job.job.download_images import DownloadAllMissingImagesForBooksJob, DownloadSelectedImagesForBooksJob
@@ -105,7 +105,7 @@ def setup_event_manager(config: Config) -> EventManager:
         StartJobListener(job_service, job_run_argument_service, SearchSelectedBooksInBookStoresJob.name))
 
     book_deleted_event = Event(str(BookPricesEvents.BOOKS_DELETED))
-    book_deleted_event.add_listener(StartJobListener(job_service, job_run_argument_service, DeleteImagesJob.name))
+    book_deleted_event.add_listener(StartJobListener(job_service, job_run_argument_service, DeleteUnusedBookImagesJob.name))
 
     books_found_in_stores = Event(str(BookPricesEvents.BOOKSTORE_SEARCH_COMPLETED))
     books_found_in_stores.add_listener(
@@ -210,11 +210,19 @@ def create_delete_unavailable_books_job(config: Config, event_manager: EventMana
     return DeleteUnavailableBooksJob(config, db, cache_key_remover, event_manager)
 
 
-def create_delete_images_job(config: Config) -> DeleteImagesJob:
+def create_delete_unused_book_images_job(config: Config) -> DeleteUnusedBookImagesJob:
     db = create_database_container(config)
     book_image_file_service = BookImageFileService(config.imgdir)
 
-    return DeleteImagesJob(config, db, book_image_file_service)
+    return DeleteUnusedBookImagesJob(config, db, book_image_file_service)
+
+
+def create_delete_excluded_book_images_job(config: Config) -> DeleteExcludedBookImagesJob:
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
+    book_image_file_service = BookImageFileService(config.imgdir)
+
+    return DeleteExcludedBookImagesJob(config, unit_of_work, book_image_file_service)
 
 
 def create_delete_prices_job(config: Config) -> DeletePricesJob:
@@ -279,7 +287,8 @@ def main() -> None:
             create_download_all_missing_images_for_books_job(config),
             create_download_selected_images_for_books_job(config),
             create_delete_unavailable_books_job(config, event_manager),
-            create_delete_images_job(config),
+            create_delete_unused_book_images_job(config),
+            create_delete_excluded_book_images_job(config),
             create_delete_prices_job(config),
             create_all_book_prices_update_job(config, event_manager),
             create_selected_book_prices_update_job(config, event_manager),

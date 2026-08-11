@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
-from bookprices.job.job.delete_images import DeleteImagesJob
+from bookprices.job.job.delete_images import DeleteUnusedBookImagesJob
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 
 
@@ -58,7 +58,7 @@ def test_deletes_multiple_images(config, images, images_deleted, book_image_file
     book_image_urls_from_db = [os.path.basename(images[i]) for i in range(0, len(images) - images_deleted)]
     mock_db.book_db.get_book_image_urls = MagicMock(return_value=book_image_urls_from_db)
 
-    job = DeleteImagesJob(config, mock_db, book_image_file_service)
+    job = DeleteUnusedBookImagesJob(config, mock_db, book_image_file_service)
     job.start()
 
     images_left = len(os.listdir(config.imgdir))
@@ -71,7 +71,7 @@ def test_deletes_only_unused_images(config, images, book_image_file_service) -> 
     books_from_db = [os.path.basename(images[0]), os.path.basename(images[2])]
     mock_db.book_db.get_book_image_urls = MagicMock(return_value=books_from_db)
 
-    job = DeleteImagesJob(config, mock_db, book_image_file_service)
+    job = DeleteUnusedBookImagesJob(config, mock_db, book_image_file_service)
     job.start()
 
     images_left = os.listdir(config.imgdir)
@@ -83,10 +83,10 @@ def test_deletes_only_unused_images(config, images, book_image_file_service) -> 
 def test_excludes_default_image_from_deletion(config, book_image_file_service) -> None:
     mock_db = Database("", "", "", "", "")
     mock_db.book_db.get_book_image_urls = MagicMock(return_value=[])
-    with open(os.path.join(config.imgdir, DeleteImagesJob.default_image_name), "wb") as default_image_file:
+    with open(os.path.join(config.imgdir, DeleteUnusedBookImagesJob.default_image_name), "wb") as default_image_file:
         default_image_file.write(b"\x00" * 1000)
 
-    job = DeleteImagesJob(config, mock_db, book_image_file_service)
+    job = DeleteUnusedBookImagesJob(config, mock_db, book_image_file_service)
     job.start()
 
     images_left = os.listdir(config.imgdir)
