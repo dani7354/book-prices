@@ -51,18 +51,18 @@ class BookRepository(RepositoryBase[Book]):
 
         return list(book_ids)
 
-    def list_books_with_image(self, offset: int, limit: int) -> list[Book]:
-        books = (self._session.execute(
+    def list_books_with_image(self, offset_book_id: int, limit: int) -> list[Book]:
+        book_ids = (self._session.execute(
             select(Book)
             .where(Book.image_url.isnot(None))
+            .where(Book.id > offset_book_id)
             .order_by(Book.id)
-            .offset(offset)
             .limit(limit))
                     .scalars()
                     .all())
         self._session.expunge_all()
 
-        return list(books)
+        return list(book_ids)
 
     def list_books_by_isbn(self) -> dict[str, Book]:
         books = (self._session.execute(select(Book)).scalars().all())

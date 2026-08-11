@@ -3,7 +3,6 @@ import logging
 import requests
 import bookprices.shared.webscraping.options as options
 from typing import Mapping
-from hashlib import sha256
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from requests.exceptions import HTTPError
@@ -66,7 +65,7 @@ class ImageDownloader:
             self._logger.warning(f"Image already exists: {ex}")
 
     def _image_not_excluded(self, image_bytes: bytes) -> bool:
-        image_hash = sha256(image_bytes).hexdigest()  # TODO: Move to helper class
+        image_hash = self._book_image_file_service.get_image_hash_from_bytes(image_bytes)
         with self._unit_of_work as uow:
             return not uow.excluded_book_image_repository.is_book_image_excluded(image_hash)
 

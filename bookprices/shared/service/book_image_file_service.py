@@ -11,7 +11,8 @@ class BookImageFileService:
         self._image_directory = image_directory
 
     def get_image_path(self, image_name: str) -> str:
-        return os.path.join(self._image_directory, image_name)
+        image_basename = os.path.basename(image_name)
+        return os.path.join(self._image_directory, image_basename)
 
     def get_images_available(self) -> list[str]:
         images = [
@@ -22,7 +23,7 @@ class BookImageFileService:
 
     def get_image_hash(self, image_name: str) -> str:
         image_bytes = self.read_image(image_name)
-        return sha256(image_bytes).hexdigest()
+        return self.get_image_hash_from_bytes(image_bytes)
 
     def read_image(self, image_name: str) -> bytes:
         if not self.image_exists(image_name):
@@ -47,3 +48,7 @@ class BookImageFileService:
     def image_exists(self, image_name: str) -> bool:
         image_path = self.get_image_path(image_name)
         return os.path.isfile(image_path)
+
+    @staticmethod
+    def get_image_hash_from_bytes(image_bytes: bytes) -> str:
+        return sha256(image_bytes).hexdigest()

@@ -10,11 +10,14 @@ from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 
 
+DEFAULT_FALLBACK_IMAGE_NAME: str = "default.png"
+
+
 class DeleteUnusedImagesJob(JobBase):
     """ Deletes image files that are no longer used by books on the site. """
 
     name: ClassVar[str] = "DeleteUnusedImagesJob"
-    default_image_name: str = "default.png"
+    default_image_name: str = DEFAULT_FALLBACK_IMAGE_NAME
 
     def __init__(self, config: Config, db: Database, book_image_file_service: BookImageFileService) -> None:
         super().__init__(config)
@@ -73,6 +76,7 @@ class DeleteExcludedBookImagesJob(JobBase):
     """ Job for deleting images that are excluded, in most cases temporary and default images. """
 
     name: ClassVar[str] = "DeleteExcludedBookImagesJob"
+    default_image_name: ClassVar[str] = DEFAULT_FALLBACK_IMAGE_NAME
     book_batch_size: ClassVar[int] = 500
 
     def __init__(
@@ -89,43 +93,55 @@ class DeleteExcludedBookImagesJob(JobBase):
     def start(self, **kwargs) -> JobResult:
         try:
             self.delete_excluded_images()
-
             return JobResult(JobExitStatus.SUCCESS)
         except Exception as ex:
             self._logger.exception(f"Unexpected error: {ex}")
             return JobResult(JobExitStatus.FAILURE, error=ex)
 
     def delete_excluded_images(self) -> None:
-        total_deleted, offset, page = 0, 0, 1
-        while books := self._list_books_with_image(offset, self.book_batch_size):
-            total_deleted += self._delete_excluded_images_batch(books)
-            page += 1
-            offset = (page - 1) * self.book_batch_size
+        self._logger.info("Deleting excluded book images...")
+        total_deleted, offset_book_id, page_count = 0, 0, 1
+        while books := self._list_books_with_image(offset_book_id, self.book_batch_size):
+            with self._unit_of_work as uow:
+                self._logger.debug(f"Processing page {page_count} with {len(books)} books...")
+                total_deleted += self._delete_excluded_images_batch(uow, books)
+                self._logger.info(f"Processed page {page_count} ({len(books)} books)")
 
-    def _delete_excluded_images_batch(self, books: list[Book]) -> int:
+            offset_book_id = books[-1].id
+            page_count += 1
+
+        self._logger.info(f"Total excluded images deleted: {total_deleted}")
+
+    def _delete_excluded_images_batch(self, uow: UnitOfWork, books: list[Book]) -> int:
+        excluded_image_hashes = self._get_excluded_image_hashes()
         delete_count = 0
         for book in books:
+            if not book.image_url:
+                self._logger.warning(f"Book with id {book.id} not found or has no image, skipping...")
+                continue
+
             image_hash = self._book_image_file_service.get_image_hash(book.image_url)
-            with self._unit_of_work as uow:
-                if uow.excluded_book_image_repository.is_book_image_excluded(image_hash):
-                    self._logger.info(f"Deleting excluded image {book.image_url} for book with id {book.id}...")
-                    self._delete_image_for_book(book)
-                    delete_count += 1
+            if image_hash in excluded_image_hashes and book.image_url != self.default_image_name:
+                self._logger.info(f"Deleting excluded image {book.image_url} for book with id {book.id}...")
+                self._delete_image_for_book(uow, book)
+                delete_count += 1
 
         return delete_count
 
-    def _list_books_with_image(self, offset: int, limit: int) -> list[Book]:
+    def _list_books_with_image(self, offset_book_id: int, limit: int) -> list[Book]:
         with self._unit_of_work as uow:
-            return uow.book_repository.list_books_with_image(offset, limit)
+            books = uow.book_repository.list_books_with_image(offset_book_id, limit)
+
+        return books
 
     def _get_excluded_image_hashes(self) -> set[str]:
         with self._unit_of_work as uow:
             excluded_images = uow.excluded_book_image_repository.list_excluded_images()
-            return {excluded_image.hash for excluded_image in excluded_images}
 
-    def _delete_image_for_book(self, book: Book) -> None:
+        return {excluded_image.hash for excluded_image in excluded_images}
+
+    def _delete_image_for_book(self, uow: UnitOfWork, book: Book) -> None:
         self._logger.info(f"Deleting image {book.image_url}...")
         self._book_image_file_service.delete_image(book.image_url)
-        with self._unit_of_work as uow:
-            book.image_url = None
-            uow.book_repository.update(book)
+        book.image_url = None
+        uow.book_repository.update(book)
