@@ -13,10 +13,10 @@ from bookprices.shared.service.book_image_file_service import BookImageFileServi
 DEFAULT_FALLBACK_IMAGE_NAME: str = "default.png"
 
 
-class DeleteUnusedImagesJob(JobBase):
+class DeleteUnusedBookImagesJob(JobBase):
     """ Deletes image files that are no longer used by books on the site. """
 
-    name: ClassVar[str] = "DeleteUnusedImagesJob"
+    name: ClassVar[str] = "DeleteUnusedBookImagesJob"
     default_image_name: str = DEFAULT_FALLBACK_IMAGE_NAME
 
     def __init__(self, config: Config, db: Database, book_image_file_service: BookImageFileService) -> None:
