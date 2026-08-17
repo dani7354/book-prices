@@ -88,9 +88,9 @@ SRI_ATTRIBUTE_VALUES = {
     "job_js": ("sha256-hVcTBUs5xvczvrzJ0F+Xo3mgIccoOcmm6N4FMMEvBss= "
                "sha384-7MR5lzIYZwrIg+isCppLWN0dno2rWJ2f/f1onjfKLWp+1AGJvpkbsemoVhLPG35O "
                "sha512-eDJPaXyM4TM8heI6ZYio0PVri0iwycPct6VK/kiP5jn3621bKlX7OFrgpvOkGnqM+Y7gIlLiUMYriWUhSFdlQA=="),
-    "job_run_js": ("sha256-i44UM5eA55a3PnILG/vybu6NwAYOJQmdjee4jFyKs8s= "
-                   "sha384-UDJVX2CqhAVldIfeE34q95n4TqP1OKWqiCyHjNuFBQsRB4BhvMp2epjwEh1EPWGN "
-                   "sha512-7442dTulLGaeiDA2VDnlZC0FzhxmoNo2E5e3mlx3Hz1SKxyt4WGB9A+cxWpnaH54HPFgRsg6/eXWKyY0KeEjkQ=="),
+    "job_run_js": ("sha256-COfC6sYzTU5EPIw4Yg+wUSxew0M1uPjyrSOtela+pic= "
+                   "sha384-BS3tf7SkYIXa4WxTy3L/YY96Vmdz5m+dk2aLRQvbVsdKbujQyh3UE7jzqT+Gj/MZ "
+                   "sha512-Yu6p7AEi1OroRwg4iXT303FTEWsKTLYJVHCTmQLszsN0E/og0XeYuq51h+xHZPCmyDrhcN5dco7jEqSYBV3PoA=="),
     "job_common_js": ("sha256-2zUcq8xx7QWV0kmDRxci68mVfTwHznOxqz6cyGl6/j0= "
                       "sha384-/G6NYjqQiBRgZWUeahybzKABsk/JrNArdX1Ol0InjjysyHa1WfDwWsQ/6/7M5jJb "
                       "sha512-yopBTu4v+JHlqpHoePm7MgPpAxz2Q9HDxk7GAcylNoVsBX1DaGQBQ8yLivpPfQKFnZq4B4K+bFJrmKFNBl1r/g=="),

@@ -161,9 +161,9 @@ function startJobRunAutoRefresh(intervalMs) {
 }
 
 function stopJobRunAutoRefresh() {
-    if (!jobsPollingId) return;
-    clearInterval(jobsPollingId);
-    jobsPollingId = null;
+    if (!jobRunsPollingId) return;
+    clearInterval(jobRunsPollingId);
+    jobRunsPollingId = null;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
