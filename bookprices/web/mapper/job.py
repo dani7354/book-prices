@@ -67,7 +67,6 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
 
     translations = {
         ColumnName.NAME.value: "Navn",
-        ColumnName.IS_ACTIVE.value: "Aktiv"
     }
 
     return JobListViewModel(jobs=job_list_items, columns=list(translations.keys()), translations=translations)

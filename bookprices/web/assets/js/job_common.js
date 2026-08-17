@@ -11,6 +11,8 @@ const errorMessageFieldName = "error_message";
 const canEditFieldName = "can_edit";
 const translationsFieldName = "translations";
 const argumentsFieldName = "arguments";
+const isActiveFieldName = "is_active";
+const lastRunAtColorFieldName = "last_run_at_color";
 
 
 function showAlert(message, alertType, container) {

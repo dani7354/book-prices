@@ -1,6 +1,11 @@
 const msgContainer = $("#msg-container");
 const jobRunContainer = $("#job-run-container");
 
+const jobRunUpdateIntervalMs = 2000
+
+let jobRunsPollingId = null
+let isLoadingJobRuns = false;
+
 
 function toggleSpinnerInJobRunContainer(showSpinner) {
     let spinner = jobRunContainer.find(".spinner-border");
@@ -83,6 +88,7 @@ function initializeJobRunTable(columns, rows, translations) {
         let actionCell = $("<td></td>");
         let showButton = $("<a></a>")
             .attr("id", "btn-delete-job-run")
+            .attr("type", "button")
             .attr("class", "btn btn-secondary mb-1")
             .attr("data-bs-toggle", "modal")
             .attr("data-bs-target", "#job-run-modal")
@@ -93,9 +99,11 @@ function initializeJobRunTable(columns, rows, translations) {
 
         let deleteButton = $("<a></a>")
             .attr("id", "btn-delete-job-run")
+            .attr("type", "button")
             .attr("class", "btn btn-secondary mb-1")
             .click(handleClickDeleteJobRun)
             .text("Slet");
+
         actionCell.append(deleteButton);
         tableRow.append(actionCell);
         tableBody.append(tableRow);
@@ -105,7 +113,9 @@ function initializeJobRunTable(columns, rows, translations) {
 }
 
 function getJobRuns(jobId) {
-    toggleSpinnerInJobRunContainer(true);
+    if (isLoadingJobRuns) return;
+    isLoadingJobRuns = true;
+
     let url = `${baseUrl}/job-run-list`;
     if (jobId !== undefined) {
         url = `${url}?jobId=${jobId}`;
@@ -128,6 +138,9 @@ function getJobRuns(jobId) {
             "error" : function (xhr) {
                 showAlert(xhr.responseJSON[messageFieldName], "danger", msgContainer);
                 toggleSpinnerInJobRunContainer(false);
+            },
+            "finally": function() {
+                isLoadingJobRuns = false;
             }
     });
 }
@@ -142,8 +155,24 @@ function refreshJobRuns() {
     }
 }
 
+function startJobRunAutoRefresh(intervalMs) {
+    if (jobRunsPollingId) return;
+    jobRunsPollingId = setInterval(refreshJobRuns, intervalMs);
+}
 
-$(document).ready(function () {
+function stopJobRunAutoRefresh() {
+    if (!jobsPollingId) return;
+    clearInterval(jobsPollingId);
+    jobsPollingId = null;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Loading job runs...");
+    toggleSpinnerInJobRunContainer(true);
     refreshJobRuns();
+
+    startJobRunAutoRefresh(jobRunUpdateIntervalMs);
     jobRunModal.on("hidden.bs.modal", refreshJobRuns);
 });
+
+document.addEventListener("beforeunload", stopJobRunAutoRefresh);

@@ -7,11 +7,11 @@ let jobsPollingId = null;
 let isLoadingJobs = false;
 
 
-function handleClickDeleteJob(e) {
+async function handleClickDeleteJob(e) {
     e.preventDefault();
      if (confirm("Er du sikker på at du vil slette jobbet?")) {
          let jobId = $(e.target).closest("tr").data("id");
-         deleteJob(jobId);
+         await deleteJob(jobId);
      }
 }
 
@@ -52,6 +52,10 @@ function initializeJobTable(columns, rows, translations) {
 
     tableHeaderRow.append($("<th></th>")
         .attr("scope", "col")
+        .text("Aktiv"));
+
+    tableHeaderRow.append($("<th></th>")
+        .attr("scope", "col")
         .text("Sidste kørsel"));
 
     tableHeaderRow.append($("<th></th>")
@@ -63,9 +67,22 @@ function initializeJobTable(columns, rows, translations) {
             tableRow.append($("<td></td>").text(row[columnName]));
         });
 
+        let activeCell = $("<td></td>")
+            .attr("class", "form-check-input")
+
+        let activeCellInput = $("<input>")
+            .attr("class", "form-check-input")
+            .attr("type", "checkbox")
+            .attr("disabled", true)
+            .prop("checked", row[isActiveFieldName]);
+
+        activeCell.append(activeCellInput);
+        tableRow.append(activeCell);
+
         let lastRunAtCell = $("<td></td>")
-            .attr("class", `text-${row["last_run_at_color"]}`)
+            .attr("class", `text-${row[lastRunAtColorFieldName]}`)
             .text(row["last_run_at"]);
+
         tableRow.append(lastRunAtCell);
 
         let actionCell = $("<td></td>");
@@ -80,6 +97,7 @@ function initializeJobTable(columns, rows, translations) {
 
         let deleteButton = $("<a></a>")
             .attr("id", "btn-delete-job")
+            .attr("type", "button")
             .attr("class", "btn btn-secondary mb-1")
             .text("Slet")
             .click(handleClickDeleteJob);
@@ -91,6 +109,7 @@ function initializeJobTable(columns, rows, translations) {
 
         let runButton = $("<a></a>")
             .attr("id", "btn-run-job")
+            .attr("type", "button")
             .attr("class", runButtonClass)
             .attr("data-bs-toggle", "modal")
             .attr("data-bs-target", "#job-run-modal")
@@ -109,6 +128,7 @@ function initializeJobTable(columns, rows, translations) {
     let createButton = $("<a></a>")
         .text("Opret")
         .attr("id", "btn-create-job")
+        .attr("type", "button")
         .attr("href", `${baseUrl}/create`)
         .attr("class", "btn btn-primary");
 
@@ -117,6 +137,7 @@ function initializeJobTable(columns, rows, translations) {
     let updateButton = $("<a></a>")
         .text("Opdater")
         .attr("id", "btn-update-jobs")
+        .attr("type", "button")
         .attr("class", "btn btn-secondary me-1")
         .click(getJobs);
 
@@ -125,7 +146,7 @@ function initializeJobTable(columns, rows, translations) {
     jobContainer.prepend(createButtonRow);
 }
 
-function deleteJob(jobId) {
+async function deleteJob(jobId) {
     let url = `${baseUrl}/delete/${jobId}`;
     $.ajax(url, {
         "method": "POST",
@@ -133,13 +154,13 @@ function deleteJob(jobId) {
         "data": {
             "csrf_token": $(csrfTokenNodeId).val()
         },
-        "success": function (data) {
+        "success": async function (data) {
             showAlert(data[messageFieldName], "success", msgContainer);
-            getJobs();
+            await getJobs();
         },
-        "error": function (error) {
+        "error": async function (error) {
             showAlert(error[messageFieldName], "danger", msgContainer);
-            getJobs();
+            await getJobs();
             console.log(error);
         }
     });
@@ -170,7 +191,6 @@ async function getJobs() {
         showAlert("Kunne ikke hente jobs.", "danger", msgContainer);
         console.error(error);
     } finally {
-        toggleSpinnerInJobContainer(false);
         isLoadingJobs = false;
     }
 }
@@ -186,11 +206,10 @@ function stopJobsAutoRefresh() {
     jobsPollingId = null;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     console.log("Loading jobs...");
     toggleSpinnerInJobContainer(true);
-    getJobs();
-    toggleSpinnerInJobContainer(false);
+    await getJobs();
 
     startJobsAutoRefresh(jobsUpdaterIntervalMs);
 });
