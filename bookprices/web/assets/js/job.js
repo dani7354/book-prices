@@ -1,6 +1,11 @@
 const msgContainer = $("#msg-container");
 const jobContainer = $("#job-container");
 
+const jobsUpdaterIntervalMs = 2500;
+
+let jobsPollingId = null;
+let isLoadingJobs = false;
+
 
 function handleClickDeleteJob(e) {
     e.preventDefault();
@@ -100,12 +105,24 @@ function initializeJobTable(columns, rows, translations) {
 
     table.append(tableBody);
 
-    jobContainer.append(
-        $("<a></a>")
-            .text("Opret")
-            .attr("id", "btn-create-job")
-            .attr("href", `${baseUrl}/create`)
-            .attr("class", "btn btn-primary"));
+    let createButtonRow = $("<div></div>").addClass("d-flex justify-content-start mb-2");
+    let createButton = $("<a></a>")
+        .text("Opret")
+        .attr("id", "btn-create-job")
+        .attr("href", `${baseUrl}/create`)
+        .attr("class", "btn btn-primary");
+
+    createButtonRow.append(createButton);
+
+    let updateButton = $("<a></a>")
+        .text("Opdater")
+        .attr("id", "btn-update-jobs")
+        .attr("class", "btn btn-secondary me-1")
+        .click(getJobs);
+
+    createButtonRow.prepend(updateButton);
+
+    jobContainer.prepend(createButtonRow);
 }
 
 function deleteJob(jobId) {
@@ -128,27 +145,54 @@ function deleteJob(jobId) {
     });
 }
 
-function getJobs() {
-    toggleSpinnerInJobContainer(true);
-    let url = `${baseUrl}/job-list`;
-    $.ajax(url, {
-        "method": "GET",
-        "dataType": "json",
-        "success": function (data) {
-            jobContainer.empty();
-            if (data["jobs"].length === 0) {
-                jobContainer.text("Ingen jobs.");
-                toggleSpinnerInJobContainer(false);
-                return;
-            }
-            initializeJobTable(data["columns"], data["jobs"], data["translations"]);
-            toggleSpinnerInJobContainer(false);
+async function getJobs() {
+    if (isLoadingJobs) return;
+    isLoadingJobs = true;
+    const url = `${baseUrl}/job-list`;
+
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        jobContainer.empty();
+
+        if (data.jobs.length === 0) {
+            jobContainer.text("Ingen jobs.");
+            return;
         }
-    });
+
+        initializeJobTable(data.columns, data.jobs, data.translations);
+    } catch (error) {
+        showAlert("Kunne ikke hente jobs.", "danger", msgContainer);
+        console.error(error);
+    } finally {
+        toggleSpinnerInJobContainer(false);
+        isLoadingJobs = false;
+    }
 }
 
+function startJobsAutoRefresh(intervalMs) {
+    if (jobsPollingId) return;
+    jobsPollingId = setInterval(getJobs, intervalMs);
+}
 
-$(document).ready(() => {
+function stopJobsAutoRefresh() {
+    if (!jobsPollingId) return;
+    clearInterval(jobsPollingId);
+    jobsPollingId = null;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
     console.log("Loading jobs...");
+    toggleSpinnerInJobContainer(true);
     getJobs();
+    toggleSpinnerInJobContainer(false);
+
+    startJobsAutoRefresh(jobsUpdaterIntervalMs);
 });
+
+window.addEventListener("beforeunload", stopJobsAutoRefresh);
