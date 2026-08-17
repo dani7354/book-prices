@@ -60,7 +60,6 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
         job_list_items.append(JobListItem(
             id=job["id"],
             name=job["name"],
-            description=job["description"],
             is_active=job["isActive"],
             url=url_for("job.edit", job_id=job["id"]),
             last_run_at=last_run_at,
@@ -68,8 +67,6 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
 
     translations = {
         ColumnName.NAME.value: "Navn",
-        ColumnName.DESCRIPTION.value: "Beskrivelse",
-        ColumnName.IS_ACTIVE.value: "Aktiv"
     }
 
     return JobListViewModel(jobs=job_list_items, columns=list(translations.keys()), translations=translations)

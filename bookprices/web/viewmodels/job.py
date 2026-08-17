@@ -9,7 +9,6 @@ from bookprices.web.validation.error_message import min_length_not_met, max_leng
 class JobListItem:
     id: str
     name: str
-    description: str
     last_run_at: str
     last_run_at_color: str
     url: str

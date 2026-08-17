@@ -85,15 +85,15 @@ SRI_ATTRIBUTE_VALUES = {
     "price_chart_js": ("sha256-0MC9H+BsSSWDojqimteKzhMIu95VrGRXAdAhtR3DY6I= "
                        "sha384-q/mJ3N23EEUdKg+IAACohdR2WgzlFQv8YlyOS7X3Mb87zjKF8F71Gq9kcE3S+qIp "
                        "sha512-/vXxBZIcj4xdIEmaMGNOudnLr4DNsDO0lJdgi/ZPQNIABX3QQtlzJzA9DCZxyDNLpjru+KpX/2Vh3njdcf4MZQ=="),
-    "job_js": ("sha256-rWaJ0ejh0Bf9ppZlXxhFqxF6sQ3c0NUQFswEfkGCdO4= "
-               "sha384-1UmwrFcVNAAqsH5t7OE+q0ouA+fCHNK2ee57Ts6CuNyA6zBktZG9WsyuTpmS3NCJ "
-               "sha512-VV0Nec3Q4VRwJ6epRhp+ci/2U1gJ8w8Hdoxx36xSgJUE3MO688a2wki633CdF6hfSInnGs11XcDBUp48vKWlnw=="),
-    "job_run_js": ("sha256-XjeLtJMtzILgcVs7RtLCuTOfB7DA5p1C0wH/TLyMF2s= "
-                   "sha384-vfjnisrN8ky3VPSP8p4sEvyrUgVnSeQSeRL8Z+3Tj2MExQ0NaSTh5Mug1i38GMlx "
-                   "sha512-sOdBTOrBusi4ETcXS0NJqutsT8a/jsLklFg9ekFGh/alMfzLpR1hUab9VjJVO96tf2H1wZj7G28cHuxU+DoJPA=="),
-    "job_common_js": ("sha256-3yArWocEBdrv3hP96AlWlZUx7VQhQyGNfHgmux/BaPo= "
-                      "sha384-/XTkOjVK8SzglbNXb9iAkZLxHufYgKSAg8jSCrmb2wxzJi2+Pc8YwwtX9RZg5pQp "
-                      "sha512-DZOHMPNe5CnCbc6ySWLNHXyOios+rdsim8/nm0liJr92UL4WpxRIvBxSn0s9BaiikfyVSKvvcTwQ8u/3dtgRiQ=="),
+    "job_js": ("sha256-hVcTBUs5xvczvrzJ0F+Xo3mgIccoOcmm6N4FMMEvBss= "
+               "sha384-7MR5lzIYZwrIg+isCppLWN0dno2rWJ2f/f1onjfKLWp+1AGJvpkbsemoVhLPG35O "
+               "sha512-eDJPaXyM4TM8heI6ZYio0PVri0iwycPct6VK/kiP5jn3621bKlX7OFrgpvOkGnqM+Y7gIlLiUMYriWUhSFdlQA=="),
+    "job_run_js": ("sha256-COfC6sYzTU5EPIw4Yg+wUSxew0M1uPjyrSOtela+pic= "
+                   "sha384-BS3tf7SkYIXa4WxTy3L/YY96Vmdz5m+dk2aLRQvbVsdKbujQyh3UE7jzqT+Gj/MZ "
+                   "sha512-Yu6p7AEi1OroRwg4iXT303FTEWsKTLYJVHCTmQLszsN0E/og0XeYuq51h+xHZPCmyDrhcN5dco7jEqSYBV3PoA=="),
+    "job_common_js": ("sha256-2zUcq8xx7QWV0kmDRxci68mVfTwHznOxqz6cyGl6/j0= "
+                      "sha384-/G6NYjqQiBRgZWUeahybzKABsk/JrNArdX1Ol0InjjysyHa1WfDwWsQ/6/7M5jJb "
+                      "sha512-yopBTu4v+JHlqpHoePm7MgPpAxz2Q9HDxk7GAcylNoVsBX1DaGQBQ8yLivpPfQKFnZq4B4K+bFJrmKFNBl1r/g=="),
     "job_run_modal_js": ("sha256-qqDYu1QZg87FzX6/ekjkFM2W6fb6oPIbK6UJifGF7YQ= "
                          "sha384-KL4cgz12hHnSnZlKw3UPph7QYpj7w0YuC/kzYmvelVL3DDyB8EbFIt2mV8T1Xm6A "
                          "sha512-tw4NsFMStptS++QnuH7/NhWfECaMK1RnLTiIcTmQLc7ylaluyQ8I9m/EVgCf1tphSb0hF9jI25dAppMdlGksJQ=="),
