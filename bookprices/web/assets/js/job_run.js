@@ -139,7 +139,7 @@ function getJobRuns(jobId) {
                 showAlert(xhr.responseJSON[messageFieldName], "danger", msgContainer);
                 toggleSpinnerInJobRunContainer(false);
             },
-            "finally": function() {
+            "complete": function() {
                 isLoadingJobRuns = false;
             }
     });
