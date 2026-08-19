@@ -109,6 +109,16 @@ function initializeJobRunTable(columns, rows, translations) {
         tableBody.append(tableRow);
     });
 
+    let createButton = $("<a></a>")
+        .attr("id", "btn-create-job-run")
+        .attr("type", "button")
+        .attr("data-bs-target", "#job-run-modal")
+        .attr("data-bs-toggle", "modal")
+        .attr("class", "btn btn-primary mb-1")
+        .text("Opret");
+
+    jobRunContainer.prepend(createButton);
+
     table.append(tableBody);
 }
 
@@ -139,7 +149,7 @@ function getJobRuns(jobId) {
                 showAlert(xhr.responseJSON[messageFieldName], "danger", msgContainer);
                 toggleSpinnerInJobRunContainer(false);
             },
-            "finally": function() {
+            "complete": function() {
                 isLoadingJobRuns = false;
             }
     });
