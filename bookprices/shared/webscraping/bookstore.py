@@ -5,7 +5,7 @@ from typing import ClassVar
 
 from bookprices.shared.webscraping.book import (
     RedirectsToDetailPageBookScraper, RateLimitedRedirectsToDetailPageBookScraper,
-    RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper, BogOgIdeBookScraper)
+    RateLimitedMatchesInResultListBookScraper, PlusbogBookScraper, BogOgIdeBookScraper, SaxoBookScraper)
 from bookprices.shared.webscraping.currency import CurrencyConverter
 from bookprices.shared.webscraping.http import RateLimiter
 from bookprices.shared.webscraping.price import (
@@ -120,7 +120,22 @@ class WilliamDamScraper(StaticBookStoreScraper):
 
 class SaxoScraper(StaticBookStoreScraper):
     """ Scraper for Saxo.com bookstore. """
-    pass
+    _max_requests_per_period: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 3
+
+    def __init__(self, configuration: BookStoreConfiguration) -> None:
+        super().__init__(configuration)
+        self._book_scraper = SaxoBookScraper(
+            configuration.bookstore_id,
+            configuration.bookstore_url,
+            configuration.bookstore_search_url,
+            RateLimiter(self._max_requests_per_period, self._period_seconds))
+
+        self._price_scraper = RateLimitedStaticHtmlPriceScraper(
+            configuration.bookstore_price_css_selector,
+            configuration.bookstore_price_format,
+            self._max_requests_per_period,
+            self._period_seconds)
 
 
 class BogOgIdeScraper(StaticBookStoreScraper):
