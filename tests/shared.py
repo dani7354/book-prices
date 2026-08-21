@@ -3,7 +3,7 @@ import os
 import requests
 
 
-def create_fake_response(html_file: str) -> requests.Response:
+def create_fake_response(html_file: str, **kwargs) -> requests.Response:
     fake_response = requests.Response()
     fake_response.status_code = 200
     full_path = os.path.join(os.path.dirname(__file__), "html", html_file)

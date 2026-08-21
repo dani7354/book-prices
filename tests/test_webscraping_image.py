@@ -12,18 +12,18 @@ from bookprices.shared.webscraping.image import ImageDownloader, ImageSource
                           ("#img-full-url", "https://example.com/static/images/books/1.jpg")])
 def test_image_downloader_finds_url_from_img_element(monkeypatch, css_selector, expected_url_found):
     book_id = 1
-    headers = {'Content-Type': 'image/jpeg'}
-    monkeypatch.setattr(requests, "get", lambda x: shared.create_fake_response("image.html"))
+    resp_headers = {'Content-Type': 'image/jpeg'}
+    monkeypatch.setattr(requests, "get", lambda x, headers: shared.create_fake_response("image.html", headers=resp_headers))
 
     image_dir = "."
     book_image_file_service = BookImageFileService(image_dir)
-    image_downloader = ImageDownloader(book_image_file_service, MagicMock(), image_dir)
+    image_downloader = ImageDownloader(book_image_file_service, MagicMock(), MagicMock())
 
     image_downloader._image_not_excluded = MagicMock(return_value=True)
-    image_downloader._get_image_from_url = MagicMock(return_value=(b"image_bytes", headers))
+    image_downloader._get_image_from_url = MagicMock(return_value=(b"image_bytes", resp_headers))
     image_downloader._get_image_name = MagicMock(return_value=f"{book_id}.jpg")
     image_source = ImageSource(book_id, "https://example.com/book1", css_selector, str(book_id))
 
     _ = image_downloader.download_image(image_source)
 
-    image_downloader._get_image_name.assert_called_once_with(str(book_id), headers)
+    image_downloader._get_image_name.assert_called_once_with(str(book_id), resp_headers)
