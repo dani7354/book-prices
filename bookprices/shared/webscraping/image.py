@@ -100,6 +100,7 @@ class ImageDownloader:
         try:
             self._rate_limiter.wait_if_needed()
             image_response = requests.get(url, headers=HTTP_HEADERS_FOR_SAXO)
+            image_response.raise_for_status()
             return image_response.content, dict(image_response.headers)
         except HTTPError as ex:
             raise ImageNotDownloadedException(f"Failed to download image from {url}: {ex}")
