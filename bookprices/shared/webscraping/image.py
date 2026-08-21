@@ -2,7 +2,7 @@ import logging
 
 import requests
 import bookprices.shared.webscraping.options as options
-from typing import Mapping
+from typing import Mapping, ClassVar
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from requests.exceptions import HTTPError
@@ -10,7 +10,8 @@ from urllib.parse import urlparse, urljoin
 
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.book_image_file_service import BookImageFileService
-
+from bookprices.shared.webscraping.headers import HTTP_HEADERS_FOR_SAXO
+from bookprices.shared.webscraping.http import RateLimiter
 
 HTML_SRC = "src"
 
@@ -32,15 +33,17 @@ class ImageSource:
 
 
 class ImageDownloader:
+    _default_requests_per_period: ClassVar[int] = 9999
+    _default_period_seconds: ClassVar[int] = 1
 
     def __init__(
             self,
             book_image_file_service: BookImageFileService,
             unit_of_work: UnitOfWork,
-            location: str):
-        self._location = location
+            rate_limiter: RateLimiter | None = None) -> None:
         self._book_image_file_service = book_image_file_service
         self._unit_of_work = unit_of_work
+        self._rate_limiter = rate_limiter or RateLimiter(self._default_requests_per_period, self._default_period_seconds)
         self._logger = logging.getLogger(self.__class__.__name__)
         self._file_extensions = {"image/jpg": ".jpg",
                                  "image/jpeg": ".jpeg",
@@ -77,6 +80,30 @@ class ImageDownloader:
         except KeyError as ex:
             raise ImageNotDownloadedException(f"Image format not supported: {ex}")
 
+    def _get_image_url_from_page(self, image_source: ImageSource) -> str:
+        try:
+            self._rate_limiter.wait_if_needed()
+            page_response = requests.get(image_source.page_url, headers=HTTP_HEADERS_FOR_SAXO)
+            page_response.raise_for_status()
+            page_content_bs = BeautifulSoup(page_response.content.decode(), options.BS_HTML_PARSER)
+            img_element = page_content_bs.select_one(image_source.image_css_selector)
+            image_url = img_element[HTML_SRC]
+            return str(image_url)
+        except HTTPError as ex:
+            raise ImageNotDownloadedException(f"Failed to connect to {image_source.page_url}: {ex}")
+        except KeyError as ex:
+            raise ImageNotDownloadedException(
+                f"Failed to parse url from HTML element {image_source.image_css_selector}: "
+                f"{ex}")
+
+    def _get_image_from_url(self, url: str) -> tuple[bytes, dict[str, str]]:
+        try:
+            self._rate_limiter.wait_if_needed()
+            image_response = requests.get(url, headers=HTTP_HEADERS_FOR_SAXO)
+            return image_response.content, dict(image_response.headers)
+        except HTTPError as ex:
+            raise ImageNotDownloadedException(f"Failed to download image from {url}: {ex}")
+
     @staticmethod
     def _get_valid_url(url: str, image_source: ImageSource) -> str:
         parsed_url = urlparse(url)
@@ -87,27 +114,3 @@ class ImageDownloader:
             return urljoin(f"{scheme}://", url)
 
         return url
-
-    @staticmethod
-    def _get_image_url_from_page(image_source: ImageSource) -> str:
-        try:
-            page_response = requests.get(image_source.page_url)
-            page_response.raise_for_status()
-            page_content_bs = BeautifulSoup(page_response.content.decode(), options.BS_HTML_PARSER)
-            img_element = page_content_bs.select_one(image_source.image_css_selector)
-            image_url = img_element[HTML_SRC]
-            return image_url
-        except HTTPError as ex:
-            raise ImageNotDownloadedException(f"Failed to connect to {image_source.page_url}: {ex}")
-        except KeyError as ex:
-            raise ImageNotDownloadedException(f"Failed to parse url from HTML element {image_source.image_css_selector}: "
-                                              f"{ex}")
-
-    @staticmethod
-    def _get_image_from_url(url: str) -> tuple[bytes, dict[str, str]]:
-        try:
-            image_response = requests.get(url)
-            image_response.raise_for_status()
-            return image_response.content, dict(image_response.headers)
-        except HTTPError as ex:
-            raise ImageNotDownloadedException(f"Failed to download image from {url}: {ex}")

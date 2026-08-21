@@ -1,5 +1,4 @@
 import logging
-import traceback
 
 from bookprices.job.job.base import DEFAULT_THREAD_COUNT
 from bookprices.job.job.book_search import SearchAllMissingBooksInBookStoresJob, SearchSelectedBooksInBookStoresJob
@@ -34,11 +33,16 @@ from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.service.currency_service import CurrencyService
 from bookprices.shared.service.job_service import JobService
 from bookprices.shared.service.scraper_service import BookStoreScraperService
+from bookprices.shared.webscraping.http import RateLimiter
 from bookprices.shared.webscraping.image import ImageDownloader
 from bookprices.shared.service.book_image_file_service import BookImageFileService
 from bookprices.shared.db.data_session import SessionFactory
 
 THREAD_COUNT = 8
+
+IMAGE_DOWNLOADER_DEFAULT_PERIOD_SECONDS = 3
+IMAGE_DOWNLOADER_DEFAULT_MAX_REQUESTS = 1
+
 JOB_API_CLIENT_ID = "JobApiJobRunner"
 PROGRAM_NAME = "JobRunner"
 
@@ -139,6 +143,18 @@ def create_bookstore_search_service(config: Config) -> BookStoreSearchService:
     return bookstore_search_service
 
 
+def create_image_download_service(config: Config) -> ImageDownloadService:
+    db = create_database_container(config)
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
+    book_image_file_service = BookImageFileService(config.imgdir)
+    rate_limiter = RateLimiter(IMAGE_DOWNLOADER_DEFAULT_MAX_REQUESTS, IMAGE_DOWNLOADER_DEFAULT_PERIOD_SECONDS)
+    image_downloader = ImageDownloader(book_image_file_service, unit_of_work, rate_limiter)
+    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
+
+    return ImageDownloadService(db, image_downloader, thread_count)
+
+
 def create_all_missing_books_search_job(
         config: Config, event_manager: EventManager) -> SearchAllMissingBooksInBookStoresJob:
     session_factory = create_data_session_factory(config)
@@ -180,12 +196,7 @@ def create_trim_selected_prices_job(config: Config) -> TrimSelectedPricesJob:
 
 def create_download_all_missing_images_for_books_job(config: Config) -> DownloadAllMissingImagesForBooksJob:
     db = create_database_container(config)
-    session_factory = create_data_session_factory(config)
-    unit_of_work = UnitOfWork(session_factory)
-    book_image_file_service = BookImageFileService(config.imgdir)
-    image_downloader = ImageDownloader(book_image_file_service, unit_of_work, config.imgdir)
-    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
-    image_download_service = ImageDownloadService(db, image_downloader, thread_count)
+    image_download_service = create_image_download_service(config)
 
     return DownloadAllMissingImagesForBooksJob(config, db, image_download_service)
 
@@ -193,12 +204,7 @@ def create_download_all_missing_images_for_books_job(config: Config) -> Download
 def create_download_selected_images_for_books_job(config: Config) -> DownloadSelectedImagesForBooksJob:
     argument_service = JobRunArgumentService()
     db = create_database_container(config)
-    session_factory = create_data_session_factory(config)
-    unit_of_work = UnitOfWork(session_factory)
-    book_image_file_service = BookImageFileService(config.imgdir)
-    image_downloader = ImageDownloader(book_image_file_service, unit_of_work, config.imgdir)
-    thread_count = config.job_thread_count or DEFAULT_THREAD_COUNT
-    image_download_service = ImageDownloadService(db, image_downloader, thread_count)
+    image_download_service = create_image_download_service(config)
 
     return DownloadSelectedImagesForBooksJob(config, argument_service, db, image_download_service)
 
@@ -300,8 +306,7 @@ def main() -> None:
         job_runner = JobRunner(config, jobs, service)
         job_runner.start()
     except Exception as ex:
-        logger.error(ex)
-        logger.error(traceback.format_exc())
+        logger.exception("Unexpected error occurred while running the job runner.")
         raise SystemExit(1) from ex
 
 

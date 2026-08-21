@@ -7,6 +7,7 @@ from urllib.parse import urljoin, urlparse
 from typing import ClassVar
 from dataclasses import dataclass, replace
 from bookprices.shared.webscraping.content import HtmlContent
+from bookprices.shared.webscraping.headers import HTTP_HEADERS_FOR_SAXO
 from bookprices.shared.webscraping.http import HttpClient, HttpResponse, RateLimiter
 
 REDIRECTED_PERMANENT = 301
@@ -524,42 +525,7 @@ class SaxoBookScraper(BookScraper):
         self._search_url = search_url
         self._rate_limiter = rate_limiter
         self._logger = logging.getLogger(self.__class__.__name__)
-
-        self._headers_for_search = {
-            "Accept": (
-                "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                "image/avif,image/webp,image/apng,*/*;q=0.8,"
-                "application/signed-exchange;v=b3;q=0.7"
-            ),
-            "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-            "Cache-Control": "no-cache",
-            "DNT": "1",
-            "Pragma": "no-cache",
-            "Priority": "u=0, i",
-            "Referer": "https://www.saxo.com",
-            "Sec-CH-UA": '"Chromium";v="151", "Not=A?Brand";v="99"',
-            "Sec-CH-UA-Arch": '"x86"',
-            "Sec-CH-UA-Bitness": '"64"',
-            "Sec-CH-UA-Full-Version": '"151.0.7922.137"',
-            "Sec-CH-UA-Full-Version-List": (
-                '"Chromium";v="151.0.7922.137", "Not=A?Brand";v="99.0.0.0"'
-            ),
-            "Sec-CH-UA-Mobile": "?0",
-            "Sec-CH-UA-Model": '""',
-            "Sec-CH-UA-Platform": '"Linux"',
-            "Sec-CH-UA-Platform-Version": '""',
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "same-origin",
-            "Sec-Fetch-User": "?1",
-            "Sec-GPC": "1",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": (
-                "Mozilla/5.0 (X11; Linux x86_64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/151.0.0.0 Safari/537.36"
-            ),
-        }
+        self._headers_for_search = HTTP_HEADERS_FOR_SAXO
 
     def find_book(self, isbn: str) -> SearchResult:
         self._rate_limiter.wait_if_needed()
