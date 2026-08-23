@@ -5,6 +5,7 @@ from typing import ClassVar
 
 from bookprices.shared.webscraping.content import HtmlContent
 from bookprices.shared.webscraping.currency import CurrencyConverter
+from bookprices.shared.webscraping.headers import HTTP_HEADERS_FOR_SAXO
 from bookprices.shared.webscraping.http import HttpClient, RequestFailedError, RateLimiter
 
 FALLBACK_PRICE_FORMAT = r".*"
@@ -46,7 +47,7 @@ class StaticHtmlPriceScraper(PriceScraper):
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def get_price(self, url: str) -> float:
-        with HttpClient() as http_client:
+        with self._http_client as http_client:
             try:
                 response = http_client.get(url)
                 if response.text:
@@ -125,3 +126,16 @@ class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
     @classmethod
     def price_in_sek(cls, price_text: str) -> bool:
         return cls._sek_currency_code in price_text
+
+
+class SaxoStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
+    """ Price scraper for Saxo.dk bookstore using custom http headers and rate limiting. """
+
+    def __init__(
+            self,
+            price_css_selector: str,
+            price_format: str | None,
+            max_requests: int,
+            period_seconds: int) -> None:
+        super().__init__(price_css_selector, price_format, max_requests, period_seconds)
+        self._http_client = HttpClient(headers=HTTP_HEADERS_FOR_SAXO)

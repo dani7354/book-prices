@@ -9,7 +9,8 @@ from bookprices.shared.webscraping.book import (
 from bookprices.shared.webscraping.currency import CurrencyConverter
 from bookprices.shared.webscraping.http import RateLimiter
 from bookprices.shared.webscraping.price import (
-    PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, GuccaStaticHtmlPriceScraper)
+    PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, GuccaStaticHtmlPriceScraper,
+    SaxoStaticHtmlPriceScraper)
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -131,7 +132,7 @@ class SaxoScraper(StaticBookStoreScraper):
             configuration.bookstore_search_url,
             RateLimiter(self._max_requests_per_period, self._period_seconds))
 
-        self._price_scraper = RateLimitedStaticHtmlPriceScraper(
+        self._price_scraper = SaxoStaticHtmlPriceScraper(
             configuration.bookstore_price_css_selector,
             configuration.bookstore_price_format,
             self._max_requests_per_period,
