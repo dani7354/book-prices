@@ -1,0 +1,24 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Canonical: https://bogpriser.stuhrs.dk/.well-known/security.txt
+Contact: mailto:d@stuhrs.dk
+Encryption: https://keys.openpgp.org/vks/v1/by-fingerprint/9ACA000AC11D51D2AE0E02C08FAEF95A8FCCA049
+Preferred-Languages: en, fr, da
+Expires: 2026-12-31T10:00:00z
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEEmsoACsEdUdKuDgLAj675Wo/MoEkFAmqOe64ACgkQj675Wo/M
+oEkKbBAAmoNBgSa8gbZkw9hX0iqJLCRlHc2z9Bz/4eV2ic5BR9uN4sONvRF/vnmF
+6Vih/rBUsB2RRZPsnaqZa6Fh3SQPDtln+QyIgMzgR01SR/mczZ6p0M9HVRQukjZd
+tokDQIT23krR3eSAUSuWvvFnXNKiVj2CEJmQstMLZvnRfUuFD9kRErM938ijNz7o
+bJvMsXlJ28uJkYQ4hziEseN4gcLluIkL52HylUGzV5B/T2VMEeYtcMeOzbiGr3d9
+Z+I/jcyTCSUgs3QSvqOTEUMpaZPxkvkC4n7EjcHlBcWdjfdroI37JYy2omPkwvuP
+jBnVJ9tVMTAh2ef8L+YStYJ8S/Hr2z4LW4Olss6XTdk2qijdTo/cDkQheDUJnjXm
+YDnxQe51BGGxL7WPbMKV50bn2sqaCKUB/jNgCdYtq/wz9XnVNLcveCIlorll7+eI
+9vvv0aZAWqi2N8+AFwppy2fLouHZPJpG30i9jSlPYFG8L0Vt1YhMW/X7CsmB19d/
+6Z/ONRMDa+BcY7sc8AuQcGt8YzkLu+XapPuhi3k904vKvh5JF5H3jVGwqr8pZANl
+7ZJ4nEVkKOw9XWq3EJqSVslIEamKcTm5qCnFchJDTH7QR3B68tgCB+er2nOyRSad
+q8BVYsqXG4PsvmJUii7sv2QzfyNNB6QwXW7mS1dqPvltlwpkECA=
+=5tFj
+-----END PGP SIGNATURE-----
