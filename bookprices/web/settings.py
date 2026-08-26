@@ -85,12 +85,12 @@ SRI_ATTRIBUTE_VALUES = {
     "price_chart_js": ("sha256-0MC9H+BsSSWDojqimteKzhMIu95VrGRXAdAhtR3DY6I= "
                        "sha384-q/mJ3N23EEUdKg+IAACohdR2WgzlFQv8YlyOS7X3Mb87zjKF8F71Gq9kcE3S+qIp "
                        "sha512-/vXxBZIcj4xdIEmaMGNOudnLr4DNsDO0lJdgi/ZPQNIABX3QQtlzJzA9DCZxyDNLpjru+KpX/2Vh3njdcf4MZQ=="),
-    "job_js": ("sha256-hVcTBUs5xvczvrzJ0F+Xo3mgIccoOcmm6N4FMMEvBss= "
-               "sha384-7MR5lzIYZwrIg+isCppLWN0dno2rWJ2f/f1onjfKLWp+1AGJvpkbsemoVhLPG35O "
-               "sha512-eDJPaXyM4TM8heI6ZYio0PVri0iwycPct6VK/kiP5jn3621bKlX7OFrgpvOkGnqM+Y7gIlLiUMYriWUhSFdlQA=="),
-    "job_run_js": ("sha256-stPUoo2OGciSGvpuxza/kwHtuaRHxFeFW+dnFk6kJjc= "
-                   "sha384-+jKouZhjCpRRZKVYOlrYAoHCE1cdLvjE44cR9tXSrFl7gHM4JM7y413zSWoCvGWB "
-                   "sha512-S6UC9xCeW7+GhZjE1FxHYQNWkDdZNlWWS6UstbEj4S7PrsFVIi0i+BqGFl7GTyzKiT+8Av/YosBHGWFMTZFUPA=="),
+    "job_js": ("sha256-Wb4ZEepPgt72C1qqDYrEVqhQxY/10ETOxLkONnpVo7c= "
+               "sha384-zZztdoLGzG10HDKp5JzQu52DZq6XW4fYQ9fOVmLCRrKj4Z/lQhL2YAEMCSHD+aUf "
+               "sha512-padmVRVz6A0qxVMpKftXdtEmV7Z6YhpkYvpCW7F6XIvK9FMEyet7ro16SEc42y4evVZvpvp9NXOS6pBXxB/z0w=="),
+    "job_run_js": ("sha256-pLNrHWui4IE93M+zw/76vtCHgIaScCfjWMOhPnW4KB4= "
+                   "sha384-d/Duxde7snj3U40ZmHm3zDoIe2h6I4JpxoO+qTJlYBFnoEUPrQX9Sy2Veg+UZzIK "
+                   "sha512-Jrzsn5Tv8mUeM3dYkeYB7KR0IU8yJ6nCk4dJ91qmzyfpZe1wAarweT6IuPffYUt6ToRxsstWnJaipf39jzJVdg=="),
     "job_common_js": ("sha256-2zUcq8xx7QWV0kmDRxci68mVfTwHznOxqz6cyGl6/j0= "
                       "sha384-/G6NYjqQiBRgZWUeahybzKABsk/JrNArdX1Ol0InjjysyHa1WfDwWsQ/6/7M5jJb "
                       "sha512-yopBTu4v+JHlqpHoePm7MgPpAxz2Q9HDxk7GAcylNoVsBX1DaGQBQ8yLivpPfQKFnZq4B4K+bFJrmKFNBl1r/g=="),

@@ -33,6 +33,29 @@ function toggleSpinnerInJobContainer(showSpinner) {
     }
 }
 
+function insertCreateAndUpdateButton() {
+    let createButtonRow = $("<div></div>").addClass("d-flex justify-content-start mb-2");
+    let createButton = $("<a></a>")
+        .text("Opret")
+        .attr("id", "btn-create-job")
+        .attr("type", "button")
+        .attr("href", `${baseUrl}/create`)
+        .attr("class", "btn btn-primary");
+
+    createButtonRow.append(createButton);
+
+    let updateButton = $("<a></a>")
+        .text("Opdater")
+        .attr("id", "btn-update-jobs")
+        .attr("type", "button")
+        .attr("class", "btn btn-secondary me-1")
+        .click(getJobs);
+
+    createButtonRow.prepend(updateButton);
+
+    jobContainer.prepend(createButtonRow);
+}
+
 function initializeJobTable(columns, rows, translations) {
     let table = $("<table></table>")
         .attr("class", "table");
@@ -123,27 +146,6 @@ function initializeJobTable(columns, rows, translations) {
     });
 
     table.append(tableBody);
-
-    let createButtonRow = $("<div></div>").addClass("d-flex justify-content-start mb-2");
-    let createButton = $("<a></a>")
-        .text("Opret")
-        .attr("id", "btn-create-job")
-        .attr("type", "button")
-        .attr("href", `${baseUrl}/create`)
-        .attr("class", "btn btn-primary");
-
-    createButtonRow.append(createButton);
-
-    let updateButton = $("<a></a>")
-        .text("Opdater")
-        .attr("id", "btn-update-jobs")
-        .attr("type", "button")
-        .attr("class", "btn btn-secondary me-1")
-        .click(getJobs);
-
-    createButtonRow.prepend(updateButton);
-
-    jobContainer.prepend(createButtonRow);
 }
 
 async function deleteJob(jobId) {
@@ -180,9 +182,10 @@ async function getJobs() {
 
         const data = await response.json();
         jobContainer.empty();
+        insertCreateAndUpdateButton();
 
         if (data.jobs.length === 0) {
-            jobContainer.text("Ingen jobs.");
+            jobContainer.append($("<p></p>").text("Ingen jobs."));
             return;
         }
 

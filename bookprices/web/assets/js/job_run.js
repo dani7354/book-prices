@@ -54,6 +54,18 @@ function deleteJobRun(jobRunId) {
     });
 }
 
+function insertCreateButton() {
+    let createButton = $("<a></a>")
+        .attr("id", "btn-create-job-run")
+        .attr("type", "button")
+        .attr("data-bs-target", "#job-run-modal")
+        .attr("data-bs-toggle", "modal")
+        .attr("class", "btn btn-primary mb-1")
+        .text("Opret");
+
+    jobRunContainer.prepend(createButton);
+}
+
 function initializeJobRunTable(columns, rows, translations) {
     let table = $("<table></table>")
         .attr("class", "table")
@@ -109,16 +121,6 @@ function initializeJobRunTable(columns, rows, translations) {
         tableBody.append(tableRow);
     });
 
-    let createButton = $("<a></a>")
-        .attr("id", "btn-create-job-run")
-        .attr("type", "button")
-        .attr("data-bs-target", "#job-run-modal")
-        .attr("data-bs-toggle", "modal")
-        .attr("class", "btn btn-primary mb-1")
-        .text("Opret");
-
-    jobRunContainer.prepend(createButton);
-
     table.append(tableBody);
 }
 
@@ -135,8 +137,10 @@ function getJobRuns(jobId) {
             "dataType": "json",
             "success" : function (data) {
                 jobRunContainer.empty();
+                insertCreateButton();
                 if (data[jobRunsFieldName].length === 0) {
-                    jobRunContainer.text("Ingen kørsler oprettet for dette job.");
+                    jobRunContainer.append(
+                        $("<p></p>").text("Ingen kørsler oprettet for dette job."));
                     return;
                 }
                 initializeJobRunTable(
