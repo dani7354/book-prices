@@ -1,4 +1,4 @@
-FROM nginx:1.29-trixie
+FROM nginx:1.31-trixie
 EXPOSE 80
 EXPOSE 443
 
@@ -7,6 +7,7 @@ RUN mkdir /etc/nginx/tls \
     && mkdir /usr/share/nginx/html/static
 
 COPY ./docker/nginx/robots.txt /usr/share/nginx/html/static/robots.txt
+COPY ./docker/nginx/security.txt /usr/share/nginx/html/static/security.txt
 COPY ./bookprices/web/assets /usr/share/nginx/html/static/assets
 
 CMD ["nginx", "-g", "daemon off;"]
