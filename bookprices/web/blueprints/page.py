@@ -13,8 +13,8 @@ from bookprices.web.service.auth_service import AuthService
 from bookprices.web.service.book_service import BookService
 from bookprices.web.service.booklist_service import BookListService
 from bookprices.web.service.csrf import get_csrf_token
-from bookprices.web.shared.db_session import SessionFactory, WebSessionFactory
-from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, PageTemplate, Endpoint, SecurityTemplate, HttpHeader
+from bookprices.web.shared.db_session import WebSessionFactory
+from bookprices.web.shared.enum import HttpMethod, HttpStatusCode, PageTemplate, Endpoint
 from bookprices.web.viewmodels.page import AboutViewModel
 from bookprices.shared.cache.key_generator import get_bookstores_key
 from bookprices.web.settings import (
@@ -95,11 +95,3 @@ def login() -> Response | str:
         return redirect(redirect_url)
 
     return render_template(PageTemplate.LOGIN.value, redirect_url=redirect_url)
-
-
-@page_blueprint.route("/.well-known/security.txt", methods=[HttpMethod.GET.value])
-def security_txt() -> Response:
-    response = Response(render_template(SecurityTemplate.SECURITY_TXT.value))
-    response.headers.add(HttpHeader.CONTENT_TYPE, "text/plain")
-
-    return response

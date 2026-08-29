@@ -15,10 +15,6 @@ class HttpStatusCode(IntEnum):
     INTERNAL_SERVER_ERROR = 500
 
 
-class HttpHeader(StrEnum):
-    CONTENT_TYPE = "Content-Type"
-
-
 class CacheTtlOption(IntEnum):  # In seconds
     SHORT = 60 * 5
     MEDIUM = 60 * 60
@@ -99,7 +95,3 @@ class JobTemplate(Enum):
     INDEX = "job/index.html"
     CREATE = "job/create.html"
     EDIT = "job/edit.html"
-
-
-class SecurityTemplate(StrEnum):
-    SECURITY_TXT = "security.txt"
