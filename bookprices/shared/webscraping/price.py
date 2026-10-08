@@ -5,7 +5,8 @@ from typing import ClassVar
 
 from bookprices.shared.webscraping.content import HtmlContent
 from bookprices.shared.webscraping.currency import CurrencyConverter
-from bookprices.shared.webscraping.headers import HTTP_HEADERS_FOR_SAXO
+from bookprices.shared.webscraping.headers import HTTP_HEADERS_FOR_SAXO, HTTP_HEADERS_FOR_BOGIDE, \
+    HTTP_HEADERS_FOR_ACADEMIC_BOOKS
 from bookprices.shared.webscraping.http import HttpClient, RequestFailedError, RateLimiter
 
 FALLBACK_PRICE_FORMAT = r".*"
@@ -139,3 +140,29 @@ class SaxoStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
             period_seconds: int) -> None:
         super().__init__(price_css_selector, price_format, max_requests, period_seconds)
         self._http_client = HttpClient(headers=HTTP_HEADERS_FOR_SAXO)
+
+
+class BogOgIdeStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
+    """ Price scraper for bog-ide.dk bookstore using custom http headers and rate limiting. """
+
+    def __init__(
+            self,
+            price_css_selector: str,
+            price_format: str | None,
+            max_requests: int,
+            period_seconds: int) -> None:
+        super().__init__(price_css_selector, price_format, max_requests, period_seconds)
+        self._http_client = HttpClient(headers=HTTP_HEADERS_FOR_BOGIDE)
+
+
+class AcademicBooksStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
+    """ Price scraper for academicbooks.dk bookstore using custom http headers and rate limiting. """
+
+    def __init__(
+            self,
+            price_css_selector: str,
+            price_format: str | None,
+            max_requests: int,
+            period_seconds: int) -> None:
+        super().__init__(price_css_selector, price_format, max_requests, period_seconds)
+        self._http_client = HttpClient(headers=HTTP_HEADERS_FOR_ACADEMIC_BOOKS)

@@ -96,14 +96,18 @@ class BookListService:
             b for b in booklists if b.name == name and (not existing_booklist_id or b.id != existing_booklist_id))
 
     def add_book(self, book_id: int, booklist_id: int, user_id: str) -> bool:
-        if not (_ := self.get_booklist(booklist_id, user_id)):
+        if not (book_list := self.get_booklist(booklist_id, user_id)):
             self._logger.error(
                 f"User {user_id} failed to access {booklist_id}. Either it does not exist or does not belong to the user.")
             return False
 
         with self._unit_of_work as uow:
-            if not (_ := uow.book_repository.get(book_id)):
+            if not (book := uow.book_repository.get(book_id)):
                 self._logger.error(f"Book with id {book_id} does not exist.")
+                return False
+
+            if any(b.book_id == book.id for b in book_list.books):
+                self._logger.error(f"Book with id {book_id} is already in the booklist {booklist_id}.")
                 return False
 
             uow.booklist_repository.add_book_to_booklist(book_id, booklist_id, datetime.now())

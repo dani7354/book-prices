@@ -172,8 +172,11 @@ def add_to_list() -> tuple[Response, int]:
     if not (booklist := booklist_service.get_booklist(user.booklist_id, user.id)):
         return jsonify({"error": "No booklist found for user, cannot add book to booklist."}), 400
 
-    if not (booklist_service.add_book(book_id=add_view_model.book_id, booklist_id=booklist.id, user_id=flask_login.current_user.id)):
-        return jsonify({"error": "Could not add book to booklist, booklist not found or not accessible."}), 400
+    if not (booklist_service.add_book(
+            book_id=add_view_model.book_id, booklist_id=booklist.id, user_id=flask_login.current_user.id)):
+        return jsonify(
+            {"error": "Could not add book to booklist. Booklist not found or not accessible. "
+                      "Or maybe the book has already been added!"}), 400
 
     return jsonify({}), 200
 
