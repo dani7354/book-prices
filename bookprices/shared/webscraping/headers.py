@@ -33,3 +33,24 @@ HTTP_HEADERS_FOR_SAXO = {
         "Chrome/151.0.0.0 Safari/537.36"
     ),
 }
+
+HTTP_HEADERS_FOR_BOGIDE = {
+    "Accept": "text/html,application/xhtml+xml",
+    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "Cache-Control": "no-cache",
+    "Cookie": "localization=DK; cart_currency=DKK;",
+    "DNT": "1",
+    "Pragma": "no-cache",
+    "Priority": "u=0, i",
+    "Sec-CH-UA": '"Not A(Brand";v="99", "Chromium";v="154"',
+    "Sec-CH-UA-Mobile": "?0",
+    "Sec-CH-UA-Platform": '"Linux"',
+    "Sec-CH-Viewport-Width": "828",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "cross-site",
+    "Sec-Fetch-User": "?1",
+    "Sec-GPC": "1",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+}
