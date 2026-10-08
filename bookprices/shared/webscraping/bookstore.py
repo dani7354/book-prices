@@ -10,7 +10,7 @@ from bookprices.shared.webscraping.currency import CurrencyConverter
 from bookprices.shared.webscraping.http import RateLimiter
 from bookprices.shared.webscraping.price import (
     PriceScraper, StaticHtmlPriceScraper, RateLimitedStaticHtmlPriceScraper, GuccaStaticHtmlPriceScraper,
-    SaxoStaticHtmlPriceScraper, BogOgIdeStaticHtmlPriceScraper)
+    SaxoStaticHtmlPriceScraper, BogOgIdeStaticHtmlPriceScraper, AcademicBooksStaticHtmlPriceScraper)
 
 FALLBACK_PRICE_FORMAT = r".*"
 
@@ -237,8 +237,8 @@ class IMusicScraper(StaticBookStoreScraper):
 
 class AcademicBooksScraper(StaticBookStoreScraper):
     """ Scraper for academicbooks.dk bookstore. """
-    _max_requests_per_period: ClassVar[int] = 2
-    _period_seconds: ClassVar[int] = 1
+    _max_requests_per_period: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 3
 
     def  __init__(self, configuration: BookStoreConfiguration) -> None:
         super().__init__(configuration)
@@ -250,6 +250,12 @@ class AcademicBooksScraper(StaticBookStoreScraper):
             configuration.bookstore_isbn_css_selector,
             max_requests=self._max_requests_per_period,
             period_seconds=self._period_seconds)
+
+        self._price_scraper = AcademicBooksStaticHtmlPriceScraper(
+            configuration.bookstore_price_css_selector,
+            configuration.bookstore_price_format,
+            self._max_requests_per_period,
+            self._period_seconds)
 
 
 class DinBoghandelScraper(StaticBookStoreScraper):
