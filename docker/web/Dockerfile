@@ -1,4 +1,4 @@
-FROM python:3.14.2-trixie
+FROM python:3.15.0-trixie
 EXPOSE 3031
 
 RUN apt update \

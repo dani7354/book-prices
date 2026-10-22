@@ -1,4 +1,4 @@
-FROM python:3.14-alpine
+FROM python:3.15-alpine
 
 ENV VENV_PATH=/opt/venv
 RUN python3 -m venv "$VENV_PATH"
