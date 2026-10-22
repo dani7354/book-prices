@@ -19,6 +19,7 @@ from bookprices.shared.db.tables import Book
 from bookprices.shared.repository.unit_of_work import UnitOfWork
 from bookprices.shared.validation import isbn as isbn_validator
 from bookprices.shared.webscraping.content import HtmlContent
+from bookprices.shared.webscraping.headers import HTTP_HEADERS_FOR_WILLIAMDAM
 from bookprices.shared.webscraping.http import RateLimiter, HttpClient
 
 
@@ -37,7 +38,7 @@ class WilliamDamBookImportJob(JobBase):
     _author_css: ClassVar[str] = "a.manufacturer-link"
     _bookstore_id: ClassVar[int] = 2
 
-    _period_seconds: ClassVar[int] = 1
+    _period_seconds: ClassVar[int] = 4
     _request_count: ClassVar[int] = 1
 
 
@@ -66,7 +67,7 @@ class WilliamDamBookImportJob(JobBase):
             self._logger.info("Getting book urls...")
             self._enqueue_urls_for_book_list_pages(
                 "https://www.williamdam.dk/boeger/skoenlitteratur/romaner/--type_bog,sprog_dansk?p={page}",
-                500)
+                220)
 
             if self._book_list_url_queue.empty():
                 self._logger.info("No book list urls found!")
@@ -132,7 +133,7 @@ class WilliamDamBookImportJob(JobBase):
         while not self._book_list_url_queue.empty():
             try:
                 book_list_url = self._book_list_url_queue.get()
-                with HttpClient() as http_client:
+                with HttpClient(headers=HTTP_HEADERS_FOR_WILLIAMDAM) as http_client:
                     self._rate_limiter.wait_if_needed()
                     book_list_response = http_client.get(book_list_url)
                 book_list_content_bs = HtmlContent(book_list_response.text)
@@ -145,7 +146,7 @@ class WilliamDamBookImportJob(JobBase):
         while not self._book_url_queue.empty():
             try:
                 book_url = self._book_url_queue.get()
-                with HttpClient() as http_client:
+                with HttpClient(headers=HTTP_HEADERS_FOR_WILLIAMDAM) as http_client:
                     self._rate_limiter.wait_if_needed()
                     book_response = http_client.get(book_url)
                 book = self._parse_book(book_response.text)
