@@ -4,13 +4,20 @@ from typing import Self
 
 from flask import url_for
 
-from bookprices.shared.service.job_service import JobRunStatus, JobRunSchemaFields, JobRunArgumentSchemaFields, \
-    JobSchemaFields
+from bookprices.shared.service.job_service import (
+    JobRunStatus,
+    JobRunSchemaFields,
+    JobRunArgumentSchemaFields,
+    JobSchemaFields)
 from bookprices.shared.service.job_run_argument_parser import JobRunArgumentParser
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
 from bookprices.web.viewmodels.job_run import (
-    JobRunListItem, JobRunListViewModel, JobRunEditViewModel, JobRunPriority, JobRunCreateViewModel)
+    JobRunListItem,
+    JobRunListViewModel,
+    JobRunEditViewModel,
+    JobRunPriority,
+    JobRunCreateViewModel)
 
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 JOB_RUN_PRIORITY_TRANSLATIONS = {
