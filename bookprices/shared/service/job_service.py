@@ -38,6 +38,7 @@ class JobSchemaFields(StrEnum):
     NAME = "name"
     DESCRIPTION = "description"
     IS_ACTIVE = "isActive"
+    RUNS_WITH_ARGUMENTS = "runsWithArguments"
     VERSION = "version"
 
 
@@ -162,7 +163,7 @@ class JobService:
             logger.exception(f"Failed to get job runs. Error: {e}")
             raise FailedToGetJobRunsError("Failed to get job runs.")
 
-    def create_job(self, name: str, description: str, is_active: bool) -> None:
+    def create_job(self, name: str, description: str, is_active: bool, runs_with_arguments: bool) -> None:
         job_list_json = self._job_api_client.get(Endpoint.JOBS.value)
         if any(job["name"] == name for job in job_list_json):
             error_msg = f"Job with name {name} already exist."
@@ -174,7 +175,8 @@ class JobService:
                 data={
                     JobSchemaFields.NAME.value: name,
                     JobSchemaFields.DESCRIPTION.value: description,
-                    JobSchemaFields.IS_ACTIVE.value: is_active})
+                    JobSchemaFields.IS_ACTIVE.value: is_active,
+                    JobSchemaFields.RUNS_WITH_ARGUMENTS.value: runs_with_arguments})
         except ApiUnavailableError as e:
             logger.exception(f"Job API is unavailable. Failed to create job with name {name}.")
             raise JobSourceUnavailableError from e
@@ -197,7 +199,14 @@ class JobService:
             logger.exception(f"Failed to create job run for job with id {job_id}. Error: {e}")
             raise CreationFailedError(f"Job run for job with id {job_id} could not be created.")
 
-    def update_job(self, job_id: str, name: str, description: str, version: str, is_active: bool) -> None:
+    def update_job(
+            self,
+            job_id: str,
+            name: str,
+            description: str,
+            version: str,
+            is_active: bool,
+            runs_with_arguments: bool) -> None:
         try:
             job_list = self.get_job_list()
             if any(job["name"] == name and job["id"] != job_id for job in job_list):
@@ -212,7 +221,8 @@ class JobService:
                     JobSchemaFields.NAME.value: name,
                     JobSchemaFields.DESCRIPTION.value: description,
                     JobSchemaFields.VERSION.value: version,
-                    JobSchemaFields.IS_ACTIVE.value: is_active})
+                    JobSchemaFields.IS_ACTIVE.value: is_active,
+                    JobSchemaFields.RUNS_WITH_ARGUMENTS: runs_with_arguments})
         except ApiUnavailableError as e:
             logger.exception(f"Job API is unavailable. Failed to update job with id {job_id}.")
             raise JobSourceUnavailableError from e

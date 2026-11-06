@@ -75,6 +75,10 @@ function initializeJobTable(columns, rows, translations) {
 
     tableHeaderRow.append($("<th></th>")
         .attr("scope", "col")
+        .text("Argumenter"));
+
+    tableHeaderRow.append($("<th></th>")
+        .attr("scope", "col")
         .text("Aktiv"));
 
     tableHeaderRow.append($("<th></th>")
@@ -89,6 +93,18 @@ function initializeJobTable(columns, rows, translations) {
         $.each(columns, (index, columnName) => {
             tableRow.append($("<td></td>").text(row[columnName]));
         });
+
+        let runsWithArgumentCell = $("<td></td>")
+            .attr("class", "form-check-input")
+
+        let runsWithArgumentsCellInput = $("<input>")
+            .attr("class", "form-check-input")
+            .attr("type", "checkbox")
+            .attr("disabled", true)
+            .prop("checked", row[runsWithArgumentsFieldName]);
+
+        runsWithArgumentCell.append(runsWithArgumentsCellInput);
+        tableRow.append(runsWithArgumentCell);
 
         let activeCell = $("<td></td>")
             .attr("class", "form-check-input")

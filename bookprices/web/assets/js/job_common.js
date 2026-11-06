@@ -12,6 +12,7 @@ const canEditFieldName = "can_edit";
 const translationsFieldName = "translations";
 const argumentsFieldName = "arguments";
 const isActiveFieldName = "is_active";
+const runsWithArgumentsFieldName = "runs_with_arguments";
 const lastRunAtColorFieldName = "last_run_at_color";
 
 

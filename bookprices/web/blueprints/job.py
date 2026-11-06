@@ -61,9 +61,15 @@ def create() -> str | Response:
         name = request.form.get(CreateJobViewModel.name_field_name) or ""
         description = request.form.get(CreateJobViewModel.description_field_name) or ""
         active = bool(request.form.get(CreateJobViewModel.active_field_name)) or False
+        runs_with_arguments = bool(request.form.get(CreateJobViewModel.runs_with_arguments_field_name)) or False
 
         view_model = CreateJobViewModel(
-            name=name, description=description, version="", active=active, form_action_url=url_for("job.create"))
+            name=name,
+            description=description,
+            version="",
+            active=active,
+            runs_with_arguments=runs_with_arguments,
+            form_action_url=url_for("job.create"))
         if not view_model.is_valid():
             return render_template(JobTemplate.CREATE.value, view_model=view_model)
 
@@ -71,7 +77,8 @@ def create() -> str | Response:
             job_service.create_job(
                 name=view_model.name,
                 description=view_model.description,
-                is_active=view_model.active)
+                is_active=view_model.active,
+                runs_with_arguments=view_model.runs_with_arguments)
         except AlreadyExistError as ex:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.CREATE.value, view_model=view_model)
@@ -93,12 +100,14 @@ def edit(job_id: str) -> str | Response:
         description = request.form.get(CreateJobViewModel.description_field_name) or ""
         version = request.form.get(CreateJobViewModel.version_field_name) or ""
         active = bool(request.form.get(CreateJobViewModel.active_field_name)) or False
+        runs_with_arguments = bool(request.form.get(CreateJobViewModel.runs_with_arguments_field_name)) or False
 
         view_model = CreateJobViewModel(
             name,
             description,
             version,
             active,
+            runs_with_arguments,
             form_action_url=url_for(Endpoint.JOB_EDIT.value, job_id=job_id),
             id=job_id)
         if not view_model.is_valid():
@@ -110,7 +119,8 @@ def edit(job_id: str) -> str | Response:
                 name=view_model.name,
                 description=view_model.description,
                 version=view_model.version,
-                is_active=view_model.active)
+                is_active=view_model.active,
+                runs_with_arguments=view_model.runs_with_arguments)
         except (AlreadyExistError, UpdateFailedError) as ex:
             view_model.add_error(CreateJobViewModel.name_field_name, str(ex))
             return render_template(JobTemplate.EDIT.value, view_model=view_model)
@@ -154,7 +164,10 @@ def create_job_run_model() -> tuple[Response, int]:
     if not (job_id := request.args.get(JOB_ID_URL_PARAMETER)):
         return jsonify({MESSAGE_FIELD_NAME: "Job-id påkrævet!"}), HttpStatusCode.BAD_REQUEST
 
-    return jsonify(map_job_run_create_view_model(job_id)), HttpStatusCode.OK
+    if not (job := job_service.get_job(job_id)):
+        return jsonify({MESSAGE_FIELD_NAME: "Job blev ikke fundet"}), HttpStatusCode.BAD_REQUEST
+
+    return jsonify(map_job_run_create_view_model(job)), HttpStatusCode.OK
 
 
 @job_blueprint.route("job-run/update/<job_run_id>", methods=[HttpMethod.POST.value])
