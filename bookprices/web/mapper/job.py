@@ -4,12 +4,20 @@ from typing import Self
 
 from flask import url_for
 
-from bookprices.shared.service.job_service import JobRunStatus, JobRunSchemaFields, JobRunArgumentSchemaFields
+from bookprices.shared.service.job_service import (
+    JobRunStatus,
+    JobRunSchemaFields,
+    JobRunArgumentSchemaFields,
+    JobSchemaFields)
 from bookprices.shared.service.job_run_argument_parser import JobRunArgumentParser
 from bookprices.web.shared.enum import Endpoint
 from bookprices.web.viewmodels.job import JobListItem, JobListViewModel, CreateJobViewModel
 from bookprices.web.viewmodels.job_run import (
-    JobRunListItem, JobRunListViewModel, JobRunEditViewModel, JobRunPriority, JobRunCreateViewModel)
+    JobRunListItem,
+    JobRunListViewModel,
+    JobRunEditViewModel,
+    JobRunPriority,
+    JobRunCreateViewModel)
 
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 JOB_RUN_PRIORITY_TRANSLATIONS = {
@@ -40,6 +48,7 @@ class ColumnName(StrEnum):
     DESCRIPTION = "description"
     LAST_RUN_AT = "last_run_at"
     IS_ACTIVE = "is_active"
+    RUNS_WITH_ARGUMENTS = "runs_with_arguments"
     STATUS = "status"
     PRIORITY = "priority"
     UPDATED = "updated"
@@ -51,22 +60,24 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
     job_list_items = []
     for job in jobs_json:
         last_run_at, last_run_at_status = "-", "-"
-        if (job_run := job_run_by_job_id.get(job["id"])) and (last_run_at := job_run.get("updated")):
+        if ((job_run := job_run_by_job_id.get(job[JobSchemaFields.ID]))
+                and (last_run_at := job_run.get(JobRunSchemaFields.UPDATED))):
             last_run_at = datetime.fromisoformat(last_run_at).strftime(DATE_FORMAT)
-            last_run_at_status = job_run["status"]
+            last_run_at_status = job_run[JobRunSchemaFields.STATUS]
 
         last_run_at_color = status_color.value \
             if (status_color := JobStatusColor.parse_str(last_run_at_status)) else JobStatusColor.DEFAULT.value
         job_list_items.append(JobListItem(
-            id=job["id"],
-            name=job["name"],
-            is_active=job["isActive"],
-            url=url_for("job.edit", job_id=job["id"]),
+            id=job[JobSchemaFields.ID],
+            name=job[JobSchemaFields.NAME],
+            is_active=job[JobSchemaFields.IS_ACTIVE],
+            runs_with_arguments=job[JobSchemaFields.RUNS_WITH_ARGUMENTS],
+            url=url_for("job.edit", job_id=job[JobSchemaFields.ID]),
             last_run_at=last_run_at,
             last_run_at_color=last_run_at_color))
 
     translations = {
-        ColumnName.NAME.value: "Navn",
+        ColumnName.NAME.value: "Navn"
     }
 
     return JobListViewModel(jobs=job_list_items, columns=list(translations.keys()), translations=translations)
@@ -74,17 +85,19 @@ def map_job_list(jobs_json: dict, job_run_by_job_id: dict[str, dict]) -> JobList
 
 def map_job_edit_view_model(job_json: dict) -> CreateJobViewModel:
     return CreateJobViewModel(
-        name=job_json["name"],
-        description=job_json["description"],
-        active=job_json["isActive"],
-        id=job_json["id"],
-        version=job_json["version"],
-        form_action_url=url_for(Endpoint.JOB_EDIT.value, job_id=job_json["id"]))
+        name=job_json[JobSchemaFields.NAME],
+        description=job_json[JobSchemaFields.DESCRIPTION],
+        active=job_json[JobSchemaFields.IS_ACTIVE],
+        id=job_json[JobSchemaFields.ID],
+        version=job_json[JobSchemaFields.VERSION],
+        runs_with_arguments=job_json[JobSchemaFields.RUNS_WITH_ARGUMENTS],
+        form_action_url=url_for(Endpoint.JOB_EDIT.value, job_id=job_json[JobSchemaFields.ID]))
 
 
-def map_job_run_create_view_model(job_id: str) -> JobRunCreateViewModel:
+def map_job_run_create_view_model(job: dict) -> JobRunCreateViewModel:
     return JobRunCreateViewModel(
-        job_id=job_id,
+        job_id=job[JobSchemaFields.ID],
+        runs_with_arguments=job[JobSchemaFields.RUNS_WITH_ARGUMENTS],
         form_action_url=url_for(Endpoint.JOB_CREATE_JOB_RUN.value),
         priorities=_get_job_run_priorities(),
         translations=JOB_RUN_PRIORITY_TRANSLATIONS)

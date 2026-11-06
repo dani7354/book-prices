@@ -45,8 +45,9 @@ class JobRunCreateViewModel:
 
     form_action_url: str
     job_id: str
+    runs_with_arguments: bool
     priorities: list[str] = field(default_factory=list)
-    translations: dict[str, str] = field(default_factory=dict)
+    translations: dict = field(default_factory=dict)
 
 
 

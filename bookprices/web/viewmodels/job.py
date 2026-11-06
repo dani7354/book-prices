@@ -13,6 +13,7 @@ class JobListItem:
     last_run_at_color: str
     url: str
     is_active: bool
+    runs_with_arguments: bool
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,7 @@ class CreateJobViewModel:
     active_field_name: ClassVar[str] = "active"
     id_field_name: ClassVar[str] = "job_id"
     version_field_name: ClassVar[str] = "version"
+    runs_with_arguments_field_name: ClassVar[str] = "runs_with_arguments"
 
     name_min_length: ClassVar[int] = 3
     name_max_length: ClassVar[int] = 256
@@ -39,6 +41,7 @@ class CreateJobViewModel:
     description: str
     version: str
     active: bool
+    runs_with_arguments: bool
     form_action_url: str
     id: str | None = None
     errors: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
@@ -67,4 +70,4 @@ class CreateJobViewModel:
 
     @staticmethod
     def empty(form_action_url: str) -> "CreateJobViewModel":
-        return CreateJobViewModel(name="", description="", version="", active=False, form_action_url=form_action_url)
+        return CreateJobViewModel(name="", description="", version="", active=False, runs_with_arguments=False, form_action_url=form_action_url)

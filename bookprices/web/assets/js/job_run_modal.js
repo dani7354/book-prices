@@ -8,6 +8,7 @@ const divErrorMessage = $("#div-error-message");
 const textArguments = $("#text-arguments");
 const textErrorMessage = $("#text-error-message");
 const jobRunSaveBtn = $("#btn-job-run-save");
+const divArguments = $("#div-arguments");
 
 
 const jobIdInput = "job-id";
@@ -30,6 +31,7 @@ function toggleSpinnerInJobRunModal(showSpinner) {
     }
 }
 
+
 function loadPriorityOptions(responseData) {
     let priorities = responseData[prioritiesFieldName];
     let translations = responseData[translationsFieldName];
@@ -51,6 +53,7 @@ function hideModal(event) {
     inputJobId.val("");
     divErrorMessage.hide();
     textErrorMessage.text("");
+    divArguments.hide();
     textArguments.text("");
     inputPriority.removeAttr("disabled");
     textArguments.removeAttr("disabled");
@@ -76,6 +79,7 @@ function loadJobRunModal(event) {
 
                 inputJobId.val(jobId);
                 toggleSpinnerInJobRunModal(false);
+                divArguments.toggle(data[runsWithArgumentsFieldName]);
                 jobRunModalForm.attr("action", data[formActionUrlFieldName]);
                 jobRunModalForm.show();
             },
@@ -128,7 +132,6 @@ function sendJobRunForm(event) {
     let form = $(event.target);
     let url = form.attr("action");
     let data = form.serialize();
-    console.log(data);
     data += `&csrf_token=${$(csrfTokenNodeId).val()}`;
     $.ajax(url, {
         "method": "POST",

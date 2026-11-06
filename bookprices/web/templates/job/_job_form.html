@@ -29,7 +29,7 @@
         {% endif %}
     </div>
     <div class="mb-3">
-        <label for="{{ view_model.active_field_name }}" class="form-label">Aktiv</label>
+        <!-- Active checkbox -->
         {% if view_model.active %}
          <input name="{{ view_model.active_field_name }}" type="checkbox" class="form-check-input"
                id="{{ view_model.active_field_name }}" checked>
@@ -37,7 +37,16 @@
          <input name="{{ view_model.active_field_name }}" type="checkbox" class="form-check-input"
                id="{{ view_model.active_field_name }}">
         {% endif %}
-
+        <label for="{{ view_model.active_field_name }}" class="form-label">Aktiv</label>
+        <!-- RunsWithArguments checkbox  -->
+        {% if view_model.runs_with_arguments %}
+         <input name="{{ view_model.runs_with_arguments_field_name }}" type="checkbox" class="form-check-input"
+               id="{{ view_model.runs_with_arguments_field_name }}" checked>
+        {% else %}
+         <input name="{{ view_model.runs_with_arguments_field_name }}" type="checkbox" class="form-check-input"
+               id="{{ view_model.runs_with_arguments_field_name }}">
+        {% endif %}
+        <label for="{{ view_model.runs_with_arguments_field_name }}" class="form-label">Tager argumenter</label>
     </div>
     {% if view_model.id %}
     <input type="hidden" id="job-id" name="{{ view_model.id_field_name }}" value="{{ view_model.id }}">
