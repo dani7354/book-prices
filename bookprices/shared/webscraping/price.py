@@ -94,7 +94,7 @@ class RateLimitedStaticHtmlPriceScraper(StaticHtmlPriceScraper):
 
 class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
     """ Price scraper for Gucca.dk bookstore. """
-    _sek_currency_code: ClassVar[str] = "SEK"
+    _alt_currencies: ClassVar[list[str]] = ["EUR", "SEK"]
 
     def __init__(
             self,
@@ -117,17 +117,21 @@ class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
 
         try:
             price_value = float(price_match.group().replace(",", "."))
-            if self.price_in_sek(price_text):
-                price_value = self._currency_converter.convert_to_dkk(price_value, self._sek_currency_code)
+            if price_text:
+                if alt_currency_code := self.get_alt_currency_code(price_text):
+                    price_value = self._currency_converter.convert_to_dkk(price_value, alt_currency_code)
 
             return price_value
         except ValueError as ex:
             self._logger.error(f"Failed to parse value as float: {price_match.group()}")
             raise PriceFormatError from ex
 
-    @classmethod
-    def price_in_sek(cls, price_text: str) -> bool:
-        return cls._sek_currency_code in price_text
+    def get_alt_currency_code(self, price_text: str) -> str | None:
+        for c in self._alt_currencies:
+            if c in price_text:
+                return c
+
+        return None
 
 
 class SaxoStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):

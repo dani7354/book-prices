@@ -21,7 +21,7 @@ class CacheTtlOption(IntEnum):  # In seconds
     LONG = 60 * 60 * 24
 
 
-class Endpoint(Enum):
+class Endpoint(StrEnum):
     PAGE_INDEX = "page.index"
     PAGE_ABOUT = "page.about"
     PAGE_LOGIN = "page.login"

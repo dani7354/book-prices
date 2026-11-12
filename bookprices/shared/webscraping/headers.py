@@ -51,6 +51,6 @@ HTTP_HEADERS_FOR_IMUSIC = {
     **BASE_HEADERS,
     "Cache-Control": "no-cache",
     "DNT": "1",
-    "Referer": "https://imusic.dk?query=",
+    "Referer": "https://imusic.dk",
     "Host": "imusic.dk",
 }
