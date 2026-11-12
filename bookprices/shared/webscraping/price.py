@@ -118,8 +118,7 @@ class GuccaStaticHtmlPriceScraper(RateLimitedStaticHtmlPriceScraper):
         try:
             price_value = float(price_match.group().replace(",", "."))
             if price_text:
-                alt_currency_code = self.get_alt_currency_code(price_text)
-                if alt_currency_code:
+                if alt_currency_code := self.get_alt_currency_code(price_text):
                     price_value = self._currency_converter.convert_to_dkk(price_value, alt_currency_code)
 
             return price_value
