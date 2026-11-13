@@ -210,10 +210,11 @@ def create_download_selected_images_for_books_job(config: Config) -> DownloadSel
 
 
 def create_delete_unavailable_books_job(config: Config, event_manager: EventManager) -> DeleteUnavailableBooksJob:
-    db = create_database_container(config)
     cache_key_remover = create_cache_key_remover(config)
+    session_factory = create_data_session_factory(config)
+    unit_of_work = UnitOfWork(session_factory)
 
-    return DeleteUnavailableBooksJob(config, db, cache_key_remover, event_manager)
+    return DeleteUnavailableBooksJob(config, unit_of_work, cache_key_remover, event_manager)
 
 
 def create_delete_unused_book_images_job(config: Config) -> DeleteUnusedBookImagesJob:

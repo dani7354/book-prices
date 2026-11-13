@@ -29,14 +29,6 @@ class BookPriceDb(BaseDb):
 
                 return prices
 
-    def delete_failed_price_updates(self, book_id: int, bookstore_id: int):
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("DELETE FROM FailedPriceUpdate "
-                         "WHERE BookId = %s AND BookStoreId = %s")
-                cursor.execute(query, (book_id, bookstore_id))
-                con.commit()
-
     def get_latest_prices(self, book_id: int) -> list[BookStoreBookPrice]:
         with self.get_connection() as con:
             with con.cursor(dictionary=True) as cursor:
@@ -123,37 +115,3 @@ class BookPriceDb(BaseDb):
                                                                      row["Price"],
                                                                      row["Created"]))
                 return prices_by_bookstores
-
-    def get_failed_price_update_counts(self, min_count: int) -> list[FailedPriceUpdateCount]:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT BookId, BookStoreId, COUNT(*) AS Count "
-                         "FROM FailedPriceUpdate "
-                         "GROUP BY BookId, BookStoreId HAVING Count >= %s;")
-
-                cursor.execute(query, (min_count,))
-                failed_price_update_counts = [
-                    FailedPriceUpdateCount(row["BookId"], row["BookStoreId"], row["Count"]) for row in cursor]
-
-                return failed_price_update_counts
-
-    def get_latest_failed_price_updates(self, book_id: int, bookstore_id: int, limit: int) -> list[FailedPriceUpdate]:
-        with self.get_connection() as con:
-            with con.cursor(dictionary=True) as cursor:
-                query = ("SELECT Id, BookId, BookStoreId, Reason, Created "
-                         "FROM FailedPriceUpdate "
-                         "WHERE BookId = %s AND BookStoreId = %s "
-                         "ORDER BY Created DESC "
-                         "LIMIT %s;")
-
-                cursor.execute(query, (book_id, bookstore_id, limit))
-                failed_price_updates = []
-                for row in cursor:
-                    failed_price_updates.append(
-                        FailedPriceUpdate(row["Id"],
-                                          row["BookId"],
-                                          row["BookStoreId"],
-                                          FailedUpdateReason.from_str(row["Reason"]),
-                                          row["Created"]))
-
-                return failed_price_updates

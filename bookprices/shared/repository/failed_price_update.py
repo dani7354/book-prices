@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func, case, delete
 from sqlalchemy.orm import Session
 
 from bookprices.shared.db.tables import FailedPriceUpdate, BookStore
@@ -38,3 +38,35 @@ class FailedPriceUpdateRepository(RepositoryBase[FailedPriceUpdate]):
             .order_by(failed_update_count.desc()))
 
         return [(row[0], row[1], row[2], row[3] or 0) for row in self._session.execute(stmt).all()]
+
+    def get_latest_failed_price_updates(
+            self, book_id: int, bookstore_id: int, limit: int) -> list[tuple[int, int, int, str, datetime]]:
+        stmt = (select(
+                FailedPriceUpdate.id,
+                FailedPriceUpdate.book_id,
+                FailedPriceUpdate.book_store_id,
+                FailedPriceUpdate.reason,
+                FailedPriceUpdate.created)
+            .where(FailedPriceUpdate.book_id == book_id)
+            .where(FailedPriceUpdate.book_store_id == bookstore_id)
+            .order_by(FailedPriceUpdate.created.desc())
+            .limit(limit))
+
+        return [(row[0], row[1], row[2], row[3], row[4]) for row in self._session.execute(stmt).all()]
+
+    def get_failed_update_count_above(self, limit: int) -> list[tuple[int, int, int]]:
+        stmt = (select(
+                FailedPriceUpdate.book_id,
+                FailedPriceUpdate.book_store_id,
+                func.count(FailedPriceUpdate.id).label("failed_count"))
+            .group_by(FailedPriceUpdate.book_id, FailedPriceUpdate.book_store_id)
+            .having(func.count(FailedPriceUpdate.id) > limit))
+
+        return [(row[0], row[1], row[2]) for row in self._session.execute(stmt).all()]
+
+    def delete_failed_updates(self, book_id: int, bookstore_id: int) -> None:
+        stmt = (delete(FailedPriceUpdate)
+                .where(FailedPriceUpdate.book_id == book_id)
+                .where(FailedPriceUpdate.book_store_id == bookstore_id))
+
+        self._session.execute(stmt)
