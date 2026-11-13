@@ -9,6 +9,7 @@ from bookprices.job.service.image_download import ImageDownloadService
 from bookprices.job.shared.error_message import FAILED_TO_PARSE_ARGUMENTS
 from bookprices.shared.config.config import Config
 from bookprices.shared.db.database import Database
+from bookprices.shared.repository.unit_of_work import UnitOfWork
 
 
 class DownloadAllMissingImagesForBooksJob(JobBase):
@@ -19,9 +20,9 @@ class DownloadAllMissingImagesForBooksJob(JobBase):
 
     name: ClassVar[str] = "DownloadAllMissingImagesForBooksJob"
 
-    def __init__(self, config: Config, db: Database, image_download_service: ImageDownloadService) -> None:
+    def __init__(self, config: Config, unit_of_work: UnitOfWork, image_download_service: ImageDownloadService) -> None:
         super().__init__(config)
-        self._db = db
+        self._unit_of_work = unit_of_work
         self._image_download_service = image_download_service
         self._image_source_queue = Queue()
         self._image_filenames = {}
@@ -29,12 +30,11 @@ class DownloadAllMissingImagesForBooksJob(JobBase):
 
     def start(self, **kwargs) -> JobResult:
         try:
-            book_ids_offset, book_id_page = 0, 1
-            while book_ids := self._db.book_db.get_book_ids_with_no_image(book_ids_offset, self.books_batch_size):
+            book_ids_offset = 0
+            while book_ids := self._list_book_ids_with_no_image(book_ids_offset, self.books_batch_size):
                 self._logger.info(f"Found {len(book_ids)} books with no image")
                 self._image_download_service.download_images_for_books(book_ids)
-                book_id_page += 1
-                book_ids_offset = (book_id_page - 1) * self.books_batch_size
+                book_ids_offset = book_ids[-1]
 
             self._logger.info("Done!")
             return JobResult(JobExitStatus.SUCCESS)
@@ -43,6 +43,9 @@ class DownloadAllMissingImagesForBooksJob(JobBase):
             self._logger.error(traceback.format_exc())
             return JobResult(exit_status=JobExitStatus.FAILURE, error=ex)
 
+    def _list_book_ids_with_no_image(self, offset: int, limit: int) -> list[int]:
+        with self._unit_of_work as uow:
+            return uow.book_repository.list_books_ids_without_image(offset, limit)
 
 class DownloadSelectedImagesForBooksJob(JobBase):
     """ Downloads images for selected new books. """

@@ -33,7 +33,7 @@ class PriceUpdateService:
         self._unit_of_work = unit_of_work
         self._scraper_service = scraper_service
         self._updated_book_prices: list[tables.BookPrice] = []
-        self._scrapers_by_bookstore_id = {}
+        self._scrapers_by_bookstore_id: dict[int, BookStoreScraper] = {}
         self._unit_of_work_lock = Lock()
         self._logger = logging.getLogger(self.__class__.__name__)
 

@@ -64,7 +64,7 @@ class StaticHtmlPriceScraper(PriceScraper):
         price_text := html_content.find_element_text_by_css(self._price_css_selector)):
             raise PriceSelectorError
 
-        if not (price_match := re.search(self._price_format, price_text)):
+        if not (price_match := re.search (self._price_format, price_text)):
             raise PriceFormatError
 
         try:
